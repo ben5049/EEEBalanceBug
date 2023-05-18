@@ -9,6 +9,7 @@ Dead reckoning broad idea:
   - normal step = 8, mircostep = 1,2,4?
   - embed into stepping function/task
 - Task to sample IMU (&magnetometer?)
+  - ISR to get data ready interrupt
   - Can't use DMA since ESP32 I2C peripheral not supported (look into MPU6000 & SPI?)
 - Task to do sensor fusion
   - Orientation and absolute position
@@ -56,10 +57,14 @@ Balance control loop:
 #define IMU_SCL 2
 #define IMU_SDA 3
 
+/* Other defines */
+#define USE_TASK_AFFINITIES false
+
 //-------------------------------- Global Variables -------------------------------------
 
 /* IMU */
 static const uint16_t IMUSamplingFrequency = 100; /* IMU sampling frequency in Hz, default: 100 */
+volatile static bool IMUDataReady = false;
 
 /* Dead Reckoning */
 static const uint16_t deadReckoningFrequency = 100; /* Dead reckoning frequency in Hz, default: 100 */
@@ -88,6 +93,9 @@ void taskController(void *pvParameters);
 
 //-------------------------------- Interrupt Servce Routines ----------------------------
 
+void IMUDataReadyISR(){
+  IMUDataReady = true;
+}
 
 //-------------------------------- Task Functions ---------------------------------------
 
@@ -106,6 +114,14 @@ void taskSampleIMU(void* pvParameters) {
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
+    if (IMUDataReady){
+      IMUDataReady = false;
+
+      /*
+      ADD SAMPLING CODE HERE
+      */
+
+    }
   }
 }
 
@@ -123,6 +139,10 @@ void taskDeadReckoning(void* pvParameters) {
 
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+    /*
+    ADD DEAD RECKONING HERE
+    */
 
   }
 }
@@ -142,12 +162,19 @@ void taskController(void* pvParameters) {
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
+    /*
+    ADD CONTROLLER CODE HERE
+    */
+
   }
 }
 
 //-------------------------------- Setups -----------------------------------------------
 
 void setup() {
+
+  /* Create ISRs */
+  attachInterrupt(IMU_INT, IMUDataReadyISR, RISING);
 
   /* Begin I2C */
   Wire.setPins(IMU_SDA, IMU_SCL);
@@ -187,13 +214,12 @@ void setup() {
     6,                         /* Task priority */
     &taskControllerHandle);    /* Pointer to store the task handle */
 
-
-  // Set task affinities (0x00 -> no cores, 0x01 -> C0, 0x02 -> C1, 0x03 -> C0 and C1)
-  // vTaskCoreAffinitySet(sampleADCsHandle, (UBaseType_t)0x03);
-  // vTaskCoreAffinitySet(getMotorFrequencyHandle, (UBaseType_t)0x03);
-  // vTaskCoreAffinitySet(pidControllerHandle, (UBaseType_t)0x03);
-  // vTaskCoreAffinitySet(usbHandle, (UBaseType_t)0x03);
-  // vTaskCoreAffinitySet(updateLedsHandle, (UBaseType_t)0x03);
+  /* Set task affinities if enabled (0x00 -> no cores, 0x01 -> C0, 0x02 -> C1, 0x03 -> C0 and C1) */
+  #if USE_TASK_AFFINITIES == true
+  vTaskCoreAffinitySet(taskSampleIMUHandle, (UBaseType_t)0x03);
+  vTaskCoreAffinitySet(taskDeadReckoningHandle, (UBaseType_t)0x03);
+  vTaskCoreAffinitySet(taskControllerHandle, (UBaseType_t)0x03);
+  #endif
 
   /* Starts the scheduler */
   vTaskStartScheduler();
