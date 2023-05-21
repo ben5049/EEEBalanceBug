@@ -26,8 +26,8 @@ Balance control loop:
 
 //-------------------------------- Includes ---------------------------------------------
 
-#include "Wire.h"
-#include <Adafruit_MPU6050.h>
+#include <ESP32DMASPIMaster.h>
+
 
 #include <math.h>
 
@@ -241,5 +241,5 @@ void loop() {
 }
 
 void loop1() {
-  // Should never get to this point
+  /* Should never get to this point */
 }
