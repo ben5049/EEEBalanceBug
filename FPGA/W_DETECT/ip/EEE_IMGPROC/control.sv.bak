@@ -1,0 +1,2 @@
+module control(
+	input logic 
