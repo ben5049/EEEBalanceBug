@@ -1,6 +1,6 @@
 # Aranya Gupta
 # 19/5/2023
-
+# TODO: finish tremaux algorithm (mainly helper funcs), test everything
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
     # when visited twice, it is treated as a "dead end" and will not be 
@@ -13,6 +13,9 @@ class Node:
 
     def visit(self):
         self.state = 2
+
+    def __str__(self):
+        return str(self.position)
 
 # abstract funcs - to be implemented later. will use recursion with tremaux()
 # so that it is a depth-first search. dependent on how tremaux alg will control 
