@@ -5,6 +5,7 @@
 #include "terasic_includes.h"
 #include "mipi_camera_config.h"
 #include "mipi_bridge_config.h"
+#include "UART.h"
 
 #include "auto_focus.h"
 
