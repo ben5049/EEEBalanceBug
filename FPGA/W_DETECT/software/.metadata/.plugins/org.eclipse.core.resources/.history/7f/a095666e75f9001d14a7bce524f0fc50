@@ -189,7 +189,6 @@ int main()
     	alt_u32 exposureTime = EXPOSURE_INIT;
     	alt_u16 gain = GAIN_INIT;
 
-    	// STUPID ERROR :(
 //        OV8865SetExposure(exposureTime);
 //        OV8865SetGain(gain);
         Focus_Init();
