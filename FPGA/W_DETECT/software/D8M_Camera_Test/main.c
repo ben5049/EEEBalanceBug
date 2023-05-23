@@ -5,7 +5,6 @@
 #include "terasic_includes.h"
 #include "mipi_camera_config.h"
 #include "mipi_bridge_config.h"
-#include "UART.h"
 
 #include "auto_focus.h"
 
@@ -190,8 +189,9 @@ int main()
     	alt_u32 exposureTime = EXPOSURE_INIT;
     	alt_u16 gain = GAIN_INIT;
 
-        OV8865SetExposure(exposureTime);
-        OV8865SetGain(gain);
+    	// STUPID ERROR :(
+//        OV8865SetExposure(exposureTime);
+//        OV8865SetGain(gain);
         Focus_Init();
 
         FILE* ser = fopen("/dev/uart_0", "rb+");

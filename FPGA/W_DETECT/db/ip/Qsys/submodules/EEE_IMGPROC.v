@@ -74,6 +74,36 @@ wire [7:0]   red, green, blue, grey;
 wire [7:0]   red_out, green_out, blue_out;
 
 wire         sop, eop, in_valid, out_ready;
+
+////////////////////////////////////////////////////////////////////////
+
+wire out, out_valid;
+
+white_detect white_detect_inst(
+	.clk(clk),
+	.rst(eop),
+	.red(red),
+	.green(green),
+	.blue(blue),
+	.x(x),
+	.y(y),
+	.out(out),
+	.out_valid(out_valid));
+
+reg [3:0] counter;
+initial counter = 4'b0;
+
+reg [31:0] new_msg;
+initial new_msg = 32'b0;
+
+always @ (posedge clk)
+	if (eop) counter = 4'b0;
+	else if (out_valid) begin
+		counter = counter + 4'b1;
+		new_msg = new_msg | (out << counter);
+		end
+
+
 ////////////////////////////////////////////////////////////////////////
 
 // Detect red areas
@@ -98,7 +128,7 @@ assign new_image = bb_active ? bb_col : red_high;
 // Don't modify data in non-video packets
 assign {red_out, green_out, blue_out} = (mode & ~sop & packet_video) ? new_image : {red,green,blue};
 
-//Count valid pixels to tget the image coordinates. Reset and detect packet type on Start of Packet.
+// Count valid pixels to tget the image coordinates. Reset and detect packet type on Start of Packet.
 reg [10:0] x, y;
 reg packet_video;
 always@(posedge clk) begin
@@ -118,7 +148,7 @@ always@(posedge clk) begin
 	end
 end
 
-//Find first and last red pixels
+// Find first and last red pixels
 reg [10:0] x_min, y_min, x_max, y_max;
 always@(posedge clk) begin
 	if (red_detect & in_valid) begin	//Update bounds when the pixel is red
@@ -162,7 +192,7 @@ always@(posedge clk) begin
 	if (msg_state != 2'b00) msg_state <= msg_state + 2'b01;
 
 end
-	
+
 //Generate output messages for CPU
 reg [31:0] msg_buf_in; 
 wire [31:0] msg_buf_out;
@@ -184,11 +214,13 @@ always@(*) begin	//Write words to FIFO as state machine advances
 			msg_buf_wr = 1'b1;
 		end
 		2'b10: begin
-			msg_buf_in = {5'b0, x_min, 5'b0, y_min};	//Top left coordinate
+//			msg_buf_in = {5'b0, x_min, 5'b0, y_min};	//Top left coordinate
+			msg_buf_in = new_msg;
 			msg_buf_wr = 1'b1;
 		end
 		2'b11: begin
-			msg_buf_in = {5'b0, x_max, 5'b0, y_max}; //Bottom right coordinate
+//			msg_buf_in = {5'b0, x_max, 5'b0, y_max}; //Bottom right coordinate
+			msg_buf_in = 32'b0;
 			msg_buf_wr = 1'b1;
 		end
 	endcase

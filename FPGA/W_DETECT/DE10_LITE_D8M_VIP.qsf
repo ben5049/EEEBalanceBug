@@ -423,9 +423,7 @@ set_global_assignment -name VERILOG_FILE ip/EEE_IMGPROC/STREAM_REG_TEST.v
 set_global_assignment -name QIP_FILE ip/EEE_IMGPROC/MSG_FIFO.qip
 set_global_assignment -name VERILOG_FILE ip/EEE_IMGPROC/EEE_IMGPROC.v
 set_global_assignment -name CDF_FILE Chain.cdf
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name SYSTEMVERILOG_FILE ip/EEE_IMGPROC/px_classify.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ip/EEE_IMGPROC/block_classify.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ip/EEE_IMGPROC/addr_logic.sv
-set_global_assignment -name SYSTEMVERILOG_FILE ip/EEE_IMGPROC/control.sv
 set_global_assignment -name QIP_FILE ip/EEE_IMGPROC/ram_px_counter.qip
+set_global_assignment -name SYSTEMVERILOG_FILE ip/EEE_IMGPROC/white_detect.sv
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
