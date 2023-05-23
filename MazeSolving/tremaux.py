@@ -3,9 +3,10 @@
 # TODO: finish tremaux algorithm (mainly helper funcs), test everything
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
+    # 3 is special state - signifies its the exit of the maze
     # when visited twice, it is treated as a "dead end" and will not be 
     # re-traversed, but will be added to children of prior node
-    state = 0
+    state = 0 
     position = 0
     def __init__(self, position):
         self.position = position
@@ -13,6 +14,9 @@ class Node:
 
     def visit(self):
         self.state = 2
+
+    def setend(self):
+        self.state = 3
 
     def __str__(self):
         return str(self.position)
@@ -154,7 +158,7 @@ def visit_straight(priornode):
 
 
 # position is x, y from starting position ie dead reckoning
-# whereat is passage - 0, junc - 1, exit - 2
+# whereat is passage - 0, junc - 1, deadend - 2, exit - 3
 # whereat may be done on this side rather than on fpga 
 # orientation is 0 - right, 1 - left, 2 - up, 3 - down
 # currently, after each movement, relevant data is sent to program
@@ -200,6 +204,15 @@ def tremaux(position, whereat, orientation, priornode):
         go_back(orientation, n, position)
 
     elif whereat == 2:
+        n = Node(position)
+        nodes[n] = []
+        n.visit()
+        go_back(orientation, priornode, position)
+
+    elif whereat == 3:
+        n = Node(position)
+        nodes[n] = []
+        n.setend()
         go_back(orientation, priornode, position)
         
 
