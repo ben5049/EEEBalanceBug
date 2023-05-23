@@ -28,6 +28,8 @@ Balance control loop:
 
 #include <ESP32DMASPIMaster.h>
 
+#include "MadgwickAHRS.h"
+#include "ICM_20948.h"
 
 #include <math.h>
 
@@ -53,40 +55,36 @@ Balance control loop:
 #define STEPPER_R_MS3
 
 /* IMU pins */
-#define IMU_INT 1
-#define IMU_SCL 2
-#define IMU_SDA 3
+#define IMU_INT 21
+#define IMU_MISO 19
+#define IMU_MOSI 23
+#define IMU_CS 5
+#define IMU_SCK 18
 
 /* Other defines */
-#define USE_TASK_AFFINITIES false
+//#define USE_TASK_AFFINITIES /* Uncomment to use task affinities */
 
 //-------------------------------- Global Variables -------------------------------------
 
 /* IMU */
-static const uint16_t IMUSamplingFrequency = 100; /* IMU sampling frequency in Hz, default: 100 */
+static const uint16_t IMUSamplingFrequency = 512; /* IMU sampling frequency in Hz, default: 100 */
 volatile static bool IMUDataReady = false;
 
 /* Dead Reckoning */
 static const uint16_t deadReckoningFrequency = 100; /* Dead reckoning frequency in Hz, default: 100 */
 
-/* Controller */
-static const uint16_t controllerFrequency = 100;  /* Control loop frequency in Hz, default: 100 */
-
-
 /* Task handles */
 static TaskHandle_t taskSampleIMUHandle = nullptr;
 static TaskHandle_t taskDeadReckoningHandle = nullptr;
-static TaskHandle_t taskControllerHandle = nullptr;
 
 /* Semaphores */
-SemaphoreHandle_t semaphoreI2C; /* I2C Mutex so only one task can access the I2C peripheral at a time */
+SemaphoreHandle_t semaphoreSPI; /* SPI Mutex so only one task can access the SPI peripheral at a time */
 
 //-------------------------------- Function Prototypes ----------------------------------
 
 /* Task protoype functions */
 void taskSampleIMU(void *pvParameters);
 void taskDeadReckoning(void *pvParameters);
-void taskController(void *pvParameters);
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -147,28 +145,6 @@ void taskDeadReckoning(void* pvParameters) {
   }
 }
 
-/* Task to run the controller */
-void taskController(void* pvParameters) {
-
-  (void)pvParameters;
-
-  /* Setup timer so this task executes at the frequency specified in controllerFrequency */
-  const TickType_t xFrequency = configTICK_RATE_HZ / controllerFrequency;
-  TickType_t xLastWakeTime = xTaskGetTickCount();
-
-  /* Start the loop */
-  while (true) {
-
-    /* Pause the task until enough time has passed */
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
-
-    /*
-    ADD CONTROLLER CODE HERE
-    */
-
-  }
-}
-
 //-------------------------------- Setups -----------------------------------------------
 
 void setup() {
@@ -181,10 +157,10 @@ void setup() {
   Wire.begin();
 
   /* Create I2C mutex */
-  if (semaphoreI2C == NULL){
-    semaphoreI2C = xSemaphoreCreateMutex();
-    if (semaphoreI2C != NULL){
-      xSemaphoreGive(semaphoreI2C);
+  if (semaphoreSPI == NULL){
+    semaphoreSPI = xSemaphoreCreateMutex();
+    if (semaphoreSPI != NULL){
+      xSemaphoreGive(semaphoreSPI);
     }
   }
 
@@ -206,19 +182,10 @@ void setup() {
     6,                         /* Task priority */
     &taskDeadReckoningHandle); /* Pointer to store the task handle */
 
-  xTaskCreate(
-    taskController,            /* Function that implements the task */
-    "CONTROLLER",              /* Text name for the task */
-    1000,                      /* Stack size in words, not bytes */
-    nullptr,                   /* Parameter passed into the task */
-    6,                         /* Task priority */
-    &taskControllerHandle);    /* Pointer to store the task handle */
-
   /* Set task affinities if enabled (0x00 -> no cores, 0x01 -> C0, 0x02 -> C1, 0x03 -> C0 and C1) */
-  #if USE_TASK_AFFINITIES == true
+  #ifdef USE_TASK_AFFINITIES
   vTaskCoreAffinitySet(taskSampleIMUHandle, (UBaseType_t)0x03);
   vTaskCoreAffinitySet(taskDeadReckoningHandle, (UBaseType_t)0x03);
-  vTaskCoreAffinitySet(taskControllerHandle, (UBaseType_t)0x03);
   #endif
 
   /* Starts the scheduler */
