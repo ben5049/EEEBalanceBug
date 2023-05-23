@@ -2,23 +2,23 @@
 
 #define STEP_PIN 18
 #define DIR_PIN 19
-#define STEPS 200
+#define STEPS 1600
 #define MIN_RPM 10
 #define MAX_RPM 1000 // MOTOR CONFIG END
 
 #include "ICM_20948.h" //START IMU CONFIG
 #define WIRE_PORT Wire
 #define AD0_VAL 1
-#define K_P 0.3
-#define K_I 0.0
-#define K_D 0.0
+#define K_P 1.5 
+#define K_I 0.5
+#define K_D 0.0015
 ICM_20948_I2C myICM; // END IMU CONFIG
               
 hw_timer_t *motor_timer = NULL;
 
 unsigned long prevStepMillis = 0;
 double pid_out;
-double setpoint = 0;
+double setpoint = 0.8;
 double pitch;
 static const uint16_t controllerFrequency = 100;
 PID control(&pitch,&pid_out,&setpoint,K_P,K_I,K_D,DIRECT);
@@ -36,6 +36,7 @@ void setup() {
   pinMode(DIR_PIN,OUTPUT);
   control.SetMode(AUTOMATIC);
   control.SetOutputLimits(-256, 256);
+  control.SetSampleTime(10);
   Serial.begin(9600);
   Serial.println("Meep morp robot online");
 
@@ -134,14 +135,11 @@ void loop() {
   
 
   control.Compute();
-  Serial.print("pid_out: ");
-  Serial.println(pid_out);  
+  //Serial.print("pid_out: ");
+  //Serial.println(pid_out);  
+  Serial.println(pitch);
   double motorspeed = (pid_out/255)*(MAX_RPM);
-  if(abs(motorspeed)>MIN_RPM){
-    motor_start(-motorspeed);
-  }else{
-    motor_start(0);
-  }
+  motor_start(-motorspeed);
   
 
 
