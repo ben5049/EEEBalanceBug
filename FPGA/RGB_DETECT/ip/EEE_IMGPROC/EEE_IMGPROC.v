@@ -79,18 +79,18 @@ wire         sop, eop, in_valid, out_ready;
 
 // Detect red areas
 wire red_detect;
-//assign red_detect = red[7] & ~green[7] & ~blue[7];
-assign red_detect =  mode & ({1'b0, red[7:0]} > ({1'b0, green[7:0]} + 9'd30)) & ({1'b0, red[7:0]} > ({1'b0, blue[7:0]} + 9'd30));
+assign red_detect = red[7] & ~green[7] & ~blue[7];
+//assign red_detect =  mode & ({1'b0, red[7:0]} > ({1'b0, green[7:0]} + 9'd30)) & ({1'b0, red[7:0]} > ({1'b0, blue[7:0]} + 9'd30));
 
 // Detect green areas
 wire green_detect;
-//assign green_detect = ~red[7] & green[7] & ~blue[7];
-assign green_detect =  mode & ({1'b0, green[7:0]} > ({1'b0, red[7:0]} + 9'd48)) & ({1'b0, green[7:0]} > ({1'b0, blue[7:0]} + 9'd40));
+assign green_detect = ~red[7] & green[7] & ~blue[7];
+//assign green_detect =  mode & ({1'b0, green[7:0]} > ({1'b0, red[7:0]} + 9'd48)) & ({1'b0, green[7:0]} > ({1'b0, blue[7:0]} + 9'd40));
 
 // Detect blue areas
 wire blue_detect;
-//assign blue_detect = ~red[7] & ~green[7] & blue[7];
-assign blue_detect =  mode & ({1'b0, blue[7:0]} > ({1'b0, green[7:0]} + 9'd20)) & ({1'b0, blue[7:0]} > ({1'b0, red[7:0]} + 9'd20));
+assign blue_detect = ~red[7] & ~green[7] & blue[7];
+//assign blue_detect =  mode & ({1'b0, blue[7:0]} > ({1'b0, green[7:0]} + 9'd20)) & ({1'b0, blue[7:0]} > ({1'b0, red[7:0]} + 9'd20));
 
 ////////////////////////////////////////////////////////////////////////
 

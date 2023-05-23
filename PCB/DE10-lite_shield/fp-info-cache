@@ -1,4 +1,4 @@
-21765293261073608
+21766978105312930
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -90824,6 +90824,13 @@ UBC-R112-56C-7ATS-TBHF
 0
 30
 30
+footprints
+UNO_R3_SHIELD
+Arduino UNO R3, http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf
+Arduino UNO R3
+0
+32
+32
 footprints
 USB405603A
 USB4056-03-A-3
