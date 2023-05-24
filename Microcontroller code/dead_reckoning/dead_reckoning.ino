@@ -28,8 +28,9 @@ Balance control loop:
 
 #include <ESP32DMASPIMaster.h>
 
-#include "Fusion.h"
+#include "src/Fusion.h"
 #include "ICM_20948.h"
+#include "NewIMU.h"
 
 #include <SPI.h>
 
@@ -77,13 +78,18 @@ Balance control loop:
 //-------------------------------- Global Variables -------------------------------------
 
 /* IMU */
-ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
+//ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
+NewIMU myICM; /* Create an ICM_20948_SPI object */
 volatile static float acc[3]; /* x, y ,z */
 volatile static float gyr[3]; /* x, y ,z */
 volatile static float mag[3]; /* x, y ,z */
 static const float samplingFrequency = 230;
+
 /* Dead Reckoning */
 volatile static long timestamp;
+volatile static float velocity [3] = {0, 0, 0};
+volatile static float speed;
+volatile static float displacement [3] {0, 0, 0};
 
 /* Task handles */
 static TaskHandle_t taskSampleIMUHandle = nullptr;
@@ -117,10 +123,187 @@ void taskSampleIMU(void* pvParameters) {
 
   (void)pvParameters;
 
-  /* Configure the IMU */
-  SERIAL_PORT.println("pog");
+  double total = 0;
+  double num = 0;
+
+  /* Start the loop */
+  while (true) {
+
+    /* Wait for the data ready interrupt before sampling the IMU */
+    ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
+
+    /* Get data from the IMU and timestamp */
+    if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
+      timestamp = micros();
+      myICM.getAGMT();
+      xSemaphoreGive(mutexSPI);
+    }
+    
+    acc[0] = myICM.accX();
+    acc[1] = myICM.accY();
+    acc[2] = myICM.accZ();
+
+    gyr[0] = myICM.gyrX();
+    gyr[1] = myICM.gyrY();
+    gyr[2] = myICM.gyrZ();
+
+    mag[0] = myICM.magX();
+    mag[1] = myICM.magY();
+    mag[2] = myICM.magZ();
+
+    // SERIAL_PORT.print(gyr[0]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(gyr[1]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(gyr[2]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(acc[0]/1000.0);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(acc[1]/1000.0);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(acc[2]/1000.0);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(mag[0]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(mag[1]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.println(mag[2]);
+
+    total += acc[0];
+    num+= 1;
+    // SERIAL_PORT.println(total/num);
+    /* Notify the dead reckoning task that there is new data */
+    xTaskNotifyGiveIndexed(taskDeadReckoningHandle, 0);
+  }
+}
+
+
+/* Task to perform dead reckoning */
+void taskDeadReckoning(void* pvParameters) {
+
+  (void)pvParameters;
+
+  /* https://github.com/xioTechnologies/Fusion */
+  
+  /* Get the calibration data from the IMU */
   xSemaphoreTake(mutexSPI, portMAX_DELAY);
-  SERIAL_PORT.println("pog2");
+
+  // Define calibration (replace with actual calibration data if available)
+  const FusionMatrix gyroscopeMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  const FusionVector gyroscopeSensitivity = {1.0f, 1.0f, 1.0f};
+  const FusionVector gyroscopeOffset = {myICM.getBiasGyroXDPS(), myICM.getBiasGyroYDPS(), myICM.getBiasGyroZDPS()};
+  const FusionMatrix accelerometerMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  const FusionVector accelerometerSensitivity = {1.0f, 1.0f, 1.0f};
+  const FusionVector accelerometerOffset = {myICM.getBiasAccelXMG()/1000.0, myICM.getBiasAccelYMG()/1000.0, myICM.getBiasAccelZMG()/1000.0};
+  const FusionMatrix softIronMatrix = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  const FusionVector hardIronOffset = {myICM.getBiasCPassXUT(), myICM.getBiasCPassYUT(), myICM.getBiasCPassZUT()};
+
+  xSemaphoreGive(mutexSPI);
+
+  // Initialise algorithms
+  FusionOffset offset;
+  FusionAhrs ahrs;
+
+  FusionOffsetInitialise(&offset, samplingFrequency);
+  FusionAhrsInitialise(&ahrs);
+
+  // Set AHRS algorithm settings
+  const FusionAhrsSettings settings = {
+          .convention = FusionConventionNwu,
+          .gain = 0.5f,
+          .accelerationRejection = 10.0f,
+          .magneticRejection = 20.0f,
+          .rejectionTimeout = 5 * samplingFrequency, /* 5 seconds */
+  };
+
+  FusionAhrsSetSettings(&ahrs, &settings);
+
+  /* Create timing variables */
+  static long previousTimestamp;
+  static float deltaTime;
+
+  /* Start the loop */
+  while (true) {
+
+    /* Pause the task until there is new data */
+    ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
+
+    // Acquire latest sensor data
+    FusionVector gyroscope      = {gyr[0], gyr[1], gyr[2]};   //{0.0f, 0.0f, 0.0f}; // replace this with actual gyroscope data in degrees/s
+    FusionVector accelerometer  = {acc[0]/1000.0, acc[1]/1000.0, acc[2]/1000.0};   //{0.0f, 0.0f, 1.0f}; // replace this with actual accelerometer data in g
+    FusionVector magnetometer   = {mag[0], mag[1], mag[2]};   //{1.0f, 0.0f, 0.0f}; // replace this with actual magnetometer data in arbitrary units
+
+    // Apply calibration
+    gyroscope = FusionCalibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
+    accelerometer = FusionCalibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
+    magnetometer = FusionCalibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
+
+    // Update gyroscope offset correction algorithm
+    gyroscope = FusionOffsetUpdate(&offset, gyroscope);
+
+    // Calculate delta time (in seconds) to account for gyroscope sample clock error
+    const float deltaTime = (float) (timestamp - previousTimestamp) / (float) 1000000.0;
+
+    // Update gyroscope AHRS algorithm
+    FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+
+    // Print algorithm outputs
+    const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
+    const FusionVector linearAcceleration  = FusionAhrsGetLinearAcceleration(&ahrs);
+
+    /* Integrate acceleration for velocity */
+    velocity[0] += deltaTime * linearAcceleration.axis.x;
+    velocity[1] += deltaTime * linearAcceleration.axis.y;
+    velocity[2] += deltaTime * linearAcceleration.axis.z;
+
+    displacement[0] += deltaTime * velocity[0];
+    displacement[1] += deltaTime * velocity[1]
+    displacement[2] += deltaTime * velocity[2]
+
+    SERIAL_PORT.print(euler.angle.pitch);
+    SERIAL_PORT.print(", ");
+    SERIAL_PORT.print(euler.angle.roll);
+    SERIAL_PORT.print(", ");
+    SERIAL_PORT.println(euler.angle.yaw);
+
+  }
+}
+
+//-------------------------------- Setups -----------------------------------------------
+
+void setup() {
+
+  /* Create ISRs */
+  pinMode(IMU_INT, INPUT_PULLUP);
+  attachInterrupt(IMU_INT, IMUDataReadyISR, FALLING);
+
+  /* Begin USB (over UART) */
+  SERIAL_PORT.begin(115200);
+  while (!SERIAL_PORT){
+  }
+
+  /* Configure the IMU */
+  
+  /* Begin SPI */
+  SPI_PORT.begin(IMU_SCK, IMU_MISO, IMU_MOSI, IMU_INT);
+  bool initialized = false;
+  while (!initialized){
+    myICM.begin(IMU_CS, SPI_PORT, SPI_FREQ);
+    
+    SERIAL_PORT.print(F("Initialization of the sensor returned: "));
+    SERIAL_PORT.println(myICM.statusString());
+    if (myICM.status != ICM_20948_Stat_Ok){
+      SERIAL_PORT.println("Trying again...");
+      delay(500);
+    }
+    else{
+      initialized = true;
+    }
+  }
+
+  SERIAL_PORT.println("IMU connected");
+
+
   /* Reset and wake up */
   myICM.swReset();
   if (myICM.status != ICM_20948_Stat_Ok)
@@ -194,171 +377,6 @@ void taskSampleIMU(void* pvParameters) {
   myICM.intEnableRawDataReady(true);
   SERIAL_PORT.print(F("intEnableRawDataReady returned: "));
   SERIAL_PORT.println(myICM.statusString());
-
-  xSemaphoreGive(mutexSPI);
-
-  double total = 0;
-  double num = 0;
-
-  /* Start the loop */
-  while (true) {
-
-    /* Wait for the data ready interrupt before sampling the IMU */
-    ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
-
-    /* Get data from the IMU and timestamp */
-    if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
-      timestamp = micros();
-      myICM.getAGMT();
-      xSemaphoreGive(mutexSPI);
-    }
-    
-    acc[0] = myICM.accX();
-    acc[1] = myICM.accY();
-    acc[2] = myICM.accZ();
-
-    gyr[0] = myICM.gyrX();
-    gyr[1] = myICM.gyrY();
-    gyr[2] = myICM.gyrZ();
-
-    mag[0] = myICM.magX();
-    mag[1] = myICM.magY();
-    mag[2] = myICM.magZ();
-
-    // SERIAL_PORT.print(gyr[0]);
-    // SERIAL_PORT.print(", ");
-    // SERIAL_PORT.print(gyr[1]);
-    // SERIAL_PORT.print(", ");
-    // SERIAL_PORT.print(gyr[2]);
-    // SERIAL_PORT.print(", ");
-    // SERIAL_PORT.print(acc[0]/1000.0);
-    // SERIAL_PORT.print(", ");
-    // SERIAL_PORT.print(acc[1]/1000.0);
-    // SERIAL_PORT.print(", ");
-    // SERIAL_PORT.print(acc[2]/1000.0);
-    // SERIAL_PORT.print(", ");
-    // SERIAL_PORT.print(mag[0]);
-    // SERIAL_PORT.print(", ");
-    // SERIAL_PORT.print(mag[1]);
-    // SERIAL_PORT.print(", ");
-    // SERIAL_PORT.println(mag[2]);
-
-    total += acc[0];
-    num+= 1;
-    // SERIAL_PORT.println(total/num);
-    /* Notify the dead reckoning task that there is new data */
-    xTaskNotifyGiveIndexed(taskDeadReckoningHandle, 0);
-  }
-}
-
-
-/* Task to perform dead reckoning */
-void taskDeadReckoning(void* pvParameters) {
-
-  (void)pvParameters;
-
-  // Define calibration (replace with actual calibration data if available)
-  const FusionMatrix gyroscopeMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-  const FusionVector gyroscopeSensitivity = {1.0f, 1.0f, 1.0f};
-  const FusionVector gyroscopeOffset = {-0.51, 0.06, -0.46};
-  const FusionMatrix accelerometerMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-  const FusionVector accelerometerSensitivity = {1.0f, 1.0f, 1.0f};
-  const FusionVector accelerometerOffset = {0.0f, 0.0f, 0.0f};
-  const FusionMatrix softIronMatrix = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-  const FusionVector hardIronOffset = {0.0f, 0.0f, 0.0f};
-
-  // Initialise algorithms
-  FusionOffset offset;
-  FusionAhrs ahrs;
-
-  FusionOffsetInitialise(&offset, samplingFrequency);
-  FusionAhrsInitialise(&ahrs);
-
-  // Set AHRS algorithm settings
-  const FusionAhrsSettings settings = {
-          .convention = FusionConventionNwu,
-          .gain = 0.5f,
-          .accelerationRejection = 10.0f,
-          .magneticRejection = 20.0f,
-          .rejectionTimeout = 5 * samplingFrequency, /* 5 seconds */
-  };
-
-  FusionAhrsSetSettings(&ahrs, &settings);
-
-  /* Create timing variables */
-  static long previousTimestamp;
-  static float deltaTime;
-
-  /* Start the loop */
-  while (true) {
-
-    /* Pause the task until there is new data */
-    ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
-
-    // Acquire latest sensor data
-    FusionVector gyroscope      = {gyr[0], gyr[1], gyr[2]};   //{0.0f, 0.0f, 0.0f}; // replace this with actual gyroscope data in degrees/s
-    FusionVector accelerometer  = {acc[0]/1000.0, acc[1]/1000.0, acc[2]/1000.0};   //{0.0f, 0.0f, 1.0f}; // replace this with actual accelerometer data in g
-    FusionVector magnetometer   = {mag[0], mag[1], mag[2]};   //{1.0f, 0.0f, 0.0f}; // replace this with actual magnetometer data in arbitrary units
-
-    // Apply calibration
-    gyroscope = FusionCalibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
-    accelerometer = FusionCalibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
-    magnetometer = FusionCalibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
-
-    // Update gyroscope offset correction algorithm
-    gyroscope = FusionOffsetUpdate(&offset, gyroscope);
-
-    // Calculate delta time (in seconds) to account for gyroscope sample clock error
-    const float deltaTime = (float) (timestamp - previousTimestamp) / (float) 1000000.0;
-
-    // Update gyroscope AHRS algorithm
-    FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
-
-    // Print algorithm outputs
-    const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
-    const FusionVector earth = FusionAhrsGetEarthAcceleration(&ahrs);
-
-    SERIAL_PORT.print(euler.angle.pitch);
-    SERIAL_PORT.print(", ");
-    SERIAL_PORT.print(euler.angle.roll);
-    SERIAL_PORT.print(", ");
-    SERIAL_PORT.println(euler.angle.yaw);
-
-  }
-}
-
-//-------------------------------- Setups -----------------------------------------------
-
-void setup() {
-
-  /* Create ISRs */
-  pinMode(IMU_INT, INPUT_PULLUP);
-  attachInterrupt(IMU_INT, IMUDataReadyISR, FALLING);
-
-  /* Begin USB (over UART) */
-  SERIAL_PORT.begin(115200);
-  while (!SERIAL_PORT){
-  }
-
-  /* Begin SPI */
-  SPI_PORT.begin(IMU_SCK, IMU_MISO, IMU_MOSI, IMU_INT);
-  bool initialized = false;
-  while (!initialized){
-    myICM.begin(IMU_CS, SPI_PORT, SPI_FREQ);
-    
-    SERIAL_PORT.print(F("Initialization of the sensor returned: "));
-    SERIAL_PORT.println(myICM.statusString());
-    if (myICM.status != ICM_20948_Stat_Ok){
-      SERIAL_PORT.println("Trying again...");
-      delay(500);
-    }
-    else{
-      initialized = true;
-    }
-  }
-
-  SERIAL_PORT.println("IMU connected");
-
 
   /* Create SPI mutex */
   if (mutexSPI == NULL){
