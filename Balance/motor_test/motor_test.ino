@@ -9,19 +9,28 @@
 #include "ICM_20948.h" //START IMU CONFIG
 #define WIRE_PORT Wire
 #define AD0_VAL 1
-#define K_P 1.5 
-#define K_I 0.5
-#define K_D 0.0015
+
+#define KP_Pitch 1.5 
+#define KI_Pitch 0.5
+#define KD_Pitch 0.0015
+
+#define KP_Speed 1.5 
+#define KI_Speed 0.5
+#define KD_Speed 0.0015
+
 ICM_20948_I2C myICM; // END IMU CONFIG
               
 hw_timer_t *motor_timer = NULL;
 
-unsigned long prevStepMillis = 0;
-double pid_out;
-double setpoint = 0.8;
+double pitch_out;
+double angle_setpoint = 0.8;
 double pitch;
-static const uint16_t controllerFrequency = 100;
-PID control(&pitch,&pid_out,&setpoint,K_P,K_I,K_D,DIRECT);
+double x_speed;
+double speed_out;
+double speed_setpoint = 0;
+
+PID pitch_control(&pitch,&pitch_out,&angle_setpoint,KP_Pitch,KI_Pitch,KD_Pitch,DIRECT);
+//PID speed_control(&x_speed,&speed_out,&speed_setpoint,KP_Speed,KI_Speed,KD_Speed,DIRECT);
 
 void IRAM_ATTR onTimer(){
   digitalWrite(STEP_PIN, HIGH);
@@ -34,9 +43,9 @@ void setup() {
   timerAttachInterrupt(motor_timer, &onTimer, true);
   pinMode(STEP_PIN,OUTPUT);
   pinMode(DIR_PIN,OUTPUT);
-  control.SetMode(AUTOMATIC);
-  control.SetOutputLimits(-256, 256);
-  control.SetSampleTime(10);
+  pitch_control.SetMode(AUTOMATIC);
+  pitch_control.SetOutputLimits(-256, 256);
+  pitch_control.SetSampleTime(10);
   Serial.begin(9600);
   Serial.println("Meep morp robot online");
 
@@ -98,17 +107,22 @@ void motor_start(double RPM) {
 
 
 void loop() {
-  
-  icm_20948_DMP_data_t data; //IMU START
-  myICM.readDMPdataFromFIFO(&data);
+  ICM_20948_AGMT_t agmt;
+  icm_20948_DMP_data_t angle_data; //IMU START
+  myICM.readDMPdataFromFIFO(&angle_data);
+  myICM.getAGMT();
+
+  float acc_x = myICM.accX();
+  float acc_y = myICM.accY();
+  float acc_z = myICM.accZ();
 
   if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) // Was valid data available?
   {
-    if ((data.header & DMP_header_bitmap_Quat6) > 0)
+    if ((angle_data.header & DMP_header_bitmap_Quat6) > 0)
     {
-      double q1 = ((double)data.Quat6.Data.Q1) / 1073741824.0; // Convert to double. Divide by 2^30
-      double q2 = ((double)data.Quat6.Data.Q2) / 1073741824.0; // Convert to double. Divide by 2^30
-      double q3 = ((double)data.Quat6.Data.Q3) / 1073741824.0; // Convert to double. Divide by 2^30
+      double q1 = ((double)angle_data.Quat6.Data.Q1) / 1073741824.0; // Convert to double. Divide by 2^30
+      double q2 = ((double)angle_data.Quat6.Data.Q2) / 1073741824.0; // Convert to double. Divide by 2^30
+      double q3 = ((double)angle_data.Quat6.Data.Q3) / 1073741824.0; // Convert to double. Divide by 2^30
       double q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
       double q2sqr = q2 * q2;
       // roll (x-axis rotation)
@@ -133,13 +147,15 @@ void loop() {
   }//IMU END
 
   
-
-  control.Compute();
+  
+  pitch_control.Compute();
   //Serial.print("pid_out: ");
   //Serial.println(pid_out);  
-  Serial.println(pitch);
-  double motorspeed = (pid_out/255)*(MAX_RPM);
-  motor_start(-motorspeed);
+  //Serial.println(pitch);
+  Serial.println(acc_x);
+  double pitch_contribution = (pitch_out/255)*(MAX_RPM);
+  double speed_contribution = (speed_out/255)*(MAX_RPM);
+  motor_start(-(pitch_contribution+speed_contribution));
   
 
 
