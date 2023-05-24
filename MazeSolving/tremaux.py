@@ -25,8 +25,13 @@ class Node:
 # so that it is a depth-first search. dependent on how tremaux alg will control 
 # rover
 
-def dataRequest():
-    return
+def dataRequest(V):
+    position = (0,0)
+    whereat = 0
+    orientation = 0
+    V.visualiser(position, whereat, orientation)
+    # visual map updates must happen here
+    return position, whereat, orientation
 
 def clockwiseTurn90():
     return
@@ -37,121 +42,151 @@ def anticlockwiseTurn90():
 def step_forward():
     return
 
-def go_back(orientation, priornode, position):
+def go_back(orientation, priornode, position, V):
     # if facing right
     xdiff = position[0]-priornode.position[0]
     ydiff = position[1]-priornode.position[1]
-    if orientation==0:
-        clockwiseTurn90()
-        clockwiseTurn90()
-        step_forward()
-        if ydiff > 0: # 
+    if priorwhereat == 0:
+        if orientation==0:
+            while xdiff > 0:
+                clockwiseTurn90()
+                clockwiseTurn90()
+                step_forward()
+                position = dataRequest(V)[0]
+                xdiff = position[0]-priornode.position[0]
+        elif orientation == 1:
+            while xdiff < 0:
+                clockwiseTurn90()
+                clockwiseTurn90()
+                step_forward()
+                position = dataRequest(V)[0]
+                xdiff = position[0]-priornode.position[0]
+        elif priorwhereat == 2:
+            while ydiff < 0:
+                clockwiseTurn90()
+                clockwiseTurn90()
+                step_forward()
+                position = dataRequest(V)[0]
+                ydiff = position[1]-priornode.position[1]
+        elif priorwhereat == 3:
+            while ydiff > 0:
+                clockwiseTurn90()
+                clockwiseTurn90()
+                step_forward()
+                position = dataRequest(V)[0]
+                ydiff = position[1]-priornode.position[1]
+    elif priorwhereat == 1:
+        if orientation==0:
+            clockwiseTurn90()
             clockwiseTurn90()
             step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
-        elif ydiff < 0:
-            anticlockwiseTurn90()
-            step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
-        else:
-            step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
+            if ydiff > 0: # 
+                clockwiseTurn90()
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+            elif ydiff < 0:
+                anticlockwiseTurn90()
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+            else:
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
 
-    # if facing left
-    elif orientation==1:
-        clockwiseTurn90()
-        clockwiseTurn90()
-        step_forward()
-        if ydiff > 0: # 
-            anticlockwiseTurn90()
-            step_forward()
+        # if facing left
+        elif orientation==1:
             clockwiseTurn90()
-            clockwiseTurn90()
-        elif ydiff < 0:
             clockwiseTurn90()
             step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
-        else:
-            step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
+            if ydiff > 0: # 
+                anticlockwiseTurn90()
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+            elif ydiff < 0:
+                clockwiseTurn90()
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+            else:
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
 
-    # if facing up
-    elif orientation==2:
-        clockwiseTurn90()
-        clockwiseTurn90()
-        step_forward()
-        if xdiff > 0: # 
+        # if facing up
+        elif orientation==2:
+            clockwiseTurn90()
             clockwiseTurn90()
             step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
-        elif ydiff < 0:
-            anticlockwiseTurn90()
-            step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
-        else:
-            step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
+            if xdiff > 0: # 
+                clockwiseTurn90()
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+            elif ydiff < 0:
+                anticlockwiseTurn90()
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+            else:
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
 
-    # if facing down
-    elif orientation == 3:
-        clockwiseTurn90()
-        clockwiseTurn90()
-        step_forward()
-        if xdiff > 0: # 
-            anticlockwiseTurn90()
-            step_forward()
+        # if facing down
+        elif orientation == 3:
             clockwiseTurn90()
-            clockwiseTurn90()
-        elif ydiff < 0:
             clockwiseTurn90()
             step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
-        else:
-            step_forward()
-            clockwiseTurn90()
-            clockwiseTurn90()
-    return
+            if xdiff > 0: # 
+                anticlockwiseTurn90()
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+            elif ydiff < 0:
+                clockwiseTurn90()
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+            else:
+                step_forward()
+                clockwiseTurn90()
+                clockwiseTurn90()
+        return
 
-def visit_left(priornode):
+def visit_left(priornode, V):
     # turn left    
     step_forward()
     anticlockwiseTurn90()
     step_forward()
     
     # wait for new position, whereat, orientation
-    p, w, o = dataRequest()
+    p, w, o = dataRequest(V)
 
     # tremaux(position, whereat, priornode) to search left part of maze
     priorwhereat = 1
     tremaux(p, w, o, priornode)
     
 
-def visit_right(priornode):
+def visit_right(priornode, V):
     # turn right
     step_forward()
     clockwiseTurn90()
     step_forward()
     # wait for new position, whereat, 
-    p, w, o = dataRequest()
+    p, w, o = dataRequest(V)
     # tremaux(position, whereat, priornode) to search right part of maze
     priorwhereat = 1
     tremaux(p, w, o, priornode)
 
-def visit_straight(priornode):
+def visit_straight(priornode, V):
     # go straight
     step_forward()
     step_forward()
     # wait for new position, whereat, 
-    p, w, o = dataRequest()
+    p, w, o = dataRequest(V)
     # tremaux(position, whereat, priornode) to search straight part of maze
     priorwhereat = 1
     tremaux(p, w, o, priornode)
@@ -167,10 +202,12 @@ def visit_straight(priornode):
 # tree represented as hash table with each node having its children as an array of values
 nodes = {}
 priorwhereat = 0
-def tremaux(position, whereat, orientation, priornode):
+def tremaux(position, whereat, orientation, priornode, V):
     if whereat == 0: 
         if priorwhereat == 0: 
-            return step_forward()
+            step_forward()
+            p, w, o = dataRequest(V)
+            tremaux(p, w, o, priornode)
         elif priorwhereat == 1:
             if position not in [node.position for node in nodes]: #if we haven't ever visited this node ...
                 n = Node(position)
@@ -179,12 +216,14 @@ def tremaux(position, whereat, orientation, priornode):
                         nodes[node].append(n)
                         break
                 nodes[n] = []
-                return step_forward()
+                step_forward()
+                p, w, o = dataRequest(V)
+                tremaux(p, w, o, priornode)
             else: #if we have previously visited this node .. 
                 for node in nodes:
                     if node.position == position: 
                         node.visit()
-                        return go_back(orientation, priornode, position)
+                        go_back(orientation, priornode, position)
     elif whereat == 1:
         for node in nodes:
             if node.position == position:  #if we've already visited this node mark it as dead and go back
@@ -194,14 +233,14 @@ def tremaux(position, whereat, orientation, priornode):
         # if we haven't visited this node, check all possible other routes, then backtrack
         n = Node(position)
         nodes[n] = []
-        visit_left(n)
-        go_back(orientation, n, position)
-        visit_right(n)
-        go_back(orientation, n, position)
-        visit_straight(n)
-        go_back(orientation, n, position)
+        visit_left(n, V)
+        go_back(orientation, n, position, V) # possible bug - double go_back if visiting a dead-end node from a junction
+        visit_right(n, V)
+        go_back(orientation, n, position, V)
+        visit_straight(n, V)
+        go_back(orientation, n, position, V)
         n.visit()
-        go_back(orientation, n, position)
+        go_back(orientation, n, position, V)
 
     elif whereat == 2:
         n = Node(position)
@@ -214,6 +253,9 @@ def tremaux(position, whereat, orientation, priornode):
         nodes[n] = []
         n.setend()
         go_back(orientation, priornode, position)
+    
+    # once we get back to the start, the maze has finished being mapped out
+    if position == (0,0):
+        return nodes 
         
-
     priorwhereat = whereat
