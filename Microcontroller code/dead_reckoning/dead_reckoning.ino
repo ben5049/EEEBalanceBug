@@ -28,10 +28,13 @@ Balance control loop:
 
 #include <ESP32DMASPIMaster.h>
 
-#include "MadgwickAHRS.h"
+#include "Fusion.h"
 #include "ICM_20948.h"
 
+#include <SPI.h>
+
 #include <math.h>
+
 
 //-------------------------------- Defines ----------------------------------------------
 
@@ -61,24 +64,33 @@ Balance control loop:
 #define IMU_CS 5
 #define IMU_SCK 18
 
+/* SPI */
+#define SPI_PORT SPI     // Your desired SPI port
+#define SPI_FREQ 5000000 // You can override the default SPI frequency
+
+/* UART */
+#define SERIAL_PORT Serial
+
 /* Other defines */
 //#define USE_TASK_AFFINITIES /* Uncomment to use task affinities */
 
 //-------------------------------- Global Variables -------------------------------------
 
 /* IMU */
-static const uint16_t IMUSamplingFrequency = 512; /* IMU sampling frequency in Hz, default: 100 */
-volatile static bool IMUDataReady = false;
-
+ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
+volatile static float acc[3]; /* x, y ,z */
+volatile static float gyr[3]; /* x, y ,z */
+volatile static float mag[3]; /* x, y ,z */
+static const float samplingFrequency = 230;
 /* Dead Reckoning */
-static const uint16_t deadReckoningFrequency = 100; /* Dead reckoning frequency in Hz, default: 100 */
+volatile static long timestamp;
 
 /* Task handles */
 static TaskHandle_t taskSampleIMUHandle = nullptr;
 static TaskHandle_t taskDeadReckoningHandle = nullptr;
 
 /* Semaphores */
-SemaphoreHandle_t semaphoreSPI; /* SPI Mutex so only one task can access the SPI peripheral at a time */
+SemaphoreHandle_t mutexSPI; /* SPI Mutex so only one task can access the SPI peripheral at a time */
 
 //-------------------------------- Function Prototypes ----------------------------------
 
@@ -91,10 +103,13 @@ void taskDeadReckoning(void *pvParameters);
 
 //-------------------------------- Interrupt Servce Routines ----------------------------
 
-void IMUDataReadyISR(){
-  IMUDataReady = true;
+/* ISR that triggers on IMU data ready interrupt and unblocks the IMU sampling task*/
+void IRAM_ATTR IMUDataReadyISR(){
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    vTaskNotifyGiveIndexedFromISR(taskSampleIMUHandle, 0, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
-
+    
 //-------------------------------- Task Functions ---------------------------------------
 
 /* Task to sample the IMU */
@@ -102,45 +117,212 @@ void taskSampleIMU(void* pvParameters) {
 
   (void)pvParameters;
 
-  /* Setup timer so this task executes at the frequency specified in IMUSamplingFrequency */
-  const TickType_t xFrequency = configTICK_RATE_HZ / IMUSamplingFrequency;
-  TickType_t xLastWakeTime = xTaskGetTickCount();
+  /* Configure the IMU */
+  SERIAL_PORT.println("pog");
+  xSemaphoreTake(mutexSPI, portMAX_DELAY);
+  SERIAL_PORT.println("pog2");
+  /* Reset and wake up */
+  myICM.swReset();
+  if (myICM.status != ICM_20948_Stat_Ok)
+  {
+    SERIAL_PORT.print(F("Software Reset returned: "));
+    SERIAL_PORT.println(myICM.statusString());
+  }
+
+  delay(250);
+  
+  myICM.sleep(false);
+  myICM.lowPower(false);
+
+  /* Sample mode */
+  myICM.setSampleMode((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), ICM_20948_Sample_Mode_Cycled);
+  SERIAL_PORT.print(F("setSampleMode returned: "));
+  SERIAL_PORT.println(myICM.statusString());
+
+  /* Sample rate */
+  ICM_20948_smplrt_t mySmplrt;
+  mySmplrt.g = 4; // 225Hz
+  mySmplrt.a = 4; // 225Hz
+  myICM.setSampleRate(ICM_20948_Internal_Gyr, mySmplrt);
+  SERIAL_PORT.print(F("setSampleRate returned: "));
+  SERIAL_PORT.println(myICM.statusString());
+  
+  /* Full scale ranges for the acc and gyr */
+  ICM_20948_fss_t myFSS;
+  myFSS.a = gpm2;
+  myFSS.g = dps250;
+  myICM.setFullScale((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myFSS);
+  if (myICM.status != ICM_20948_Stat_Ok)
+  {
+    SERIAL_PORT.print(F("setFullScale returned: "));
+    SERIAL_PORT.println(myICM.statusString());
+  }
+
+  /* Configure Digital Low-Pass Filter */
+  ICM_20948_dlpcfg_t myDLPcfg;
+  myDLPcfg.a = acc_d473bw_n499bw;
+  myDLPcfg.g = gyr_d361bw4_n376bw5;
+  myICM.setDLPFcfg((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myDLPcfg);
+  if (myICM.status != ICM_20948_Stat_Ok)
+  {
+    SERIAL_PORT.print(F("setDLPcfg returned: "));
+    SERIAL_PORT.println(myICM.statusString());
+  }
+
+  ICM_20948_Status_e accDLPEnableStat = myICM.enableDLPF(ICM_20948_Internal_Acc, true);
+  ICM_20948_Status_e gyrDLPEnableStat = myICM.enableDLPF(ICM_20948_Internal_Gyr, true);
+  SERIAL_PORT.print(F("Enable DLPF for Accelerometer returned: "));
+  SERIAL_PORT.println(myICM.statusString(accDLPEnableStat));
+  SERIAL_PORT.print(F("Enable DLPF for Gyroscope returned: "));
+  SERIAL_PORT.println(myICM.statusString(gyrDLPEnableStat));
+
+  /* Start the magnetometer */
+  myICM.startupMagnetometer();
+  if (myICM.status != ICM_20948_Stat_Ok)
+  {
+    SERIAL_PORT.print(F("startupMagnetometer returned: "));
+    SERIAL_PORT.println(myICM.statusString());
+  }
+
+  /* Enable data ready interrupt */
+  myICM.cfgIntActiveLow(true);
+  myICM.cfgIntOpenDrain(false);
+  myICM.cfgIntLatch(false);
+  SERIAL_PORT.print(F("cfgIntLatch returned: "));
+  SERIAL_PORT.println(myICM.statusString());
+
+  myICM.intEnableRawDataReady(true);
+  SERIAL_PORT.print(F("intEnableRawDataReady returned: "));
+  SERIAL_PORT.println(myICM.statusString());
+
+  xSemaphoreGive(mutexSPI);
+
+  double total = 0;
+  double num = 0;
 
   /* Start the loop */
   while (true) {
 
-    /* Pause the task until enough time has passed */
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    /* Wait for the data ready interrupt before sampling the IMU */
+    ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
-    if (IMUDataReady){
-      IMUDataReady = false;
-
-      /*
-      ADD SAMPLING CODE HERE
-      */
-
+    /* Get data from the IMU and timestamp */
+    if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
+      timestamp = micros();
+      myICM.getAGMT();
+      xSemaphoreGive(mutexSPI);
     }
+    
+    acc[0] = myICM.accX();
+    acc[1] = myICM.accY();
+    acc[2] = myICM.accZ();
+
+    gyr[0] = myICM.gyrX();
+    gyr[1] = myICM.gyrY();
+    gyr[2] = myICM.gyrZ();
+
+    mag[0] = myICM.magX();
+    mag[1] = myICM.magY();
+    mag[2] = myICM.magZ();
+
+    // SERIAL_PORT.print(gyr[0]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(gyr[1]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(gyr[2]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(acc[0]/1000.0);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(acc[1]/1000.0);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(acc[2]/1000.0);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(mag[0]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(mag[1]);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.println(mag[2]);
+
+    total += acc[0];
+    num+= 1;
+    // SERIAL_PORT.println(total/num);
+    /* Notify the dead reckoning task that there is new data */
+    xTaskNotifyGiveIndexed(taskDeadReckoningHandle, 0);
   }
 }
+
 
 /* Task to perform dead reckoning */
 void taskDeadReckoning(void* pvParameters) {
 
   (void)pvParameters;
 
-  /* Setup timer so this task executes at the frequency specified in deadReckoningFrequency */
-  const TickType_t xFrequency = configTICK_RATE_HZ / deadReckoningFrequency;
-  TickType_t xLastWakeTime = xTaskGetTickCount();
+  // Define calibration (replace with actual calibration data if available)
+  const FusionMatrix gyroscopeMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  const FusionVector gyroscopeSensitivity = {1.0f, 1.0f, 1.0f};
+  const FusionVector gyroscopeOffset = {-0.51, 0.06, -0.46};
+  const FusionMatrix accelerometerMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  const FusionVector accelerometerSensitivity = {1.0f, 1.0f, 1.0f};
+  const FusionVector accelerometerOffset = {0.0f, 0.0f, 0.0f};
+  const FusionMatrix softIronMatrix = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  const FusionVector hardIronOffset = {0.0f, 0.0f, 0.0f};
+
+  // Initialise algorithms
+  FusionOffset offset;
+  FusionAhrs ahrs;
+
+  FusionOffsetInitialise(&offset, samplingFrequency);
+  FusionAhrsInitialise(&ahrs);
+
+  // Set AHRS algorithm settings
+  const FusionAhrsSettings settings = {
+          .convention = FusionConventionNwu,
+          .gain = 0.5f,
+          .accelerationRejection = 10.0f,
+          .magneticRejection = 20.0f,
+          .rejectionTimeout = 5 * samplingFrequency, /* 5 seconds */
+  };
+
+  FusionAhrsSetSettings(&ahrs, &settings);
+
+  /* Create timing variables */
+  static long previousTimestamp;
+  static float deltaTime;
 
   /* Start the loop */
   while (true) {
 
-    /* Pause the task until enough time has passed */
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    /* Pause the task until there is new data */
+    ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
-    /*
-    ADD DEAD RECKONING HERE
-    */
+    // Acquire latest sensor data
+    FusionVector gyroscope      = {gyr[0], gyr[1], gyr[2]};   //{0.0f, 0.0f, 0.0f}; // replace this with actual gyroscope data in degrees/s
+    FusionVector accelerometer  = {acc[0]/1000.0, acc[1]/1000.0, acc[2]/1000.0};   //{0.0f, 0.0f, 1.0f}; // replace this with actual accelerometer data in g
+    FusionVector magnetometer   = {mag[0], mag[1], mag[2]};   //{1.0f, 0.0f, 0.0f}; // replace this with actual magnetometer data in arbitrary units
+
+    // Apply calibration
+    gyroscope = FusionCalibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
+    accelerometer = FusionCalibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
+    magnetometer = FusionCalibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
+
+    // Update gyroscope offset correction algorithm
+    gyroscope = FusionOffsetUpdate(&offset, gyroscope);
+
+    // Calculate delta time (in seconds) to account for gyroscope sample clock error
+    const float deltaTime = (float) (timestamp - previousTimestamp) / (float) 1000000.0;
+
+    // Update gyroscope AHRS algorithm
+    FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+
+    // Print algorithm outputs
+    const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
+    const FusionVector earth = FusionAhrsGetEarthAcceleration(&ahrs);
+
+    SERIAL_PORT.print(euler.angle.pitch);
+    SERIAL_PORT.print(", ");
+    SERIAL_PORT.print(euler.angle.roll);
+    SERIAL_PORT.print(", ");
+    SERIAL_PORT.println(euler.angle.yaw);
 
   }
 }
@@ -150,17 +332,39 @@ void taskDeadReckoning(void* pvParameters) {
 void setup() {
 
   /* Create ISRs */
-  attachInterrupt(IMU_INT, IMUDataReadyISR, RISING);
+  pinMode(IMU_INT, INPUT_PULLUP);
+  attachInterrupt(IMU_INT, IMUDataReadyISR, FALLING);
 
-  /* Begin I2C */
-  Wire.setPins(IMU_SDA, IMU_SCL);
-  Wire.begin();
+  /* Begin USB (over UART) */
+  SERIAL_PORT.begin(115200);
+  while (!SERIAL_PORT){
+  }
 
-  /* Create I2C mutex */
-  if (semaphoreSPI == NULL){
-    semaphoreSPI = xSemaphoreCreateMutex();
-    if (semaphoreSPI != NULL){
-      xSemaphoreGive(semaphoreSPI);
+  /* Begin SPI */
+  SPI_PORT.begin(IMU_SCK, IMU_MISO, IMU_MOSI, IMU_INT);
+  bool initialized = false;
+  while (!initialized){
+    myICM.begin(IMU_CS, SPI_PORT, SPI_FREQ);
+    
+    SERIAL_PORT.print(F("Initialization of the sensor returned: "));
+    SERIAL_PORT.println(myICM.statusString());
+    if (myICM.status != ICM_20948_Stat_Ok){
+      SERIAL_PORT.println("Trying again...");
+      delay(500);
+    }
+    else{
+      initialized = true;
+    }
+  }
+
+  SERIAL_PORT.println("IMU connected");
+
+
+  /* Create SPI mutex */
+  if (mutexSPI == NULL){
+    mutexSPI = xSemaphoreCreateMutex();
+    if (mutexSPI != NULL){
+      xSemaphoreGive(mutexSPI);
     }
   }
 
@@ -169,15 +373,15 @@ void setup() {
   xTaskCreate(
     taskSampleIMU,             /* Function that implements the task */
     "SAMPLE_IMU",              /* Text name for the task */
-    1000,                      /* Stack size in words, not bytes */
+    10000,                      /* Stack size in words, not bytes */
     nullptr,                   /* Parameter passed into the task */
-    6,                         /* Task priority */
+    10,                        /* Task priority */
     &taskSampleIMUHandle);     /* Pointer to store the task handle */
 
   xTaskCreate(
     taskDeadReckoning,         /* Function that implements the task */
     "DEAD_RECKONING",          /* Text name for the task */
-    1000,                      /* Stack size in words, not bytes */
+    30000,                      /* Stack size in words, not bytes */
     nullptr,                   /* Parameter passed into the task */
     6,                         /* Task priority */
     &taskDeadReckoningHandle); /* Pointer to store the task handle */
@@ -204,7 +408,6 @@ void setup1() {
 
 void loop() {
   /* Should never get to this point */
-
 }
 
 void loop1() {
