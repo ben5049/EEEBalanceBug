@@ -24,9 +24,19 @@ def main():
         path.append(end)
         end = shortestGraph[end]
     path = path[::-1]
-    input()
 
-    # TODO: make rover follow path to end
+    position= tremaux.dataRequest(V)[0]
+    xdiff = i.position[0]-position[0]
+    ydiff = i.position[1]-position[1]
+    angle = tremaux.degrees(tremaux.atan(ydiff/xdiff))
+    for i in path:
+        while xdiff > 0:
+            position = tremaux.dataRequest(V)[0]
+            tremaux.setAngle(angle)
+            tremaux.step_forward()
+            xdiff = i.position[0]-position[0]
+            ydiff = i.position[1]-position[1]
+            angle = tremaux.degrees(tremaux.atan(ydiff/xdiff))
     
 main()
     
