@@ -16,7 +16,7 @@ def graphVisualiser(graph):
 
 # actual visualiser
 # takes position, whereat, orientation data real time and builds walls around position
-# how? distance from rover to wall will be measured (provisionally set to 100px)
+# how? distance from rover to wall will be measured (provisionally set to 30px)
 # orientation is 0-right,1-left,2-up,3-down as seen from top-down view
 # screen is pygame screen 
 # needed as a class so that python passes it by reference, not value, and will update in tremaux
@@ -27,7 +27,7 @@ class Visualiser:
         self.screen = pygame.display.set_mode([500,500])
     
     def visualiser(self, position, whereat, orientation):
-        while position!=None and whereat!=None and orientation!=None:
+        if position!=None and whereat!=None and orientation!=None:
             # at passage, draw straight parallel lines next to user
             r = 30
             l = 30

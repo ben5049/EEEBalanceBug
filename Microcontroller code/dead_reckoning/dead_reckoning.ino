@@ -90,6 +90,7 @@ volatile static long timestamp;
 volatile static float velocity [3] = {0, 0, 0};
 volatile static float speed;
 volatile static float displacement [3] {0, 0, 0};
+volatile float euler1[3];
 
 /* Task handles */
 static TaskHandle_t taskSampleIMUHandle = nullptr;
@@ -123,8 +124,10 @@ void taskSampleIMU(void* pvParameters) {
 
   (void)pvParameters;
 
-  double total = 0;
-  double num = 0;
+  Serial.println("pog"); /* !!DO NOT REMOVE!! FOR SOME GODFORSAKEN REASON REMOVING THIS LINE CAUSES THE MCU TO BOOT LOOP */
+
+  static float num = 0;
+  static float total = 0;
 
   /* Start the loop */
   while (true) {
@@ -136,20 +139,24 @@ void taskSampleIMU(void* pvParameters) {
     if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
       timestamp = micros();
       myICM.getAGMT();
+//      SERIAL_PORT.print(myICM.getOffsetGyroXDPS());
       xSemaphoreGive(mutexSPI);
-    }
-    
-    acc[0] = myICM.accX();
-    acc[1] = myICM.accY();
-    acc[2] = myICM.accZ();
 
-    gyr[0] = myICM.gyrX();
-    gyr[1] = myICM.gyrY();
-    gyr[2] = myICM.gyrZ();
+      /* Store the data in volatile variables to pass to next task
+         TODO: replace with queue? */
 
-    mag[0] = myICM.magX();
-    mag[1] = myICM.magY();
-    mag[2] = myICM.magZ();
+      acc[0] = myICM.accX();
+      acc[1] = myICM.accY();
+      acc[2] = myICM.accZ();
+
+      // gyr[0] = myICM.gyrX();
+      gyr[0] = myICM.gyrX();
+      gyr[1] = myICM.gyrY();
+      gyr[2] = myICM.gyrZ();
+
+      mag[0] = myICM.magX();
+      mag[1] = myICM.magY();
+      mag[2] = myICM.magZ();
 
     // SERIAL_PORT.print(gyr[0]);
     // SERIAL_PORT.print(", ");
@@ -169,11 +176,16 @@ void taskSampleIMU(void* pvParameters) {
     // SERIAL_PORT.print(", ");
     // SERIAL_PORT.println(mag[2]);
 
-    total += acc[0];
-    num+= 1;
-    // SERIAL_PORT.println(total/num);
-    /* Notify the dead reckoning task that there is new data */
-    xTaskNotifyGiveIndexed(taskDeadReckoningHandle, 0);
+      // total += gyr[2];
+      // num += 1.0;
+      // SERIAL_PORT.print(", ");
+      // SERIAL_PORT.println(total/num);
+
+      /* Notify the dead reckoning task that there is new data */
+      xTaskNotifyGiveIndexed(taskDeadReckoningHandle, 0);
+    }
+    
+    taskYIELD();
   }
 }
 
@@ -184,27 +196,39 @@ void taskDeadReckoning(void* pvParameters) {
   (void)pvParameters;
 
   /* https://github.com/xioTechnologies/Fusion */
-  
-  /* Get the calibration data from the IMU */
-  xSemaphoreTake(mutexSPI, portMAX_DELAY);
 
   // Define calibration (replace with actual calibration data if available)
-  const FusionMatrix gyroscopeMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-  const FusionVector gyroscopeSensitivity = {1.0f, 1.0f, 1.0f};
-  const FusionVector gyroscopeOffset = {myICM.getBiasGyroXDPS(), myICM.getBiasGyroYDPS(), myICM.getBiasGyroZDPS()};
-  const FusionMatrix accelerometerMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-  const FusionVector accelerometerSensitivity = {1.0f, 1.0f, 1.0f};
-  const FusionVector accelerometerOffset = {myICM.getBiasAccelXMG()/1000.0, myICM.getBiasAccelYMG()/1000.0, myICM.getBiasAccelZMG()/1000.0};
-  const FusionMatrix softIronMatrix = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
-  const FusionVector hardIronOffset = {myICM.getBiasCPassXUT(), myICM.getBiasCPassYUT(), myICM.getBiasCPassZUT()};
+  FusionMatrix gyroscopeMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  FusionVector gyroscopeSensitivity = {1.0f, 1.0f, 1.0f};
+  FusionVector gyroscopeOffset = {0.0f, 0.0f, 0.0f};
+  FusionMatrix accelerometerMisalignment = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  FusionVector accelerometerSensitivity = {1.0f, 1.0f, 1.0f};
+  FusionVector accelerometerOffset = {0.0f, 0.0f, 0.0f};
+  FusionMatrix softIronMatrix = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+  FusionVector hardIronOffset = {0.0f, 0.0f, 0.0f};
 
-  xSemaphoreGive(mutexSPI);
+
+  /* Get the calibration data from the IMU */
+  if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
+
+    gyroscopeOffset.axis.x = myICM.getOffsetGyroXDPS();
+    // gyroscopeOffset.axis.y = myICM.getOffsetGyroYDPS();
+    // gyroscopeOffset.axis.z = myICM.getOffsetGyroZDPS();
+    // accelerometerOffset.axis.x = myICM.getOffsetAccelXMG()/1000.0;
+    // accelerometerOffset.axis.y = myICM.getOffsetAccelYMG()/1000.0;
+    // accelerometerOffset.axis.z = myICM.getOffsetAccelZMG()/1000.0;
+    // hardIronOffset.axis.x = myICM.getOffsetCPassXUT();
+    // hardIronOffset.axis.y = myICM.getOffsetCPassYUT();
+    // hardIronOffset.axis.z = myICM.getOffsetCPassZUT();
+
+    xSemaphoreGive(mutexSPI);
+  }
 
   // Initialise algorithms
   FusionOffset offset;
   FusionAhrs ahrs;
 
-  FusionOffsetInitialise(&offset, samplingFrequency);
+  // FusionOffsetInitialise(&offset, samplingFrequency);
   FusionAhrsInitialise(&ahrs);
 
   // Set AHRS algorithm settings
@@ -216,7 +240,7 @@ void taskDeadReckoning(void* pvParameters) {
           .rejectionTimeout = 5 * samplingFrequency, /* 5 seconds */
   };
 
-  FusionAhrsSetSettings(&ahrs, &settings);
+  // FusionAhrsSetSettings(&ahrs, &settings);
 
   /* Create timing variables */
   static long previousTimestamp;
@@ -234,15 +258,16 @@ void taskDeadReckoning(void* pvParameters) {
     FusionVector magnetometer   = {mag[0], mag[1], mag[2]};   //{1.0f, 0.0f, 0.0f}; // replace this with actual magnetometer data in arbitrary units
 
     // Apply calibration
-    gyroscope = FusionCalibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
-    accelerometer = FusionCalibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
-    magnetometer = FusionCalibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
+    // gyroscope = FusionCalibrationInertial(gyroscope, gyroscopeMisalignment, gyroscopeSensitivity, gyroscopeOffset);
+    // accelerometer = FusionCalibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
+    // magnetometer = FusionCalibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
 
-    // Update gyroscope offset correction algorithm
+    // // Update gyroscope offset correction algorithm
     gyroscope = FusionOffsetUpdate(&offset, gyroscope);
 
     // Calculate delta time (in seconds) to account for gyroscope sample clock error
-    const float deltaTime = (float) (timestamp - previousTimestamp) / (float) 1000000.0;
+    deltaTime = (float) (timestamp - previousTimestamp) / (float) 1000000.0;
+    previousTimestamp = timestamp;
 
     // Update gyroscope AHRS algorithm
     FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
@@ -257,14 +282,18 @@ void taskDeadReckoning(void* pvParameters) {
     velocity[2] += deltaTime * linearAcceleration.axis.z;
 
     displacement[0] += deltaTime * velocity[0];
-    displacement[1] += deltaTime * velocity[1]
-    displacement[2] += deltaTime * velocity[2]
+    displacement[1] += deltaTime * velocity[1];
+    displacement[2] += deltaTime * velocity[2];
+    euler1[0] = euler.angle.pitch;
+    euler1[1] = euler.angle.roll;
+    euler1[2] = euler.angle.yaw;
 
-    SERIAL_PORT.print(euler.angle.pitch);
-    SERIAL_PORT.print(", ");
-    SERIAL_PORT.print(euler.angle.roll);
-    SERIAL_PORT.print(", ");
-    SERIAL_PORT.println(euler.angle.yaw);
+
+    // SERIAL_PORT.print(euler.angle.pitch);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.print(euler.angle.roll);
+    // SERIAL_PORT.print(", ");
+    // SERIAL_PORT.println(euler.angle.yaw);
 
   }
 }
@@ -273,9 +302,6 @@ void taskDeadReckoning(void* pvParameters) {
 
 void setup() {
 
-  /* Create ISRs */
-  pinMode(IMU_INT, INPUT_PULLUP);
-  attachInterrupt(IMU_INT, IMUDataReadyISR, FALLING);
 
   /* Begin USB (over UART) */
   SERIAL_PORT.begin(115200);
@@ -399,7 +425,7 @@ void setup() {
   xTaskCreate(
     taskDeadReckoning,         /* Function that implements the task */
     "DEAD_RECKONING",          /* Text name for the task */
-    30000,                      /* Stack size in words, not bytes */
+    30000,                     /* Stack size in words, not bytes */
     nullptr,                   /* Parameter passed into the task */
     6,                         /* Task priority */
     &taskDeadReckoningHandle); /* Pointer to store the task handle */
@@ -410,11 +436,17 @@ void setup() {
   vTaskCoreAffinitySet(taskDeadReckoningHandle, (UBaseType_t)0x03);
   #endif
 
+
   /* Starts the scheduler */
   vTaskStartScheduler();
 
+  /* Create ISRs */
+  pinMode(IMU_INT, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
+
+
   /* Delete "setup" and "loop" task */
-  vTaskDelete(NULL);
+//  vTaskDelete(NULL);
 }
 
 void setup1() {
@@ -426,6 +458,14 @@ void setup1() {
 
 void loop() {
   /* Should never get to this point */
+  SERIAL_PORT.print(euler1[0]);
+  SERIAL_PORT.print(", ");
+  SERIAL_PORT.print(euler1[1]);
+  SERIAL_PORT.print(", ");
+  SERIAL_PORT.println(euler1[2]);
+
+  vTaskDelay(pdMS_TO_TICKS(100));
+
 }
 
 void loop1() {
