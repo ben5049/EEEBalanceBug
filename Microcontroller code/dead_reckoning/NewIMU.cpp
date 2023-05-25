@@ -1,5 +1,7 @@
 #include "NewIMU.h"
 
+
+
 NewIMU::NewIMU()  {
   ICM_20948();
 }
@@ -15,56 +17,8 @@ float NewIMU::getOffsetGyroXDPS(){
   return ((float) signedUnsigned16.signed16);// * 0.0305;
 }
 
-// float NewIMU::getOffsetGyroXDPS() {
-//   int32_t val;
-//   getOffsetGyroX(&val);
-//   return val;//*0.0305;
-// }
 
-// float NewIMU::getOffsetGyroYDPS() {
-//   int32_t val;
-//   getOffsetGyroY(&val);
-//   return getGyrDPS(val);
-// }
 
-// float NewIMU::getOffsetGyroZDPS() {
-//   int32_t val;
-//   getOffsetGyroZ(&val);
-//   return getGyrDPS(val);
-// }
-
-// float NewIMU::getOffsetAccelXMG() {
-//   int32_t val;
-//   getOffsetAccelX(&val);
-//   return getAccMG(val);
-// }
-
-// float NewIMU::getOffsetAccelYMG() {
-//   int32_t val;
-//   getOffsetAccelY(&val);
-//   return getAccMG(val);
-// }
-
-// float NewIMU::getOffsetAccelZMG() {
-//   int32_t val;
-//   getOffsetAccelZ(&val);
-//   return getAccMG(val);
-// }
-
-// float NewIMU::getOffsetCPassXUT() {
-//   int32_t val;
-//   getOffsetCPassX(&val);
-//   return getMagUT(val);
-// }
-
-// float NewIMU::getOffsetCPassYUT() {
-//   int32_t val;
-//   getOffsetCPassY(&val);
-//   return getMagUT(val);
-// }
-
-// float NewIMU::getOffsetCPassZUT() {
-//   int32_t val;
-//   getOffsetCPassZ(&val);
-//   return getMagUT(val);
+// bool initialiseIMU(NewIMU *myICM){
+//   return true;
 // }

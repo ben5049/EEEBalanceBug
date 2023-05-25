@@ -10,17 +10,17 @@ class NewIMU : public ICM_20948_SPI  {
     NewIMU();
 
     float getOffsetGyroXDPS();
-    // float getOffsetGyroYDPS();
-    // float getOffsetGyroZDPS();
-
-    // float getOffsetAccelXMG();
-    // float getOffsetAccelYMG();
-    // float getOffsetAccelZMG();
-    
-    // float getOffsetCPassXUT();
-    // float getOffsetCPassYUT();
-    // float getOffsetCPassZUT();
     
 };
+
+#define IMU_CS 5
+#define SPI_PORT SPI
+#define SPI_FREQ 5000000
+
+#define SERIAL_PORT Serial
+
+// initialiseIMU(NewIMU *myICM);
+
+
 
 #endif
