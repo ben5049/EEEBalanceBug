@@ -1,7 +1,7 @@
 # Aranya Gupta
 # 19/5/2023
-# TODO: modify movement so it can handle non-right angle turning
 from random import randint
+from math import atan, degrees
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
     # 3 is special state - signifies its the exit of the maze
@@ -34,6 +34,15 @@ def dataRequest(V):
     V.visualiser(position, whereat, orientation)
     input()
     return position, whereat, orientation
+# get left, right, up, down junction positions
+def spin():
+    leftRough = 0
+    rightRough = 0
+    straightRough = 0  
+    return leftRough, rightRough, straightRough # angle setpoints to turn to
+
+def setAngle(angle):
+    return
 
 def clockwiseTurn90():
     return
@@ -45,123 +54,30 @@ def step_forward():
     return
 
 def go_back(orientation, priornode, position, priorwhereat, V):
-    # if facing right
     xdiff = position[0]-priornode.position[0]
     ydiff = position[1]-priornode.position[1]
+    angle = degrees(atan(ydiff/xdiff))
     if priorwhereat == 0:
-        if orientation==0:
-            while xdiff > 0:
-                clockwiseTurn90()
-                clockwiseTurn90()
-                step_forward()
-                position = dataRequest(V)[0]
-                xdiff = position[0]-priornode.position[0]
-        elif orientation == 1:
-            while xdiff < 0:
-                clockwiseTurn90()
-                clockwiseTurn90()
-                step_forward()
-                position = dataRequest(V)[0]
-                xdiff = position[0]-priornode.position[0]
-        elif priorwhereat == 2:
-            while ydiff < 0:
-                clockwiseTurn90()
-                clockwiseTurn90()
-                step_forward()
-                position = dataRequest(V)[0]
-                ydiff = position[1]-priornode.position[1]
-        elif priorwhereat == 3:
-            while ydiff > 0:
-                clockwiseTurn90()
-                clockwiseTurn90()
-                step_forward()
-                position = dataRequest(V)[0]
-                ydiff = position[1]-priornode.position[1]
+        while xdiff > 0:
+            setAngle(180+angle)
+            step_forward()
+            position = dataRequest(V)[0]
+            xdiff = position[0]-priornode.position[0]
+            ydiff = position[1]-priornode.position[1]
+            angle = degrees(atan(ydiff/xdiff))
     elif priorwhereat == 1:
-        if orientation==0:
-            clockwiseTurn90()
-            clockwiseTurn90()
-            step_forward()
-            if ydiff > 0: # 
-                clockwiseTurn90()
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-            elif ydiff < 0:
-                anticlockwiseTurn90()
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-            else:
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-
-        # if facing left
-        elif orientation==1:
-            clockwiseTurn90()
-            clockwiseTurn90()
-            step_forward()
-            if ydiff > 0: # 
-                anticlockwiseTurn90()
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-            elif ydiff < 0:
-                clockwiseTurn90()
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-            else:
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-
-        # if facing up
-        elif orientation==2:
-            clockwiseTurn90()
-            clockwiseTurn90()
-            step_forward()
-            if xdiff > 0: # 
-                clockwiseTurn90()
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-            elif ydiff < 0:
-                anticlockwiseTurn90()
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-            else:
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-
-        # if facing down
-        elif orientation == 3:
-            clockwiseTurn90()
-            clockwiseTurn90()
-            step_forward()
-            if xdiff > 0: # 
-                anticlockwiseTurn90()
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-            elif ydiff < 0:
-                clockwiseTurn90()
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
-            else:
-                step_forward()
-                clockwiseTurn90()
-                clockwiseTurn90()
+        setAngle(orientation+180)
+        step_forward()
+        position = dataRequest(V)[0]
+        xdiff = position[0]-priornode.position[0]
+        ydiff = position[1]-priornode.position[1]
+        angle = degrees(atan(ydiff/xdiff))
+        setAngle(180+angle)
+        step_forward()
     return
 
-def visit_left(priornode, priorwhereat, V, nodes):
-    # turn left    
-    step_forward()
-    anticlockwiseTurn90()
+def visit_branch(priornode, priorwhereat, angle, V, nodes):
+    setAngle(angle)
     step_forward()
     
     # wait for new position, whereat, orientation
@@ -169,41 +85,17 @@ def visit_left(priornode, priorwhereat, V, nodes):
 
     # tremaux(position, whereat, priornode) to search left part of maze
     tremaux(p, w, o, priornode, priorwhereat, V, nodes)
-    
-
-def visit_right(priornode, priorwhereat, V, nodes):
-    # turn right
-    step_forward()
-    clockwiseTurn90()
-    step_forward()
-    # wait for new position, whereat, 
-    p, w, o = dataRequest(V)
-    # tremaux(position, whereat, priornode) to search right part of maze
-    priorwhereat = 1
-    tremaux(p, w, o, priornode, priorwhereat, V, nodes)
-
-def visit_straight(priornode, priorwhereat, V, nodes):
-    # go straight
-    step_forward()
-    step_forward()
-    # wait for new position, whereat, 
-    p, w, o = dataRequest(V)
-    # tremaux(position, whereat, priornode) to search straight part of maze
-    priorwhereat = 1
-    tremaux(p, w, o, priornode, priorwhereat, V, nodes)
-
 
 # position is x, y from starting position ie dead reckoning
 # whereat is passage - 0, junc - 1, deadend - 2, exit - 3
 # whereat may be done on this side rather than on fpga 
-# orientation is 0 - right, 1 - left, 2 - up, 3 - down
+# orientation is int showing current angle, 0 is right-pointing
 # currently, after each movement, relevant data is sent to program
 # which then uses tremaux to find the next step the rover should take
 
 # tree represented as hash table with each node having its children as an array of values
 
 def tremaux(position, whereat, orientation, priornode, priorwhereat, V, nodes):
-    print(nodes)
     if whereat == 0: 
         if priorwhereat == 0: 
             step_forward()
@@ -237,10 +129,13 @@ def tremaux(position, whereat, orientation, priornode, priorwhereat, V, nodes):
         # if we haven't visited this node, check all possible other routes, then backtrack
         if flag:
             n = Node(position)
+            step_forward()
+            langle, rangle, sangle = spin()
             nodes[n] = []
-            visit_left(n, whereat, V, nodes)
-            visit_right(n, whereat, V, nodes)
-            visit_straight(n, whereat, V, nodes)
+            # visit left, right, straight branches
+            visit_branch(n, whereat, langle, V, nodes)
+            visit_branch(n, whereat, rangle, V, nodes)
+            visit_branch(n, whereat, sangle, V, nodes)
             n.visit()
             go_back(orientation, n, position, priorwhereat, V)
 
