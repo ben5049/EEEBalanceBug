@@ -36,6 +36,7 @@ Balance control loop:
 
 #include <math.h>
 
+#include "FIRFilter.h"
 
 //-------------------------------- Defines ----------------------------------------------
 
@@ -87,9 +88,9 @@ static const float samplingFrequency = 230;
 
 /* Dead Reckoning */
 volatile static long timestamp;
-volatile static float velocity [3] = {0, 0, 0};
-volatile static float speed;
-volatile static float displacement [3] {0, 0, 0};
+volatile static float acceleration[3] = {0.0f, 0.0f, 0.0f};
+volatile static float velocity[3]     = {0.0f, 0.0f, 0.0f};
+volatile static float displacement[3] = {0.0f, 0.0f, 0.0f};
 volatile float euler1[3];
 
 /* Task handles */
@@ -211,7 +212,7 @@ void taskDeadReckoning(void* pvParameters) {
   /* Get the calibration data from the IMU */
   if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
 
-    gyroscopeOffset.axis.x = myICM.getOffsetGyroXDPS();
+    // gyroscopeOffset.axis.x = myICM.getOffsetGyroXDPS();
     // gyroscopeOffset.axis.y = myICM.getOffsetGyroYDPS();
     // gyroscopeOffset.axis.z = myICM.getOffsetGyroZDPS();
     // accelerometerOffset.axis.x = myICM.getOffsetAccelXMG()/1000.0;
@@ -237,14 +238,16 @@ void taskDeadReckoning(void* pvParameters) {
           .gain = 0.5f,
           .accelerationRejection = 10.0f,
           .magneticRejection = 20.0f,
-          .rejectionTimeout = 5 * samplingFrequency, /* 5 seconds */
+          .rejectionTimeout = 1 * samplingFrequency, /* 1 seconds */
   };
 
-  // FusionAhrsSetSettings(&ahrs, &settings);
+
+  FusionAhrsSetSettings(&ahrs, &settings);
 
   /* Create timing variables */
   static long previousTimestamp;
   static float deltaTime;
+
 
   /* Start the loop */
   while (true) {
@@ -277,16 +280,44 @@ void taskDeadReckoning(void* pvParameters) {
     const FusionVector linearAcceleration  = FusionAhrsGetLinearAcceleration(&ahrs);
 
     /* Integrate acceleration for velocity */
-    velocity[0] += deltaTime * linearAcceleration.axis.x;
-    velocity[1] += deltaTime * linearAcceleration.axis.y;
-    velocity[2] += deltaTime * linearAcceleration.axis.z;
 
-    displacement[0] += deltaTime * velocity[0];
-    displacement[1] += deltaTime * velocity[1];
-    displacement[2] += deltaTime * velocity[2];
-    euler1[0] = euler.angle.pitch;
-    euler1[1] = euler.angle.roll;
-    euler1[2] = euler.angle.yaw;
+    acceleration[0] = linearAcceleration.axis.x;
+    acceleration[1] = linearAcceleration.axis.y;
+    acceleration[2] = linearAcceleration.axis.z;
+    
+
+
+    if ((acceleration[0] > 0.03) || (acceleration[0] < -0.03)){
+      velocity[0] += linearAcceleration.axis.x * deltaTime;
+    }
+    if ((acceleration[1] > 0.03) || (acceleration[1] < -0.03)){
+      velocity[1] += linearAcceleration.axis.y * deltaTime;
+    }
+    if ((acceleration[2] > 0.03) || (acceleration[2] < -0.03)){
+      velocity[2] += linearAcceleration.axis.x * deltaTime;
+    }
+
+    Serial.print(acceleration[0]);
+    Serial.print(", ");
+    Serial.print(acceleration[1]);
+    Serial.print(", ");
+    Serial.print(acceleration[2]);
+    Serial.print(", ");
+    Serial.print(0.5);
+    Serial.print(", ");
+    Serial.println(-0.5);
+
+    // velocity[0] = linearAcceleration.axis.x;
+    // velocity[1] = linearAcceleration.axis.y;
+    // velocity[2] = linearAcceleration.axis.z;
+
+    // displacement[0] += deltaTime * velocity[0];
+    // displacement[1] += deltaTime * velocity[1];
+    // displacement[2] += deltaTime * velocity[2];
+    
+    // euler1[0] = euler.angle.pitch;
+    // euler1[1] = euler.angle.roll;
+    // euler1[2] = euler.angle.yaw;
 
 
     // SERIAL_PORT.print(euler.angle.pitch);
@@ -458,11 +489,18 @@ void setup1() {
 
 void loop() {
   /* Should never get to this point */
-  SERIAL_PORT.print(euler1[0]);
-  SERIAL_PORT.print(", ");
-  SERIAL_PORT.print(euler1[1]);
-  SERIAL_PORT.print(", ");
-  SERIAL_PORT.println(euler1[2]);
+  // SERIAL_PORT.print(euler1[0]);
+  // SERIAL_PORT.print(", ");
+  // SERIAL_PORT.print(euler1[1]);
+  // SERIAL_PORT.print(", ");
+  // SERIAL_PORT.println(euler1[2]);
+
+  // SERIAL_PORT.print(velocity[0]);
+  // SERIAL_PORT.print(", ");
+  // SERIAL_PORT.print(velocity[1]);
+  // SERIAL_PORT.print(", ");
+  // SERIAL_PORT.println(velocity[2]);
+
 
   vTaskDelay(pdMS_TO_TICKS(100));
 
