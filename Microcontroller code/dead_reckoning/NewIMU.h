@@ -9,17 +9,17 @@ class NewIMU : public ICM_20948_SPI  {
   public:
     NewIMU();
 
-    float getBiasGyroXDPS();
-    float getBiasGyroYDPS();
-    float getBiasGyroZDPS();
+    float getOffsetGyroXDPS();
+    // float getOffsetGyroYDPS();
+    // float getOffsetGyroZDPS();
 
-    float getBiasAccelXMG();
-    float getBiasAccelYMG();
-    float getBiasAccelZMG();
+    // float getOffsetAccelXMG();
+    // float getOffsetAccelYMG();
+    // float getOffsetAccelZMG();
     
-    float getBiasCPassXUT();
-    float getBiasCPassYUT();
-    float getBiasCPassZUT();
+    // float getOffsetCPassXUT();
+    // float getOffsetCPassYUT();
+    // float getOffsetCPassZUT();
     
 };
 
