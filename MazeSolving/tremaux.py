@@ -1,6 +1,7 @@
 # Aranya Gupta
 # 19/5/2023
-# TODO: finish tremaux algorithm (mainly helper funcs), test everything
+# TODO: modify movement so it can handle non-right angle turning
+from random import randint
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
     # 3 is special state - signifies its the exit of the maze
@@ -26,11 +27,12 @@ class Node:
 # rover
 
 def dataRequest(V):
-    position = (0,0)
-    whereat = 0
+    # making fake position data for testing
+    position = (randint(0,500),randint(0,500))
+    whereat = randint(0,3)
     orientation = 0
     V.visualiser(position, whereat, orientation)
-    # visual map updates must happen here
+    input()
     return position, whereat, orientation
 
 def clockwiseTurn90():
@@ -42,7 +44,7 @@ def anticlockwiseTurn90():
 def step_forward():
     return
 
-def go_back(orientation, priornode, position, V):
+def go_back(orientation, priornode, position, priorwhereat, V):
     # if facing right
     xdiff = position[0]-priornode.position[0]
     ydiff = position[1]-priornode.position[1]
@@ -154,9 +156,9 @@ def go_back(orientation, priornode, position, V):
                 step_forward()
                 clockwiseTurn90()
                 clockwiseTurn90()
-        return
+    return
 
-def visit_left(priornode, V):
+def visit_left(priornode, priorwhereat, V, nodes):
     # turn left    
     step_forward()
     anticlockwiseTurn90()
@@ -166,11 +168,10 @@ def visit_left(priornode, V):
     p, w, o = dataRequest(V)
 
     # tremaux(position, whereat, priornode) to search left part of maze
-    priorwhereat = 1
-    tremaux(p, w, o, priornode)
+    tremaux(p, w, o, priornode, priorwhereat, V, nodes)
     
 
-def visit_right(priornode, V):
+def visit_right(priornode, priorwhereat, V, nodes):
     # turn right
     step_forward()
     clockwiseTurn90()
@@ -179,9 +180,9 @@ def visit_right(priornode, V):
     p, w, o = dataRequest(V)
     # tremaux(position, whereat, priornode) to search right part of maze
     priorwhereat = 1
-    tremaux(p, w, o, priornode)
+    tremaux(p, w, o, priornode, priorwhereat, V, nodes)
 
-def visit_straight(priornode, V):
+def visit_straight(priornode, priorwhereat, V, nodes):
     # go straight
     step_forward()
     step_forward()
@@ -189,7 +190,7 @@ def visit_straight(priornode, V):
     p, w, o = dataRequest(V)
     # tremaux(position, whereat, priornode) to search straight part of maze
     priorwhereat = 1
-    tremaux(p, w, o, priornode)
+    tremaux(p, w, o, priornode, priorwhereat, V, nodes)
 
 
 # position is x, y from starting position ie dead reckoning
@@ -200,14 +201,14 @@ def visit_straight(priornode, V):
 # which then uses tremaux to find the next step the rover should take
 
 # tree represented as hash table with each node having its children as an array of values
-nodes = {}
-priorwhereat = 0
-def tremaux(position, whereat, orientation, priornode, V):
+
+def tremaux(position, whereat, orientation, priornode, priorwhereat, V, nodes):
+    print(nodes)
     if whereat == 0: 
         if priorwhereat == 0: 
             step_forward()
             p, w, o = dataRequest(V)
-            tremaux(p, w, o, priornode)
+            tremaux(p, w, o, priornode, whereat, V, nodes)
         elif priorwhereat == 1:
             if position not in [node.position for node in nodes]: #if we haven't ever visited this node ...
                 n = Node(position)
@@ -218,44 +219,44 @@ def tremaux(position, whereat, orientation, priornode, V):
                 nodes[n] = []
                 step_forward()
                 p, w, o = dataRequest(V)
-                tremaux(p, w, o, priornode)
+                tremaux(p, w, o, priornode, whereat, V, nodes)
             else: #if we have previously visited this node .. 
                 for node in nodes:
                     if node.position == position: 
                         node.visit()
-                        go_back(orientation, priornode, position)
+                        go_back(orientation, priornode, position, priorwhereat, V)
+                        break
     elif whereat == 1:
+        flag = True
         for node in nodes:
             if node.position == position:  #if we've already visited this node mark it as dead and go back
                 node.visit()
-                return go_back(orientation, priornode, position)
-            
+                go_back(orientation, priornode, position, priorwhereat, V)
+                flag = False
+                break
         # if we haven't visited this node, check all possible other routes, then backtrack
-        n = Node(position)
-        nodes[n] = []
-        visit_left(n, V)
-        go_back(orientation, n, position, V) # possible bug - double go_back if visiting a dead-end node from a junction
-        visit_right(n, V)
-        go_back(orientation, n, position, V)
-        visit_straight(n, V)
-        go_back(orientation, n, position, V)
-        n.visit()
-        go_back(orientation, n, position, V)
+        if flag:
+            n = Node(position)
+            nodes[n] = []
+            visit_left(n, whereat, V, nodes)
+            visit_right(n, whereat, V, nodes)
+            visit_straight(n, whereat, V, nodes)
+            n.visit()
+            go_back(orientation, n, position, priorwhereat, V)
 
     elif whereat == 2:
         n = Node(position)
         nodes[n] = []
         n.visit()
-        go_back(orientation, priornode, position)
+        go_back(orientation, priornode, position, priorwhereat, V)
 
     elif whereat == 3:
         n = Node(position)
         nodes[n] = []
         n.setend()
-        go_back(orientation, priornode, position)
+        go_back(orientation, priornode, position, priorwhereat, V)
     
     # once we get back to the start, the maze has finished being mapped out
     if position == (0,0):
         return nodes 
         
-    priorwhereat = whereat

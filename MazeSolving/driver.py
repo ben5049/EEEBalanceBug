@@ -6,9 +6,10 @@ import tremaux, mapvisualise, dijkstra
 # visualise shortest path and take shortest path
 
 def main(): 
-    start = tremaux.Node(0,0)
+    start = tremaux.Node((0,0))
     V = mapvisualise.Visualiser()
-    graph = tremaux.tremaux(start, 0, 0, start, V)
+    nodes = {}
+    graph = tremaux.tremaux(start, 0, 0, start, 0, V, nodes)
     graph = dijkstra.assertValid(graph)
     shortestGraph = dijkstra.dijkstra(graph, start)
     
@@ -23,10 +24,11 @@ def main():
         path.append(end)
         end = shortestGraph[end]
     path = path[::-1]
+    input()
 
     # TODO: make rover follow path to end
     
-
+main()
     
 
     
