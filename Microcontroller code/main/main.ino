@@ -49,7 +49,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 /* SPI & IMU */
 #define SPI_PORT SPI     /* Desired SPI port */
 #define SPI_FREQ 5000000 /* Override the default SPI frequency */
-#define IMU_INT 21
+#define IMU_INT 3
 #define IMU_MISO 19
 #define IMU_MOSI 23
 #define IMU_CS 5
@@ -155,10 +155,12 @@ void motor_start(double RPM) {
 
   if (RPM > 0) {
     digitalWrite(STEPPER_L_DIR, HIGH);
+    stepperRightDirection = true;
     stepperLeftDirection = true;
   }
   else if (RPM < 0) {
     digitalWrite(STEPPER_L_DIR, LOW);
+    stepperRightDirection = false;
     stepperLeftDirection = false;
   }
   else {
@@ -575,7 +577,7 @@ void setup() {
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
   /* Delete "setup" and "loop" task */
-  vTaskDelete(NULL);
+  // vTaskDelete(NULL);
 }
 
 void setup1() {
