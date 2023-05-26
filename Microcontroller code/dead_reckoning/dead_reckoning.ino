@@ -152,7 +152,6 @@ void taskSampleIMU(void* pvParameters) {
       myICM.clearInterrupts();
       xSemaphoreGive(mutexSPI);
 
-  
 
 //   if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
 //     myICM.readDMPdataFromFIFO(&angle_data);
@@ -413,10 +412,11 @@ void setup() {
     }
     else{
       initialized = true;
+      SERIAL_PORT.println("IMU connected");
     }
   }
 
-  SERIAL_PORT.println("IMU connected");
+  
 
 
   /* Reset and wake up */
@@ -560,10 +560,10 @@ void setup() {
 //  vTaskDelete(NULL);
 }
 
-void setup1() {
-  /* Delete "setup1" and "loop1" task */
-  vTaskDelete(NULL);
-}
+// void setup1() {
+//   /* Delete "setup1" and "loop1" task */
+//   vTaskDelete(NULL);
+// }
 
 //-------------------------------- Loops -----------------------------------------------
 
@@ -577,14 +577,14 @@ void loop() {
   //   vTaskDelay(pdMS_TO_TICKS(100));
   //   // delay(10);
   // }//IMU END
-  // Serial.print("Pitch:");
-  // Serial.print(pitch);
-  // Serial.print(", Roll:");
-  // Serial.print(roll);
-  // Serial.print(", Yaw:"); 
-  // Serial.print(yaw);
+  Serial.print("Pitch:");
+  Serial.print(pitch);
+  Serial.print(", Roll:");
+  Serial.print(roll);
+  Serial.print(", Yaw:"); 
+  Serial.print(yaw);
 
-  Serial.print("Acc x:");
+  Serial.print(", Acc x:");
   Serial.print(acceleration[0]);
   Serial.print(", Acc y:");
   Serial.print(acceleration[1]);
