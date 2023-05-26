@@ -29,7 +29,6 @@ class Node:
 def dataRequest(V):
     # making fake position data for testing
     position = tuple(int(x) for x in input("pos ").split(","))
-    print(position)
     whereat = int(input("whereat "))
     orientation = int(input("orientation "))
     V.visualiser(position, whereat, orientation)

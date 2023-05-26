@@ -54,6 +54,3 @@ class Visualiser:
                 pygame.draw.line(self.screen, (0,255,0), (position[0]-r*cos(theta), position[1]-r*sin(theta)), (position[0]-r*cos(theta)+l*sin(theta), position[1]-r*sin(theta)-l*cos(theta)))
             pygame.display.update()
             input()
-
-v = Visualiser()
-v.visualiser((250,250), 3, 45)
