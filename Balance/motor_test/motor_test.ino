@@ -154,8 +154,8 @@ void loop() {
   //Serial.println(pitch);
   Serial.println(acc_x);
   double pitch_contribution = (pitch_out/255)*(MAX_RPM);
-  double speed_contribution = (speed_out/255)*(MAX_RPM);
-  motor_start(-(pitch_contribution+speed_contribution));
+  //double speed_contribution = (speed_out/255)*(MAX_RPM);
+  motor_start(-(pitch_contribution));
   
 
 

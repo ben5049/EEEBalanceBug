@@ -26,16 +26,16 @@ Balance control loop:
 
 //-------------------------------- Includes ---------------------------------------------
 
-#include <ESP32DMASPIMaster.h>
 
 #include "src/Fusion.h"
 #include "ICM_20948.h"
-#include "NewIMU.h"
+//#include "NewIMU.h"
 
 #include <SPI.h>
 
 #include <math.h>
 
+//#include "FIRFilter.h"
 
 //-------------------------------- Defines ----------------------------------------------
 
@@ -79,18 +79,23 @@ Balance control loop:
 
 /* IMU */
 //ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
-NewIMU myICM; /* Create an ICM_20948_SPI object */
+ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
 volatile static float acc[3]; /* x, y ,z */
 volatile static float gyr[3]; /* x, y ,z */
 volatile static float mag[3]; /* x, y ,z */
-static const float samplingFrequency = 230;
+static const float samplingFrequency = 55.47;
 
 /* Dead Reckoning */
 volatile static long timestamp;
-volatile static float velocity [3] = {0, 0, 0};
-volatile static float speed;
-volatile static float displacement [3] {0, 0, 0};
+volatile static float acceleration[3] = {0.0f, 0.0f, 0.0f};
+volatile static float velocity[3]     = {0.0f, 0.0f, 0.0f};
+volatile static float displacement[3] = {0.0f, 0.0f, 0.0f};
 volatile float euler1[3];
+
+/* DMP */
+volatile double pitch;
+volatile double yaw;
+volatile double roll;
 
 /* Task handles */
 static TaskHandle_t taskSampleIMUHandle = nullptr;
@@ -106,6 +111,7 @@ void taskSampleIMU(void *pvParameters);
 void taskDeadReckoning(void *pvParameters);
 
 //-------------------------------- Functions --------------------------------------------
+
 
 
 //-------------------------------- Interrupt Servce Routines ----------------------------
@@ -132,6 +138,7 @@ void taskSampleIMU(void* pvParameters) {
   /* Start the loop */
   while (true) {
 
+    icm_20948_DMP_data_t angle_data;
     /* Wait for the data ready interrupt before sampling the IMU */
     ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
@@ -139,9 +146,44 @@ void taskSampleIMU(void* pvParameters) {
     if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
       timestamp = micros();
       myICM.getAGMT();
+ 
+      myICM.readDMPdataFromFIFO(&angle_data);
 //      SERIAL_PORT.print(myICM.getOffsetGyroXDPS());
+      myICM.clearInterrupts();
       xSemaphoreGive(mutexSPI);
 
+
+//   if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
+//     myICM.readDMPdataFromFIFO(&angle_data);
+//       // myICM.getAGMT();
+//     xSemaphoreGive(mutexSPI);
+//  }
+
+  if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) // Was valid data available?
+  {
+    if ((angle_data.header & DMP_header_bitmap_Quat6) > 0)
+    {
+      double q1 = ((double)angle_data.Quat6.Data.Q1) / 1073741824.0; // Convert to double. Divide by 2^30
+      double q2 = ((double)angle_data.Quat6.Data.Q2) / 1073741824.0; // Convert to double. Divide by 2^30
+      double q3 = ((double)angle_data.Quat6.Data.Q3) / 1073741824.0; // Convert to double. Divide by 2^30
+      double q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
+      double q2sqr = q2 * q2;
+      // roll (x-axis rotation)
+      double t0 = +2.0 * (q0 * q1 + q2 * q3);
+      double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
+      roll = atan2(t0, t1) * 180.0 / PI;
+      // pitch (y-axis rotation)
+      double t2 = +2.0 * (q0 * q2 - q3 * q1);
+      t2 = t2 > 1.0 ? 1.0 : t2;
+      t2 = t2 < -1.0 ? -1.0 : t2;
+      pitch = asin(t2) * 180.0 / PI;
+      // yaw (z-axis rotation)
+      double t3 = +2.0 * (q0 * q3 + q1 * q2);
+      double t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
+      yaw = atan2(t3, t4) * 180.0 / PI;
+    }
+
+  }
       /* Store the data in volatile variables to pass to next task
          TODO: replace with queue? */
 
@@ -209,20 +251,20 @@ void taskDeadReckoning(void* pvParameters) {
 
 
   /* Get the calibration data from the IMU */
-  if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
+  // if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE){
 
-    gyroscopeOffset.axis.x = myICM.getOffsetGyroXDPS();
-    // gyroscopeOffset.axis.y = myICM.getOffsetGyroYDPS();
-    // gyroscopeOffset.axis.z = myICM.getOffsetGyroZDPS();
-    // accelerometerOffset.axis.x = myICM.getOffsetAccelXMG()/1000.0;
-    // accelerometerOffset.axis.y = myICM.getOffsetAccelYMG()/1000.0;
-    // accelerometerOffset.axis.z = myICM.getOffsetAccelZMG()/1000.0;
-    // hardIronOffset.axis.x = myICM.getOffsetCPassXUT();
-    // hardIronOffset.axis.y = myICM.getOffsetCPassYUT();
-    // hardIronOffset.axis.z = myICM.getOffsetCPassZUT();
+  //   // gyroscopeOffset.axis.x = myICM.getOffsetGyroXDPS();
+  //   // gyroscopeOffset.axis.y = myICM.getOffsetGyroYDPS();
+  //   // gyroscopeOffset.axis.z = myICM.getOffsetGyroZDPS();
+  //   // accelerometerOffset.axis.x = myICM.getOffsetAccelXMG()/1000.0;
+  //   // accelerometerOffset.axis.y = myICM.getOffsetAccelYMG()/1000.0;
+  //   // accelerometerOffset.axis.z = myICM.getOffsetAccelZMG()/1000.0;
+  //   // hardIronOffset.axis.x = myICM.getOffsetCPassXUT();
+  //   // hardIronOffset.axis.y = myICM.getOffsetCPassYUT();
+  //   // hardIronOffset.axis.z = myICM.getOffsetCPassZUT();
 
-    xSemaphoreGive(mutexSPI);
-  }
+  //   xSemaphoreGive(mutexSPI);
+  // }
 
   // Initialise algorithms
   FusionOffset offset;
@@ -237,14 +279,16 @@ void taskDeadReckoning(void* pvParameters) {
           .gain = 0.5f,
           .accelerationRejection = 10.0f,
           .magneticRejection = 20.0f,
-          .rejectionTimeout = 5 * samplingFrequency, /* 5 seconds */
+          .rejectionTimeout = 1 * samplingFrequency, /* 1 seconds */
   };
 
-  // FusionAhrsSetSettings(&ahrs, &settings);
+
+  FusionAhrsSetSettings(&ahrs, &settings);
 
   /* Create timing variables */
   static long previousTimestamp;
   static float deltaTime;
+
 
   /* Start the loop */
   while (true) {
@@ -262,7 +306,7 @@ void taskDeadReckoning(void* pvParameters) {
     // accelerometer = FusionCalibrationInertial(accelerometer, accelerometerMisalignment, accelerometerSensitivity, accelerometerOffset);
     // magnetometer = FusionCalibrationMagnetic(magnetometer, softIronMatrix, hardIronOffset);
 
-    // // Update gyroscope offset correction algorithm
+    // Update gyroscope offset correction algorithm
     gyroscope = FusionOffsetUpdate(&offset, gyroscope);
 
     // Calculate delta time (in seconds) to account for gyroscope sample clock error
@@ -277,16 +321,56 @@ void taskDeadReckoning(void* pvParameters) {
     const FusionVector linearAcceleration  = FusionAhrsGetLinearAcceleration(&ahrs);
 
     /* Integrate acceleration for velocity */
-    velocity[0] += deltaTime * linearAcceleration.axis.x;
-    velocity[1] += deltaTime * linearAcceleration.axis.y;
-    velocity[2] += deltaTime * linearAcceleration.axis.z;
 
-    displacement[0] += deltaTime * velocity[0];
-    displacement[1] += deltaTime * velocity[1];
-    displacement[2] += deltaTime * velocity[2];
-    euler1[0] = euler.angle.pitch;
-    euler1[1] = euler.angle.roll;
-    euler1[2] = euler.angle.yaw;
+    acceleration[0] = linearAcceleration.axis.x;
+    acceleration[1] = linearAcceleration.axis.y;
+    acceleration[2] = linearAcceleration.axis.z;
+    
+
+
+    if ((acceleration[0] > 0.05) || (acceleration[0] < -0.05)){
+      velocity[0] += linearAcceleration.axis.x * deltaTime;
+    }
+    else{
+      velocity[0] = 0.0;
+    }
+    
+    if ((acceleration[1] > 0.05) || (acceleration[1] < -0.05)){
+      velocity[1] += linearAcceleration.axis.y * deltaTime;
+    }
+    else{
+      velocity[1] = 0.0;
+    }
+    
+    if ((acceleration[2] > 0.05) || (acceleration[2] < -0.05)){
+      velocity[2] += linearAcceleration.axis.x * deltaTime;
+    }
+    else{
+      velocity[2] = 0.0;
+    }
+
+
+    // Serial.print(acceleration[0]);
+    // Serial.print(", ");
+    // Serial.print(acceleration[1]);
+    // Serial.print(", ");
+    // Serial.print(acceleration[2]);
+    // Serial.print(", ");
+    // Serial.print(0.5);
+    // Serial.print(", ");
+    // Serial.println(-0.5);
+
+    // velocity[0] = linearAcceleration.axis.x;
+    // velocity[1] = linearAcceleration.axis.y;
+    // velocity[2] = linearAcceleration.axis.z;
+
+    // displacement[0] += deltaTime * velocity[0];
+    // displacement[1] += deltaTime * velocity[1];
+    // displacement[2] += deltaTime * velocity[2];
+    
+    // euler1[0] = euler.angle.pitch;
+    // euler1[1] = euler.angle.roll;
+    // euler1[2] = euler.angle.yaw;
 
 
     // SERIAL_PORT.print(euler.angle.pitch);
@@ -308,26 +392,31 @@ void setup() {
   while (!SERIAL_PORT){
   }
 
-  /* Configure the IMU */
+
   
   /* Begin SPI */
   SPI_PORT.begin(IMU_SCK, IMU_MISO, IMU_MOSI, IMU_INT);
+
+  /* Configure the IMU */
+
   bool initialized = false;
   while (!initialized){
     myICM.begin(IMU_CS, SPI_PORT, SPI_FREQ);
-    
+
+
     SERIAL_PORT.print(F("Initialization of the sensor returned: "));
-    SERIAL_PORT.println(myICM.statusString());
+    // SERIAL_PORT.println(myICM.statusString());
     if (myICM.status != ICM_20948_Stat_Ok){
       SERIAL_PORT.println("Trying again...");
       delay(500);
     }
     else{
       initialized = true;
+      SERIAL_PORT.println("IMU connected");
     }
   }
 
-  SERIAL_PORT.println("IMU connected");
+  
 
 
   /* Reset and wake up */
@@ -339,64 +428,86 @@ void setup() {
   }
 
   delay(250);
-  
+
   myICM.sleep(false);
   myICM.lowPower(false);
+  
+  
+  bool success = true;
+  success &= (myICM.initializeDMP() == ICM_20948_Stat_Ok);
+  success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_GAME_ROTATION_VECTOR) == ICM_20948_Stat_Ok);
+  success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat6, 0) == ICM_20948_Stat_Ok); // Set to the maximum
+  success &= (myICM.enableFIFO() == ICM_20948_Stat_Ok);
+  success &= (myICM.enableDMP() == ICM_20948_Stat_Ok);
+  success &= (myICM.resetDMP() == ICM_20948_Stat_Ok);
+  success &= (myICM.resetFIFO() == ICM_20948_Stat_Ok);
+  if (success)
+    {
+      Serial.println("DMP initialised");
+    }
+    else
+    {
+      Serial.println(F("Enable DMP failed!"));
+      Serial.println(F("Please check that you have uncommented line 29 (#define ICM_20948_USE_DMP) in ICM_20948_C.h..."));
+      while (1){
+        ; // Do nothing more
+      }
+    }
 
-  /* Sample mode */
-  myICM.setSampleMode((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), ICM_20948_Sample_Mode_Cycled);
-  SERIAL_PORT.print(F("setSampleMode returned: "));
-  SERIAL_PORT.println(myICM.statusString());
+  // /* Sample mode */
+  // myICM.setSampleMode((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), ICM_20948_Sample_Mode_Cycled);
+  // SERIAL_PORT.print(F("setSampleMode returned: "));
+  // SERIAL_PORT.println(myICM.statusString());
 
-  /* Sample rate */
-  ICM_20948_smplrt_t mySmplrt;
-  mySmplrt.g = 4; // 225Hz
-  mySmplrt.a = 4; // 225Hz
-  myICM.setSampleRate(ICM_20948_Internal_Gyr, mySmplrt);
-  SERIAL_PORT.print(F("setSampleRate returned: "));
-  SERIAL_PORT.println(myICM.statusString());
+  // /* Sample rate */
+  // ICM_20948_smplrt_t mySmplrt;
+  // mySmplrt.g = 4; // 225Hz
+  // mySmplrt.a = 4; // 225Hz
+  // myICM.setSampleRate(ICM_20948_Internal_Gyr, mySmplrt);
+  // SERIAL_PORT.print(F("setSampleRate returned: "));
+  // SERIAL_PORT.println(myICM.statusString());
   
   /* Full scale ranges for the acc and gyr */
-  ICM_20948_fss_t myFSS;
-  myFSS.a = gpm2;
-  myFSS.g = dps250;
-  myICM.setFullScale((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myFSS);
-  if (myICM.status != ICM_20948_Stat_Ok)
-  {
-    SERIAL_PORT.print(F("setFullScale returned: "));
-    SERIAL_PORT.println(myICM.statusString());
-  }
+  // ICM_20948_fss_t myFSS;
+  // myFSS.a = gpm2;
+  // myFSS.g = dps250;
+  // myICM.setFullScale((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myFSS);
+  // if (myICM.status != ICM_20948_Stat_Ok)
+  // {
+  //   SERIAL_PORT.print(F("setFullScale returned: "));
+  //   SERIAL_PORT.println(myICM.statusString());
+  // }
 
-  /* Configure Digital Low-Pass Filter */
-  ICM_20948_dlpcfg_t myDLPcfg;
-  myDLPcfg.a = acc_d473bw_n499bw;
-  myDLPcfg.g = gyr_d361bw4_n376bw5;
-  myICM.setDLPFcfg((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myDLPcfg);
-  if (myICM.status != ICM_20948_Stat_Ok)
-  {
-    SERIAL_PORT.print(F("setDLPcfg returned: "));
-    SERIAL_PORT.println(myICM.statusString());
-  }
+  // /* Configure Digital Low-Pass Filter */
+  // ICM_20948_dlpcfg_t myDLPcfg;
+  // myDLPcfg.a = acc_d473bw_n499bw;
+  // myDLPcfg.g = gyr_d361bw4_n376bw5;
+  // myICM.setDLPFcfg((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), myDLPcfg);
+  // if (myICM.status != ICM_20948_Stat_Ok)
+  // {
+  //   SERIAL_PORT.print(F("setDLPcfg returned: "));
+  //   SERIAL_PORT.println(myICM.statusString());
+  // }
 
-  ICM_20948_Status_e accDLPEnableStat = myICM.enableDLPF(ICM_20948_Internal_Acc, true);
-  ICM_20948_Status_e gyrDLPEnableStat = myICM.enableDLPF(ICM_20948_Internal_Gyr, true);
-  SERIAL_PORT.print(F("Enable DLPF for Accelerometer returned: "));
-  SERIAL_PORT.println(myICM.statusString(accDLPEnableStat));
-  SERIAL_PORT.print(F("Enable DLPF for Gyroscope returned: "));
-  SERIAL_PORT.println(myICM.statusString(gyrDLPEnableStat));
+  // ICM_20948_Status_e accDLPEnableStat = myICM.enableDLPF(ICM_20948_Internal_Acc, true);
+  // ICM_20948_Status_e gyrDLPEnableStat = myICM.enableDLPF(ICM_20948_Internal_Gyr, true);
+  // SERIAL_PORT.print(F("Enable DLPF for Accelerometer returned: "));
+  // SERIAL_PORT.println(myICM.statusString(accDLPEnableStat));
+  // SERIAL_PORT.print(F("Enable DLPF for Gyroscope returned: "));
+  // SERIAL_PORT.println(myICM.statusString(gyrDLPEnableStat));
 
   /* Start the magnetometer */
-  myICM.startupMagnetometer();
-  if (myICM.status != ICM_20948_Stat_Ok)
-  {
-    SERIAL_PORT.print(F("startupMagnetometer returned: "));
-    SERIAL_PORT.println(myICM.statusString());
-  }
+  // myICM.startupMagnetometer();
+  // if (myICM.status != ICM_20948_Stat_Ok)
+  // {
+  //   SERIAL_PORT.print(F("startupMagnetometer returned: "));
+  //   SERIAL_PORT.println(myICM.statusString());
+  // }
 
   /* Enable data ready interrupt */
   myICM.cfgIntActiveLow(true);
   myICM.cfgIntOpenDrain(false);
-  myICM.cfgIntLatch(false);
+  myICM.cfgIntLatch(true);
   SERIAL_PORT.print(F("cfgIntLatch returned: "));
   SERIAL_PORT.println(myICM.statusString());
 
@@ -417,7 +528,7 @@ void setup() {
   xTaskCreate(
     taskSampleIMU,             /* Function that implements the task */
     "SAMPLE_IMU",              /* Text name for the task */
-    10000,                      /* Stack size in words, not bytes */
+    10000,                     /* Stack size in words, not bytes */
     nullptr,                   /* Parameter passed into the task */
     10,                        /* Task priority */
     &taskSampleIMUHandle);     /* Pointer to store the task handle */
@@ -449,25 +560,47 @@ void setup() {
 //  vTaskDelete(NULL);
 }
 
-void setup1() {
-  /* Delete "setup1" and "loop1" task */
-  vTaskDelete(NULL);
-}
+// void setup1() {
+//   /* Delete "setup1" and "loop1" task */
+//   vTaskDelete(NULL);
+// }
 
 //-------------------------------- Loops -----------------------------------------------
 
 void loop() {
   /* Should never get to this point */
-  SERIAL_PORT.print(euler1[0]);
-  SERIAL_PORT.print(", ");
-  SERIAL_PORT.print(euler1[1]);
-  SERIAL_PORT.print(", ");
-  SERIAL_PORT.println(euler1[2]);
+  // ICM_20948_AGMT_t agmt;
+
+
+  // if (myICM.status != ICM_20948_Stat_FIFOMoreDataAvail) // If more data is available then we should read it right away - and not delay
+  // {
+  //   vTaskDelay(pdMS_TO_TICKS(100));
+  //   // delay(10);
+  // }//IMU END
+  Serial.print("Pitch:");
+  Serial.print(pitch);
+  Serial.print(", Roll:");
+  Serial.print(roll);
+  Serial.print(", Yaw:"); 
+  Serial.print(yaw);
+
+  Serial.print(", Acc x:");
+  Serial.print(acceleration[0]);
+  Serial.print(", Acc y:");
+  Serial.print(acceleration[1]);
+  Serial.print(", Acc z:");
+  Serial.println(acceleration[2]);
+
+  // Serial.print(", Vel x:");
+  // Serial.print(velocity[0]);
+  // Serial.print(", Vel y:");
+  // Serial.print(velocity[1]);
+  // Serial.print(", Vel z:");
+  // Serial.println(velocity[2]);
 
   vTaskDelay(pdMS_TO_TICKS(100));
-
 }
 
-void loop1() {
-  /* Should never get to this point */
-}
+// void loop1() {
+//   /* Should never get to this point */
+// }
