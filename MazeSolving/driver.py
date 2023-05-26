@@ -39,6 +39,3 @@ def main():
             angle = tremaux.degrees(tremaux.atan(ydiff/xdiff))
     
 main()
-    
-
-    

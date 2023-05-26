@@ -28,11 +28,10 @@ class Node:
 
 def dataRequest(V):
     # making fake position data for testing
-    position = (randint(0,500),randint(0,500))
-    whereat = randint(0,3)
-    orientation = 0
+    position = tuple(int(x) for x in input("pos ").split(","))
+    whereat = int(input("whereat "))
+    orientation = int(input("orientation "))
     V.visualiser(position, whereat, orientation)
-    input()
     return position, whereat, orientation
 # get left, right, up, down junction positions
 def spin():
@@ -41,15 +40,11 @@ def spin():
     straightRough = 0  
     return leftRough, rightRough, straightRough # angle setpoints to turn to
 
+# sets angle in degrees from machine north - positive is clockwise, negative is anticlockwise
+# e.g. setAngle(90) will rotate it 90 deg clockwise, setAngle(-90) will rotate it 180 degrees anticlockwise
 def setAngle(angle):
     return
-
-def clockwiseTurn90():
-    return
-
-def anticlockwiseTurn90():
-    return
-
+# steps forward set amount - may change for variable amounts
 def step_forward():
     return
 
@@ -59,20 +54,20 @@ def go_back(orientation, priornode, position, priorwhereat, V):
     angle = degrees(atan(ydiff/xdiff))
     if priorwhereat == 0:
         while xdiff > 0:
-            setAngle(180+angle)
+            setAngle(90-angle) # mathematically should be correct - may not be idk
             step_forward()
             position = dataRequest(V)[0]
             xdiff = position[0]-priornode.position[0]
             ydiff = position[1]-priornode.position[1]
             angle = degrees(atan(ydiff/xdiff))
-    elif priorwhereat == 1:
+    elif priorwhereat == 1: # possible bug - may need to step forward more than once
         setAngle(orientation+180)
         step_forward()
         position = dataRequest(V)[0]
         xdiff = position[0]-priornode.position[0]
         ydiff = position[1]-priornode.position[1]
         angle = degrees(atan(ydiff/xdiff))
-        setAngle(180+angle)
+        setAngle(90-angle) # mathematically should be correct - may not be idk
         step_forward()
     return
 
@@ -83,13 +78,13 @@ def visit_branch(priornode, priorwhereat, angle, V, nodes):
     # wait for new position, whereat, orientation
     p, w, o = dataRequest(V)
 
-    # tremaux(position, whereat, priornode) to search left part of maze
+    # tremaux(position, whereat, priornode) to search branch of maze
     tremaux(p, w, o, priornode, priorwhereat, V, nodes)
 
 # position is x, y from starting position ie dead reckoning
 # whereat is passage - 0, junc - 1, deadend - 2, exit - 3
 # whereat may be done on this side rather than on fpga 
-# orientation is int showing current angle, 0 is right-pointing
+# orientation is int showing current angle, 0 is north-pointing
 # currently, after each movement, relevant data is sent to program
 # which then uses tremaux to find the next step the rover should take
 
