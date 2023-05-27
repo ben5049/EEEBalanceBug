@@ -17,7 +17,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 #include <math.h>
 
-#include <PID_v1.h>
+// #include <PID_v1.h>
 
 //#include "FIRFilter.h"
 
@@ -49,7 +49,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 /* SPI & IMU */
 #define SPI_PORT SPI     /* Desired SPI port */
 #define SPI_FREQ 5000000 /* Override the default SPI frequency */
-#define IMU_INT 3
+#define IMU_INT 4
 #define IMU_MISO 19
 #define IMU_MOSI 23
 #define IMU_CS 5
@@ -69,13 +69,19 @@ Main ESP32 program for Group 1's EEEBalanceBug
 #define FPGA_INT
 
 /* Controller */
-#define KP_Pitch 1.5
-#define KI_Pitch 0.5
-#define KD_Pitch 0.0015
+#define KP_Position 0.06
+#define KD_Position 0.45
 
-#define KP_Speed 1.5
-#define KI_Speed 0.5
-#define KD_Speed 0.0015
+#define KP_Speed 0.080 
+#define KI_Speed 0.01 
+
+#define KP_Stability 0.32
+#define KD_Stability 0.05
+
+#define MAX_TARGET_ANGLE 14
+#define MAX_CONTROL_OUTPUT 360
+#define ITERM_MAX_ERROR 30   // Iterm windup constants for PI control 
+#define ITERM_MAX 10000
 
 /* Other defines */
 
@@ -87,8 +93,13 @@ Main ESP32 program for Group 1's EEEBalanceBug
 /* Motor */
 volatile static bool stepperLeftDirection = true;
 volatile static bool stepperRightDirection = true;
+volatile static int32_t stepperLeftTargetSteps = 0;
+volatile static int32_t stepperRightTargetSteps = 0;
 volatile static int32_t stepperLeftSteps = 0;
 volatile static int32_t stepperRightSteps = 0;
+static const float wheelCircumference = 0.2859; /* Wheel circumference in meters */
+volatile static float leftDPS = 0.0;
+volatile static float rightDPS = 0.0;
 
 /* Collision detection */
 volatile static bool rightCollisionImminent = false;
@@ -114,16 +125,23 @@ volatile static float velocity[3] = { 0.0f, 0.0f, 0.0f };     /* Velocity in ms^
 volatile static float displacement[3] = { 0.0f, 0.0f, 0.0f }; /* Displacement in m*/
 
 /* Controller */
+static float target_angle = 0;
+static float control_output = 0;
 static double pitch_out;
 static double angle_setpoint = 0.8;
 static double x_speed;
 static double speed_out;
 static double speed_setpoint = 0;
 
-static const uint8_t controllerFrequency = 50; /* Controller frequency in Hz */
+static float PID_errorOld = 0;
+static float PID_errorOld2 = 0;
+static float setPointOld = 0;
+static float PID_errorSum = 0;
 
-static PID pitch_control(&pitch, &pitch_out, &angle_setpoint, KP_Pitch, KI_Pitch, KD_Pitch, DIRECT);
-static PID speed_control(&x_speed, &speed_out, &speed_setpoint, KP_Speed, KI_Speed, KD_Speed, DIRECT);
+static const uint8_t controllerFrequency = 25; /* Controller frequency in Hz */
+
+// static PID pitch_control(&pitch, &pitch_out, &angle_setpoint, KP_Pitch, KI_Pitch, KD_Pitch, DIRECT);
+// static PID speed_control(&x_speed, &speed_out, &speed_setpoint, KP_Speed, KI_Speed, KD_Speed, DIRECT);
 
 /* Hardware timers */
 static hw_timer_t *motorTimer = NULL;
@@ -149,16 +167,16 @@ void taskTalkToFPGA(void *pvParameters);
 //-------------------------------- Functions --------------------------------------------
 
 /* Update the timer to step the motors at the specified RPM */
-void motor_start(double RPM) {
+void motor_start(float DPS) {
 
-  static double millisBetweenSteps = 60000 / (STEPS * abs(RPM));  // milliseconds
+  float microsBetweenSteps = 360*1000000/(STEPS*abs(DPS));  // microseconds
 
-  if (RPM > 0) {
+  if (DPS > 0) {
     digitalWrite(STEPPER_L_DIR, HIGH);
     stepperRightDirection = true;
     stepperLeftDirection = true;
   }
-  else if (RPM < 0) {
+  else if (DPS < 0) {
     digitalWrite(STEPPER_L_DIR, LOW);
     stepperRightDirection = false;
     stepperLeftDirection = false;
@@ -167,9 +185,60 @@ void motor_start(double RPM) {
     return;
   }
 
-  timerAlarmWrite(motorTimer, millisBetweenSteps * 1000, true);
+  timerAlarmWrite(motorTimer, microsBetweenSteps , true);
   timerAlarmEnable(motorTimer);
 }
+
+/* Takes the number of steps and the duration (in microseconds) and returns the velocity in m/s */
+float calculateVelocity(int32_t steps, uint32_t time){
+  return (1000000*(steps/STEPS)/time)*wheelCircumference;
+}
+
+float speedPIControl(float DT, int16_t input, int16_t setPoint, float Kp, float Ki)
+{
+  int16_t error;
+  float output;
+
+  error = setPoint - input;
+  PID_errorSum += constrain(error, -ITERM_MAX_ERROR, ITERM_MAX_ERROR);
+  PID_errorSum = constrain(PID_errorSum, -ITERM_MAX, ITERM_MAX);
+
+  //Serial.println(PID_errorSum);
+
+  output = Kp * error + Ki * PID_errorSum * DT; // DT is in miliseconds...
+  return (output);
+}
+
+float positionPDControl(long actualPos, long setPointPos, float Kpp, float Kdp, int16_t speedM)
+{
+  float output;
+  float P;
+
+  P = constrain(Kpp * float(setPointPos - actualPos), -115, 115); // Limit command
+  output = P + Kdp * float(speedM);
+  return (output);
+}
+
+float stabilityPDControl(float DT, float input, float setPoint,  float Kp, float Kd)
+{
+  float error;
+  float output;
+
+  error = setPoint - input;
+
+  // Kd is implemented in two parts
+  //    The biggest one using only the input (sensor) part not the SetPoint input-input(t-1).
+  //    And the second using the setpoint to make it a bit more agressive   setPoint-setPoint(t-1)
+  float Kd_setPoint = constrain((setPoint - setPointOld), -8, 8); // We limit the input part...
+  output = Kp * error + (Kd * Kd_setPoint - Kd * (input - PID_errorOld)) / DT;
+  //Serial.print(Kd*(error-PID_errorOld));Serial.print("\t");
+  //PID_errorOld2 = PID_errorOld;
+  PID_errorOld = input;  // error for Kd is only the input component
+  setPointOld = setPoint;
+  return (output);
+}
+
+//-------------------------------- Classes ----------------------------
 
 //-------------------------------- Interrupt Servce Routines ----------------------------
 
@@ -189,15 +258,15 @@ void IRAM_ATTR onTimer() {
 
   /* Increment or decrement step counter per wheel */
   if (stepperRightDirection) {
-    stepperRightSteps += 1;
+    stepperRightSteps++;
   } else {
-    stepperRightSteps -= 1;
+    stepperRightSteps--;
   }
 
   if (stepperLeftDirection) {
-    stepperLeftSteps += 1;
+    stepperLeftSteps++;
   } else {
-    stepperLeftSteps -= 1;
+    stepperLeftSteps--;
   }
 }
 
@@ -376,31 +445,68 @@ void taskController(void *pvParameters) {
   (void)pvParameters;
 
   /* Configure controller */
-  pitch_control.SetMode(AUTOMATIC);
-  pitch_control.SetOutputLimits(-256, 256);
-  pitch_control.SetSampleTime(10);
+
+  static int16_t actual_robot_speed; /* leftDPS */
+  static int16_t actual_robot_speed_Old; /* Degrees per second */
+  static int16_t estimated_speed; /* Degrees per second */
+  static int16_t angular_velocity; /* Degrees per second */
+
+  static float estimated_speed_filtered = 0.0;
+
+  static double pitchOld;
+
+  static float motor1_control;
 
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / controllerFrequency;
   TickType_t xLastWakeTime = xTaskGetTickCount();
 
+  static uint32_t currentTime = 0.0; /* Microseconds */
+  static uint32_t previousTime = 0.0; /* Microseconds*/
+  static double deltaTime = 0.0; /* Seconds*/
+  
+
   /* Start the loop */
   while (true) {
 
     // Pause the task until enough time has passed
-    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    // vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    vTaskDelay(pdMS_TO_TICKS(40));
 
-    pitch_control.Compute();
+    currentTime = micros();
+    deltaTime = (float) (currentTime - previousTime) / 1000000.0;
+    previousTime = currentTime;
 
-    // Serial.print("pid_out: ");
-    // Serial.println(pid_out);
-    // Serial.println(pitch);
-    // Serial.println(pitch);
+    
+    angular_velocity = (pitch - pitchOld) / deltaTime;
+    pitchOld = pitch;
+    // memcpy(&pitchOld,&pitch,sizeof(pitch));
 
-    double pitch_contribution = (pitch_out / 255) * (MAX_RPM);
-    double speed_contribution = (speed_out / 255) * (MAX_RPM);
+    estimated_speed = -actual_robot_speed + angular_velocity;
+    estimated_speed_filtered = estimated_speed_filtered * 0.9 + (float)estimated_speed * 0.1; // Low pass filter, replace with an actual low pass filter
 
-    motor_start(-(pitch_contribution));
+
+    motor1_control = positionPDControl(stepperLeftSteps, stepperLeftTargetSteps, KP_Position, KD_Position, leftDPS); // (throttle)
+
+
+    target_angle = speedPIControl(deltaTime, estimated_speed_filtered, motor1_control, KP_Speed, KI_Speed);
+    target_angle = constrain(target_angle, -MAX_TARGET_ANGLE, MAX_TARGET_ANGLE); // limited output
+
+    
+    
+
+    control_output += stabilityPDControl(deltaTime, pitch, target_angle, KP_Stability, KD_Stability);
+    control_output = constrain(control_output, -MAX_CONTROL_OUTPUT, MAX_CONTROL_OUTPUT); // Limit max output from control
+    
+    leftDPS = control_output; // add steering here
+    leftDPS = constrain(leftDPS, -MAX_CONTROL_OUTPUT, MAX_CONTROL_OUTPUT);
+    
+    actual_robot_speed = leftDPS;
+
+    Serial.println(leftDPS);
+    
+    motor_start(-leftDPS);
+    
   }
 }
 
@@ -437,9 +543,9 @@ void setup() {
   SERIAL_PORT.println("SPI Initialised");
 
   /* Begin I2C */
-  I2C_PORT.begin();
-  I2C_PORT.setClock(I2C_FREQ);
-  SERIAL_PORT.println("I2C Initialised");
+  // I2C_PORT.begin();
+  // I2C_PORT.setClock(I2C_FREQ);
+  // SERIAL_PORT.println("I2C Initialised");
 
   /* Create hw timers */
   motorTimer = timerBegin(0, 80, true);
@@ -590,19 +696,19 @@ void setup1() {
 void loop() {
   /* Should never get to this point */
 
-  Serial.print("Pitch:");
-  Serial.print(pitch);
-  Serial.print(", Roll:");
-  Serial.print(roll);
-  Serial.print(", Yaw:");
-  Serial.print(yaw);
+  // Serial.print("Pitch:");
+  // Serial.print(pitch);
+  // Serial.print(", Roll:");
+  // Serial.print(roll);
+  // Serial.print(", Yaw:");
+  // Serial.print(yaw);
 
-  Serial.print(", Acc x:");
-  Serial.print(acceleration[0]);
-  Serial.print(", Acc y:");
-  Serial.print(acceleration[1]);
-  Serial.print(", Acc z:");
-  Serial.println(acceleration[2]);
+  // Serial.print("Acc x:");
+  // Serial.print(acceleration[0]);
+  // Serial.print(", Acc y:");
+  // Serial.print(acceleration[1]);
+  // Serial.print(", Acc z:");
+  // Serial.println(acceleration[2]);
 
   // Serial.print(", Vel x:");
   // Serial.print(velocity[0]);
@@ -611,7 +717,7 @@ void loop() {
   // Serial.print(", Vel z:");
   // Serial.println(velocity[2]);
 
-  vTaskDelay(pdMS_TO_TICKS(100));
+  vTaskDelay(pdMS_TO_TICKS(1000));
 }
 
 void loop1() {
