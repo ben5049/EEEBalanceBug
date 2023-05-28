@@ -55,10 +55,6 @@ Main ESP32 program for Group 1's EEEBalanceBug
 #define IMU_CS 5
 #define IMU_SCK 18
 
-/* IR Sensors*/
-#define IR_LEFT 36
-#define IR_RIGHT 39
-
 /* UART */
 #define SERIAL_PORT Serial
 
@@ -109,9 +105,9 @@ static double roll;
 
 /* Dead Reckoning */
 volatile static unsigned long timestamp;                      /* Timestamp of samples taken in microseconds */
-volatile static float acceleration[3] = { 0.0f, 0.0f, 0.0f }; /* Linear acceleration in ms^-2*/
-volatile static float velocity[3] = { 0.0f, 0.0f, 0.0f };     /* Velocity in ms^-1*/
-volatile static float displacement[3] = { 0.0f, 0.0f, 0.0f }; /* Displacement in m*/
+volatile static float acceleration[3] { 0.0f, 0.0f, 0.0f }; /* Linear acceleration in ms^-2*/
+volatile static float velocity[3] { 0.0f, 0.0f, 0.0f };     /* Velocity in ms^-1*/
+volatile static float displacement[3] { 0.0f, 0.0f, 0.0f }; /* Displacement in m*/
 
 /* Controller */
 static double pitch_out;
@@ -199,16 +195,6 @@ void IRAM_ATTR onTimer() {
   } else {
     stepperLeftSteps -= 1;
   }
-}
-
-/* ISR that triggers when right IR sensor detects the edge */
-void IRAM_ATTR rightCollisionISR() {
-  rightCollisionImminent = true;
-}
-
-/* ISR that triggers when left IR sensor detects the edge */
-void IRAM_ATTR leftCollisionISR() {
-  leftCollisionImminent = true;
 }
 
 //-------------------------------- Task Functions ---------------------------------------
@@ -508,8 +494,6 @@ void setup() {
   pinMode(IMU_INT, INPUT_PULLUP);
   pinMode(STEPPER_L_STEP, OUTPUT);
   pinMode(STEPPER_L_DIR, OUTPUT);
-  pinMode(IR_LEFT, INPUT);
-  pinMode(IR_RIGHT, INPUT);
 
   /* Create SPI mutex */
   if (mutexSPI == NULL) {
@@ -572,8 +556,6 @@ void setup() {
 
   /* Create ISRs */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
-  attachInterrupt(digitalPinToInterrupt(IR_LEFT), leftCollisionISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(IR_RIGHT), rightCollisionISR, RISING);
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
   /* Delete "setup" and "loop" task */
