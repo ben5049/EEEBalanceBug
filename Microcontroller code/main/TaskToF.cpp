@@ -157,7 +157,8 @@ void taskToF(void *pvParameters) {
 
   /* Start the loop */
   while (true) {
-      vTaskDelay(pdMS_TO_TICKS(1000));
+    read_dual_sensors()
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
 

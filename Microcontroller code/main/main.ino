@@ -11,6 +11,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 #include "TaskMovement.h"
 #include "TaskIMU.h"
 #include "TaskToF.h"
+#include "TaskExecuteCommand.h"
 
 /* Configuration headers */
 #include "PinAssignments.h"
@@ -23,17 +24,23 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 //-------------------------------- Global Variables -------------------------------------
 
+extern robotCommand;
+
 /* Hardware timers */
 extern hw_timer_t *motorTimer;
-
+TaskHandle_t taskExecuteCommandHandle = nullptr;
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;
 extern TaskHandle_t taskMovementHandle;
 extern TaskHandle_t taskToFHandle;
+extern TaskHandle_t taskExecuteCommandHandle;
 
 /* Semaphores */
 SemaphoreHandle_t mutexSPI; /* SPI Mutex so only one task can access the SPI peripheral at a time */
 SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C peripheral at a time */
+
+/* Queues */
+QueueHandle_t commandQueue;
 
 //-------------------------------- Interrupt Servce Routines ----------------------------
 
@@ -109,6 +116,9 @@ void setup() {
       xSemaphoreGive(mutexI2C);
     }
   }
+
+  /* Create queues */
+  commandQueue = xQueueCreate(10, sizeof(robotCommand));
 
   /* Create Tasks */
 
