@@ -1,6 +1,3 @@
-
-
-
 /* Task handles */
 static TaskHandle_t taskExecuteCommandHandle = nullptr;
 
@@ -114,5 +111,6 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  vTaskDelay(pdMS_TO_TICKS(1000));
+  Serial.println("pog");
 }
