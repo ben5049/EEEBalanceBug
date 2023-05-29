@@ -2,6 +2,7 @@
 # 19/5/2023
 from random import randint
 from math import atan, degrees
+from triangulate import triangulate
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
     # 3 is special state - signifies its the exit of the maze
@@ -19,6 +20,9 @@ class Node:
     def setend(self):
         self.state = 3
 
+    def updatePos(self, x, y):
+        self.position = (x, y)
+
     def __str__(self):
         return str(self.position)
 
@@ -34,16 +38,20 @@ def dataRequest(V):
     V.visualiser(position, whereat, orientation)
     return position, whereat, orientation
 # get left, right, up, down junction positions
+
 def spin():
+    ang1, ang2, ang3 = input()
+    updatedx, updatedy = triangulate(ang1, ang2, ang3)
     leftRough = 0
     rightRough = 0
-    straightRough = 0  
-    return leftRough, rightRough, straightRough # angle setpoints to turn to
+    straightRough = 0
+    return leftRough, rightRough, straightRough, updatedx, updatedy # angle setpoints to turn to
 
 # sets angle in degrees from machine north - positive is clockwise, negative is anticlockwise
 # e.g. setAngle(90) will rotate it 90 deg clockwise, setAngle(-90) will rotate it 180 degrees anticlockwise
 def setAngle(angle):
     return
+
 # steps forward set amount - may change for variable amounts
 def step_forward():
     return
@@ -125,7 +133,8 @@ def tremaux(position, whereat, orientation, priornode, priorwhereat, V, nodes):
         if flag:
             n = Node(position)
             step_forward()
-            langle, rangle, sangle = spin()
+            langle, rangle, sangle, newx, newy = spin()
+            n.updatePos(newx, newy)
             nodes[n] = []
             # visit left, right, straight branches
             visit_branch(n, whereat, langle, V, nodes)
