@@ -9,6 +9,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 //-------------------------------- Includes ---------------------------------------------
 
 #include "src/Fusion.h"
+#include "PinAssignments.h"
 #include "ICM_20948.h"
 //#include "NewIMU.h"
 
@@ -23,65 +24,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 //-------------------------------- Defines ----------------------------------------------
 
-/* Joint stepper motor control pins*/
-#define STEPPER_EN
-#define STEPPER_RST
-#define STEPPER_SLP
 
-/* Left stepper motor control pins */
-#define STEPPER_L_STEP 16
-#define STEPPER_L_DIR 17
-#define STEPPER_L_MS1
-#define STEPPER_L_MS2
-#define STEPPER_L_MS3
-
-/* Right stepper motor control pins */
-#define STEPPER_R_STEP STEPPER_L_STEP
-#define STEPPER_R_DIR STEPPER_L_DIR
-#define STEPPER_R_MS1
-#define STEPPER_R_MS2
-#define STEPPER_R_MS3
-
-#define STEPS 1600 /* Steps per revolution */
-#define MIN_RPM 10
-#define MAX_RPM 1000
-
-/* SPI & IMU */
-#define SPI_PORT SPI     /* Desired SPI port */
-#define SPI_FREQ 5000000 /* Override the default SPI frequency */
-#define IMU_INT 4
-#define IMU_MISO 19
-#define IMU_MOSI 23
-#define IMU_CS 5
-#define IMU_SCK 18
-
-/* IR Sensors*/
-#define IR_LEFT 36
-#define IR_RIGHT 39
-
-/* UART */
-#define SERIAL_PORT Serial
-
-/* I2C & FPGA */
-#define I2C_PORT Wire
-#define I2C_FREQ 400000
-#define FPGA_DEV_ADDR 0x55
-#define FPGA_INT
-
-/* Controller */
-#define KP_Position 0.06
-#define KD_Position 0.45
-
-#define KP_Speed 0.080 
-#define KI_Speed 0.01 
-
-#define KP_Stability 0.32
-#define KD_Stability 0.05
-
-#define MAX_TARGET_ANGLE 14
-#define MAX_CONTROL_OUTPUT 360
-#define ITERM_MAX_ERROR 30   // Iterm windup constants for PI control 
-#define ITERM_MAX 10000
 
 /* Other defines */
 
@@ -172,11 +115,13 @@ void motor_start(float DPS) {
   float microsBetweenSteps = 360*1000000/(STEPS*abs(DPS));  // microseconds
 
   if (DPS > 0) {
+    digitalWrite(STEPPER_R_DIR, HIGH);
     digitalWrite(STEPPER_L_DIR, HIGH);
     stepperRightDirection = true;
     stepperLeftDirection = true;
   }
   else if (DPS < 0) {
+    digitalWrite(STEPPER_R_DIR, LOW);
     digitalWrite(STEPPER_L_DIR, LOW);
     stepperRightDirection = false;
     stepperLeftDirection = false;
@@ -253,8 +198,8 @@ void IRAM_ATTR IMUDataReadyISR() {
 void IRAM_ATTR onTimer() {
 
   /* Send pulse to the stepper motors to make them step once */
-  digitalWrite(STEPPER_L_STEP, HIGH);
-  digitalWrite(STEPPER_L_STEP, LOW);
+  digitalWrite(STEPPER_STEP, HIGH);
+  digitalWrite(STEPPER_STEP, LOW);
 
   /* Increment or decrement step counter per wheel */
   if (stepperRightDirection) {
@@ -268,16 +213,6 @@ void IRAM_ATTR onTimer() {
   } else {
     stepperLeftSteps--;
   }
-}
-
-/* ISR that triggers when right IR sensor detects the edge */
-void IRAM_ATTR rightCollisionISR() {
-  rightCollisionImminent = true;
-}
-
-/* ISR that triggers when left IR sensor detects the edge */
-void IRAM_ATTR leftCollisionISR() {
-  leftCollisionImminent = true;
 }
 
 //-------------------------------- Task Functions ---------------------------------------
@@ -587,10 +522,10 @@ void setup() {
   success &= (myICM.resetDMP() == ICM_20948_Stat_Ok);
   success &= (myICM.resetFIFO() == ICM_20948_Stat_Ok);
   if (success) {
-    Serial.println("DMP initialised");
+    SERIAL_PORT.println("DMP initialised");
   } else {
-    Serial.println(F("Enable DMP failed!"));
-    Serial.println(F("Please check that you have uncommented line 29 (#define ICM_20948_USE_DMP) in ICM_20948_C.h..."));
+    SERIAL_PORT.println(F("Enable DMP failed!"));
+    SERIAL_PORT.println(F("Please check that you have uncommented line 29 (#define ICM_20948_USE_DMP) in ICM_20948_C.h..."));
     while (1) {
       ;  // Do nothing more
     }
@@ -612,10 +547,13 @@ void setup() {
 
   /* Configure pins */
   pinMode(IMU_INT, INPUT_PULLUP);
-  pinMode(STEPPER_L_STEP, OUTPUT);
+  pinMode(STEPPER_STEP, OUTPUT);
   pinMode(STEPPER_L_DIR, OUTPUT);
-  pinMode(IR_LEFT, INPUT);
-  pinMode(IR_RIGHT, INPUT);
+  pinMode(STEPPER_R_DIR, OUTPUT);
+  pinMode(STEPPER_MS2, OUTPUT);
+
+  /* Set pin initial states */
+  digitalWrite(STEPPER_MS2, HIGH);
 
   /* Create SPI mutex */
   if (mutexSPI == NULL) {
@@ -634,7 +572,6 @@ void setup() {
   }
 
   /* Create Tasks */
-
   xTaskCreate(
     taskSampleIMU,             /* Function that implements the task */
     "SAMPLE_IMU",              /* Text name for the task */
@@ -678,8 +615,6 @@ void setup() {
 
   /* Create ISRs */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
-  attachInterrupt(digitalPinToInterrupt(IR_LEFT), leftCollisionISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(IR_RIGHT), rightCollisionISR, RISING);
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
   /* Delete "setup" and "loop" task */
@@ -696,12 +631,12 @@ void setup1() {
 void loop() {
   /* Should never get to this point */
 
-  // Serial.print("Pitch:");
-  // Serial.print(pitch);
-  // Serial.print(", Roll:");
-  // Serial.print(roll);
-  // Serial.print(", Yaw:");
-  // Serial.print(yaw);
+  // SERIAL_PORT.print("Pitch:");
+  // SERIAL_PORT.print(pitch);
+  // SERIAL_PORT.print(", Roll:");
+  // SERIAL_PORT.print(roll);
+  // SERIAL_PORT.print(", Yaw:");
+  // SERIAL_PORT.print(yaw);
 
   // Serial.print("Acc x:");
   // Serial.print(acceleration[0]);

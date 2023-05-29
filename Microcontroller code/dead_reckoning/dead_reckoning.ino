@@ -26,10 +26,8 @@ Balance control loop:
 
 //-------------------------------- Includes ---------------------------------------------
 
-
 #include "src/Fusion.h"
 #include "ICM_20948.h"
-//#include "NewIMU.h"
 
 #include <SPI.h>
 
@@ -78,7 +76,6 @@ Balance control loop:
 //-------------------------------- Global Variables -------------------------------------
 
 /* IMU */
-//ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
 ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
 volatile static float acc[3]; /* x, y ,z */
 volatile static float gyr[3]; /* x, y ,z */
