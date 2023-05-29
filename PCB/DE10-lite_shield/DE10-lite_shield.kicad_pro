@@ -428,7 +428,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "../../../../../../../Downloads/DE10-lite_shield.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""
