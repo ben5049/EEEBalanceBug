@@ -10,6 +10,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 #include "src/Fusion.h"
 #include "PinAssignments.h"
+#include "Config.h"
 #include "ICM_20948.h"
 //#include "NewIMU.h"
 
@@ -68,7 +69,7 @@ volatile static float velocity[3] = { 0.0f, 0.0f, 0.0f };     /* Velocity in ms^
 volatile static float displacement[3] = { 0.0f, 0.0f, 0.0f }; /* Displacement in m*/
 
 /* Controller */
-static float target_angle = 0;
+static float target_angle = -3.9;
 static float control_output = 0;
 static double pitch_out;
 static double angle_setpoint = 0.8;
@@ -107,6 +108,7 @@ void taskDeadReckoning(void *pvParameters);
 void taskController(void *pvParameters);
 void taskTalkToFPGA(void *pvParameters);
 
+
 //-------------------------------- Functions --------------------------------------------
 
 /* Update the timer to step the motors at the specified RPM */
@@ -115,13 +117,13 @@ void motor_start(float DPS) {
   float microsBetweenSteps = 360*1000000/(STEPS*abs(DPS));  // microseconds
 
   if (DPS > 0) {
-    digitalWrite(STEPPER_R_DIR, HIGH);
+    digitalWrite(STEPPER_R_DIR, LOW);
     digitalWrite(STEPPER_L_DIR, HIGH);
     stepperRightDirection = true;
     stepperLeftDirection = true;
   }
   else if (DPS < 0) {
-    digitalWrite(STEPPER_R_DIR, LOW);
+    digitalWrite(STEPPER_R_DIR, HIGH);
     digitalWrite(STEPPER_L_DIR, LOW);
     stepperRightDirection = false;
     stepperLeftDirection = false;
@@ -175,9 +177,12 @@ float stabilityPDControl(float DT, float input, float setPoint,  float Kp, float
   //    The biggest one using only the input (sensor) part not the SetPoint input-input(t-1).
   //    And the second using the setpoint to make it a bit more agressive   setPoint-setPoint(t-1)
   float Kd_setPoint = constrain((setPoint - setPointOld), -8, 8); // We limit the input part...
-  output = Kp * error + (Kd * Kd_setPoint - Kd * (input - PID_errorOld)) / DT;
+  output = Kp * error ;
+  // + (Kd * Kd_setPoint - Kd * (input - PID_errorOld)) / DT;
   //Serial.print(Kd*(error-PID_errorOld));Serial.print("\t");
   //PID_errorOld2 = PID_errorOld;
+  Serial.print(",Angle_error:");
+  Serial.println(error);
   PID_errorOld = input;  // error for Kd is only the input component
   setPointOld = setPoint;
   return (output);
@@ -424,25 +429,30 @@ void taskController(void *pvParameters) {
     motor1_control = positionPDControl(stepperLeftSteps, stepperLeftTargetSteps, KP_Position, KD_Position, leftDPS); // (throttle)
 
 
-    target_angle = speedPIControl(deltaTime, estimated_speed_filtered, motor1_control, KP_Speed, KI_Speed);
+    // target_angle = speedPIControl(deltaTime, estimated_speed_filtered, motor1_control, KP_Speed, KI_Speed);
     target_angle = constrain(target_angle, -MAX_TARGET_ANGLE, MAX_TARGET_ANGLE); // limited output
 
     
     
 
-    control_output += stabilityPDControl(deltaTime, pitch, target_angle, KP_Stability, KD_Stability);
+    control_output = stabilityPDControl(deltaTime, pitch, target_angle, KP_Stability, KD_Stability);
     control_output = constrain(control_output, -MAX_CONTROL_OUTPUT, MAX_CONTROL_OUTPUT); // Limit max output from control
     
     leftDPS = control_output; // add steering here
     leftDPS = constrain(leftDPS, -MAX_CONTROL_OUTPUT, MAX_CONTROL_OUTPUT);
     
     actual_robot_speed = leftDPS;
-
+    Serial.println(360);
+    Serial.print(",");
+    Serial.println(-360);
+    Serial.print("Motor:");
     Serial.println(leftDPS);
+    Serial.print(",Angle:");
+    Serial.println(pitch*10);
     
     motor_start(-leftDPS);
-    
   }
+    
 }
 
 /* Task to talk to the FPGA */
@@ -605,7 +615,7 @@ void setup() {
     &taskTalkToFPGAHandle);    /* Pointer to store the task handle */
 
   /* Set task affinities if enabled (0x00 -> no cores, 0x01 -> C0, 0x02 -> C1, 0x03 -> C0 and C1) */
-  #ifdef USE_TASK_AFFINITIES
+  #if USE_TASK_AFFINITIES == 1
     vTaskCoreAffinitySet(taskSampleIMUHandle, (UBaseType_t)0x03);
     vTaskCoreAffinitySet(taskDeadReckoningHandle, (UBaseType_t)0x03);
   #endif

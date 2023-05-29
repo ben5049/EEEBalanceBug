@@ -6,10 +6,13 @@ Date updated: 28/05/23
 Pin assignments for Group 1's EEEBalanceBug
 */
 
+#ifndef PIN_ASSIGNMENTS_H
+#define PIN_ASSIGNMENTS_H
+
 /* Stepper motor control pins */
-#define STEPPER_STEP 14
+#define STEPPER_STEP 25
 #define STEPPER_MS1
-#define STEPPER_MS2 25
+#define STEPPER_MS2 26
 #define STEPPER_MS3
 #define STEPPER_L_DIR 13
 #define STEPPER_R_DIR 27
@@ -30,3 +33,5 @@ Pin assignments for Group 1's EEEBalanceBug
 #define MUX_A2
 #define TOF_L_INT 36
 #define TOF_R_INT 0
+
+#endif
