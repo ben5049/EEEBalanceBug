@@ -121,6 +121,8 @@ always @ (posedge MIPI_PIXEL_CLK_d) begin
 end
 
 
+	wire [7:0] conduit_signal;
+
 
 Qsys u0 (
 		.clk_clk                                   (MAX10_CLK1_50), 			//                              clk.clk
@@ -177,10 +179,13 @@ Qsys u0 (
 		.altpll_0_phasedone_conduit_export         (),         					//       altpll_0_phasedone_conduit.export		
 		
 		.eee_imgproc_0_conduit_mode_new_signal     (SW[0]),
+		.custom_signal(conduit_signal),
 		
 		.uart_0_rx_tx_rxd                          (ARDUINO_IO[1]),                          //                     uart_0_rx_tx.rxd
 		.uart_0_rx_tx_txd                          (ARDUINO_IO[0])                           //
 	);
+	
+	assign conduit_signal = top_signal;
 
 FpsMonitor uFps(
 	.clk50(MAX10_CLK2_50),

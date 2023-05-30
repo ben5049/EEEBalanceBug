@@ -1,4 +1,4 @@
-21766978105312930
+21780454307659376
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -90125,6 +90125,20 @@ footprints
 5
 5
 footprints
+ALERT
+
+
+0
+0
+0
+footprints
+ALERT_Mirrored
+
+
+0
+0
+0
+footprints
 AMASS_XT60PW-M
 
 
@@ -90222,6 +90236,13 @@ BGA484C100P22X22_2300X2300X260N
 0
 484
 484
+footprints
+BSS138PS_115
+SOT363
+MOSFET (N-Channel)
+0
+6
+6
 footprints
 Bourns-SRP3212-0-0-MFG
 
@@ -90365,6 +90386,13 @@ IC_SLG59M1558V
 footprints
 INDC3030X200N
 3x3
+Inductor
+0
+2
+2
+footprints
+INDPM3630X200N
+ER 2mm thickness
 Inductor
 0
 2
@@ -90587,6 +90615,13 @@ RP2040
 57
 57
 footprints
+S8050
+SOT, 3 Pin (https://www.jedec.org/sites/default/files/docs/Mo-178D.PDF inferred 3-pin variant), generated with kicad-footprint-generator ipc_gullwing_generator.py
+SOT TO_SOT_SMD
+0
+3
+3
+footprints
 SESD0201X1BN0010098
 0201DFN
 TVS Diode (Bi-directional)
@@ -90635,6 +90670,13 @@ Integrated Circuit
 0
 11
 11
+footprints
+SON50P100X145X60-6_TPD4S012DRYR
+
+
+0
+6
+6
 footprints
 SON50P160X160X50-7N120X50
 
@@ -90790,6 +90832,13 @@ TPS54116QRTWTQ1
 29
 25
 footprints
+TPS54295RSAT
+
+TPS54295RSAT 
+0
+22
+18
+footprints
 TRANS_SSM6K513NU-LF
 
 
@@ -90829,8 +90878,8 @@ UNO_R3_SHIELD
 Arduino UNO R3, http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf
 Arduino UNO R3
 0
-32
-32
+18
+18
 footprints
 USB405603A
 USB4056-03-A-3
@@ -90852,6 +90901,13 @@ VL53L7CXV0GC&slash_1
 0
 17
 17
+footprints
+W25N01GVZEIG
+
+
+0
+9
+9
 footprints
 Wurth_Electronics-744042150-Manufacturer_Recommended
 

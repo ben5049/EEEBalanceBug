@@ -10,7 +10,7 @@
 
 INA219_WE ina219; // this is the instantiation of the library for the current sensor
 
-float open_loop, closed_loop; // Duty Cycles
+float open_loop, closed_loop, closed_loopb; // Duty Cycles
 float va,vb,vref,iL,dutyref,current_mA,dv,di,dp,current_mA_ap; // Measurement Variables
 unsigned int sensorValue0,sensorValue1,sensorValue2,sensorValue3;  // ADC sample values declaration
 float ev=0,cv=0,ei=0,oc=0; //internal signals
@@ -57,8 +57,8 @@ void setup() {
   Wire.begin(); // We need this for the i2c comms for the current sensor
   ina219.init(); // this initiates the current sensor
   Wire.setClock(700000); // set the comms speed for i2c
-  closed_loop=0.5;
-  
+  closed_loop=0.7;
+  closed_loopb=closed_loop;
 }
 
  void loop() {
@@ -84,6 +84,8 @@ void setup() {
       di=ibp;
       dp=p-pp;
 //varying dutycycle if the following condition meet
+if(va<=16)
+{
        if(dp>0)
       {
   
@@ -107,6 +109,11 @@ void setup() {
           closed_loop=closed_loop-delta; //at LHS of MPP
         }
       }
+}
+else
+{
+  closed_loop=closed_loop-2*delta;
+}
 //store the current value as the pervious value of next cycle
 ibp=current_mA_ap;
 vbp=vb_10;
@@ -135,8 +142,19 @@ pwm_modulate(closed_loop);
       }
     }
 
-    com_count++;              //used for debugging.
-//    if (com_count >= 1000) {  //send out data every second.
+    com_count++;              //self activating, being used when dutycycle is capped at lowwer bound.
+    if (com_count >= 500) { //record data every second.
+      if(closed_loopb==0.02&&closed_loop==0.02)
+      {//if the dutycycle is capped, reset the dutycycle to initial value.
+        closed_loop=0.7;
+        closed_loopb=closed_loop;
+      }
+      else
+      {
+        closed_loopb=closed_loop;
+      }
+      com_count = 0;
+    }
       Serial.print("Va: ");
       Serial.print(va);
       Serial.print("\t");
@@ -149,6 +167,14 @@ pwm_modulate(closed_loop);
       Serial.print(p);
       Serial.print("\t\t");
 
+      Serial.print("dp: ");
+      Serial.print(dp);
+      Serial.print("\t\t");
+
+      Serial.print("dv: ");
+      Serial.print(dv);
+      Serial.print("\t\t");
+      
       Serial.print("CLduty: ");
       Serial.print(closed_loop);
       Serial.print("\t\t");
@@ -165,8 +191,7 @@ pwm_modulate(closed_loop);
       Serial.print("CL Mode: ");
       Serial.print(CL_mode);
       Serial.print("\n");
-      com_count = 0;
-//    }
+
 
     digitalWrite(13, LOW);   // reset pin13.
     loopTrigger = 0;

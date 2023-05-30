@@ -1,16 +1,21 @@
 #include <PID_v1.h>
 
-#define STEP_PIN 18
-#define DIR_PIN 19
+#define STEP_PIN 16
+#define DIR_PIN 17
 #define STEPS 1600
 #define MIN_RPM 10
 #define MAX_RPM 1000 // MOTOR CONFIG END
 
 #include "ICM_20948.h" //START IMU CONFIG
-#define WIRE_PORT Wire
-#define AD0_VAL 1
+#define SPI_PORT SPI     /* Desired SPI port */
+#define SPI_FREQ 5000000 /* Override the default SPI frequency */
+#define IMU_INT 4
+#define IMU_MISO 19
+#define IMU_MOSI 23
+#define IMU_CS 5
+#define IMU_SCK 18
 
-#define KP_Pitch 1.5 
+#define KP_Pitch 1.5
 #define KI_Pitch 0.5
 #define KD_Pitch 0.0015
 
@@ -18,7 +23,7 @@
 #define KI_Speed 0.5
 #define KD_Speed 0.0015
 
-ICM_20948_I2C myICM; // END IMU CONFIG
+ICM_20948_SPI myICM; // END IMU CONFIG
               
 hw_timer_t *motor_timer = NULL;
 
@@ -28,6 +33,7 @@ double pitch;
 double x_speed;
 double speed_out;
 double speed_setpoint = 0;
+
 
 PID pitch_control(&pitch,&pitch_out,&angle_setpoint,KP_Pitch,KI_Pitch,KD_Pitch,DIRECT);
 //PID speed_control(&x_speed,&speed_out,&speed_setpoint,KP_Speed,KI_Speed,KD_Speed,DIRECT);
@@ -49,15 +55,15 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Meep morp robot online");
 
-  WIRE_PORT.begin();
-  WIRE_PORT.setClock(400000);
+  SPI_PORT.begin(IMU_SCK, IMU_MISO, IMU_MOSI, IMU_INT);
+  
    bool initialized = false;
   while (!initialized)
   {
 
     // Initialize the ICM-20948
     // If the DMP is enabled, .begin performs a minimal startup. We need to configure the sample mode etc. manually.
-    myICM.begin(WIRE_PORT, AD0_VAL);
+    myICM.begin(IMU_CS, SPI_PORT, SPI_FREQ);
 
     if (myICM.status != ICM_20948_Stat_Ok)
     {
@@ -152,7 +158,9 @@ void loop() {
   //Serial.print("pid_out: ");
   //Serial.println(pid_out);  
   //Serial.println(pitch);
-  Serial.println(acc_x);
+  // Serial.print(pitch);
+  // Serial.print(",");
+  // Serial.println(pitch_out);
   double pitch_contribution = (pitch_out/255)*(MAX_RPM);
   //double speed_contribution = (speed_out/255)*(MAX_RPM);
   motor_start(-(pitch_contribution));
