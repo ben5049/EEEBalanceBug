@@ -60,6 +60,7 @@ output								source_eop;
 
 // conduit export
 input                         mode;
+input [7:0] custom_signal;
 
 ////////////////////////////////////////////////////////////////////////
 //
