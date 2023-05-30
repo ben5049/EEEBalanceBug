@@ -1,4 +1,4 @@
-21780454307659376
+21782139811795556
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -90837,7 +90837,7 @@ TPS54295RSAT
 TPS54295RSAT 
 0
 22
-18
+17
 footprints
 TRANS_SSM6K513NU-LF
 
@@ -90866,6 +90866,13 @@ Teseo-LIV3FL
 0
 18
 18
+footprints
+Toggle_switch
+1-1825137-1-1
+Switch
+0
+3
+3
 footprints
 UBC-R112-56C-7ATS-TBHF
 
