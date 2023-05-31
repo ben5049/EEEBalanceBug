@@ -1,6 +1,5 @@
 # Aranya Gupta
-# 19/5/2023
-from random import randint
+# 31/5/2023
 from math import atan, degrees
 from triangulate import triangulate
 class Node:
@@ -10,6 +9,7 @@ class Node:
     # re-traversed, but will be added to children of prior node
     state = 0 
     position = 0
+    
     def __init__(self, position):
         self.position = position
         self.state = 1
@@ -26,140 +26,138 @@ class Node:
     def __str__(self):
         return str(self.position)
 
-# abstract funcs - to be implemented later. will use recursion with tremaux()
-# so that it is a depth-first search. dependent on how tremaux alg will control 
-# rover
+class Rover():
+    DEFAULT_DIST = 100
+    name = ""
+    # next actions to take - 0: idle, 1: step forward, 2: spin, 3: visit branch, 4: go back, 5: update position, 6: set angle
+    actions = []
+    # tree containing nodes and their edges
+    tree = {}
 
-def dataRequest():
-    # receive data from esp
-    position = tuple(int(x) for x in input("pos ").split(","))
-    whereat = int(input("whereat "))
-    orientation = int(input("orientation "))
-    # send data to client
-    print(position, whereat, orientation)
-    return position, whereat, orientation
-# get left, right, up, down junction positions
-
-def spin():
-    ang1 = input()
-    ang2 = input()
-    ang3 = input()
-    updatedx, updatedy = triangulate(ang1, ang2, ang3)
-    junctionAngs = []
-    return junctionAngs, updatedx, updatedy # angle setpoints to turn to
-
-# sets angle in degrees from machine north - positive is clockwise, negative is anticlockwise
-# e.g. setAngle(90) will rotate it 90 deg clockwise, setAngle(-90) will rotate it 180 degrees anticlockwise
-def setAngle(angle):
-    return
-
-# steps forward set amount - may change for variable amounts
-def step_forward():
-    return
-
-def go_back(orientation, priornode, position, priorwhereat):
-    xdiff = position[0]-priornode.position[0]
-    ydiff = position[1]-priornode.position[1]
-    angle = degrees(atan(ydiff/xdiff))
-    if priorwhereat == 0:
-        while xdiff > 0:
-            setAngle(90-angle) # mathematically should be correct - may not be idk
-            step_forward()
-            position = dataRequest()[0]
-            xdiff = position[0]-priornode.position[0]
-            ydiff = position[1]-priornode.position[1]
-            angle = degrees(atan(ydiff/xdiff))
-    elif priorwhereat == 1: # possible bug - may need to step forward more than once
-        setAngle(orientation+180)
-        step_forward()
-        position = dataRequest()[0]
-        xdiff = position[0]-priornode.position[0]
-        ydiff = position[1]-priornode.position[1]
-        angle = degrees(atan(ydiff/xdiff))
-        setAngle(90-angle) # mathematically should be correct - may not be idk
-        step_forward()
-    return
-
-def visit_branch(priornode, priorwhereat, angle, nodes):
-    setAngle(angle)
-    step_forward()
+    toreturn = []
     
-    # wait for new position, whereat, orientation
-    p, w, o = dataRequest()
+    priornode = 0
+    priorwhereat = 0
 
-    # tremaux(position, whereat, priornode) to search branch of maze
-    tremaux(p, w, o, priornode, priorwhereat, nodes)
-
-def updateRoverPos(pos):
-    return pos
-
-# position is x, y from starting position ie dead reckoning
-# whereat is passage - 0, junc - 1, deadend - 2, exit - 3
-# whereat may be done on this side rather than on fpga 
-# orientation is int showing current angle, 0 is north-pointing
-# currently, after each movement, relevant data is sent to program
-# which then uses tremaux to find the next step the rover should take
-
-# tree represented as hash table with each node having its children as an array of values
-
-def tremaux(position, whereat, orientation, priornode, priorwhereat, nodes):
-    if whereat == 0: 
-        if priorwhereat == 0: 
-            step_forward()
-            p, w, o = dataRequest()
-            tremaux(p, w, o, priornode, whereat, nodes)
-        elif priorwhereat == 1:
-            if position not in [node.position for node in nodes]: #if we haven't ever visited this node ...
-                n = Node(position)
-                for node in nodes:
-                    if node.position == priornode.position:
-                        nodes[node].append(n)
-                        break
-                nodes[n] = []
-                step_forward()
-                p, w, o = dataRequest()
-                tremaux(p, w, o, priornode, whereat, nodes)
-            else: #if we have previously visited this node .. 
-                for node in nodes:
-                    if node.position == position: 
-                        node.visit()
-                        go_back(orientation, priornode, position, priorwhereat)
-                        break
-    elif whereat == 1:
-        flag = True
-        for node in nodes:
-            if node.position == position:  #if we've already visited this node mark it as dead and go back
-                node.visit()
-                go_back(orientation, priornode, position, priorwhereat)
-                flag = False
-                break
-        # if we haven't visited this node, check all possible other routes, then backtrack
-        if flag:
-            n = Node(position)
-            step_forward()
-            junctions, newx, newy = spin()
-            updateRoverPos((newx, newy))
-            n.updatePos(newx, newy)
-            nodes[n] = []
-            # visit left, right, straight branches
-            for ang in junctions:
-                visit_branch(n, whereat, ang, nodes)
-            n.visit()
-            go_back(orientation, n, position, priorwhereat)
-
-    elif whereat == 2:
+    def __init__(self, position, whereat, name):
+        self.name = name
         n = Node(position)
-        nodes[n] = []
-        n.visit()
-        go_back(orientation, priornode, position, priorwhereat)
-
-    elif whereat == 3:
-        n = Node(position)
-        nodes[n] = []
-        n.setend()
-        go_back(orientation, priornode, position, priorwhereat)
-    
-    # once we get back to the start, the maze has finished being mapped out
-    if position == (0,0):
-        return nodes 
+        self.tree[n] = []
+        self.priornode = n
         
+        if whereat == 0:
+            self.actions.append(1)
+            self.priorwhereat = 1
+        elif whereat == 1:
+            self.actions.append(2)
+        # dead end, exit should not occur
+        # return 200 ok response 
+    
+    # these all update toreturn, which gives the actual things the rover will do
+    
+    def step_forward(self, dist=DEFAULT_DIST):
+        self.toreturn.append("go forward " + str(dist)) # this will be a JSON in reality
+    
+    def spin(self):
+        self.toreturn.append("spin")
+    
+    def setAngle(self, angle):
+        self.toreturn.append("set angle to " + str(angle))
+    
+    def go_back(self, node, position):
+        if node.position[0]-position[0]==0:
+            if node.position[1]-position[1]==0:
+                self.toreturn.append("idle")
+            else:
+                if self.position[0]>position[0]:
+                    self.toreturn.append("set angle to 0")
+                    self.toreturn.append(self.step_forward(node.position[1]-position[1]))
+                else:
+                    self.toreturn.append("set angle to 1800")
+                    self.toreturn.append(self.step_forward( position[1]-node.position[1]))
+        else:
+            angle = 90-degrees(atan( (node.position[1]-position[1])/(node.position[0]-position[0]) ))
+            self.toreturn.append("set angle to " + str(angle))
+            self.toreturn.append(self.step_forward( ((node.position[1]-position[1])**2 + (node.position[0]-position[0])**2)**0.5 ))
+        
+    
+    def idle(self):
+        self.toreturn.append("idle")
+    
+    def updatePos(self, newx, newy):
+        self.toreturn.append("update position to: " + str(newx) + " " + str(newy))
+
+
+    def tremaux(self, position, whereat, orientation, potentialbranches, beaconangles):
+        self.toreturn = []
+        if len(self.actions)!=0:
+            currentAction = self.actions.pop(0)
+            if currentAction == 1:
+                if whereat == 0:
+                    if position not in [nodes.position for nodes in self.tree]:
+                        if self.priorwhereat == 1:
+                            n = Node(position)
+                            self.tree[n] = []
+                            self.tree[self.priornode].append(n)
+                            self.priornode = n
+                            self.priorwhereat = 0
+                            self.actions = [1] + self.actions
+                        self.step_forward()
+                    else:
+                        for node in self.tree:
+                            if node.position == position:
+                                node.visit()
+                        self.actions = [[4, self.priornode]] + self.actions
+                elif whereat == 1:
+                    if position not in [nodes.position for nodes in self.tree]:
+                        self.actions = [2] + self.actions
+                        self.idle()
+                    else:
+                        for node in self.tree:
+                            if node.position == position:
+                                node.visit()
+                        self.actions= [[4,self.priornode]] + self.actions
+                elif whereat == 2:
+                    self.actions = [[4, self.priornode]] + self.actions
+                    self.idle()
+                elif whereat == 3:
+                    n = Node(position)
+                    self.tree[n] = []
+                    n.setend()
+                    self.tree[self.priornode].append(n)
+                    self.priornode = n
+                    self.actions = [[4, self.priornode]] + self.actions
+            elif currentAction == 2:
+                self.actions = [3] + self.actions
+                self.spin()
+            elif currentAction == 3:
+                if position in [nodes.position for nodes in self.tree]:
+                    for node in self.tree:
+                        if node.position == position:
+                            node.visit()
+                    self.actions = [[4, self.priornode]] + self.actions
+                else:
+                    newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
+                    self.updatePos(newx, newy)
+                    n = Node(newx, newy)
+                    self.tree[n] = []
+                    self.tree[self.priornode].append(n)
+
+                    self.actions = [[4, self.priornode]] + self.actions
+                    self.priornode = n
+                    self.priorwhereat = 1
+                    for i in potentialbranches:
+                        self.actions = [[3, i], [4, self.priornode]] + self.actions 
+                               
+            elif currentAction[0] == 3:
+                self.actions = [[6,currentAction[1]], 1] + self.actions
+            elif currentAction[0] == 4:
+                currentAction[1].visit()
+                self.go_back(currentAction[1], position)
+            elif currentAction[0] == 6:
+                self.setAngle(currentAction[1], position)
+                self.step_forward()
+        else:
+            self.toreturn.append("DONE")
+            self.toreturn.append(self.tree)
+        return self.toreturn
