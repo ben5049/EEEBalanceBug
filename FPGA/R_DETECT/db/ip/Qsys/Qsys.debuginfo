@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="Qsys" kind="system" version="18.1" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
-<<<<<<< HEAD
- <!-- 2023.05.30.16:30:08 -->
-=======
- <!-- 2023.05.30.01:30:05 -->
->>>>>>> 4d4973bcac72837ee53ab8b7d1c4f5a30c4cca21
+ <!-- 2023.05.31.03:49:41 -->
  <!-- A collection of modules and connections -->
  <parameter name="clockCrossingAdapter">
   <type>com.altera.sopcmodel.ensemble.EClockAdapter</type>
@@ -57,11 +53,7 @@
  </parameter>
  <parameter name="generationId">
   <type>int</type>
-<<<<<<< HEAD
-  <value>1685460548</value>
-=======
-  <value>1685406562</value>
->>>>>>> 4d4973bcac72837ee53ab8b7d1c4f5a30c4cca21
+  <value>1685501339</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>true</visible>
@@ -17530,11 +17522,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMESTAMP</name>
-<<<<<<< HEAD
-   <value>1685460548</value>
-=======
-   <value>1685406562</value>
->>>>>>> 4d4973bcac72837ee53ab8b7d1c4f5a30c4cca21
+   <value>1685501339</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.compatible</name>
@@ -17554,11 +17542,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.timestamp</name>
-<<<<<<< HEAD
-   <value>1685460548</value>
-=======
-   <value>1685406562</value>
->>>>>>> 4d4973bcac72837ee53ab8b7d1c4f5a30c4cca21
+   <value>1685501339</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.vendor</name>
@@ -17574,11 +17558,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timestamp">
    <type>int</type>
-<<<<<<< HEAD
-   <value>1685460548</value>
-=======
-   <value>1685406562</value>
->>>>>>> 4d4973bcac72837ee53ab8b7d1c4f5a30c4cca21
+   <value>1685501339</value>
    <derived>true</derived>
    <enabled>false</enabled>
    <visible>false</visible>
@@ -32475,9 +32455,5 @@ parameters are a RESULT of the module parameters. -->
   <version>18.1</version>
  </plugin>
  <reportVersion>18.1 625</reportVersion>
-<<<<<<< HEAD
- <uniqueIdentifier>4AE7DAAD3D31000001886D4715D8</uniqueIdentifier>
-=======
- <uniqueIdentifier>B6B024D28AF8000001886A0F4DF9</uniqueIdentifier>
->>>>>>> 4d4973bcac72837ee53ab8b7d1c4f5a30c4cca21
+ <uniqueIdentifier>B6B024D28AF8000001886FB57C53</uniqueIdentifier>
 </EnsembleReport>
