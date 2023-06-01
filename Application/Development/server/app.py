@@ -1,9 +1,37 @@
 from flask import Flask, jsonify, request, make_response
 import tremaux, dijkstra
+import mariadb
 # TODO: database stuff
+
 app = Flask(__name__)
 
+hostip = '54.174.2.95'
+
+try:
+    conn = mariadb.connect(
+        user='bb',
+        password='',
+        host=hostip,
+        port=3306,
+        database='BalanceBug'
+    )
+except mariadb.Error as e:
+    print(f"Error connecting to MariaDB platform: {e}")
+
+cur = conn.cursor()
+try:
+    cur.execute("INSERT INTO Info (MAC, timestamp, xpos, ypos, nickname, whereat, orientation, tofleft, tofright) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (0,0,0,0,"test",0,0,0,0))
+except mariadb.error as e:
+    print(f"Unable to carry out action due to: {e}")
+print("executed")
 rovers = []
+
+try:
+    cur.execute("SELECT * FROM Info")
+except mariadb.error as e:
+    print(f"Unable to carry out action due to: {e}")
+
+print([x for x in cur])
 
 @app.route("/")
 def hello():
@@ -60,7 +88,7 @@ def diagnostics():
 def visualisations():
     return
 
-@app.route("client/pause", methods=["POST"])
+@app.route("/client/pause", methods=["POST"])
 def pause():
     data = request.get_json()
     mac = data["MAC"]
@@ -70,7 +98,7 @@ def pause():
 
     return make_response(jsonify({"success":"successfully paused rover"}), 200)
 
-@app.route("client/play", methods=["POST"])
+@app.route("/client/play", methods=["POST"])
 def play():
     data = request.get_json()
     mac = data["MAC"]
@@ -80,7 +108,7 @@ def play():
     return make_response(jsonify({"success":"successfully played rover"}), 200)
 
 
-@app.route("client/addnickname", methods=["POST"])
+@app.route("/client/addnickname", methods=["POST"])
 def addnickname():
     data = request.get_json()
     mac = data["MAC"]
@@ -90,7 +118,7 @@ def addnickname():
             rover.nickname = nick
     return make_response(jsonify({"success":"successfully changed rover nickname"}), 200)
 
-@app.route("client/shortestpath", methods=["POST"])
+@app.route("/client/shortestpath", methods=["POST"])
 def findShortestPath():
     data = request.get_json()
     mac = data["MAC"]
