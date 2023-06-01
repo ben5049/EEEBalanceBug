@@ -91,19 +91,19 @@ wire         sop, eop, in_valid, out_ready;
 ////////////////////////////////////////////////////////////////////////
 
 //hsv, red
-assign red_detect_h = ((9'd25< hsv_h && hsv_h < 9'd30 )|| ((9'd350 < hsv_h) & (hsv_h < 360))) ? 1'b1 : 1'b0;
-assign red_detect_s = (9'd80 < hsv_s && hsv_s < 9'd255) ? 1'b1 : 1'b0;
-assign red_detect_v = (9'd100 < hsv_v && hsv_v < 9'd255) ? 1'b1 : 1'b0;
+assign red_detect_h = ((8'd10< hsv_h && hsv_h < 8'd30 )|| (8'd350 < hsv_h && hsv_h < 8'd360)) ? 1'b1 : 1'b0;
+assign red_detect_s = (8'd80 < hsv_s) ? 1'b1 : 1'b0;
+assign red_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
 
 //hsv, yellow
-assign yellow_detect_h = (9'd50 < hsv_h  &&  hsv_h < 9'd80) ? 1'b1 : 1'b0;
-assign yellow_detect_s = (9'd120 < hsv_s) ? 1'b1 : 1'b0;
-assign yellow_detect_v = (9'd160 < hsv_v) ? 1'b1 : 1'b0;
+assign yellow_detect_h = (8'd40 < hsv_h && hst_h < 8'd60) ? 1'b1 : 1'b0;
+assign yellow_detect_s = (8'd150 < hsv_s) ? 1'b1 : 1'b0;
+assign yellow_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
 
 //hsv, blue
-assign blue_detect_h = (9'd180 < hsv_h  &&  hsv_h < 9'd240) ? 1'b1 : 1'b0;
-assign blue_detect_s = (9'd30 < hsv_s) ? 1'b1 : 1'b0;
-assign blue_detect_v = (9'd30 < hsv_v) ? 1'b1 : 1'b0;
+assign blue_detect_h = (8'd190 < hsv_h  &&  hsv_h < 8'd240) ? 1'b1 : 1'b0;
+assign blue_detect_s = (8'd130 < hsv_s) ? 1'b1 : 1'b0;
+assign blue_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
 
 
 
