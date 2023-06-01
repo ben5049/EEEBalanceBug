@@ -16,11 +16,17 @@
 /* Time of flight (ToF) sensors */
 static Adafruit_VL53L0X tofRight;
 static Adafruit_VL53L0X tofLeft;
-static VL53L0X_RangingMeasurementData_t measure1;
-static VL53L0X_RangingMeasurementData_t measure2;
+static VL53L0X_RangingMeasurementData_t measureRight;
+static VL53L0X_RangingMeasurementData_t measureLeft;
+volatile uint16_t distanceRight;
+volatile uint16_t distanceLeft;
 
 /* I2C multiplexer */
 static TCA9548A I2CMux;
+
+/* Variables */
+static volatile bool rightToFDataReady = false;
+static volatile bool leftToFDataReady = false;
 
 /* Task handles */
 TaskHandle_t taskToFHandle = nullptr;
@@ -73,7 +79,7 @@ void configureToF(){
 
   /* Close all channels to ensure state is know */
   I2CMux.closeAll();
-
+  
   /* Begin the first sensor if it isn't already connected */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
   if (!findI2CDevice(TOF_RIGHT_ADDRESS)) {
@@ -87,12 +93,17 @@ void configureToF(){
       SERIAL_PORT.println("Right ToF sensor connected");
     }
   }
-
+  else {
+    SERIAL_PORT.println("Can't find right ToF sensor");
+  }
+  SERIAL_PORT.print("4: ");
+  checkI2CBusMembers();
   /* Close the first sensor's channel */
   I2CMux.closeChannel(TOF_RIGHT_CHANNEL);
 
   /* Begin the second sensor if it isn't already connected */
   I2CMux.openChannel(TOF_LEFT_CHANNEL);
+  
   if (!findI2CDevice(TOF_LEFT_ADDRESS)) {
     if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
       while (true){
@@ -104,6 +115,9 @@ void configureToF(){
       SERIAL_PORT.println("Left ToF sensor connected");
     }
   }
+  else {
+    SERIAL_PORT.println("Can't find left ToF sensor");
+  }
 
   /* Open all channels */
   I2CMux.openAll();
@@ -112,13 +126,13 @@ void configureToF(){
 /* Reads data from two ToF sensors. Used for debugging  */
 void read_dual_sensors() {
 
-  tofRight.rangingTest(&measure1, false);  // pass in 'true' to get debug data printout!
-  tofLeft.rangingTest(&measure2, false);   // pass in 'true' to get debug data printout!
+  tofRight.rangingTest(&measureRight, false);  // pass in 'true' to get debug data printout!
+  tofLeft.rangingTest(&measureLeft, false);   // pass in 'true' to get debug data printout!
 
   // print sensor one reading
   Serial.print(F("1: "));
-  if (measure1.RangeStatus != 4) {  // if not out of range
-    Serial.print(measure1.RangeMilliMeter);
+  if (measureRight.RangeStatus != 4) {  // if not out of range
+    Serial.print(measureRight.RangeMilliMeter);
   } else {
     Serial.print(F("Out of range"));
   }
@@ -127,8 +141,8 @@ void read_dual_sensors() {
 
   // print sensor two reading
   Serial.print(F("2: "));
-  if (measure2.RangeStatus != 4) {
-    Serial.print(measure2.RangeMilliMeter);
+  if (measureLeft.RangeStatus != 4) {
+    Serial.print(measureLeft.RangeMilliMeter);
   } else {
     Serial.print(F("Out of range"));
   }
@@ -140,12 +154,12 @@ void read_dual_sensors() {
 
 /* ISR that triggers on right ToF sensor interrupt */
 void IRAM_ATTR ToFRightISR(){
-
+  rightToFDataReady = true;
 }
 
 /* ISR that triggers on left ToF sensor interrupt */
 void IRAM_ATTR ToFLeftISR(){
-
+  leftToFDataReady = true;
 }
 
 //-------------------------------- Task Functions ---------------------------------------
@@ -155,10 +169,77 @@ void taskToF(void *pvParameters) {
 
   (void)pvParameters;
 
+  /* Make the task execute at a specified frequency */
+  const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+  
   /* Start the loop */
   while (true) {
-    read_dual_sensors()
-    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    SERIAL_PORT.println("loopin1");
+
+    /* Pause the task until enough time has passed */
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+    SERIAL_PORT.println("loopin2");
+
+    /* Check for new data from the right ToF sensor */
+    if (rightToFDataReady){
+      
+      /* Read data from the right ToF sensor */
+      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
+        tofRight.getRangingMeasurement(&measureLeft, false);
+        xSemaphoreGive(mutexI2C);
+      }
+
+      /* Check if the data is valid (phase failures have incorrect data) */
+      if (measureRight.RangeStatus != 4){
+        distanceRight =  measureRight.RangeMilliMeter;
+        Serial.println(distanceRight);
+      }
+      else{
+        // What to do if the range is invalid
+      }
+
+      /* Clear the data ready flag */
+      rightToFDataReady = false;
+      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
+        tofRight.clearInterruptMask(false);
+        xSemaphoreGive(mutexI2C);
+      }
+    }
+
+    /* Check for new data from the left ToF sensor */
+    if (leftToFDataReady){
+      
+      /* Read data from the left ToF sensor */
+      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
+        tofLeft.getRangingMeasurement(&measureLeft, false);
+        xSemaphoreGive(mutexI2C);
+      }
+
+      /* Check if the data is valid (phase failures have incorrect data) */
+      if (measureLeft.RangeStatus != 4){
+        distanceLeft =  measureLeft.RangeMilliMeter;
+        Serial.println(distanceLeft);
+      }
+      else{
+        // What to do if the range is invalid
+      }
+      
+
+      /* Clear the data ready flag */
+      leftToFDataReady = false;
+      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
+        tofLeft.clearInterruptMask(false);
+        xSemaphoreGive(mutexI2C);
+      }
+    }
+    
+    /* Process data */
+    if (findingBeacons){
+
+    }
   }
 }
 

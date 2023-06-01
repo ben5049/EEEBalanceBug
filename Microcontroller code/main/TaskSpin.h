@@ -18,17 +18,10 @@ extern volatile uint16_t distanceRight;
 extern volatile uint16_t distanceLeft;
 
 /* Task handles */
-extern TaskHandle_t taskToFHandle;
-
-/* ISR */
-void IRAM_ATTR ToFRightISR();
-void IRAM_ATTR ToFLeftISR();
-
-/* Functions */
-void configureToF();
+extern TaskHandle_t taskSpinHandle;
 
 /* Tasks */
-void taskToF(void *pvParameters);
+void taskSpin(void *pvParameters);
 
 //-------------------------------- Imported ---------------------------------------
 

@@ -11,11 +11,7 @@ IMU Sampling task
 #include "Arduino.h"
 #include "freertos/FreeRTOS.h"
 
-/* Task handles */
-extern TaskHandle_t taskIMUhandle;
-
-/* Mutexes */
-extern SemaphoreHandle_t mutexSPI;
+//-------------------------------- Exported ---------------------------------------
 
 /* ISR */
 extern void IRAM_ATTR IMUDataReadyISR();
@@ -23,7 +19,15 @@ extern void IRAM_ATTR IMUDataReadyISR();
 /* Functions */
 extern void configureIMU();
 
+/* Task handles */
+extern TaskHandle_t taskIMUhandle;
+
 /* Tasks */
 void taskIMU(void *pvParameters);
+
+//-------------------------------- Imported ---------------------------------------
+
+/* Mutexes */
+extern SemaphoreHandle_t mutexSPI;
 
 #endif

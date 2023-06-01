@@ -15,12 +15,13 @@ Pin assignments for Group 1's EEEBalanceBug
 
 /* SPI & IMU */
 #define SPI_PORT SPI     /* Desired SPI port */
-#define SPI_FREQ 5000000 /* Override the default SPI frequency */
+#define SPI_FREQ 500000 /* Override the default SPI frequency */
+#define IMU_SAMPLING_FREQUENCY 57.49
 
 /* UART */
 #define SERIAL_PORT Serial
 
-/* I2C: FPGA */
+/* I2C: FPGA, Multiplexer & ToF sensors */
 #define I2C_PORT Wire
 #define I2C_FREQ 400000
 #define FPGA_DEV_ADDR 0x55
@@ -28,6 +29,10 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TOF_LEFT_ADDRESS 0x31
 #define TOF_RIGHT_CHANNEL 0
 #define TOF_LEFT_CHANNEL 2
+#define TOF_SAMPLE_FREQUENCY 10  /* Max = 33Hz, default = 10Hz */
+
+/* Spin task */
+#define TASK_SPIN_FREQUENCY 10
 
 /* Controller */
 #define KP_Position 0.06

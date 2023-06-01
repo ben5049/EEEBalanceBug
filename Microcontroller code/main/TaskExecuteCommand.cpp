@@ -2,6 +2,7 @@
 
 /* Task headers */
 #include "TaskExecuteCommand.h"
+#include "TaskSpin.h"
 
 /* Configuration headers */
 #include "Config.h"
@@ -12,19 +13,12 @@
 /* Task handles */
 TaskHandle_t taskExecuteCommandHandle = nullptr;
 
+/* Variables */
+volatile bool findingBeacons = false;
+
 //-------------------------------- Functions --------------------------------------------
 
 //-------------------------------- Task Functions ---------------------------------------
-
-/*  */
-void taskExecuteCommand(void *pvParameters);
-
-typedef enum{
-  IDLE         = 0x00,
-  FORWARD      = 0x01,
-  TURN         = 0x02,
-  FIND_BEACONS = 0x03
-} robotCommand;
 
 /* Task for the state machine */
 void taskExecuteCommand(void *pvParameters) {
@@ -77,6 +71,12 @@ void taskExecuteCommand(void *pvParameters) {
       case FIND_BEACONS:
 
         /* Define what to do in the FIND_BEACONS state */
+
+        /* Unblock TaskSpin which will then count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
+        xTaskNotifyGiveIndexed(taskSpinHandle, 0);
+
+        /* Wait for the spin task to complete */
+        ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &currentCommand, 0) != pdTRUE){

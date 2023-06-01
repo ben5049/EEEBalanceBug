@@ -24,11 +24,9 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 //-------------------------------- Global Variables -------------------------------------
 
-extern robotCommand;
-
 /* Hardware timers */
 extern hw_timer_t *motorTimer;
-TaskHandle_t taskExecuteCommandHandle = nullptr;
+
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;
 extern TaskHandle_t taskMovementHandle;
@@ -55,6 +53,8 @@ extern void IRAM_ATTR ToFLeftISR();
 extern void taskIMU(void *pvParameters);
 extern void taskMovement(void *pvParameters);
 extern void taskToF(void *pvParameters);
+extern void taskExeculteCommand(void *pvParameters);
+extern void taskSpin(void *pvParameters);
 
 //-------------------------------- Setups -----------------------------------------------
 
@@ -76,7 +76,7 @@ void setup() {
   SERIAL_PORT.println("SPI Initialised");
 
   /* Begin I2C */
-  I2C_PORT.begin();
+  I2C_PORT.begin(I2C_SDA, I2C_SCL, I2C_FREQ);
   I2C_PORT.setClock(I2C_FREQ);
   SERIAL_PORT.println("I2C Initialised");
 

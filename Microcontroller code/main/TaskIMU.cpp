@@ -18,12 +18,11 @@ static ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
 volatile static float acc[3]; /* x, y ,z */
 volatile static float gyr[3]; /* x, y ,z */
 volatile static float mag[3]; /* x, y ,z */
-static const float samplingFrequency = 57.49;
 
 /* IMU DMP */
-static double pitch;
-static double yaw;
-static double roll;
+volatile float pitch;
+volatile float yaw;
+volatile float roll;
 
 /* Task handles */
 TaskHandle_t taskIMUHandle = nullptr;
@@ -121,7 +120,7 @@ void taskIMU(void *pvParameters) {
   FusionOffset offset;
   FusionAhrs ahrs;
 
-  FusionOffsetInitialise(&offset, samplingFrequency);
+  FusionOffsetInitialise(&offset, IMU_SAMPLING_FREQUENCY);
   FusionAhrsInitialise(&ahrs);
 
   /* Set AHRS algorithm settings */
@@ -130,7 +129,7 @@ void taskIMU(void *pvParameters) {
     .gain = 0.5f,
     .accelerationRejection = 10.0f,
     .magneticRejection = 20.0f,
-    .rejectionTimeout = 1 * samplingFrequency, /* 1 seconds */
+    .rejectionTimeout = 1 * IMU_SAMPLING_FREQUENCY, /* 1 seconds */
   };
 
   FusionAhrsSetSettings(&ahrs, &settings);
@@ -159,23 +158,26 @@ void taskIMU(void *pvParameters) {
       /* Process the quaternion data from the DMP into Euler angles */
       if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)){  // Was valid data available?
         if ((angle_data.header & DMP_header_bitmap_Quat6) > 0) {
-          double q1 = ((double)angle_data.Quat6.Data.Q1) / 1073741824.0;  // Convert to double. Divide by 2^30
-          double q2 = ((double)angle_data.Quat6.Data.Q2) / 1073741824.0;  // Convert to double. Divide by 2^30
-          double q3 = ((double)angle_data.Quat6.Data.Q3) / 1073741824.0;  // Convert to double. Divide by 2^30
-          double q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
-          double q2sqr = q2 * q2;
-          // roll (x-axis rotation)
-          double t0 = +2.0 * (q0 * q1 + q2 * q3);
-          double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
-          roll = atan2(t0, t1) * 180.0 / PI;
-          // pitch (y-axis rotation)
-          double t2 = +2.0 * (q0 * q2 - q3 * q1);
+          float q1 = ((float)angle_data.Quat6.Data.Q1) / 1073741824.0;  // Convert to double. Divide by 2^30
+          float q2 = ((float)angle_data.Quat6.Data.Q2) / 1073741824.0;  // Convert to double. Divide by 2^30
+          float q3 = ((float)angle_data.Quat6.Data.Q3) / 1073741824.0;  // Convert to double. Divide by 2^30
+          float q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
+          float q2sqr = q2 * q2;
+
+          /* roll (x-axis rotation) don't need to calculate since rover cannot move in this axis */
+          // double t0 = +2.0 * (q0 * q1 + q2 * q3);
+          // double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
+          // roll = atan2(t0, t1) * 180.0 / PI;
+
+          /* pitch (y-axis rotation) */
+          float t2 = +2.0 * (q0 * q2 - q3 * q1);
           t2 = t2 > 1.0 ? 1.0 : t2;
           t2 = t2 < -1.0 ? -1.0 : t2;
           pitch = asin(t2) * 180.0 / PI;
-          // yaw (z-axis rotation)
-          double t3 = +2.0 * (q0 * q3 + q1 * q2);
-          double t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
+
+          /* yaw (z-axis rotation) */
+          float t3 = +2.0 * (q0 * q3 + q1 * q2);
+          float t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
           yaw = atan2(t3, t4) * 180.0 / PI;
         }
       }
@@ -189,7 +191,7 @@ void taskIMU(void *pvParameters) {
       gyroscope = FusionOffsetUpdate(&offset, gyroscope);
 
       // Calculate delta time (in seconds) to account for gyroscope sample clock error
-      deltaTime = (float)(timestamp - previousTimestamp) / (float)1000000.0;
+      deltaTime = (float)(timestamp - previousTimestamp) / (float) 1000000.0;
       previousTimestamp = timestamp;
 
       // Update gyroscope AHRS algorithm

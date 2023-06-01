@@ -11,6 +11,8 @@ Controller task
 #include "Arduino.h"
 #include "freertos/FreeRTOS.h"
 
+//-------------------------------- Exported ---------------------------------------
+
 /* Hardware timers */
 extern hw_timer_t *motorTimer;
 
