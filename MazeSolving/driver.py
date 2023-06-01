@@ -7,9 +7,11 @@ import tremaux, dijkstra
 
 def main(): 
     rover = tremaux.Rover((0,0), 0, "MAC ADDRESS")
-    next_command = rover.tremaux((0,0), 2, 90, None, None)
-    next_command = rover.tremaux((0,0), 2, 90, None, None)
-    next_command = rover.tremaux((0,0), 2, 90, None, None)
+    next_command = rover.tremaux((0,0), 0, None, None)
+    print(next_command)
+    next_command = rover.tremaux((100,0), 0, None, None)
+    print(next_command)
+    next_command = rover.tremaux((200,0), 1, None, None)
     print(next_command[0])
     graph = next_command[1]
     print(graph)

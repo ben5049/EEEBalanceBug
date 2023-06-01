@@ -21,7 +21,11 @@ def findDist(node1, node2):
 # each Node has its position, Dijkstra will calculate 
 # distances based on position
 # returns predecessor graph showing shortest path from startNode to every point
-def dijkstra(graph, startNode):
+def dijkstra(graph, startPos):
+    for node in graph:
+        if startPos == node.position:
+            startNode = node
+            break
     G = {startNode: 0} # distance from startNode to given node
     P = {startNode: None} # predecessor graph - shortest path from given node to start node
     for node in graph:

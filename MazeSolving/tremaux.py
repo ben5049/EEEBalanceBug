@@ -50,7 +50,7 @@ class Rover():
             self.priorwhereat = 1
         elif whereat == 1:
             self.actions.append(2)
-        # dead end, exit should not occur
+        self.toreturn = [-1]
         # return 200 ok response 
     
     # these all update toreturn, which gives the actual things the rover will do
@@ -73,10 +73,10 @@ class Rover():
                     self.toreturn.append("set angle to 0")
                     self.toreturn.append(self.step_forward(node.position[1]-position[1]))
                 else:
-                    self.toreturn.append("set angle to 1800")
+                    self.toreturn.append("set angle to 180")
                     self.toreturn.append(self.step_forward( position[1]-node.position[1]))
         else:
-            angle = 90-degrees(atan( (node.position[1]-position[1])/(node.position[0]-position[0]) ))
+            angle = degrees(atan( (node.position[1]-position[1])/(node.position[0]-position[0]) ))-90
             self.toreturn.append("set angle to " + str(angle))
             self.toreturn.append(self.step_forward( ((node.position[1]-position[1])**2 + (node.position[0]-position[0])**2)**0.5 ))
         
@@ -88,8 +88,14 @@ class Rover():
         self.toreturn.append("update position to: " + str(newx) + " " + str(newy))
 
 
-    def tremaux(self, position, whereat, orientation, potentialbranches, beaconangles):
-        self.toreturn = []
+    def tremaux(self, position, whereat, potentialbranches, beaconangles):
+        print(self.actions)
+        if self.toreturn[0] == -1:
+            self.step_forward()
+            self.toreturn.pop(0)
+            return self.toreturn
+        else:
+            self.toreturn = []
         if len(self.actions)!=0:
             currentAction = self.actions.pop(0)
             if currentAction == 1:
@@ -160,4 +166,5 @@ class Rover():
         else:
             self.toreturn.append("DONE")
             self.toreturn.append(self.tree)
+        print(self.actions)
         return self.toreturn
