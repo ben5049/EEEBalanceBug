@@ -1,0 +1,22 @@
+body {
+    margin: 0;
+  }
+  
+  .wrapper {
+    display: grid;
+    grid-gap: 0;
+    grid-template-columns: repeat(20, [col] 5vw);
+    grid-template-rows: repeat(20, [row] 5vw);
+    background-color: #fff;
+    color: #444;
+    height: 100vh;
+    padding: 0;
+  }
+  
+  .box {
+    background-color: #000;
+    color: #fff;
+    border-radius: 5px;
+    padding: 2vh;
+    font-size: 3vh;
+  }

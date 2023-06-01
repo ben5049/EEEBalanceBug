@@ -1,0 +1,25 @@
+  .a_Home {
+    grid-column: col 3 / span 15;
+    grid-row: row 2 / span 20;
+  }
+  
+  .b_Home {
+    grid-column: col 1 / span 1;
+    grid-row: row;
+  }
+  
+  .c_Home {
+    grid-column: col;
+    grid-row: row 2;
+  }
+  
+  .d_Home {
+    grid-column: col 2 / span 3;
+    grid-row: row 2;
+  }
+  
+  .e_Home {
+    grid-column: col / span 4;
+    grid-row: row 3;
+  }
+  

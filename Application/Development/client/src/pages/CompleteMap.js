@@ -1,4 +1,6 @@
 import React from "react";
+import '../components/CompletedMap/grid_CompletedMap.css';
+import '../components/grid.css';
 
 const CompleteMap = () => {
 	return (

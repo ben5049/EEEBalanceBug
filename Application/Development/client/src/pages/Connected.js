@@ -1,4 +1,6 @@
 import React from 'react';
+import '../components/Connected/grid_Connected.css';
+import '../components/grid.css';
 
 const Connected = () => {
 	return (
