@@ -1,0 +1,36 @@
+.carousel-button {
+    position: relative;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  
+  .carousel-button:hover img {
+    filter: grayscale(100%);
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .carousel-button:hover .overlay {
+    opacity: 0.6;
+  }
+  
+  .overlay p { /*hover rover text*/
+    color: #FFF; 
+    font-size: 16px;
+    text-align: center;
+  }
+  

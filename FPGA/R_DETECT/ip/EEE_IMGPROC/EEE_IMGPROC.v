@@ -25,6 +25,11 @@ module EEE_IMGPROC(
 	source_sop,
 	source_eop,
 	
+	// hsv
+	hsv_h,
+	hsv_s,
+	hsv_v,
+	
 	// conduit
 	mode
 	
@@ -58,10 +63,13 @@ input									source_ready;
 output								source_sop;
 output								source_eop;
 
+//HSV conversion
+output reg[8:0] hsv_h; //0-360
+output reg[7:0] hsv_s, hsv_v; //0-255
+
+
 // conduit export
 input                         mode;
-input [7:0] custom_signal;
-
 ////////////////////////////////////////////////////////////////////////
 //
 parameter IMAGE_W = 11'd640;
@@ -74,20 +82,46 @@ parameter BB_COL_DEFAULT = 24'h00ff00;
 wire [7:0]   red, green, blue, grey;
 wire [7:0]   red_out, green_out, blue_out;
 
+wire [24:0] hsv_colour;
+wire red_detect_h, red_detect_s, red_detect_v;
+wire yellow_detect_h, yellow_detect_s, yellow_detect_v;
+wire blue_detect_h, blue_detect_s, blue_detect_v;
+
 wire         sop, eop, in_valid, out_ready;
 ////////////////////////////////////////////////////////////////////////
 
+//hsv, red
+assign red_detect_h = ((8'd10< hsv_h && hsv_h < 8'd30 )|| (8'd350 < hsv_h && hsv_h < 8'd360)) ? 1'b1 : 1'b0;
+assign red_detect_s = (8'd80 < hsv_s) ? 1'b1 : 1'b0;
+assign red_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
+
+//hsv, yellow
+assign yellow_detect_h = (8'd40 < hsv_h && hst_h < 8'd60) ? 1'b1 : 1'b0;
+assign yellow_detect_s = (8'd150 < hsv_s) ? 1'b1 : 1'b0;
+assign yellow_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
+
+//hsv, blue
+assign blue_detect_h = (8'd190 < hsv_h  &&  hsv_h < 8'd240) ? 1'b1 : 1'b0;
+assign blue_detect_s = (8'd130 < hsv_s) ? 1'b1 : 1'b0;
+assign blue_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
+
+
+
 // Detect red areas
 wire red_detect;
-assign red_detect = red[7] & ~green[7] & ~blue[7];
+//assign red_detect = red[7] & ~green[7] & ~blue[7];
+assign red_detect = (red_detect_h && red_detect_s && red_detect_v) ? 1'b1 : 1'b0;
+
 
 //Detect yellow areas
 wire yellow_detect;
-assign yellow_detect = (red[7] & green[7]) & ~blue[7];
+//assign yellow_detect = (red[7] & green[7]) & ~blue[7];
+assign yellow_detect = (yellow_detect_h && yellow_detect_s && yellow_detect_v) ? 1'b1 : 1'b0;
 
 //Detect blue areas
 wire blue_detect;
-assign blue_detect = ~red[7] & ~green[7] & blue[7];
+//assign blue_detect = ~red[7] & ~green[7] & blue[7];
+assign blue_detect = (blue_detect_h && blue_detect_s && blue_detect_v) ? 1'b1 : 1'b0;
 
 // Find boundary of cursor box
 
@@ -287,6 +321,18 @@ always@(*) begin	//Write words to FIFO as state machine advances
 	endcase
 end
 
+
+//RGB to HSV conversion
+rgb_to_hsv hsv_inst(
+.clk(clk),
+.rst(reset_n),
+.rgb_r(red),
+.rgb_g(green),
+.rgb_b(blue),
+.hsv_h(hsv_h),
+.hsv_s(hsv_s),
+.hsv_v(hsv_v)
+);
 
 //Output message FIFO
 MSG_FIFO	MSG_FIFO_inst (

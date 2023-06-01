@@ -12,43 +12,17 @@ function drawLine(ctx, begin, end, stroke = 'black', width = 1) {
     ctx.lineTo(...end);
     ctx.stroke();
 }
-
-function draw(position, whereat, orientation) {
+// draws small line in correct direction with correct distances using TOF sensors
+function draw(position, orientation, tofleft, tofright) {
     const canvas = document.querySelector('#canvas');
 
     if (canvas.getContext) {
         const ctx = canvas.getContext('2d');
-        let r = 30;
-        let l = 30;
+        let l = 5;
         let theta = orientation*Math.PI/180
-        if (whereat === 0) {
-            drawLine(ctx, [position[0] + r * Math.cos(theta), position[1] + r * Math.sin(theta)], [position[0] + r * Math.cos(theta) + l * Math.sin(theta), position[1] + r * Math.sin(theta) - l * Math.cos(theta)]);
-        
-            drawLine(ctx, [position[0] - r * Math.cos(theta), position[1] - r * Math.sin(theta)], [position[0] - r * Math.cos(theta) + l * Math.sin(theta), position[1] - r * Math.sin(theta) - l * Math.cos(theta)]);
-        } 
-        else if (whereat === 1) {
-            // left junc
-            drawLine(ctx, [position[0] - r * Math.cos(theta), position[1] - r * Math.sin(theta)], [position[0] - r * Math.cos(theta) - l * Math.cos(theta), position[1] - r * Math.sin(theta) - l * Math.sin(theta)]);
-        
-            drawLine(ctx, [position[0] - r * Math.cos(theta) + 2 * r * Math.sin(theta), position[1] - r * Math.sin(theta) - 2 * r * Math.cos(theta)], [position[0] - r * Math.cos(theta) + 2 * r * Math.sin(theta) - l * Math.cos(theta), position[1] - r * Math.sin(theta) - 2 * r * Math.cos(theta) - l * Math.sin(theta)]);
-        
-            // right junc
-            drawLine(ctx, [position[0] + r * Math.cos(theta), position[1] + r * Math.sin(theta)], [position[0] + r * Math.cos(theta) + l * Math.cos(theta), position[1] + r * Math.sin(theta) + l * Math.sin(theta)]);
-        
-            drawLine(ctx, [position[0] + r * Math.cos(theta) + 2 * r * Math.sin(theta), position[1] + r * Math.sin(theta) - 2 * r * Math.cos(theta)], [position[0] + r * Math.cos(theta) + 2 * r * Math.sin(theta) + l * Math.cos(theta), position[1] + r * Math.sin(theta) - 2 * r * Math.cos(theta) + l * Math.sin(theta)]);
-        
-            // straight junc
-            drawLine(ctx, [position[0] - r * Math.cos(theta) + 2 * r * Math.sin(theta), position[1] - r * Math.sin(theta) - 2 * r * Math.cos(theta)], [position[0] - r * Math.cos(theta) + 2 * r * Math.sin(theta) + l * Math.sin(theta), position[1] - r * Math.sin(theta) - 2 * r * Math.cos(theta) - l * Math.cos(theta)]);
-        
-            drawLine(ctx, [position[0] + r * Math.cos(theta) + 2 * r * Math.sin(theta), position[1] + r * Math.sin(theta) - 2 * r * Math.cos(theta)], [position[0] + r * Math.cos(theta) + 2 * r * Math.sin(theta) + l * Math.sin(theta), position[1] + r * Math.sin(theta) - 2 * r * Math.cos(theta) - l * Math.cos(theta)]);
-        } 
-        else if (whereat === 2) {
-            drawLine(ctx, [position[0] - r * Math.cos(theta), position[1] - r * Math.sin(theta)], [position[0] + r * Math.cos(theta), position[1] + r * Math.sin(theta)]);
-        } 
-        else if (whereat === 3) {
-            drawLine(ctx, [position[0] + r * Math.cos(theta), position[1] + r * Math.sin(theta)], [position[0] + r * Math.cos(theta) + l * Math.sin(theta), position[1] + r * Math.sin(theta) - l * Math.cos(theta)], "green");
-        
-            drawLine(ctx, [position[0] - r * Math.cos(theta), position[1] - r * Math.sin(theta)], [position[0] - r * Math.cos(theta) + l * Math.sin(theta), position[1] - r * Math.sin(theta) - l * Math.cos(theta)], "green");
-        }
+    
+        drawLine(ctx, [position[0] + tofleft * Math.cos(theta), position[1] + tofleft * Math.sin(theta)], [position[0] + tofleft * Math.cos(theta) + l * Math.sin(theta), position[1] + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
+        drawLine(ctx, [position[0] - tofright * Math.cos(theta), position[1] - tofright * Math.sin(theta)], [position[0] - tofright * Math.cos(theta) + l * Math.sin(theta), position[1] - tofright * Math.sin(theta) - l * Math.cos(theta)]);
     }
 }
+

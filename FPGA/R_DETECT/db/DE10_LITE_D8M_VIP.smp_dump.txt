@@ -83,6 +83,26 @@ mSetup_ST.0000 0 0 0
 mSetup_ST.0001 1 0 1 
 mSetup_ST.0010 1 1 0 
 
+State Machine - |DE10_LITE_D8M_VIP|Qsys:u0|EEE_IMGPROC:eee_imgproc_0|rgb_to_hsv:hsv_inst|rgb_se_n
+Name rgb_se_n.111 rgb_se_n.110 rgb_se_n.100 rgb_se_n.011 rgb_se_n.000 rgb_se_n.001 rgb_se_n.010 
+rgb_se_n.010 0 0 0 0 0 0 0 
+rgb_se_n.001 0 0 0 0 0 1 1 
+rgb_se_n.000 0 0 0 0 1 0 1 
+rgb_se_n.011 0 0 0 1 0 0 1 
+rgb_se_n.100 0 0 1 0 0 0 1 
+rgb_se_n.110 0 1 0 0 0 0 1 
+rgb_se_n.111 1 0 0 0 0 0 1 
+
+State Machine - |DE10_LITE_D8M_VIP|Qsys:u0|EEE_IMGPROC:eee_imgproc_0|rgb_to_hsv:hsv_inst|rgb_se
+Name rgb_se.111 rgb_se.110 rgb_se.100 rgb_se.011 rgb_se.000 rgb_se.001 rgb_se.010 
+rgb_se.010 0 0 0 0 0 0 0 
+rgb_se.001 0 0 0 0 0 1 1 
+rgb_se.000 0 0 0 0 1 0 1 
+rgb_se.011 0 0 0 1 0 0 1 
+rgb_se.100 0 0 1 0 0 0 1 
+rgb_se.110 0 1 0 0 0 0 1 
+rgb_se.111 1 0 0 0 0 0 1 
+
 State Machine - |DE10_LITE_D8M_VIP|Qsys:u0|Qsys_nios2_gen2:nios2_gen2|Qsys_nios2_gen2_cpu:cpu|Qsys_nios2_gen2_cpu_nios2_oci:the_Qsys_nios2_gen2_cpu_nios2_oci|Qsys_nios2_gen2_cpu_debug_slave_wrapper:the_Qsys_nios2_gen2_cpu_debug_slave_wrapper|Qsys_nios2_gen2_cpu_debug_slave_tck:the_Qsys_nios2_gen2_cpu_debug_slave_tck|DRsize
 Name DRsize.101 DRsize.100 DRsize.011 DRsize.010 DRsize.001 DRsize.000 
 DRsize.000 0 0 0 0 0 0 
