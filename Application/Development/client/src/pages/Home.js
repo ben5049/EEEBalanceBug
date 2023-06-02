@@ -10,23 +10,46 @@ const Home = () => {
 		{MAC: '11:11:11:11:11:11', nickname: 'David2', overlayText: 'CONNECTED' },
 		{MAC: '13:13:13:13:13:13', nickname: 'Kyle', overlayText: 'OFFLINE' },
 		{MAC: '00:00:00:00:00:00', nickname: 'David', overlayText: 'OFFLINE' },
+		{MAC: '11:11:11:11:11:11', nickname: 'David2', overlayText: 'CONNECTED' },
+		{MAC: '13:13:13:13:13:13', nickname: 'Kyle', overlayText: 'OFFLINE' },
+		{MAC: '00:00:00:00:00:00', nickname: 'David', overlayText: 'OFFLINE' },
+		{MAC: '11:11:11:11:11:11', nickname: 'David2', overlayText: 'CONNECTED' },
+		{MAC: '13:13:13:13:13:13', nickname: 'Kyle', overlayText: 'OFFLINE' },
+		{MAC: '00:00:00:00:00:00', nickname: 'David', overlayText: 'OFFLINE' },
 	  ];
 
+	  const replays_list = [
+		{ID: '1', name: 'run1'},
+		{ID: '2', name: 'trial'},
+		{ID: '3', name: 'test'},
+		{ID: '4', name: 'It works!!'},
+		{ID: '5', name: "didn't work :("},
+		{ID: '6', name: 'aaaaa'},
+		{ID: '7', name: 'ababa'},
+		{ID: '8', name: 'what'},
+		{ID: '9', name: 'wtf'},
+	  ];
+
+
 	return (
-		<div>
-			<div class="wrapper">
-				<div class="box a_Home">A</div>
-				<div class="box b_Home">B</div>
-				<div class="box c_Home">C</div>
-				<div class="box d_Home">D</div>
-				<div class="box e_Home">E</div>
+		<div className="background">
+			<div className="wrapper">
+				<div className="box Group1_Home">
+					Group 1				
+				</div>
+				<div className="box RoversText_Home">
+					Rovers
+				</div>
+				<div className="box RoverCarousel_Home">
+					<RoverCarousel rovers={rovers_list}/>
+				</div>
+				<div className="box ReplaysText_Home">
+					Replays
+				</div>
+				<div className="box ReplayCarousel_Home">
+					<ReplayCarousel replays={replays_list} />
+				</div>
 			</div>
-			{/*
-			<h1>Rovers</h1>
-			<RoverCarousel rovers={rovers_list}/>
-			<h1>Replays</h1>
-			<ReplayCarousel />
-			*/}
 		</div>
 	);
 };
