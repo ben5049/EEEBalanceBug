@@ -27,9 +27,9 @@ def hello():
     return jsonify({"hello":"world"})
 
 # rover communication
-@app.route("/rover", methods=["GET"])
+@app.route("/rover", methods=["POST"])
 def rover():
-    data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright", "SessionNickname"
+    data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     r = 0
     flag = True
     for rover in rovers:
@@ -53,7 +53,7 @@ def rover():
     # store positions and timestamp in database
     cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, CPU, connection) VALUES (?, ?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["CPU"], data["diagnostics"]["connection"]))
     cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-
+    
     return make_response(jsonify(resp), 200)
 
 @app.route("/client/allrovers", methods=["GET"])
