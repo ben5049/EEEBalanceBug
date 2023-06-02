@@ -38,6 +38,7 @@ class Rover():
     nickname = ""
     priornode = 0
     priorwhereat = 0
+    sessionId = -1
 
     pause = False
 
@@ -91,6 +92,8 @@ class Rover():
 
 
     def tremaux(self, position, whereat, potentialbranches, beaconangles):
+        if self.pause:
+            return ["idle"]
         if self.toreturn[0] == -1:
             self.step_forward()
             self.toreturn.pop(0)
@@ -168,6 +171,4 @@ class Rover():
             self.toreturn.append("DONE")
             self.toreturn.append(self.tree)
 
-        if self.pause:
-            return ["idle"]
         return self.toreturn
