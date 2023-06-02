@@ -28,8 +28,8 @@ Pin assignments for Group 1's EEEBalanceBug
 #define I2C_SCL 22
 #define I2C_SDA 21
 #define FPGA_INT 
-#define MUX_A0 16
-#define MUX_A1 4
+#define MUX_A0
+#define MUX_A1
 #define MUX_A2
 #define TOF_L_INT 36
 #define TOF_R_INT 0

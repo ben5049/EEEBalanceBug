@@ -1,10 +1,7 @@
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
-#include "TaskSpin.h"
-#include "TaskExecuteCommand.h"
-#include "TaskToF.h"
-#include "TaskIMU.h"
+#include "Tasks.h"
 
 /* Configuration headers */
 #include "Config.h"

@@ -1,7 +1,7 @@
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
-#include "TaskToF.h"
+#include "Tasks.h"
 
 /* Configuration headers */
 #include "Config.h"
@@ -82,7 +82,7 @@ void configureToF(){
   
   /* Begin the first sensor if it isn't already connected */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
-  if (!findI2CDevice(TOF_RIGHT_ADDRESS)) {
+  // if (!findI2CDevice(TOF_RIGHT_ADDRESS)) {
     if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
       while (true){
         SERIAL_PORT.println(F("Failed to boot right ToF sensor"));
@@ -90,24 +90,14 @@ void configureToF(){
       }
     }
     else {
+      tofRight.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+      tofRight.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+      tofRight.startMeasurement();
       SERIAL_PORT.println("Right ToF sensor connected");
     }
-  }
-  else {
-    if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
-      while (true){
-        SERIAL_PORT.println(F("Failed to boot right ToF sensor"));
-        delay(1000);
-      }
-    }
-    else {
-      SERIAL_PORT.println("Right ToF sensor already begun");
-    }
-  }
+  // }
 
-  tofRight.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
-  tofRight.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
-  tofRight.startMeasurement();
+
 
   /* Close the first sensor's channel */
   I2CMux.closeChannel(TOF_RIGHT_CHANNEL);
@@ -116,7 +106,7 @@ void configureToF(){
   I2CMux.openChannel(TOF_LEFT_CHANNEL);
   checkI2CBusMembers();
 
-  if (!findI2CDevice(TOF_LEFT_ADDRESS)) {
+  // if (!findI2CDevice(TOF_LEFT_ADDRESS)) {
     if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
       while (true){
         SERIAL_PORT.println(F("Failed to boot left ToF sensor"));
@@ -124,24 +114,12 @@ void configureToF(){
       }
     }
     else {
+      tofLeft.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+      tofLeft.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+      tofLeft.startMeasurement();
       SERIAL_PORT.println("Left ToF sensor connected");
     }
-  }
-  else {
-    if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
-      while (true){
-        SERIAL_PORT.println(F("Failed to boot left ToF sensor"));
-        delay(1000);
-      }
-    }
-    else {
-      SERIAL_PORT.println("Left ToF sensor already begun");
-    }
-  }
-
-  tofLeft.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
-  tofLeft.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
-  tofLeft.startMeasurement();
+  // }
   
   /* Open all channels */
   I2CMux.openAll();
@@ -193,8 +171,6 @@ void taskToF(void *pvParameters) {
 
   (void)pvParameters;
 
-  /* Task variables */
-
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -232,8 +208,6 @@ void taskToF(void *pvParameters) {
     SERIAL_PORT.print(distanceLeft);
     SERIAL_PORT.print(", Right: ");
     SERIAL_PORT.println(distanceRight);
-
-    // read_dual_sensors();
 
     // if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
     //   tofRight.clearInterruptMask(false);

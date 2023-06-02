@@ -51,6 +51,4 @@ Pin assignments for Group 1's EEEBalanceBug
 #define ITERM_MAX_ERROR 30   // I term windup constants for PI control 
 #define ITERM_MAX 10000
 
-#define USE_TASK_AFFINITIES 0 /* Set to 1 to enable task affinities */
-
 #endif

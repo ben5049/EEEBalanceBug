@@ -1,0 +1,67 @@
+/*
+Authors: Ben Smith
+Date created: 02/06/23
+*/
+
+#ifndef TASKS_H
+#define TASKS_H
+
+#include "Arduino.h"
+#include "freertos/FreeRTOS.h"
+
+//-------------------------------- Exported ---------------------------------------
+
+/* Hardware timers */
+extern hw_timer_t *motorTimer;
+
+/* Types */
+typedef enum{
+  IDLE         = 0x00,
+  FORWARD      = 0x01,
+  TURN         = 0x02,
+  FIND_BEACONS = 0x03
+} robotCommand;
+
+/* Variables */
+extern volatile float pitch;
+extern volatile float yaw;
+extern volatile uint16_t distanceRight;
+extern volatile uint16_t distanceLeft;
+extern volatile float spinStartingAngle;
+
+
+/* ISR */
+void IRAM_ATTR IMUDataReadyISR();
+void IRAM_ATTR onTimer();
+void IRAM_ATTR ToFRightISR();
+void IRAM_ATTR ToFLeftISR();
+
+/* Functions */
+void configureIMU();
+void configureToF();
+void motor_start(double RPM);
+
+/* Task handles */
+extern TaskHandle_t taskIMUhandle;
+extern TaskHandle_t taskMovementHandle;
+extern TaskHandle_t taskSpinHandle;
+extern TaskHandle_t taskExecuteCommandHandle;
+extern TaskHandle_t taskToFHandle;
+
+/* Tasks */
+void taskIMU(void *pvParameters);
+void taskMovement(void *pvParameters);
+void taskSpin(void *pvParameters);
+void taskExecuteCommand(void *pvParameters);
+
+
+//-------------------------------- Imported ---------------------------------------
+
+/* Mutexes */
+extern SemaphoreHandle_t mutexSPI;
+extern SemaphoreHandle_t mutexI2C;
+
+/* Queue handles */
+extern QueueHandle_t commandQueue;
+
+#endif

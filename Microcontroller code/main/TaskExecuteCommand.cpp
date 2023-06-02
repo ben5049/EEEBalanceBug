@@ -1,8 +1,7 @@
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
-#include "TaskExecuteCommand.h"
-#include "TaskSpin.h"
+#include "Tasks.h"
 
 /* Configuration headers */
 #include "Config.h"
@@ -14,6 +13,7 @@
 TaskHandle_t taskExecuteCommandHandle = nullptr;
 
 /* Variables */
+volatile float spinStartingAngle;
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -70,6 +70,8 @@ void taskExecuteCommand(void *pvParameters) {
       case FIND_BEACONS:
 
         /* Define what to do in the FIND_BEACONS state */
+
+        spinStartingAngle = yaw;
 
         /* Unblock TaskSpin which will then count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);

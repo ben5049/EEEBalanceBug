@@ -8,10 +8,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
-#include "TaskMovement.h"
-#include "TaskIMU.h"
-#include "TaskToF.h"
-#include "TaskExecuteCommand.h"
+#include "Tasks.h"
 
 /* Configuration headers */
 #include "PinAssignments.h"
@@ -141,15 +138,10 @@ void setup() {
   xTaskCreate(
     taskToF,              /* Function that implements the task */
     "TOF",                /* Text name for the task */
-    5000,                 /* Stack size in words, not bytes */
+    10000,                 /* Stack size in words, not bytes */
     nullptr,              /* Parameter passed into the task */
     8,                    /* Task priority */
     &taskToFHandle); /* Pointer to store the task handle */
-
-/* Set task affinities if enabled (0x00 -> no cores, 0x01 -> C0, 0x02 -> C1, 0x03 -> C0 and C1) */
-#if USE_TASK_AFFINITIES == 1
-  vTaskCoreAffinitySet(taskIMUHandle, (UBaseType_t)0x03);
-#endif
 
   /* Starts the scheduler */
   vTaskStartScheduler();

@@ -1,7 +1,7 @@
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
-#include "TaskIMU.h"
+#include "Tasks.h"
 
 /* Configuration headers */
 #include "Config.h"
