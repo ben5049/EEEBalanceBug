@@ -30,6 +30,8 @@ const Home = () => {
 		{ID: '9', name: 'wtf'},
 	  ];
 
+	  
+	
 
 	return (
 		<div className="background">
@@ -42,6 +44,9 @@ const Home = () => {
 				</div>
 				<div className="box RoverCarousel_Home">
 					<RoverCarousel rovers={rovers_list}/>
+				</div>
+				<div className="box AddButton_Home">
+
 				</div>
 				<div className="box ReplaysText_Home">
 					Replays

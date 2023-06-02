@@ -15,12 +15,36 @@ body {
   
   .box {
     background-color: #75bcff;
-    color: #fff;
+    color: #ffffff;
     border-radius: 5px;
     padding: 2vh;
     font-size: 3vh;
   }
 
+  .box-nobackground {
+    background-color: #ffffff;
+    color: #00ff6a;
+    border-radius: 5px;
+    padding: 2vh;
+    font-size: 2vh;
+  }
+
+  .box-red {
+    background-color: #F84F31;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 2vh;
+    font-size: 2vh;
+  }
+
+  .box-green {
+    background-color: #23C552;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 2vh;
+    font-size: 2vh;
+  }
+  
   .page-link {
     text-decoration: none;
   }

@@ -1,25 +1,70 @@
-  .a_Connected {
-    grid-column: col / span 2;
-    grid-row: row;
-  }
-  
-  .b_Connected {
-    grid-column: col 3 / span 2;
-    grid-row: row;
-  }
-  
-  .c_Connected {
-    grid-column: col;
-    grid-row: row 2;
-  }
-  
-  .d_Connected {
-    grid-column: col 2 / span 3;
-    grid-row: row 2;
-  }
-  
-  .e_Connected {
-    grid-column: col / span 4;
-    grid-row: row 3;
-  }
-  
+.DisplayMAC_Connected {
+  grid-column: col 15 / span 5;
+  grid-row: row 1 / span 1;
+  text-align: center;
+  line-height: 5px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
+}
+
+.SmallLeftButton_Connected {
+  grid-column: col 14 / span 3;
+  grid-row: row 12 / span 1;
+  text-align: center;
+  line-height: 40px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none;
+  border: none
+}
+
+.SmallRightButton_Connected {
+  grid-column: col 17 / span 3;
+  grid-row: row 12 / span 1;
+  text-align: center;
+  line-height: 40px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none
+}
+
+.LargeButton_Connected {
+  grid-column: col 14 / span 6;
+  grid-row: row 12 / span 1;
+  text-align: center;
+  line-height: 40px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none
+}
+
+.Map_Connected {
+  grid-column: col 2 / span 11;
+  grid-row: row 2 / span 11;
+}
+
+.Data_Connected {
+  grid-column: col 14 / span 6;
+  grid-row: row 2 / span 9;
+  text-align: center;
+  line-height: 40px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
+}
+
+.buttons_Connected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative; /* Add position relative */
+}
