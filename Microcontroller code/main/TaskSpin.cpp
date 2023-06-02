@@ -31,7 +31,7 @@ void taskSpin(void *pvParameters) {
   /* Task variables */
 
   /* Control */
-  static bool completed = false;
+  static bool completed = true;
   static bool firstHalf = true; /* Whether we are in the first half of the 360 degree turn or the second half */
 
   /* Statistical analysis */
