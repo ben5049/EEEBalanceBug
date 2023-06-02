@@ -76,7 +76,7 @@ void configureToF(){
 
   /* Begin the multiplexer */
   I2CMux.begin(I2C_PORT);
-
+  
   /* Close all channels to ensure state is know */
   I2CMux.closeAll();
   
@@ -94,16 +94,28 @@ void configureToF(){
     }
   }
   else {
-    SERIAL_PORT.println("Can't find right ToF sensor");
+    if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
+      while (true){
+        SERIAL_PORT.println(F("Failed to boot right ToF sensor"));
+        delay(1000);
+      }
+    }
+    else {
+      SERIAL_PORT.println("Right ToF sensor already begun");
+    }
   }
-  SERIAL_PORT.print("4: ");
-  checkI2CBusMembers();
+
+  tofRight.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+  tofRight.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+  tofRight.startMeasurement();
+
   /* Close the first sensor's channel */
   I2CMux.closeChannel(TOF_RIGHT_CHANNEL);
-
+  checkI2CBusMembers();
   /* Begin the second sensor if it isn't already connected */
   I2CMux.openChannel(TOF_LEFT_CHANNEL);
-  
+  checkI2CBusMembers();
+
   if (!findI2CDevice(TOF_LEFT_ADDRESS)) {
     if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
       while (true){
@@ -116,9 +128,21 @@ void configureToF(){
     }
   }
   else {
-    SERIAL_PORT.println("Can't find left ToF sensor");
+    if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
+      while (true){
+        SERIAL_PORT.println(F("Failed to boot left ToF sensor"));
+        delay(1000);
+      }
+    }
+    else {
+      SERIAL_PORT.println("Left ToF sensor already begun");
+    }
   }
 
+  tofLeft.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+  tofLeft.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+  tofLeft.startMeasurement();
+  
   /* Open all channels */
   I2CMux.openAll();
 }
@@ -178,70 +202,44 @@ void taskToF(void *pvParameters) {
   /* Start the loop */
   while (true) {
 
-    SERIAL_PORT.println("loopin1");
-
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-    SERIAL_PORT.println("loopin2");
-
-    /* Check for new data from the right ToF sensor */
-    if (rightToFDataReady){
-      
-      /* Read data from the right ToF sensor */
-      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-        tofRight.getRangingMeasurement(&measureLeft, false);
-        xSemaphoreGive(mutexI2C);
-      }
-
-      /* Check if the data is valid (phase failures have incorrect data) */
+    /* Read data from the ToF sensors */
+    if (xSemaphoreTake(mutexI2C, 0) == pdTRUE) {
+      tofRight.getRangingMeasurement(&measureRight, false);
+      tofLeft.getRangingMeasurement(&measureLeft, false);
+      xSemaphoreGive(mutexI2C);
+    
+      /* Check if the right data is valid (phase failures have incorrect data) */
       if ((measureRight.RangeStatus != 4) && (measureRight.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceRight =  measureRight.RangeMilliMeter;
-        Serial.println(distanceRight);
       }
       else{
         // What to do if the range is invalid
       }
-
-      /* Clear the data ready flag */
-      rightToFDataReady = false;
-      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-        tofRight.clearInterruptMask(false);
-        xSemaphoreGive(mutexI2C);
-      }
-    }
-
-    /* Check for new data from the left ToF sensor */
-    if (leftToFDataReady){
       
-      /* Read data from the left ToF sensor */
-      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-        tofLeft.getRangingMeasurement(&measureLeft, false);
-        xSemaphoreGive(mutexI2C);
-      }
-
-      /* Check if the data is valid (phase failures have incorrect data) */
+      /* Check if the left data is valid (phase failures have incorrect data) */
       if ((measureLeft.RangeStatus != 4) && (measureLeft.RangeMilliMeter < MAX_MAZE_DIMENSION)){
         distanceLeft = measureLeft.RangeMilliMeter;
-        Serial.println(distanceLeft);
       }
       else{
         // What to do if the range is invalid
-      }
-      
-
-      /* Clear the data ready flag */
-      leftToFDataReady = false;
-      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-        tofLeft.clearInterruptMask(false);
-        xSemaphoreGive(mutexI2C);
       }
     }
     
-    /* Process data */
-    if (findingBeacons){
+    SERIAL_PORT.print("Left: ");
+    SERIAL_PORT.print(distanceLeft);
+    SERIAL_PORT.print(", Right: ");
+    SERIAL_PORT.println(distanceRight);
 
-    }
+    // read_dual_sensors();
+
+    // if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
+    //   tofRight.clearInterruptMask(false);
+    //   tofLeft.clearInterruptMask(false);
+    //   xSemaphoreGive(mutexI2C);
+    // }
   }
 }
 

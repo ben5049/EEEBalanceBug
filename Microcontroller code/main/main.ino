@@ -156,12 +156,12 @@ void setup() {
 
   /* Create ISRs */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
-  attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
+  // attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
+  // attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
   /* Delete "setup" and "loop" task */
-  vTaskDelete(NULL);
+  // vTaskDelete(NULL);
 }
 
 void setup1() {
@@ -173,6 +173,7 @@ void setup1() {
 
 void loop() {
   /* Should never get to this point */
+  vTaskDelay(10000);
 }
 
 void loop1() {
