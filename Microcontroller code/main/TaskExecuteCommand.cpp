@@ -14,7 +14,6 @@
 TaskHandle_t taskExecuteCommandHandle = nullptr;
 
 /* Variables */
-volatile bool findingBeacons = false;
 
 //-------------------------------- Functions --------------------------------------------
 

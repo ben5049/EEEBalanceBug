@@ -25,9 +25,6 @@ void taskSpin(void *pvParameters);
 
 //-------------------------------- Imported ---------------------------------------
 
-/* Variables */
-extern volatile bool findingBeacons;
-
 /* Mutexes */
 extern SemaphoreHandle_t mutexI2C;
 

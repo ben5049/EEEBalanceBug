@@ -14,7 +14,6 @@ Controller task
 //-------------------------------- Exported ---------------------------------------
 
 /* Variables */
-extern volatile bool findingBeacons;
 
 /* Task handles */
 extern TaskHandle_t taskExecuteCommandHandle;

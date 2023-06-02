@@ -12,6 +12,8 @@ Pin assignments for Group 1's EEEBalanceBug
 #define STEPS 1600 /* Steps per revolution */
 #define MIN_RPM 10
 #define MAX_RPM 1000
+#define MAX_MAZE_DIMENSION 3000 /* Largest dimension of the maze in mm, used for rejecting anomalous ToF sensor data */
+#define MAX_NUMBER_OF_JUNCTIONS 6
 
 /* SPI & IMU */
 #define SPI_PORT SPI     /* Desired SPI port */

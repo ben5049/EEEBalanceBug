@@ -13,6 +13,10 @@ IMU Sampling task
 
 //-------------------------------- Exported ---------------------------------------
 
+/* Variables */
+extern volatile float pitch;
+extern volatile float yaw;
+
 /* ISR */
 extern void IRAM_ATTR IMUDataReadyISR();
 

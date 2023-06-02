@@ -16,10 +16,10 @@
 /* Time of flight (ToF) sensors */
 static Adafruit_VL53L0X tofRight;
 static Adafruit_VL53L0X tofLeft;
-static VL53L0X_RangingMeasurementData_t measureRight;
-static VL53L0X_RangingMeasurementData_t measureLeft;
 volatile uint16_t distanceRight;
 volatile uint16_t distanceLeft;
+static VL53L0X_RangingMeasurementData_t measureRight;
+static VL53L0X_RangingMeasurementData_t measureLeft;
 
 /* I2C multiplexer */
 static TCA9548A I2CMux;
@@ -169,6 +169,8 @@ void taskToF(void *pvParameters) {
 
   (void)pvParameters;
 
+  /* Task variables */
+
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -193,7 +195,7 @@ void taskToF(void *pvParameters) {
       }
 
       /* Check if the data is valid (phase failures have incorrect data) */
-      if (measureRight.RangeStatus != 4){
+      if ((measureRight.RangeStatus != 4) && (measureRight.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceRight =  measureRight.RangeMilliMeter;
         Serial.println(distanceRight);
       }
@@ -219,8 +221,8 @@ void taskToF(void *pvParameters) {
       }
 
       /* Check if the data is valid (phase failures have incorrect data) */
-      if (measureLeft.RangeStatus != 4){
-        distanceLeft =  measureLeft.RangeMilliMeter;
+      if ((measureLeft.RangeStatus != 4) && (measureLeft.RangeMilliMeter < MAX_MAZE_DIMENSION)){
+        distanceLeft = measureLeft.RangeMilliMeter;
         Serial.println(distanceLeft);
       }
       else{
