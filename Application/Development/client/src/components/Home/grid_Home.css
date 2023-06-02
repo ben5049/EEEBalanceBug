@@ -1,25 +1,33 @@
-  .a_Home {
-    grid-column: col 3 / span 15;
-    grid-row: row 2 / span 20;
+  .Group1_Home {
+    grid-column: col 9  / span 4;
+    grid-row:    row 2 / span 1;
+    text-align: center;
+    line-height: 35px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-weight: bold;
   }
   
-  .b_Home {
-    grid-column: col 1 / span 1;
-    grid-row: row;
+  .RoversText_Home {
+    grid-column: col 3  / span 3;
+    grid-row:    row 3 / span 2;
+    font-family: "Lucida Console", "Courier New", monospace;
+    user-select: none
   }
   
-  .c_Home {
-    grid-column: col;
-    grid-row: row 2;
+  .RoverCarousel_Home {
+    grid-column: col 2 / span 18;
+    grid-row: row 4 / span 4;
   }
   
-  .d_Home {
-    grid-column: col 2 / span 3;
-    grid-row: row 2;
+  .ReplaysText_Home {
+    grid-column: col 3 / span 3;
+    grid-row: row 9 / span 2;
+    font-family: "Lucida Console", "Courier New", monospace;
+    user-select: none
   }
   
-  .e_Home {
-    grid-column: col / span 4;
-    grid-row: row 3;
+  .ReplayCarousel_Home {
+    grid-column: col 2 / span 18;
+    grid-row: row 10 / span 4;
   }
   

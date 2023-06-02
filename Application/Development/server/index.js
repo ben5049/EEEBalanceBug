@@ -97,13 +97,14 @@ app.get("/MenuRoverImage", (req, res) => {
 });
 
 // Rover Diagnostics
-app.get("/LaptopLiveData", (req, res) => {
+app.get("/LaptopLiveData", (req, res) => { // TODO: change to post
     res.send({"data" : "DATA GIVEN HERE"});
 });
 
 // Live Map Update
-app.get("/LaptopLiveMap", (req, res) => {
-    res.send({"timestamp": "LAST UPDATE TIME FROM SCRIPT", "data" : "ARGUMENTS FOR MAPPING VISUALISATION FUNCTION"});
+app.post("/LaptopLiveMap", (req, res) => {
+    console.log('Client request for rover: ' + req.body);
+    res.json({timestamp: "LAST UPDATE TIME FROM SCRIPT", data : "{orientation : 'N', TOF-L : 'X', TOF-R : 'G'}"});
 }); 
 
 // Start Mapping (start script)
