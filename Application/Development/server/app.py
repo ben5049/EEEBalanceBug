@@ -27,9 +27,9 @@ def hello():
     return jsonify({"hello":"world"})
 
 # rover communication
-@app.route("/rover", methods=["GET"])
+@app.route("/rover", methods=["POST"])
 def rover():
-    data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright", "SessionNickname"
+    data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     r = 0
     flag = True
     for rover in rovers:
