@@ -5,7 +5,7 @@
 const char* ssid = "";
 const char* password = "";
 
-String serverName = "http://13.41.200.80:3001/";
+String serverName = "http://3.86.226.249:5000/";
 
 String hostname = "ESP32 Node";
 
@@ -27,24 +27,13 @@ void setup() {
  
 }
 
-void setEndpointAndRequest(String& endpoint, int& requestType){
-  // endpoint = "tableData33";
-  // requestType = 0;
-  // endpoint = "pollServer";
-  // requestType = 0;
-  endpoint = "personQuery";
-  requestType = 0;
-  // endpoint = "TestPOST";
-  // requestType = 1; // 0 is get 1 is post
-}
-
 int makeRequest(int requestType, HTTPClient& http){
   if (requestType == 0){
       return http.GET();
   }
   else if (requestType == 1){
     http.addHeader("Content-Type", "application/json");
-    String postData = "{\"hello\":\"advik\"}";
+    String postData = "{\"diagnostics\": {\"battery\":100,\"CPU\":10,\"connection\":100},\"MAC\":1234567,\"nickname\":\"MiWhip\",\"timestamp\":10000,\"position\":[0,0],\"whereat\":0,\"orientation\":90,\"branches\":[],\"beaconangles\":[],\"tofleft\":10,\"tofright\":10,\"battery\":100}";
     return http.POST(postData);
   }
 }
@@ -53,23 +42,21 @@ String handleResponse(int httpResponseCode, HTTPClient& http){
   if (httpResponseCode>=200 && httpResponseCode<300) {
       Serial.print("HTTP Response code: ");
       Serial.println(httpResponseCode);
-      return http.getString();
   }
   else if (httpResponseCode >= 400 && httpResponseCode < 500){
       Serial.print("Error code: ");
       Serial.println(httpResponseCode);
-      return "{\"error\": \"Invalid Request\"}";
   }
   else if (httpResponseCode >= 500){
     Serial.print("Error code: ");
     Serial.println(httpResponseCode);
-    return "{\"error\": \"Internal Server Error\"}";
   }
   else{
     Serial.print("Error code: ");
     Serial.println(httpResponseCode);
     return "{\"error\": \"Something really wrong...\"}";
   }
+  return http.getString();
 }
 
 void parsePayload(String payload){
@@ -96,9 +83,9 @@ void parsePayload(String payload){
 }
 
 void loop() {
-  String endpoint;
-  int requestType;
-  setEndpointAndRequest(endpoint, requestType);
+  String endpoint = "rover";
+  int requestType = 1;
+
   String serverPath = serverName + endpoint;
   
   if(WiFi.status()== WL_CONNECTED){
