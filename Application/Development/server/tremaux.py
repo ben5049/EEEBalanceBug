@@ -59,13 +59,13 @@ class Rover():
     # these all update toreturn, which gives the actual things the rover will do
     
     def step_forward(self, dist=DEFAULT_DIST):
-        self.toreturn.append("step " + str(dist)) # this will be a JSON in reality
+        self.toreturn.append("go forward " + str(dist)) # this will be a JSON in reality
     
     def spin(self):
         self.toreturn.append("spin")
     
     def setAngle(self, angle):
-        self.toreturn.append("angle " + str(angle))
+        self.toreturn.append("set angle to " + str(angle))
     
     def go_back(self, node, position):
         if node.position[0]-position[0]==0:
@@ -73,14 +73,14 @@ class Rover():
                 self.toreturn.append("idle")
             else:
                 if self.position[0]>position[0]:
-                    self.toreturn.append("angle 0")
+                    self.toreturn.append("set angle to 0")
                     self.toreturn.append(self.step_forward(node.position[1]-position[1]))
                 else:
-                    self.toreturn.append("angle 180")
+                    self.toreturn.append("set angle to 180")
                     self.toreturn.append(self.step_forward( position[1]-node.position[1]))
         else:
             angle = degrees(atan( (node.position[1]-position[1])/(node.position[0]-position[0]) ))-90
-            self.toreturn.append("angle " + str(angle))
+            self.toreturn.append("set angle to " + str(angle))
             self.toreturn.append(self.step_forward( ((node.position[1]-position[1])**2 + (node.position[0]-position[0])**2)**0.5 ))
         
     
@@ -88,7 +88,7 @@ class Rover():
         self.toreturn.append("idle")
     
     def updatePos(self, newx, newy):
-        self.toreturn.append("update position " + str(newx) + " " + str(newy))
+        self.toreturn.append("update position to: " + str(newx) + " " + str(newy))
 
 
     def tremaux(self, position, whereat, potentialbranches, beaconangles):
@@ -169,5 +169,6 @@ class Rover():
                 self.step_forward()
         else:
             self.toreturn.append("DONE")
+            self.toreturn.append(self.tree)
 
         return self.toreturn
