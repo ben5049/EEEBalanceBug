@@ -112,7 +112,7 @@ if(va<=16)
 }
 else
 {
-  closed_loop=closed_loop-2*delta;
+  closed_loop=closed_loop-2*delta; //prevent output voltage too high
 }
 //store the current value as the pervious value of next cycle
 ibp=current_mA_ap;
@@ -142,9 +142,11 @@ pwm_modulate(closed_loop);
       }
     }
 
+
     com_count++;              //self activating, being used when dutycycle is capped at lowwer bound.
+   
     if (com_count >= 500) { //record data every second.
-      if(closed_loopb==0.02&&closed_loop==0.02)
+      if(closed_loopb==0.02&&closed_loop==0.02 && va<=16)
       {//if the dutycycle is capped, reset the dutycycle to initial value.
         closed_loop=0.7;
         closed_loopb=closed_loop;
@@ -155,6 +157,7 @@ pwm_modulate(closed_loop);
       }
       com_count = 0;
     }
+
       Serial.print("Va: ");
       Serial.print(va);
       Serial.print("\t");
