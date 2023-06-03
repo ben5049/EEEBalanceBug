@@ -7,15 +7,15 @@ import '../components/grid.css';
 const Home = () => {
 	// Gets from server: MAC, Nickname, Connection status
 	const rovers_list = [
-		{MAC: '11:11:11:11:11:11', nickname: 'David2', overlayText: 'CONNECTED' },
-		{MAC: '13:13:13:13:13:13', nickname: 'Kyle', overlayText: 'OFFLINE' },
-		{MAC: '00:00:00:00:00:00', nickname: 'David', overlayText: 'OFFLINE' },
-		{MAC: '11:11:11:11:11:11', nickname: 'David2', overlayText: 'CONNECTED' },
-		{MAC: '13:13:13:13:13:13', nickname: 'Kyle', overlayText: 'OFFLINE' },
-		{MAC: '00:00:00:00:00:00', nickname: 'David', overlayText: 'OFFLINE' },
-		{MAC: '11:11:11:11:11:11', nickname: 'David2', overlayText: 'CONNECTED' },
-		{MAC: '13:13:13:13:13:13', nickname: 'Kyle', overlayText: 'OFFLINE' },
-		{MAC: '00:00:00:00:00:00', nickname: 'David', overlayText: 'OFFLINE' },
+		{MAC: '11:11:11:11:11:11', nickname: 'David2', overlayText: 'CONNECT' },
+		{MAC: '13:13:13:13:13:13', nickname: 'Kyle12', overlayText: 'OFFLINE' },
+		{MAC: '00:00:00:00:00:00', nickname: 'David43', overlayText: 'OFFLINE' },
+		{MAC: '11:11:11:11:11:11', nickname: 'David3', overlayText: 'CONNECT' },
+		{MAC: '13:13:13:13:13:13', nickname: 'Kyle65', overlayText: 'OFFLINE' },
+		{MAC: '00:00:00:00:00:00', nickname: 'David15', overlayText: 'OFFLINE' },
+		{MAC: '11:11:11:11:11:11', nickname: 'David4', overlayText: 'CONNECT' },
+		{MAC: '13:13:13:13:13:13', nickname: 'Kyle2', overlayText: 'OFFLINE' },
+		{MAC: '00:00:00:00:00:00', nickname: 'David15', overlayText: 'OFFLINE' },
 	  ];
 
 	  const replays_list = [

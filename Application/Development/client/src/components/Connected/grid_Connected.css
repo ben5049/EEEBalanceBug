@@ -12,11 +12,12 @@
   grid-column: col 14 / span 3;
   grid-row: row 12 / span 1;
   text-align: center;
-  line-height: 40px;
+  line-height: 35px;
   font-family: "Lucida Console", "Courier New", monospace;
   font-weight: bold;
   user-select: none;
-  border: none
+  border: none;
+  cursor: pointer;
 }
 
 .SmallRightButton_Connected {
@@ -67,4 +68,9 @@
   cursor: pointer;
   padding: 0;
   position: relative; /* Add position relative */
+  text-align: center;
+  line-height: 35px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
 }

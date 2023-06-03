@@ -19,11 +19,12 @@ const RoverCarousel = ({ rovers }) => {
     console.log("SELECTED " + RoverMAC)
     localStorage.setItem('MAC', RoverMAC);
     localStorage.setItem('nickname', RoverNickname);
+    localStorage.setItem('ConnectedState', 'Start');
     //switch to Connected page
   };
 
   const getOverlayStyle = (overlayText) => {
-    if (overlayText === 'CONNECTED') {
+    if (overlayText === 'CONNECT') {
       return 'overlay-green_RoverCarousel';
     }
     else if (overlayText === 'OFFLINE') {
@@ -37,7 +38,7 @@ const RoverCarousel = ({ rovers }) => {
     <Slider {...settings}>
       {rovers.map((image, index) => (
         <div key={index} className="carousel-item_RoverCarousel">
-          <Link to="/connected" className="page-link" draggable={false}>
+          <Link to={image.overlayText === 'OFFLINE' ? '#' : "/connected"} className="page-link" draggable={false}>
             <button
               className="carousel-button_RoverCarousel"
               onClick={() => handleRoverClick(image.MAC, image.nickname)}
