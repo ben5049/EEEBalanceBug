@@ -26,20 +26,20 @@ void taskExecuteCommand(void *pvParameters) {
 
   /* Create state */
   static robotCommand currentCommand = IDLE;
-  
+
   /* Start the loop */
   while (true) {
-    
+
     /* Execute the current command */
-    switch(currentCommand){
-      
+    switch (currentCommand) {
+
       /* Do nothing and wait for commands */
       case IDLE:
 
         /* Define what to do in the IDLE state e.g. speed = 0 etc */
 
         /* Wait for the next command (timeout every second to prevent deadlock) */
-        if (xQueueReceive(commandQueue, &currentCommand, pdMS_TO_TICKS(1000)) != pdTRUE){
+        if (xQueueReceive(commandQueue, &currentCommand, pdMS_TO_TICKS(1000)) != pdTRUE) {
           currentCommand = IDLE;
         }
         break;
@@ -50,7 +50,7 @@ void taskExecuteCommand(void *pvParameters) {
         /* Define what to do on the FORWARD command e.g. speed != 0 etc */
 
         /* Recieve the next command, if none are available return to IDLE */
-        if (xQueueReceive(commandQueue, &currentCommand, 0) != pdTRUE){
+        if (xQueueReceive(commandQueue, &currentCommand, 0) != pdTRUE) {
           currentCommand = IDLE;
         }
         break;
@@ -61,7 +61,7 @@ void taskExecuteCommand(void *pvParameters) {
         /* Define what to do in the TURN state */
 
         /* Recieve the next command, if none are available return to IDLE */
-        if (xQueueReceive(commandQueue, &currentCommand, 0) != pdTRUE){
+        if (xQueueReceive(commandQueue, &currentCommand, 0) != pdTRUE) {
           currentCommand = IDLE;
         }
         break;
@@ -80,7 +80,7 @@ void taskExecuteCommand(void *pvParameters) {
         ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
         /* Recieve the next command, if none are available return to IDLE */
-        if (xQueueReceive(commandQueue, &currentCommand, 0) != pdTRUE){
+        if (xQueueReceive(commandQueue, &currentCommand, 0) != pdTRUE) {
           currentCommand = IDLE;
         }
         break;
@@ -91,9 +91,8 @@ void taskExecuteCommand(void *pvParameters) {
         /* Default to IDLE state*/
         currentCommand = IDLE;
 
-    /* Small delay in case of unexpected behaviour */
-    vTaskDelay(pdMS_TO_TICKS(5));
-
+        /* Small delay in case of unexpected behaviour */
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
   }
 }

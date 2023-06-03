@@ -14,7 +14,7 @@
 //-------------------------------- Global Variables -------------------------------------
 
 /* IMU */
-static ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
+static ICM_20948_SPI myICM;   /* Create an ICM_20948_SPI object */
 volatile static float acc[3]; /* x, y ,z */
 volatile static float gyr[3]; /* x, y ,z */
 volatile static float mag[3]; /* x, y ,z */
@@ -30,7 +30,7 @@ TaskHandle_t taskIMUHandle = nullptr;
 //-------------------------------- Functions --------------------------------------------
 
 /* Configure the IMU */
-void configureIMU(){
+void configureIMU() {
   static bool initialized = false;
   while (!initialized) {
     myICM.begin(IMU_CS, SPI_PORT, SPI_FREQ);
@@ -69,9 +69,8 @@ void configureIMU(){
 
   if (success) {
     SERIAL_PORT.println("DMP initialised");
-  } 
-  else {
-    while (true){
+  } else {
+    while (true) {
       SERIAL_PORT.println(F("Enable DMP failed!"));
       SERIAL_PORT.println(F("Please check that you have uncommented line 29 (#define ICM_20948_USE_DMP) in ICM_20948_C.h..."));
       delay(1000);
@@ -80,8 +79,7 @@ void configureIMU(){
 
   /* Start the magnetometer */
   myICM.startupMagnetometer();
-  if (myICM.status != ICM_20948_Stat_Ok)
-  {
+  if (myICM.status != ICM_20948_Stat_Ok) {
     SERIAL_PORT.print(F("startupMagnetometer returned: "));
     SERIAL_PORT.println(myICM.statusString());
   }
@@ -156,7 +154,7 @@ void taskIMU(void *pvParameters) {
       xSemaphoreGive(mutexSPI);
 
       /* Process the quaternion data from the DMP into Euler angles */
-      if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)){  // Was valid data available?
+      if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) {  // Was valid data available?
         if ((angle_data.header & DMP_header_bitmap_Quat6) > 0) {
           float q1 = ((float)angle_data.Quat6.Data.Q1) / 1073741824.0;  // Convert to double. Divide by 2^30
           float q2 = ((float)angle_data.Quat6.Data.Q2) / 1073741824.0;  // Convert to double. Divide by 2^30
@@ -191,7 +189,7 @@ void taskIMU(void *pvParameters) {
       gyroscope = FusionOffsetUpdate(&offset, gyroscope);
 
       // Calculate delta time (in seconds) to account for gyroscope sample clock error
-      deltaTime = (float)(timestamp - previousTimestamp) / (float) 1000000.0;
+      deltaTime = (float)(timestamp - previousTimestamp) / (float)1000000.0;
       previousTimestamp = timestamp;
 
       // Update gyroscope AHRS algorithm

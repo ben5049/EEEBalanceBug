@@ -72,29 +72,28 @@ bool findI2CDevice(uint8_t addressToFind) {
 }
 
 /* Begin two ToF sensors using a TCA9548A bus multiplexer */
-void configureToF(){
+void configureToF() {
 
   /* Begin the multiplexer */
   I2CMux.begin(I2C_PORT);
-  
+
   /* Close all channels to ensure state is know */
   I2CMux.closeAll();
-  
+
   /* Begin the first sensor if it isn't already connected */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
   // if (!findI2CDevice(TOF_RIGHT_ADDRESS)) {
-    if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
-      while (true){
-        SERIAL_PORT.println(F("Failed to boot right ToF sensor"));
-        delay(1000);
-      }
+  if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
+    while (true) {
+      SERIAL_PORT.println(F("Failed to boot right ToF sensor"));
+      delay(1000);
     }
-    else {
-      tofRight.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
-      tofRight.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
-      tofRight.startMeasurement();
-      SERIAL_PORT.println("Right ToF sensor connected");
-    }
+  } else {
+    tofRight.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+    tofRight.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+    tofRight.startMeasurement();
+    SERIAL_PORT.println("Right ToF sensor connected");
+  }
   // }
 
 
@@ -107,20 +106,19 @@ void configureToF(){
   checkI2CBusMembers();
 
   // if (!findI2CDevice(TOF_LEFT_ADDRESS)) {
-    if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
-      while (true){
-        SERIAL_PORT.println(F("Failed to boot left ToF sensor"));
-        delay(1000);
-      }
+  if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
+    while (true) {
+      SERIAL_PORT.println(F("Failed to boot left ToF sensor"));
+      delay(1000);
     }
-    else {
-      tofLeft.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
-      tofLeft.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
-      tofLeft.startMeasurement();
-      SERIAL_PORT.println("Left ToF sensor connected");
-    }
+  } else {
+    tofLeft.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+    tofLeft.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+    tofLeft.startMeasurement();
+    SERIAL_PORT.println("Left ToF sensor connected");
+  }
   // }
-  
+
   /* Open all channels */
   I2CMux.openAll();
 }
@@ -129,7 +127,7 @@ void configureToF(){
 void read_dual_sensors() {
 
   tofRight.rangingTest(&measureRight, false);  // pass in 'true' to get debug data printout!
-  tofLeft.rangingTest(&measureLeft, false);   // pass in 'true' to get debug data printout!
+  tofLeft.rangingTest(&measureLeft, false);    // pass in 'true' to get debug data printout!
 
   // print sensor one reading
   Serial.print(F("1: "));
@@ -155,12 +153,12 @@ void read_dual_sensors() {
 //-------------------------------- Interrupt Servce Routines ----------------------------
 
 /* ISR that triggers on right ToF sensor interrupt */
-void IRAM_ATTR ToFRightISR(){
+void IRAM_ATTR ToFRightISR() {
   rightToFDataReady = true;
 }
 
 /* ISR that triggers on left ToF sensor interrupt */
-void IRAM_ATTR ToFLeftISR(){
+void IRAM_ATTR ToFLeftISR() {
   leftToFDataReady = true;
 }
 
@@ -174,7 +172,7 @@ void taskToF(void *pvParameters) {
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
-  
+
   /* Start the loop */
   while (true) {
 
@@ -186,28 +184,27 @@ void taskToF(void *pvParameters) {
       tofRight.getRangingMeasurement(&measureRight, false);
       tofLeft.getRangingMeasurement(&measureLeft, false);
       xSemaphoreGive(mutexI2C);
-    
+
       /* Check if the right data is valid (phase failures have incorrect data) */
       if ((measureRight.RangeStatus != 4) && (measureRight.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
-        distanceRight =  measureRight.RangeMilliMeter;
-      }
-      else{
+        distanceRight = measureRight.RangeMilliMeter;
+      } else {
         // What to do if the range is invalid
       }
-      
+
       /* Check if the left data is valid (phase failures have incorrect data) */
-      if ((measureLeft.RangeStatus != 4) && (measureLeft.RangeMilliMeter < MAX_MAZE_DIMENSION)){
+      if ((measureLeft.RangeStatus != 4) && (measureLeft.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceLeft = measureLeft.RangeMilliMeter;
-      }
-      else{
+      } else {
         // What to do if the range is invalid
       }
     }
-    
-    SERIAL_PORT.print("Left: ");
-    SERIAL_PORT.print(distanceLeft);
-    SERIAL_PORT.print(", Right: ");
-    SERIAL_PORT.println(distanceRight);
+
+    // SERIAL_PORT.print("Left: ");
+    // SERIAL_PORT.print(distanceLeft);
+    // SERIAL_PORT.print(", Right: ");
+    // SERIAL_PORT.println(distanceRight);
+    SERIAL_PORT.println(yaw);
 
     // if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
     //   tofRight.clearInterruptMask(false);
@@ -216,4 +213,3 @@ void taskToF(void *pvParameters) {
     // }
   }
 }
-

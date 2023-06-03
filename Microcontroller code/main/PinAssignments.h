@@ -27,7 +27,7 @@ Pin assignments for Group 1's EEEBalanceBug
 /* I2C: FPGA, Multiplexer & ToF sensors */
 #define I2C_SCL 22
 #define I2C_SDA 21
-#define FPGA_INT 
+#define FPGA_INT
 #define MUX_A0
 #define MUX_A1
 #define MUX_A2

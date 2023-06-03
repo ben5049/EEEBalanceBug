@@ -10,6 +10,11 @@ Main ESP32 program for Group 1's EEEBalanceBug
 /* Task headers */
 #include "Tasks.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/timers.h"
+#include "freertos/event_groups.h"
+
 /* Configuration headers */
 #include "PinAssignments.h"
 #include "Config.h"
@@ -36,6 +41,7 @@ SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C per
 
 /* Queues */
 QueueHandle_t commandQueue;
+QueueHandle_t junctionAngleQueue;
 
 //-------------------------------- Interrupt Servce Routines ----------------------------
 
@@ -43,6 +49,8 @@ extern void IRAM_ATTR IMUDataReadyISR();
 extern void IRAM_ATTR onTimer();
 extern void IRAM_ATTR ToFRightISR();
 extern void IRAM_ATTR ToFLeftISR();
+
+//-------------------------------- Functions --------------------------------------------
 
 //-------------------------------- Task Functions ---------------------------------------
 
@@ -53,7 +61,7 @@ extern void taskToF(void *pvParameters);
 extern void taskExeculteCommand(void *pvParameters);
 extern void taskSpin(void *pvParameters);
 
-//-------------------------------- Setups -----------------------------------------------
+//--------------------------------- Setup -----------------------------------------------
 
 void setup() {
 
@@ -86,6 +94,11 @@ void setup() {
   /* Start the ToF sensors */
   configureToF();
 
+#if ENABLE_SERVER_COMMUNICATION_TASK == true
+  /* Begin WiFi */
+  configureWiFi();
+#endif
+
   /* Configure pins */
   pinMode(IMU_INT, INPUT_PULLUP);
   pinMode(TOF_R_INT, INPUT_PULLUP);
@@ -116,6 +129,7 @@ void setup() {
 
   /* Create queues */
   commandQueue = xQueueCreate(10, sizeof(robotCommand));
+  junctionAngleQueue = xQueueCreate(MAX_NUMBER_OF_JUNCTIONS, sizeof(float));
 
   /* Create Tasks */
 
@@ -136,12 +150,32 @@ void setup() {
     &taskMovementHandle); /* Pointer to store the task handle */
 
   xTaskCreate(
-    taskToF,              /* Function that implements the task */
-    "TOF",                /* Text name for the task */
-    10000,                 /* Stack size in words, not bytes */
-    nullptr,              /* Parameter passed into the task */
-    8,                    /* Task priority */
+    taskToF,         /* Function that implements the task */
+    "TOF",           /* Text name for the task */
+    5000,            /* Stack size in words, not bytes */
+    nullptr,         /* Parameter passed into the task */
+    8,               /* Task priority */
     &taskToFHandle); /* Pointer to store the task handle */
+
+#if ENABLE_SERVER_COMMUNICATION_TASK == true
+  xTaskCreate(
+    taskServerCommunication,         /* Function that implements the task */
+    "SERVER_COMMS",                  /* Text name for the task */
+    10000,                           /* Stack size in words, not bytes */
+    nullptr,                         /* Parameter passed into the task */
+    8,                               /* Task priority */
+    &taskServerCommunicationHandle); /* Pointer to store the task handle */
+#endif
+
+#if ENABLE_DEBUG_TASK == true
+  xTaskCreate(
+    taskDebug,         /* Function that implements the task */
+    "DEBUG",           /* Text name for the task */
+    1000,              /* Stack size in words, not bytes */
+    nullptr,           /* Parameter passed into the task */
+    4,                 /* Task priority */
+    &taskDebugHandle); /* Pointer to store the task handle */
+#endif
 
   /* Starts the scheduler */
   vTaskStartScheduler();
@@ -151,23 +185,8 @@ void setup() {
   // attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
   // attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
   timerAttachInterrupt(motorTimer, &onTimer, true);
-
-  /* Delete "setup" and "loop" task */
-  // vTaskDelete(NULL);
 }
 
-void setup1() {
-  /* Delete "setup1" and "loop1" task */
-  vTaskDelete(NULL);
-}
+//--------------------------------- Loop -----------------------------------------------
 
-//-------------------------------- Loops -----------------------------------------------
-
-void loop() {
-  /* Should never get to this point */
-  vTaskDelay(10000);
-}
-
-void loop1() {
-  /* Should never get to this point */
-}
+void loop() {}

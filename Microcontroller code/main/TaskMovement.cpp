@@ -40,13 +40,11 @@ void motor_start(double RPM) {
     digitalWrite(STEPPER_L_DIR, HIGH);
     stepperRightDirection = true;
     stepperLeftDirection = true;
-  }
-  else if (RPM < 0) {
+  } else if (RPM < 0) {
     digitalWrite(STEPPER_L_DIR, LOW);
     stepperRightDirection = false;
     stepperLeftDirection = false;
-  }
-  else {
+  } else {
     return;
   }
 
@@ -86,7 +84,6 @@ void taskMovement(void *pvParameters) {
 
   /* Start the loop */
   while (true) {
-      vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
-
