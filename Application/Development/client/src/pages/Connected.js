@@ -1,9 +1,6 @@
 import React from 'react';
 import { useState } from "react";
 import { Link } from 'react-router-dom';
-import SL_Button from '../components/Connected/SL';
-import Menu_Button_Connected from '../components/Connected/Menu_Button';
-import Pause_Button_Connected from '../components/Connected/Pause_Button';
 import '../components/Connected/grid_Connected.css';
 import '../components/grid.css';
 import Replay from './Replay';
@@ -59,6 +56,7 @@ const Connected = () => {
 				<div className="box-nobackground DisplayMAC_Connected">
 					{nickname} / {MAC}
 				</div>
+				{/* State-dependant Buttons */}
 				{ConnectedState === 'Start'   ? ( <div className="wrapper">
 													<div className='box-red SmallRightButton_Connected'>
 														<Link to='/' className="page-link" draggable={false}>
@@ -113,14 +111,6 @@ const Connected = () => {
 													</div>
 												  </div>
 												) : (<></>)}
-				{/*
-				<button onClick={handlePause} className='box-green LargeButton_Connected'>
-					Pause
-				</button>
-				*/}
-					{/*<SL_Button />*/}
-					{/*<Menu_Button_Connected />*/}
-				
 				<div className="box Map_Connected">
 					Map	
 				</div>
