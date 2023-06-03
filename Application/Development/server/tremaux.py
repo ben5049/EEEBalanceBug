@@ -2,6 +2,7 @@
 # 31/5/2023
 from math import atan, degrees
 from triangulate import triangulate
+# todo: make triangulation more robust, and generally test thoroughly
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
     # 3 is special state - signifies its the exit of the maze
@@ -55,6 +56,9 @@ class Rover():
             self.actions.append(2)
         self.toreturn = [-1]
         # return 200 ok response 
+    
+    def __str__(self):
+        return str(self.name)
     
     # these all update toreturn, which gives the actual things the rover will do
     
