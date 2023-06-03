@@ -1,7 +1,7 @@
 import React from 'react';
 import './grid_Connected.css';
 
-const L_Button = () => {
+const Pause_Button_Connected = () => {
   const handleClick = () => {
     console.log('Pause');
     // TODO: Send Pause Post to server
@@ -14,4 +14,4 @@ const L_Button = () => {
   );
 };
 
-export default L_Button;
+export default Pause_Button_Connected;

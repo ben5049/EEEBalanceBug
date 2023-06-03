@@ -12,7 +12,6 @@
   grid-column: col 14 / span 3;
   grid-row: row 12 / span 1;
   text-align: center;
-  line-height: 35px;
   font-family: "Lucida Console", "Courier New", monospace;
   font-weight: bold;
   user-select: none;
@@ -24,11 +23,10 @@
   grid-column: col 17 / span 3;
   grid-row: row 12 / span 1;
   text-align: center;
-  line-height: 40px;
   font-family: "Lucida Console", "Courier New", monospace;
   font-weight: bold;
   border: none;
-  user-select: none
+  user-select: none;
 }
 
 .LargeButton_Connected {
@@ -39,7 +37,8 @@
   font-family: "Lucida Console", "Courier New", monospace;
   font-weight: bold;
   border: none;
-  user-select: none
+  user-select: none;
+  cursor: pointer;
 }
 
 .Map_Connected {
@@ -69,8 +68,8 @@
   padding: 0;
   position: relative; /* Add position relative */
   text-align: center;
-  line-height: 35px;
   font-family: "Lucida Console", "Courier New", monospace;
   font-weight: bold;
-  user-select: none
+  user-select: none;
+  line-height: 70px;
 }

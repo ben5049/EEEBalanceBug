@@ -2,7 +2,7 @@ import React from 'react';
 import './grid_Connected.css';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 
-const SR_Button = () => {
+const Menu_Button_Connected = () => {
   const handleClick = () => {
     console.log('SR Button clicked');
   };
@@ -18,4 +18,4 @@ const SR_Button = () => {
   );
 };
 
-export default SR_Button;
+export default Menu_Button_Connected;

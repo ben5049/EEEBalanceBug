@@ -1,20 +1,57 @@
 import React from 'react';
 import { useState } from "react";
+import { Link } from 'react-router-dom';
 import SL_Button from '../components/Connected/SL';
-import SR_Button from '../components/Connected/SR';
-import L_Button from '../components/Connected/L';
+import Menu_Button_Connected from '../components/Connected/Menu_Button';
+import Pause_Button_Connected from '../components/Connected/Pause_Button';
 import '../components/Connected/grid_Connected.css';
 import '../components/grid.css';
+import Replay from './Replay';
 
 const Connected = () => {
 	const MAC = localStorage.getItem('MAC');
 	const nickname = localStorage.getItem('nickname');
 
-	const [State_Connected, setState_Connected] = useState('Start');
-
 	console.log('CONNECTED MAC = ' + MAC)
 	console.log('CONNECTED nickname = ' + nickname)
 	
+	const handlePause = () => {
+		console.log('Pause');
+		// TODO: Send Pause Post to server
+	};
+
+	const handleStart = () => {
+		console.log('Start');
+		// TODO: Send Pause Post to server
+	};
+
+	const handlePlay = () => {
+		console.log('Play');
+		// TODO: Send Pause Post to server
+	};
+
+	const handleViewReplay = () => {
+		console.log("View Replay")
+		// TODO: request replay of Session
+	}
+
+	// Get starting state
+	const [ConnectedState, setConnectedState] = useState('Start'); // TODO: Retreieve from server
+
+	const ChangeState = () => {
+		if (ConnectedState == "Start") {
+			setConnectedState("Mapping");
+			handleStart();
+		}
+		else if (ConnectedState == "Mapping") {
+			setConnectedState("Pause");
+			handlePause();
+		}
+		else if (ConnectedState == "Pause") {
+			setConnectedState("Mapping");
+			handlePlay();
+		}
+	};
 
 	return (
 		<div className="background">
@@ -22,10 +59,68 @@ const Connected = () => {
 				<div className="box-nobackground DisplayMAC_Connected">
 					{nickname} / {MAC}
 				</div>
-				<div>
-				{State_Connected == "Mapping" ? <L_Button /> : <SL_Button />}
-				{State_Connected == "Mapping" ? null : <SR_Button />}
-				</div>
+				{ConnectedState === 'Start'   ? ( <div className="wrapper">
+													<div className='box-red SmallRightButton_Connected'>
+														<Link to='/' className="page-link" draggable={false}>
+															<button onClick={ChangeState} className='box-red buttons_Connected'>
+																Menu
+															</button>
+														</Link>
+													</div>
+												  
+													<div className='box-green SmallLeftButton_Connected'>
+														<button onClick={ChangeState} className='box-green buttons_Connected'>
+															Start Mapping
+														</button>
+													</div>
+												  </div>
+												) : (<></>)}
+				{ConnectedState === 'Mapping' ? ( <button onClick={ChangeState} className='box-green LargeButton_Connected'>
+													Pause
+												  </button>
+										  		) : (<></>)}
+				{ConnectedState === 'Pause'   ? (<div className="wrapper">
+													<div className='box-red SmallRightButton_Connected'>
+														<Link to='/' className="page-link" draggable={false}>
+															<button onClick={ChangeState} className='box-red buttons_Connected'>
+																Menu
+															</button>
+														</Link>
+													</div>
+												  
+													<div className='box-green SmallLeftButton_Connected'>
+														<button onClick={ChangeState} className='box-green buttons_Connected'>
+															Resume
+														</button>
+													</div>
+												  </div>
+												) : (<></>)}
+				{ConnectedState === 'Finish'  ? (<div className="wrapper">
+													<div className='box-red SmallRightButton_Connected'>
+														<Link to='/' className="page-link" draggable={false}>
+															<button onClick={ChangeState} className='box-red buttons_Connected'>
+																Menu
+															</button>
+														</Link>
+													</div>
+												  
+													<div className='box-green SmallLeftButton_Connected'>
+														<Link to='/replay' className="page-link" draggable={false}>
+															<button onClick={handleViewReplay} className='box-red buttons_Connected'>
+																View Replay
+															</button>
+														</Link>
+													</div>
+												  </div>
+												) : (<></>)}
+				{/*
+				<button onClick={handlePause} className='box-green LargeButton_Connected'>
+					Pause
+				</button>
+				*/}
+					{/*<SL_Button />*/}
+					{/*<Menu_Button_Connected />*/}
+				
 				<div className="box Map_Connected">
 					Map	
 				</div>
