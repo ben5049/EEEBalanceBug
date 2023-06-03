@@ -122,6 +122,7 @@ end
 
 
 
+
 Qsys u0 (
 		.clk_clk                                   (MAX10_CLK1_50), 			//                              clk.clk
 		.reset_reset_n                             (1'b1), 						//                            reset.reset_n
@@ -181,6 +182,7 @@ Qsys u0 (
 		.uart_0_rx_tx_rxd                          (ARDUINO_IO[1]),                          //                     uart_0_rx_tx.rxd
 		.uart_0_rx_tx_txd                          (ARDUINO_IO[0])                           //
 	);
+	
 
 FpsMonitor uFps(
 	.clk50(MAX10_CLK2_50),

@@ -9,6 +9,8 @@ Main ESP32 program for Group 1's EEEBalanceBug
 //-------------------------------- Includes ---------------------------------------------
 
 #include "src/Fusion.h"
+#include "PinAssignments.h"
+#include "Config.h"
 #include "ICM_20948.h"
 //#include "NewIMU.h"
 
@@ -23,65 +25,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 //-------------------------------- Defines ----------------------------------------------
 
-/* Joint stepper motor control pins*/
-#define STEPPER_EN
-#define STEPPER_RST
-#define STEPPER_SLP
 
-/* Left stepper motor control pins */
-#define STEPPER_L_STEP 16
-#define STEPPER_L_DIR 17
-#define STEPPER_L_MS1
-#define STEPPER_L_MS2
-#define STEPPER_L_MS3
-
-/* Right stepper motor control pins */
-#define STEPPER_R_STEP STEPPER_L_STEP
-#define STEPPER_R_DIR STEPPER_L_DIR
-#define STEPPER_R_MS1
-#define STEPPER_R_MS2
-#define STEPPER_R_MS3
-
-#define STEPS 1600 /* Steps per revolution */
-#define MIN_RPM 10
-#define MAX_RPM 1000
-
-/* SPI & IMU */
-#define SPI_PORT SPI     /* Desired SPI port */
-#define SPI_FREQ 5000000 /* Override the default SPI frequency */
-#define IMU_INT 4
-#define IMU_MISO 19
-#define IMU_MOSI 23
-#define IMU_CS 5
-#define IMU_SCK 18
-
-/* IR Sensors*/
-#define IR_LEFT 36
-#define IR_RIGHT 39
-
-/* UART */
-#define SERIAL_PORT Serial
-
-/* I2C & FPGA */
-#define I2C_PORT Wire
-#define I2C_FREQ 400000
-#define FPGA_DEV_ADDR 0x55
-#define FPGA_INT
-
-/* Controller */
-#define KP_Position 0.06
-#define KD_Position 0.45
-
-#define KP_Speed 0.080 
-#define KI_Speed 0.01 
-
-#define KP_Stability 0.32
-#define KD_Stability 0.05
-
-#define MAX_TARGET_ANGLE 14
-#define MAX_CONTROL_OUTPUT 360
-#define ITERM_MAX_ERROR 30   // Iterm windup constants for PI control 
-#define ITERM_MAX 10000
 
 /* Other defines */
 
@@ -125,7 +69,7 @@ volatile static float velocity[3] = { 0.0f, 0.0f, 0.0f };     /* Velocity in ms^
 volatile static float displacement[3] = { 0.0f, 0.0f, 0.0f }; /* Displacement in m*/
 
 /* Controller */
-static float target_angle = 0;
+static float target_angle = -3.9;
 static float control_output = 0;
 static double pitch_out;
 static double angle_setpoint = 0.8;
@@ -164,6 +108,7 @@ void taskDeadReckoning(void *pvParameters);
 void taskController(void *pvParameters);
 void taskTalkToFPGA(void *pvParameters);
 
+
 //-------------------------------- Functions --------------------------------------------
 
 /* Update the timer to step the motors at the specified RPM */
@@ -172,11 +117,13 @@ void motor_start(float DPS) {
   float microsBetweenSteps = 360*1000000/(STEPS*abs(DPS));  // microseconds
 
   if (DPS > 0) {
+    digitalWrite(STEPPER_R_DIR, LOW);
     digitalWrite(STEPPER_L_DIR, HIGH);
     stepperRightDirection = true;
     stepperLeftDirection = true;
   }
   else if (DPS < 0) {
+    digitalWrite(STEPPER_R_DIR, HIGH);
     digitalWrite(STEPPER_L_DIR, LOW);
     stepperRightDirection = false;
     stepperLeftDirection = false;
@@ -230,9 +177,12 @@ float stabilityPDControl(float DT, float input, float setPoint,  float Kp, float
   //    The biggest one using only the input (sensor) part not the SetPoint input-input(t-1).
   //    And the second using the setpoint to make it a bit more agressive   setPoint-setPoint(t-1)
   float Kd_setPoint = constrain((setPoint - setPointOld), -8, 8); // We limit the input part...
-  output = Kp * error + (Kd * Kd_setPoint - Kd * (input - PID_errorOld)) / DT;
+  output = Kp * error ;
+  // + (Kd * Kd_setPoint - Kd * (input - PID_errorOld)) / DT;
   //Serial.print(Kd*(error-PID_errorOld));Serial.print("\t");
   //PID_errorOld2 = PID_errorOld;
+  Serial.print(",Angle_error:");
+  Serial.println(error);
   PID_errorOld = input;  // error for Kd is only the input component
   setPointOld = setPoint;
   return (output);
@@ -253,8 +203,8 @@ void IRAM_ATTR IMUDataReadyISR() {
 void IRAM_ATTR onTimer() {
 
   /* Send pulse to the stepper motors to make them step once */
-  digitalWrite(STEPPER_L_STEP, HIGH);
-  digitalWrite(STEPPER_L_STEP, LOW);
+  digitalWrite(STEPPER_STEP, HIGH);
+  digitalWrite(STEPPER_STEP, LOW);
 
   /* Increment or decrement step counter per wheel */
   if (stepperRightDirection) {
@@ -268,16 +218,6 @@ void IRAM_ATTR onTimer() {
   } else {
     stepperLeftSteps--;
   }
-}
-
-/* ISR that triggers when right IR sensor detects the edge */
-void IRAM_ATTR rightCollisionISR() {
-  rightCollisionImminent = true;
-}
-
-/* ISR that triggers when left IR sensor detects the edge */
-void IRAM_ATTR leftCollisionISR() {
-  leftCollisionImminent = true;
 }
 
 //-------------------------------- Task Functions ---------------------------------------
@@ -489,25 +429,30 @@ void taskController(void *pvParameters) {
     motor1_control = positionPDControl(stepperLeftSteps, stepperLeftTargetSteps, KP_Position, KD_Position, leftDPS); // (throttle)
 
 
-    target_angle = speedPIControl(deltaTime, estimated_speed_filtered, motor1_control, KP_Speed, KI_Speed);
+    // target_angle = speedPIControl(deltaTime, estimated_speed_filtered, motor1_control, KP_Speed, KI_Speed);
     target_angle = constrain(target_angle, -MAX_TARGET_ANGLE, MAX_TARGET_ANGLE); // limited output
 
     
     
 
-    control_output += stabilityPDControl(deltaTime, pitch, target_angle, KP_Stability, KD_Stability);
+    control_output = stabilityPDControl(deltaTime, pitch, target_angle, KP_Stability, KD_Stability);
     control_output = constrain(control_output, -MAX_CONTROL_OUTPUT, MAX_CONTROL_OUTPUT); // Limit max output from control
     
     leftDPS = control_output; // add steering here
     leftDPS = constrain(leftDPS, -MAX_CONTROL_OUTPUT, MAX_CONTROL_OUTPUT);
     
     actual_robot_speed = leftDPS;
-
+    Serial.println(360);
+    Serial.print(",");
+    Serial.println(-360);
+    Serial.print("Motor:");
     Serial.println(leftDPS);
+    Serial.print(",Angle:");
+    Serial.println(pitch*10);
     
     motor_start(-leftDPS);
-    
   }
+    
 }
 
 /* Task to talk to the FPGA */
@@ -587,10 +532,10 @@ void setup() {
   success &= (myICM.resetDMP() == ICM_20948_Stat_Ok);
   success &= (myICM.resetFIFO() == ICM_20948_Stat_Ok);
   if (success) {
-    Serial.println("DMP initialised");
+    SERIAL_PORT.println("DMP initialised");
   } else {
-    Serial.println(F("Enable DMP failed!"));
-    Serial.println(F("Please check that you have uncommented line 29 (#define ICM_20948_USE_DMP) in ICM_20948_C.h..."));
+    SERIAL_PORT.println(F("Enable DMP failed!"));
+    SERIAL_PORT.println(F("Please check that you have uncommented line 29 (#define ICM_20948_USE_DMP) in ICM_20948_C.h..."));
     while (1) {
       ;  // Do nothing more
     }
@@ -612,10 +557,13 @@ void setup() {
 
   /* Configure pins */
   pinMode(IMU_INT, INPUT_PULLUP);
-  pinMode(STEPPER_L_STEP, OUTPUT);
+  pinMode(STEPPER_STEP, OUTPUT);
   pinMode(STEPPER_L_DIR, OUTPUT);
-  pinMode(IR_LEFT, INPUT);
-  pinMode(IR_RIGHT, INPUT);
+  pinMode(STEPPER_R_DIR, OUTPUT);
+  pinMode(STEPPER_MS2, OUTPUT);
+
+  /* Set pin initial states */
+  digitalWrite(STEPPER_MS2, HIGH);
 
   /* Create SPI mutex */
   if (mutexSPI == NULL) {
@@ -634,7 +582,6 @@ void setup() {
   }
 
   /* Create Tasks */
-
   xTaskCreate(
     taskSampleIMU,             /* Function that implements the task */
     "SAMPLE_IMU",              /* Text name for the task */
@@ -668,7 +615,7 @@ void setup() {
     &taskTalkToFPGAHandle);    /* Pointer to store the task handle */
 
   /* Set task affinities if enabled (0x00 -> no cores, 0x01 -> C0, 0x02 -> C1, 0x03 -> C0 and C1) */
-  #ifdef USE_TASK_AFFINITIES
+  #if USE_TASK_AFFINITIES == 1
     vTaskCoreAffinitySet(taskSampleIMUHandle, (UBaseType_t)0x03);
     vTaskCoreAffinitySet(taskDeadReckoningHandle, (UBaseType_t)0x03);
   #endif
@@ -678,8 +625,6 @@ void setup() {
 
   /* Create ISRs */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
-  attachInterrupt(digitalPinToInterrupt(IR_LEFT), leftCollisionISR, RISING);
-  attachInterrupt(digitalPinToInterrupt(IR_RIGHT), rightCollisionISR, RISING);
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
   /* Delete "setup" and "loop" task */
@@ -696,12 +641,12 @@ void setup1() {
 void loop() {
   /* Should never get to this point */
 
-  // Serial.print("Pitch:");
-  // Serial.print(pitch);
-  // Serial.print(", Roll:");
-  // Serial.print(roll);
-  // Serial.print(", Yaw:");
-  // Serial.print(yaw);
+  // SERIAL_PORT.print("Pitch:");
+  // SERIAL_PORT.print(pitch);
+  // SERIAL_PORT.print(", Roll:");
+  // SERIAL_PORT.print(roll);
+  // SERIAL_PORT.print(", Yaw:");
+  // SERIAL_PORT.print(yaw);
 
   // Serial.print("Acc x:");
   // Serial.print(acceleration[0]);
