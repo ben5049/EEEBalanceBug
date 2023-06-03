@@ -10,10 +10,10 @@ Main ESP32 program for Group 1's EEEBalanceBug
 /* Task headers */
 #include "Tasks.h"
 
-#include "freertos/FreeRTOS.h"
+// #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/timers.h"
-#include "freertos/event_groups.h"
+// #include "freertos/timers.h"
+// #include "freertos/event_groups.h"
 
 /* Configuration headers */
 #include "PinAssignments.h"
@@ -34,6 +34,7 @@ extern TaskHandle_t taskIMUHandle;
 extern TaskHandle_t taskMovementHandle;
 extern TaskHandle_t taskToFHandle;
 extern TaskHandle_t taskExecuteCommandHandle;
+extern TaskHandle_t taskSpinHandle;
 
 /* Semaphores */
 SemaphoreHandle_t mutexSPI; /* SPI Mutex so only one task can access the SPI peripheral at a time */
@@ -70,6 +71,7 @@ void setup() {
   while (!SERIAL_PORT) {
     delay(100);
   }
+  delay(500);
   SERIAL_PORT.println("UART Initialised");
 
   /* Begin SPI */
@@ -88,7 +90,7 @@ void setup() {
   /* Create hw timers */
   motorTimer = timerBegin(0, 80, true);
 
-  /* Configure the IMU */
+  /* Configure the IMU & DMP */
   configureIMU();
 
   /* Start the ToF sensors */
@@ -133,52 +135,72 @@ void setup() {
 
   /* Create Tasks */
 
-  xTaskCreate(
+  xTaskCreatePinnedToCore(
     taskIMU,         /* Function that implements the task */
     "IMU",           /* Text name for the task */
     10000,           /* Stack size in words, not bytes */
     nullptr,         /* Parameter passed into the task */
     10,              /* Task priority */
-    &taskIMUHandle); /* Pointer to store the task handle */
+    &taskIMUHandle, /* Pointer to store the task handle */
+    tskNO_AFFINITY);
 
-  xTaskCreate(
+  xTaskCreatePinnedToCore(
     taskMovement,         /* Function that implements the task */
     "MOVEMENT",           /* Text name for the task */
     5000,                 /* Stack size in words, not bytes */
     nullptr,              /* Parameter passed into the task */
     8,                    /* Task priority */
-    &taskMovementHandle); /* Pointer to store the task handle */
+    &taskMovementHandle, /* Pointer to store the task handle */
+    tskNO_AFFINITY);
 
-  xTaskCreate(
+  xTaskCreatePinnedToCore(
     taskToF,         /* Function that implements the task */
     "TOF",           /* Text name for the task */
-    5000,            /* Stack size in words, not bytes */
+    10000,            /* Stack size in words, not bytes */
     nullptr,         /* Parameter passed into the task */
     8,               /* Task priority */
-    &taskToFHandle); /* Pointer to store the task handle */
+    &taskToFHandle, /* Pointer to store the task handle */
+    tskNO_AFFINITY);
+
+  xTaskCreatePinnedToCore(
+    taskExecuteCommand,         /* Function that implements the task */
+    "COMMAND",           /* Text name for the task */
+    2000,            /* Stack size in words, not bytes */
+    nullptr,         /* Parameter passed into the task */
+    10,               /* Task priority */
+    &taskExecuteCommandHandle, /* Pointer to store the task handle */
+    tskNO_AFFINITY); 
+
+  xTaskCreatePinnedToCore(
+    taskSpin,         /* Function that implements the task */
+    "SPIN",           /* Text name for the task */
+    5000,            /* Stack size in words, not bytes */
+    nullptr,         /* Parameter passed into the task */
+    10,               /* Task priority */
+    &taskSpinHandle, /* Pointer to store the task handle */
+    tskNO_AFFINITY);
 
 #if ENABLE_SERVER_COMMUNICATION_TASK == true
-  xTaskCreate(
+  xTaskCreatePinnedToCore(
     taskServerCommunication,         /* Function that implements the task */
     "SERVER_COMMS",                  /* Text name for the task */
     10000,                           /* Stack size in words, not bytes */
     nullptr,                         /* Parameter passed into the task */
     8,                               /* Task priority */
-    &taskServerCommunicationHandle); /* Pointer to store the task handle */
+    &taskServerCommunicationHandle, /* Pointer to store the task handle */
+    tskNO_AFFINITY);
 #endif
 
 #if ENABLE_DEBUG_TASK == true
-  xTaskCreate(
+  xTaskCreatePinnedToCore(
     taskDebug,         /* Function that implements the task */
     "DEBUG",           /* Text name for the task */
     1000,              /* Stack size in words, not bytes */
     nullptr,           /* Parameter passed into the task */
     4,                 /* Task priority */
-    &taskDebugHandle); /* Pointer to store the task handle */
+    &taskDebugHandle, /* Pointer to store the task handle */
+    tskNO_AFFINITY);
 #endif
-
-  /* Starts the scheduler */
-  vTaskStartScheduler();
 
   /* Create ISRs */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
@@ -189,4 +211,10 @@ void setup() {
 
 //--------------------------------- Loop -----------------------------------------------
 
-void loop() {}
+void loop() {  
+  vTaskDelay(5000);
+  SERIAL_PORT.println("Sending start command");
+  robotCommand command = FIND_BEACONS;
+  xQueueSend(commandQueue, &command, 0);
+  vTaskDelay(25000);
+}

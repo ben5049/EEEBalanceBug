@@ -27,6 +27,9 @@ void taskExecuteCommand(void *pvParameters) {
   /* Create state */
   static robotCommand currentCommand = IDLE;
 
+  /* Variables */
+  static float junctionAngle;
+
   /* Start the loop */
   while (true) {
 
@@ -71,13 +74,29 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Define what to do in the FIND_BEACONS state */
 
+        SERIAL_PORT.print("Starting yaw: ");
         spinStartingAngle = yaw;
+        SERIAL_PORT.println(spinStartingAngle);
 
         /* Unblock TaskSpin which will then count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
-        /* Wait for the spin task to complete */
-        ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
+        /* Wait for the turn to complete */
+        vTaskDelay(8000);
+
+        /* Notify the spin task that the turn is complete*/
+        xTaskNotifyGiveIndexed(taskSpinHandle, 0);
+        SERIAL_PORT.println("Finished");
+        
+        vTaskDelay(100);
+
+        /* Print the angles of the junctions */
+        while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
+          if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {
+              SERIAL_PORT.print("Junction at: ");
+              SERIAL_PORT.println(junctionAngle);
+          }
+        }
 
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &currentCommand, 0) != pdTRUE) {

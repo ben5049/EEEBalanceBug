@@ -13,7 +13,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define MIN_RPM 10
 #define MAX_RPM 1000
 #define MAX_MAZE_DIMENSION 3000 /* Largest dimension of the maze in mm, used for rejecting anomalous ToF sensor data */
-#define MAX_NUMBER_OF_JUNCTIONS 6
+#define MAX_NUMBER_OF_JUNCTIONS 10
 
 #define SPIN_LEFT true /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
 

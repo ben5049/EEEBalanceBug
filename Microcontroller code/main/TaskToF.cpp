@@ -76,12 +76,20 @@ void configureToF() {
 
   /* Begin the multiplexer */
   I2CMux.begin(I2C_PORT);
+  
+  SERIAL_PORT.print("1: ");
+  checkI2CBusMembers();
 
   /* Close all channels to ensure state is know */
   I2CMux.closeAll();
 
+  SERIAL_PORT.print("2: ");
+  checkI2CBusMembers();
+
   /* Begin the first sensor if it isn't already connected */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
+  SERIAL_PORT.print("3: ");
+  checkI2CBusMembers();
   // if (!findI2CDevice(TOF_RIGHT_ADDRESS)) {
   if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
     while (true) {
@@ -100,10 +108,9 @@ void configureToF() {
 
   /* Close the first sensor's channel */
   I2CMux.closeChannel(TOF_RIGHT_CHANNEL);
-  checkI2CBusMembers();
+
   /* Begin the second sensor if it isn't already connected */
   I2CMux.openChannel(TOF_LEFT_CHANNEL);
-  checkI2CBusMembers();
 
   // if (!findI2CDevice(TOF_LEFT_ADDRESS)) {
   if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
@@ -200,11 +207,12 @@ void taskToF(void *pvParameters) {
       }
     }
 
-    // SERIAL_PORT.print("Left: ");
+    // SERIAL_PORT.print("Yaw: ");
+    // SERIAL_PORT.print(yaw);
+    // SERIAL_PORT.print(", Left: ");
     // SERIAL_PORT.print(distanceLeft);
     // SERIAL_PORT.print(", Right: ");
     // SERIAL_PORT.println(distanceRight);
-    SERIAL_PORT.println(yaw);
 
     // if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
     //   tofRight.clearInterruptMask(false);

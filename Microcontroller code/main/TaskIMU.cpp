@@ -142,7 +142,7 @@ void taskIMU(void *pvParameters) {
 
   /* Start the loop */
   while (true) {
-
+    
     /* Wait for the data ready interrupt before sampling the IMU */
     ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
