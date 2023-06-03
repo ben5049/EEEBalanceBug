@@ -45,7 +45,7 @@ def rover():
             cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], data["timestamp"]))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
-            return make_response(jsonify({f"error":"Incorrectly formatted request: {e}"}), 400)
+            return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
         for x in cur:
             r.sessionId = x[0]
         
@@ -59,7 +59,7 @@ def rover():
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, CPU, connection) VALUES (?, ?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["CPU"], data["diagnostics"]["connection"]))
     except mariadb.Error as e:
-        return make_response(jsonify({f"error":"Incorrectly formatted request: {e}"}), 400)
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     # cur.execute("SELECT * FROM Rovers")
     # for mac, nickname in cur:
     #     print(mac, nickname)
@@ -112,9 +112,11 @@ def replay():
         sessionid = int(data["sessionid"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing sessionid"}), 400)
-    
-    cur.execute("SELECT * FROM ReplayInfo")
-    cur.execute("SELECT * FROM ReplayInfo WHERE SessionID=?", (sessionid,))
+    try:
+        cur.execute("SELECT * FROM ReplayInfo WHERE SessionID=?", (sessionid,))
+    except mariadb.Error as e:
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
+
     if cur is None or len(cur)==0:
         return make_response(jsonify({"error":"Session does not exist"}), 404)
     resp = {}
@@ -193,7 +195,7 @@ def sessionNickname():
     try:
         cur.execute("UPDATE Sessions SET SessionNickname=? WHERE SessionId=?", (nick, session,))
     except mariadb.Error as e:
-        return make_response(jsonify({f"error":"Incorrectly formatted request: {e}"}), 400)
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     return make_response(jsonify({"success":"successfully changed session nickname"}), 200)
 
 # works
@@ -212,7 +214,7 @@ def addnickname():
     try:
         cur.execute("UPDATE Rovers SET nickname=? WHERE MAC=?", (nick, mac,))
     except mariadb.Error as e:
-        return make_response(jsonify({f"error":"Incorrectly formatted request: {e}"}), 400)
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
 
     return make_response(jsonify({"success":"successfully changed rover nickname"}), 200)
 
