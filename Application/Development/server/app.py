@@ -100,7 +100,6 @@ def allrovers():
         temp["MAC"] = rover[0]
         temp["nickname"] = rover[1]
         temp["connected"] = False
-        temp["sessionid"] = None
         d.append(temp)
     return make_response(jsonify(d), 200)
 
@@ -140,7 +139,7 @@ def diagnostics():
     try:
         cur.execute("SELECT * FROM Diagnostics WHERE MAC=? ORDER BY timestamp DESC LIMIT 1;", (data["MAC"],))
     except:
-        return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC address"}), 400)
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid MAC address"}), 400)
     d = {}
     for mac, timestamp, battery, cpu, connection in cur:
         d = {"MAC":mac, "timestamp":timestamp, "battery":battery, "CPU":cpu, "connection":connection}
@@ -153,7 +152,7 @@ def pause():
     try:
         mac = data["MAC"]
     except:
-        return make_response(jsonify({"error":"Incorrectly formatted request: {e}"}), 400)
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
     for rover in rovers:
         if rover.name == mac:
@@ -184,7 +183,7 @@ def play():
     return make_response(jsonify({"success":"successfully played rover"}), 200)
 
 # works
-@app.route("/client/setsessionnickname", methods=["POST"])
+@app.route("/client/sessionnickname", methods=["POST"])
 def sessionNickname():
     data = request.get_json()
     try:
@@ -199,7 +198,7 @@ def sessionNickname():
     return make_response(jsonify({"success":"successfully changed session nickname"}), 200)
 
 # works
-@app.route("/client/addnickname", methods=["POST"])
+@app.route("/client/rovernickname", methods=["POST"])
 def addnickname():
     data = request.get_json()
     try:
@@ -218,23 +217,29 @@ def addnickname():
 
     return make_response(jsonify({"success":"successfully changed rover nickname"}), 200)
 
-@app.route("/client/shortestpath", methods=["POST"])
+@app.route("/client/shortestpath", methods=["GET"])
 def findShortestPath():
     data = request.get_json()
     try:
         mac = data["MAC"]
         start = data["start"]
-        end = data["end"]
     except:
-        return make_response(jsonify({"error":"Incorrectly formatted request: missing mac, start, or end"}), 400)
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC or start"}), 400)
     tree = 0
+    flag = True
     for rover in rovers:
         if rover.name == mac:
             tree = rover.tree
+            flag= = False
+    if flag:
+        return make_response(jsonify({"error":"Incorrectly formatted request: invalid MAC address"}), 400)
     P = dijkstra.dijkstra(tree, start)
     betterP = {}
     for key, value in P:
-        betterP[key.position] = betterP[value.position]
+        if value is not None:
+            betterP[key.position] = betterP[value.position]
+        else:
+            betterP[key.position] = 0
 
     return make_response(jsonify(betterP), 200)
 

@@ -1,6 +1,5 @@
 /venv
 *.pyc
-*.pdf
 /FPGA/*/software/.metadata
 /PCB/DE10-lite_shield/DE10-lite_shield-backups
 /PCB/DE10-lite_shield/fp-info-cache
