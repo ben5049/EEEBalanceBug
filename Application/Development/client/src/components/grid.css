@@ -21,6 +21,15 @@ body {
     font-size: 3vh;
   }
 
+  .box-nopadding {
+    background-color: #75bcff;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 0;
+    font-size: 3vh;
+    
+  }
+
   .box-nobackground {
 
     background-color: transparent;
