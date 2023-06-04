@@ -65,6 +65,16 @@
   width: 100%;
 }
 
+.ShortestPathControls_Rewind {
+  grid-column: col 14 / span 6;
+  grid-row: row 6 / span 2;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
 .PlaybackControls_Rewind {
   grid-column: col 14 / span 6;
   grid-row: row 9 / span 2;

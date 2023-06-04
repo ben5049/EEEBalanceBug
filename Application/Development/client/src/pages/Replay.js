@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from '../components/Replay/Slider';
 import '../components/Replay/grid_Replay.css';
@@ -45,19 +45,13 @@ const Replay = () => {
 	};
 	const handleReplay = () => {
 		console.log('Replay');
+		setSliderValue(parseInt(0));
 	};
 	const handleFastforward = () => {
 		console.log('Fast Forward');
 	};
 	const handleRepeat = () => {
 		console.log('Repeat');
-	};
-
-	// Slider
-	const [SliderValue, setSliderValue] = useState(0);
-
-	const handleSliderChange = (event) => {
-		setSliderValue(event.target.value);
 	};
 
 	// Get starting state
@@ -90,6 +84,54 @@ const Replay = () => {
 		}
 	};
 
+	// Slider
+	const [SliderValue, setSliderValue] = useState(0);
+	const SliderValueMax = 100; // Number of Replay values TODO: get from server
+	const SliderRate = 40; // Time Interval (ms)
+
+	const handleSliderChange = (event) => {
+		setSliderValue(parseInt(event.target.value));
+		if      (RepeatToggleState == false) {
+			if (event.target.value == SliderValueMax) {
+				setPlayState("End");
+			}
+			else {
+				setPlayState("Pause");
+			}
+		}
+		else {
+			setPlayState("Pause");
+		}
+	};
+
+	// Increment SliderValue every 0.1 seconds when PlayState is "Play"
+	useEffect(() => {
+		let interval = null;
+	
+		if (PlayState === "Play") {
+			interval = setInterval(() => {
+				setSliderValue((prevValue) => {
+				const newValue = prevValue + 1;
+				if      (RepeatToggleState == false) {
+					if (newValue == SliderValueMax) {
+						setPlayState("End");
+					}
+					return newValue > SliderValueMax ? SliderValueMax : newValue;
+				}
+				else if (RepeatToggleState == true) {
+					return newValue > SliderValueMax ? 0 : newValue;
+				}
+				});
+			}, SliderRate); 
+		}
+
+		return () => {
+			clearInterval(interval);
+		};
+	}, [PlayState]);
+
+
+
 	return (
 		<div className="background">
 			<div className="wrapper_Replay">
@@ -103,6 +145,7 @@ const Replay = () => {
 						</button>
 					</Link>
 				</div>
+				<div className="box ShortestPathControls_Rewind"/>
 				<div className='box-green SelectStartButton_Replay'>
 					<button onClick={handleSelectStart} className='box-green buttons_Replay'>
 						select
@@ -129,6 +172,7 @@ const Replay = () => {
 								height: '40px', // Set the desired height
 								objectFit: 'cover', // Adjust how the image fits within the container
 							}}
+							draggable={false}
 						/>
 					</button>
 				</div>
@@ -143,6 +187,7 @@ const Replay = () => {
 									height: '40px', // Set the desired height
 									objectFit: 'cover', // Adjust how the image fits within the container
 								}}
+								draggable={false}
 							/>
 						</button>
 					) : (<></>)
@@ -157,6 +202,7 @@ const Replay = () => {
 									height: '40px', // Set the desired height
 									objectFit: 'cover', // Adjust how the image fits within the container
 								}}
+								draggable={false}
 							/>
 						</button>
 					) : (<></>)
@@ -171,6 +217,7 @@ const Replay = () => {
 									height: '40px', // Set the desired height
 									objectFit: 'cover', // Adjust how the image fits within the container
 								}}
+								draggable={false}
 							/>
 						</button>
 					) : (<></>)
@@ -186,6 +233,7 @@ const Replay = () => {
 								height: '40px', // Set the desired height
 								objectFit: 'cover', // Adjust how the image fits within the container
 							}}
+							draggable={false}
 						/>
 					</button>
 				</div>
@@ -199,6 +247,7 @@ const Replay = () => {
 								height: '40px', // Set the desired height
 								objectFit: 'cover', // Adjust how the image fits within the container
 							}}
+							draggable={false}
 						/>
 					</button>
 				</div>

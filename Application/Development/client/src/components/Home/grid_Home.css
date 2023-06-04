@@ -5,6 +5,7 @@
     line-height: 35px;
     font-family: "Lucida Console", "Courier New", monospace;
     font-weight: bold;
+    user-select: none
   }
   
   .RoversText_Home {
