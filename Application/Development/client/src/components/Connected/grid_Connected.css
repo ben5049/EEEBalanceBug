@@ -1,3 +1,14 @@
+.wrapper_Connected {
+  display: grid;
+  grid-gap: 0.2vh;
+  grid-template-columns: repeat(20, [col] 4.88vw);
+  grid-template-rows: repeat(20, [row] 4.88vw);
+  background-color: #ffffff;
+  color: #444;
+  height: 100vh;
+  padding: 0;
+}
+
 .DisplayMAC_Connected {
   grid-column: col 15 / span 5;
   grid-row: row 1 / span 1;

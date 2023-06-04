@@ -4,7 +4,7 @@ body {
   
   .wrapper {
     display: grid;
-    grid-gap: 0;
+    grid-gap: 0vh;
     grid-template-columns: repeat(20, [col] 5vw);
     grid-template-rows: repeat(20, [row] 5vw);
     background-color: #ffffff;
@@ -22,7 +22,8 @@ body {
   }
 
   .box-nobackground {
-    background-color: #ffffff;
+
+    background-color: transparent;
     color: #00ff6a;
     border-radius: 5px;
     padding: 2vh;

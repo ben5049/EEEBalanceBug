@@ -1,40 +1,42 @@
-import React from 'react';
-import { useState } from "react";
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../components/Connected/grid_Connected.css';
 import '../components/grid.css';
-import Replay from './Replay';
 
 const Connected = () => {
+	// Retrieve selected rover
 	const MAC = localStorage.getItem('MAC');
 	const nickname = localStorage.getItem('nickname');
-
 	console.log('CONNECTED MAC = ' + MAC)
 	console.log('CONNECTED nickname = ' + nickname)
 	
+	// Button click handles
 	const handlePause = () => {
 		console.log('Pause');
 		// TODO: Send Pause Post to server
 	};
-
 	const handleStart = () => {
 		console.log('Start');
 		// TODO: Send Pause Post to server
 	};
-
 	const handlePlay = () => {
 		console.log('Play');
 		// TODO: Send Pause Post to server
 	};
-
 	const handleViewReplay = () => {
 		console.log("View Replay")
-		// TODO: request replay of Session
+		// TODO: set ReplayID of Session (given by server)
+		const ReplayID = "01";
+		localStorage.setItem('ReplayID', ReplayID);
+	}
+	const handleMenu = () => {
+		console.log("Menu")
 	}
 
 	// Get starting state
 	const [ConnectedState, setConnectedState] = useState('Start'); // TODO: Retreieve from server
 
+	// Switch state on button click
 	const ChangeState = () => {
 		if (ConnectedState == "Start") {
 			setConnectedState("Mapping");
@@ -52,15 +54,15 @@ const Connected = () => {
 
 	return (
 		<div className="background">
-			<div className="wrapper">
+			<div className="wrapper_Connected">
 				<div className="box-nobackground DisplayMAC_Connected">
 					{nickname} / {MAC}
 				</div>
 				{/* State-dependant Buttons */}
-				{ConnectedState === 'Start'   ? ( <div className="wrapper">
+				{ConnectedState === 'Start'   ? ( <div className="wrapper_Connected">
 													<div className='box-red SmallRightButton_Connected'>
 														<Link to='/' className="page-link" draggable={false}>
-															<button onClick={ChangeState} className='box-red buttons_Connected'>
+															<button onClick={handleMenu} className='box-red buttons_Connected'>
 																Menu
 															</button>
 														</Link>
@@ -77,10 +79,10 @@ const Connected = () => {
 													Pause
 												  </button>
 										  		) : (<></>)}
-				{ConnectedState === 'Pause'   ? (<div className="wrapper">
+				{ConnectedState === 'Pause'   ? (<div className="wrapper_Connected">
 													<div className='box-red SmallRightButton_Connected'>
 														<Link to='/' className="page-link" draggable={false}>
-															<button onClick={ChangeState} className='box-red buttons_Connected'>
+															<button onClick={handleMenu} className='box-red buttons_Connected'>
 																Menu
 															</button>
 														</Link>
@@ -93,10 +95,10 @@ const Connected = () => {
 													</div>
 												  </div>
 												) : (<></>)}
-				{ConnectedState === 'Finish'  ? (<div className="wrapper">
+				{ConnectedState === 'Finish'  ? (<div className="wrapper_Connected">
 													<div className='box-red SmallRightButton_Connected'>
 														<Link to='/' className="page-link" draggable={false}>
-															<button onClick={ChangeState} className='box-red buttons_Connected'>
+															<button onClick={handleMenu} className='box-red buttons_Connected'>
 																Menu
 															</button>
 														</Link>
