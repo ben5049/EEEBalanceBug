@@ -86,7 +86,7 @@ const Replay = () => {
 
 	// Slider
 	const [SliderValue, setSliderValue] = useState(0);
-	const SliderValueMax = 100; // Number of Replay values TODO: get from server
+	const SliderValueMax = 100; // Number of Replay values, TODO: get from server
 	const SliderRate = 40; // Time Interval (ms)
 
 	const handleSliderChange = (event) => {
@@ -130,6 +130,12 @@ const Replay = () => {
 		};
 	}, [PlayState]);
 
+	// User-editable Coordinates
+	const [startCoordinates_X, setStartCoordinates_X] = useState(''); // TODO: Set to replay default
+	const [startCoordinates_Y, setStartCoordinates_Y] = useState(''); // TODO: Set to replay default
+	const [endCoordinates_X, setEndCoordinates_X] = useState(''); // TODO: Set to replay default
+	const [endCoordinates_Y, setEndCoordinates_Y] = useState(''); // TODO: Set to replay default
+	
 
 
 	return (
@@ -145,7 +151,14 @@ const Replay = () => {
 						</button>
 					</Link>
 				</div>
-				<div className="box ShortestPathControls_Rewind"/>
+				<div className="box ShortestPathStartControls_Rewind"/>
+				<div className="box ShortestPathEndControls_Rewind"/>
+				<div className="box StartText_Replay">
+					Start
+				</div>
+				<div className="box EndText_Replay">
+					End
+				</div>
 				<div className='box-green SelectStartButton_Replay'>
 					<button onClick={handleSelectStart} className='box-green buttons_Replay'>
 						select
@@ -155,6 +168,34 @@ const Replay = () => {
 					<button onClick={handleSelectEnd} className='box-green buttons_Replay'>
 						select
 					</button>
+				</div>
+				<div className="box SelectStartCoordinates_X_Replay">
+					<input
+						type="text"
+						value={startCoordinates_X}
+						onChange={(e) => setStartCoordinates_X(e.target.value)}
+					/>
+				</div>
+				<div className="box SelectStartCoordinates_Y_Replay">
+					<input
+						type="text"
+						value={startCoordinates_Y}
+						onChange={(e) => setStartCoordinates_Y(e.target.value)}
+					/>
+				</div>
+				<div className="box SelectEndCoordinates_X_Replay">
+					<input
+						type="text"
+						value={endCoordinates_X}
+						onChange={(e) => setEndCoordinates_X(e.target.value)}
+					/>
+				</div>
+				<div className="box SelectEndCoordinates_Y_Replay">
+					<input
+						type="text"
+						value={endCoordinates_Y}
+						onChange={(e) => setEndCoordinates_Y(e.target.value)}
+					/>
 				</div>
 				<div className='box-green ShortestPathButton_Replay'>
 					<button onClick={handleShortestPath} className='box-green buttons_Replay'>
@@ -267,7 +308,7 @@ const Replay = () => {
 							id="myRange"
 							onChange={handleSliderChange}
 						/>
-					<p>Value: <span id="demo">{SliderValue}</span></p>
+					{/*<p>Value: <span id="demo">{SliderValue}</span></p>*/}
 				</div>
 			</div>
 		</div>

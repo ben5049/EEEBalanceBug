@@ -19,6 +19,26 @@
   user-select: none
 }
 
+.StartText_Replay {
+  grid-column: col 14 / span 2;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  line-height: 30px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
+}
+
+.EndText_Replay {
+  grid-column: col 14 / span 2;
+  grid-row: row 7 / span 1;
+  text-align: center;
+  line-height: 30px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
+}
+
 .SelectStartButton_Replay {
   grid-column: col 16 / span 2;
   grid-row: row 6 / span 1;
@@ -50,6 +70,51 @@
   cursor: pointer;
 }
 
+.SelectStartCoordinates_X_Replay {
+  grid-column: col 18 / span 1;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+}
+
+.SelectStartCoordinates_Y_Replay {
+  grid-column: col 19 / span 1;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+}
+
+.SelectEndCoordinates_X_Replay {
+  grid-column: col 18 / span 1;
+  grid-row: row 7 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+}
+
+.SelectEndCoordinates_Y_Replay {
+  grid-column: col 19 / span 1;
+  grid-row: row 7 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+}
+
+.SelectStartCoordinates_X_Replay input,
+.SelectStartCoordinates_Y_Replay input,
+.SelectEndCoordinates_X_Replay input,
+.SelectEndCoordinates_Y_Replay input {
+  width: 100%; /* Set the input width to 100% */
+  box-sizing: border-box; /* Include padding and border in the width calculation */
+  text-align: center
+}
+
 .Slider_Replay {
   grid-column: col 14 / span 6;
   grid-row: row 9 / span 1;
@@ -59,15 +124,26 @@
   border: none;
   user-select: none;
   color: green;
+  padding: 3vh;
 }
 
 .SliderElement_Replay {
   width: 100%;
 }
 
-.ShortestPathControls_Rewind {
+.ShortestPathStartControls_Rewind {
   grid-column: col 14 / span 6;
-  grid-row: row 6 / span 2;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.ShortestPathEndControls_Rewind {
+  grid-column: col 14 / span 6;
+  grid-row: row 7 / span 1;
   text-align: center;
   font-family: "Lucida Console", "Courier New", monospace;
   font-weight: bold;
