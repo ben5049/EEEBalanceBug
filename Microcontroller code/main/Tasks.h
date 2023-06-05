@@ -25,6 +25,7 @@ typedef enum {
 /* Variables */
 extern volatile float pitch;
 extern volatile float yaw;
+extern volatile float angularVelocity;
 extern volatile int32_t stepperRightSteps;
 extern volatile int32_t stepperLeftSteps;
 extern volatile uint16_t distanceRight;
