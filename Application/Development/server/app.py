@@ -274,6 +274,8 @@ def findShortestPath():
     return make_response(jsonify(betterP), 200)
 
 
-    
-
-
+@app.route("/led_driver", methods=["POST"])
+def led_driver():
+    data = request.get_json()
+    print(data)
+    return make_response(jsonify({"success":"received data"}), 200)
