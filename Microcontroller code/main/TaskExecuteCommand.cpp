@@ -14,6 +14,9 @@ TaskHandle_t taskExecuteCommandHandle = nullptr;
 
 /* Variables */
 volatile float spinStartingAngle;
+/* Create state */
+volatile robotCommand currentCommand = IDLE;
+
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -23,9 +26,6 @@ volatile float spinStartingAngle;
 void taskExecuteCommand(void *pvParameters) {
 
   (void)pvParameters;
-
-  /* Create state */
-  static robotCommand currentCommand = IDLE;
 
   /* Variables */
   static float junctionAngle;

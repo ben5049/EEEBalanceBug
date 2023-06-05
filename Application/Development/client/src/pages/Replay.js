@@ -1,6 +1,12 @@
+/*
+Authors: Advik Chitre
+Date created: 03/05/23
+*/
+
+//-------------------------------- Imports ----------------------------------------------
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Slider from '../components/Replay/Slider';
 import '../components/Replay/grid_Replay.css';
 import '../components/grid.css';
 import RewindIcon from '../components/Replay/RewindIcon.png';
@@ -11,30 +17,120 @@ import FastforwardIcon from '../components/Replay/FastforwardIcon.png';
 import RepeatIcon from '../components/Replay/RepeatIcon.png';
 import RepeatEnabledIcon from '../components/Replay/RepeatEnabledIcon.png';
 
+//-------------------------------- Main -------------------------------------------------
+/* 
+Replay Page - given a replayID, this page displays a replay while also giving the user control.
+    		  It also allows the user to change the shortest path start and end points.
+*/
 
 const Replay = () => {
+
+	//---------------------------- Get Stored Values ------------------------------------
+
+	const ServerIP = localStorage.getItem('ServerIP');
 	const ID = localStorage.getItem('ReplayID');
 	const MAC = localStorage.getItem('MAC');
 	const nickname = localStorage.getItem('nickname');
 	console.log('Replay ID = ' + ID)
 	console.log('CONNECTED MAC = ' + MAC)
 	console.log('CONNECTED nickname = ' + nickname)
+
+	//---------------------------- Polling ----------------------------------------------
+
+	/* 
+	Mapping - Gets from server: map data 
+	*/
+
+	/* Create updating variables */
+	const [MapData, UpdateMappingData] = useState([]);
+
+	/* ReactPolling calls Fetch */
+	const MappingURL = "http://" + ServerIP + ":5000/client/replay";
+	const fetchMappingData = () => {
+		console.log("URL = " + MappingURL);
+		return fetch(MappingURL, {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json'
+		  },
+		  body: JSON.stringify({ "MAC": MAC })
+		});
+	};
+	/* ReactPolling calls on Success */
+	const MappingPollingSuccess = (jsonResponse) => {
+		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
+		UpdateMappingData(jsonResponse);
+		return true;
+	}
+	/* ReactPolling calls on Failure */
+	const MappingPollingFailure = () => {
+		console.log("MAPPING POLLING FAIL");
+		return true;
+	}
+
+	//---------------------------- Shortest Path ----------------------------------------
+
+	const DiagnosticURL = "http://" + ServerIP + ":5000/client/diagnostics";
+	console.log("URL = " + DiagnosticURL);
+
+	/* Create updating variables */
+	const [ShortestPath, UpdateShortestPath] = useState([]);
+
+	/* sends request to server for shortest path to every node from a given point (arguments: Start coordinates) */
+	const postStartEnd = async (StartX, StartY) => {
+		try {
+			/* Sends POST request to server */
+			const response = await fetch(DiagnosticURL, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ "MAC": MAC, "start_x": StartX, "start_y": StartY})
+			});
+			/* GOOD response from server: update shortest path */
+			if (response.ok) {
+				const responseData = await response.json();
+				console.log("Response data:", responseData);
+				// Store the responseData in a variable or use it as needed
+				UpdateShortestPath(responseData);
+			} 
+			/* BAD response from server: throw error */
+			else {
+				console.log("Diagnostic request failed");
+				// Handle the error or throw an error
+			}
+		/* Error Handling */
+		} catch (error) {
+			console.log("Error:", error);
+		}
+	};
+
+	//---------------------------- Button Click Handles ---------------------------------
 	
-	
-	// Button click handles
+	/* Menu button */
 	const handleMenu = () => {
 		console.log('Menu');
 	};
+
+	/* User select start button */
 	const handleSelectStart = () => {
 		console.log('User select start');
 	};
+
+	/* User select start button */
 	const handleSelectEnd = () => {
 		console.log('User select end');
 	};
+
+	/* Calculate shortest path */
 	const handleShortestPath = () => {
 		console.log('Shortest Path');
+		// POST shortest path
+		postStartEnd(startCoordinates_X, startCoordinates_Y);
+		// TODO: Visualise shortest path
 	};
-		const handlePause = () => {
+	
+	const handlePause = () => {
 		console.log('Pause');
 	};
 	const handlePlay = () => {
@@ -43,9 +139,6 @@ const Replay = () => {
 	const handleReplay = () => {
 		console.log('Replay');
 		setSliderValue(parseInt(0));
-	};
-		const handleRepeat = () => {
-		console.log('Repeat');
 	};
 
 	// Use useRef to keep track of the interval ID for the button actions
@@ -99,15 +192,15 @@ const Replay = () => {
 	const [PlayState, setPlayState] = useState('Pause');
 	// Switch state on button click
 	const ChangePlayState = () => {
-		if (PlayState == "Pause") {
+		if (PlayState === "Pause") {
 			setPlayState("Play");
 			handlePlay();
 		}
-		else if (PlayState == "Play") {
+		else if (PlayState === "Play") {
 			setPlayState("Pause");
 			handlePause();
 		}
-		else if (PlayState == "End") {
+		else if (PlayState === "End") {
 			setPlayState("Play");
 			handleReplay();
 		}
@@ -117,10 +210,10 @@ const Replay = () => {
 	const [RepeatToggleState, setRepeatToggleState] = useState(false);
 	// Switch state on button click
 	const ChangeRepeatToggleState = () => {
-		if (RepeatToggleState == true) {
+		if (RepeatToggleState === true) {
 			setRepeatToggleState(false);
 		}
-		else if (RepeatToggleState == false) {
+		else if (RepeatToggleState === false) {
 			setRepeatToggleState(true);
 		}
 	};
@@ -132,8 +225,8 @@ const Replay = () => {
 
 	const handleSliderChange = (event) => {
 		setSliderValue(parseInt(event.target.value));
-		if      (RepeatToggleState == false) {
-			if (event.target.value == SliderValueMax) {
+		if      (RepeatToggleState === false) {
+			if (event.target.value === SliderValueMax) {
 				setPlayState("End");
 			}
 			else {
@@ -153,13 +246,13 @@ const Replay = () => {
 			interval = setInterval(() => {
 				setSliderValue((prevValue) => {
 				const newValue = prevValue + 1;
-				if      (RepeatToggleState == false) {
-					if (newValue == SliderValueMax) {
+				if      (RepeatToggleState === false) {
+					if (newValue === SliderValueMax) {
 						setPlayState("End");
 					}
 					return newValue > SliderValueMax ? SliderValueMax : newValue;
 				}
-				else if (RepeatToggleState == true) {
+				else if (RepeatToggleState === true) {
 					return newValue > SliderValueMax ? 0 : newValue;
 				}
 				});
@@ -262,7 +355,7 @@ const Replay = () => {
 					</button>
 				</div>
 				<div className='box-nobackground PauseButton_Replay'>
-					{ PlayState == "Pause" ? (
+					{ PlayState === "Pause" ? (
 						<button onClick={ChangePlayState} className='box-green buttons_Replay'>
 							<img
 								src={PlayIcon}
@@ -277,7 +370,7 @@ const Replay = () => {
 						</button>
 					) : (<></>)
 					}
-					{ PlayState == "Play" ? (
+					{ PlayState === "Play" ? (
 						<button onClick={ChangePlayState} className='box-green buttons_Replay'>
 							<img
 								src={PauseIcon}
@@ -292,7 +385,7 @@ const Replay = () => {
 						</button>
 					) : (<></>)
 					}
-					{ PlayState == "End" ? (
+					{ PlayState === "End" ? (
 						<button onClick={ChangePlayState} className='box-green buttons_Replay'>
 							<img
 								src={ReplayIcon}
@@ -337,7 +430,17 @@ const Replay = () => {
 					</button>
 				</div>
 				<div className="box Map_Replay">
-					Map	
+					<ReactPolling
+						url={MappingURL}
+						interval= {100} // in milliseconds(ms)
+						retryCount={3} // this is optional
+						onSuccess = {MappingPollingSuccess}
+						onFailure= {MappingPollingFailure}
+						promise={fetchMappingData} // custom api calling function that should return a promise
+						render={({ startPolling, stopPolling, isPolling }) => {
+							return <p>Map</p>;
+						}}
+					/>	
 				</div>
 				<div className="box Data_Replay">
 					<p>Data</p><p>Data</p>

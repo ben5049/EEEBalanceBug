@@ -18,7 +18,7 @@ try:
         port=3306,
         database='BalanceBug'
     )
-    print("Database connection ser up")
+    print("Database connection set up")
 except mariadb.Error as e:
     print(f"Error connecting to MariaDB platform: {e}")
 
@@ -81,13 +81,12 @@ def rover():
     # cur.execute("SELECT * FROM Diagnostics")
     # for mac, timestamp, battery, cpu, connection in cur:
     #     print(mac, timestamp, battery, cpu, connection)
-    cur.execute("SELECT * FROM ReplayInfo")
-    for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-        print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+    # cur.execute("SELECT * FROM ReplayInfo")
+    # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
+    #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
     # cur.execute("SELECT * FROM Sessions")
     # for mac, sessionId, SessionNickname in cur:
     #     print(mac, sessionId, sessionNickname)
-    print("hello")
     return make_response(jsonify(resp), 200)
 
 # works
@@ -115,7 +114,6 @@ def allrovers():
     command = "SELECT * FROM Rovers WHERE "+t
     if command == "SELECT * FROM Rovers WHERE ":
         command = "SELECT * FROM Rovers" 
-    print(command)
     try:
         cur.execute(command)
     except mariadb.Error as e:
@@ -252,7 +250,8 @@ def findShortestPath():
     data = request.get_json()
     try:
         mac = data["MAC"]
-        start = data["start"]
+        start_x = data["start_x"]
+        start_y = data["start_y"]
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC or start"}), 400)
     tree = 0
@@ -263,7 +262,7 @@ def findShortestPath():
             flag= False
     if flag:
         return make_response(jsonify({"error":"Incorrectly formatted request: invalid MAC address"}), 400)
-    P = dijkstra.dijkstra(tree, start)
+    P = dijkstra.dijkstra(tree, [start_x, start_y])
     betterP = {}
     for key, value in P:
         if value is not None:
@@ -274,6 +273,8 @@ def findShortestPath():
     return make_response(jsonify(betterP), 200)
 
 
-    
-
-
+@app.route("/led_driver", methods=["POST"])
+def led_driver():
+    data = request.get_json()
+    print(data)
+    return make_response(jsonify({"success":"received data"}), 200)
