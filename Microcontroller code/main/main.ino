@@ -93,8 +93,10 @@ void setup() {
   /* Configure the IMU & DMP */
   configureIMU();
 
+#if ENABLE_TOF_TASK == true
   /* Start the ToF sensors */
-  // configureToF();
+  configureToF();
+#endif
 
 #if ENABLE_SERVER_COMMUNICATION_TASK == true
   /* Begin WiFi */
@@ -153,14 +155,16 @@ void setup() {
     &taskMovementHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 
-  // xTaskCreatePinnedToCore(
-  //   taskToF,        /* Function that implements the task */
-  //   "TOF",          /* Text name for the task */
-  //   10000,          /* Stack size in words, not bytes */
-  //   nullptr,        /* Parameter passed into the task */
-  //   8,              /* Task priority */
-  //   &taskToFHandle, /* Pointer to store the task handle */
-  //   tskNO_AFFINITY);
+#if ENABLE_TOF_TASK == true
+  xTaskCreatePinnedToCore(
+    taskToF,        /* Function that implements the task */
+    "TOF",          /* Text name for the task */
+    10000,          /* Stack size in words, not bytes */
+    nullptr,        /* Parameter passed into the task */
+    8,              /* Task priority */
+    &taskToFHandle, /* Pointer to store the task handle */
+    tskNO_AFFINITY);
+#endif
 
   xTaskCreatePinnedToCore(
     taskExecuteCommand,        /* Function that implements the task */

@@ -61,6 +61,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
 
+#define ENABLE_TOF_TASK false
 #define ENABLE_SERVER_COMMUNICATION_TASK false
 #define ENABLE_DEBUG_TASK false
 
