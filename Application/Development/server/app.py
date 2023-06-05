@@ -18,7 +18,7 @@ try:
         port=3306,
         database='BalanceBug'
     )
-    print("Database connection ser up")
+    print("Database connection set up")
 except mariadb.Error as e:
     print(f"Error connecting to MariaDB platform: {e}")
 
@@ -81,13 +81,12 @@ def rover():
     # cur.execute("SELECT * FROM Diagnostics")
     # for mac, timestamp, battery, cpu, connection in cur:
     #     print(mac, timestamp, battery, cpu, connection)
-    cur.execute("SELECT * FROM ReplayInfo")
-    for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-        print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+    # cur.execute("SELECT * FROM ReplayInfo")
+    # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
+    #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
     # cur.execute("SELECT * FROM Sessions")
     # for mac, sessionId, SessionNickname in cur:
     #     print(mac, sessionId, sessionNickname)
-    print("hello")
     return make_response(jsonify(resp), 200)
 
 # works
@@ -115,7 +114,6 @@ def allrovers():
     command = "SELECT * FROM Rovers WHERE "+t
     if command == "SELECT * FROM Rovers WHERE ":
         command = "SELECT * FROM Rovers" 
-    print(command)
     try:
         cur.execute(command)
     except mariadb.Error as e:

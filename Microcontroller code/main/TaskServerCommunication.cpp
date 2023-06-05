@@ -45,7 +45,13 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     return http.GET();
   } else if (requestType == 1) {
     http.addHeader("Content-Type", "application/json");
-    String postData = "{\"diagnostics\": {\"battery\":100,\"CPU\":10,\"connection\":100},\"MAC\":1234567,\"nickname\":\"MiWhip\",\"timestamp\":10000,\"position\":[0,0],\"whereat\":0,\"orientation\":90,\"branches\":[],\"beaconangles\":[],\"tofleft\":10,\"tofright\":10,\"battery\":100}";
+    String timestamp = String(millis());
+    String position_x = String(xPosition);
+    String position_y = String(yPosition);
+    String orientation = String(yaw);
+    String tofleft = String(distanceLeft);
+    String tofright = String(distanceRight);
+    String postData = "{\"diagnostics\": {\"battery\":100,\"CPU\":10,\"connection\":100},\"MAC\":1234567,\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":0,\"orientation\":"+orientation+",\"branches\":[],\"beaconangles\":[],\"tofleft\":"+tofleft+",\"tofright\":"+tofright+"}";
     return http.POST(postData);
   }
 }
@@ -80,14 +86,31 @@ void parsePayload(String payload) {
 
   SERIAL_PORT.print("JSON object = ");
   SERIAL_PORT.println(data);
+  // TODO: change these so the rover actually does something
+  String actions[] = data["next_actions"]
+  for (int i=0; i<actions.size(); i++){
+    switch(actions[i].substring(0, 2)){
+      case "st":
+        float dist = (float) actions[i].substring(5);
+        SERIAL_PORT.println(dist);
+      case "sp":
+        SERIAL_PORT.println("spin");
+      case "an":
+        float ang = (float) actions[i].substring(6);
+        SERIAL_PORT.println(ang);
+      case "id":
+        SERIAL_PORT.println("idle");
+      case "up":
+        String newpos = actions[i].substring(16);
+        int spaceindex = newpos.indexOf(" ");
+        float newx = (float) newpos.substring(0, spaceindex);
+        float newy = (float) newpos.substring(spaceindex+1);
+        SERIAL_PORT.print(newx);
+        SERIAL_PORT.println(newy);
+      default:
+        SERIAL_PORT.println("idle");
+    }
 
-  JSONVar keys = data.keys();
-
-  for (uint16_t i = 0; i < keys.length(); i++) {
-    JSONVar value = data[keys[i]];
-    SERIAL_PORT.print(keys[i]);
-    SERIAL_PORT.print(" = ");
-    SERIAL_PORT.println(value);
   }
 }
 
