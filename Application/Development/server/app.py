@@ -33,8 +33,6 @@ def hello():
 @app.route("/rover", methods=["POST"])
 def rover():
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
-    if "nickname" in data:
-        print(data["nickname"])
     r = 0
     flag = True
     for rover in rovers:
@@ -55,9 +53,7 @@ def rover():
             r.sessionId = x[0]
         
         rovers.append(r)
-    cur.execute("SELECT * FROM Rovers;")
-    for mac, nick in cur:
-        print(mac, nick, "HERE")
+    r.nickname = data["nickname"]
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
     resp = {"next_actions" : resp}
     
