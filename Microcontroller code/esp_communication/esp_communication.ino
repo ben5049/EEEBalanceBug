@@ -5,7 +5,7 @@
 const char* ssid = "";
 const char* password = "";
 
-String serverName = "http://3.86.226.249:5000/";
+String serverName = "http://44.211.175.45:5000/";
 
 String hostname = "ESP32 Node";
 
@@ -33,7 +33,11 @@ int makeRequest(int requestType, HTTPClient& http){
   }
   else if (requestType == 1){
     http.addHeader("Content-Type", "application/json");
-    String postData = "{\"diagnostics\": {\"battery\":100,\"CPU\":10,\"connection\":100},\"MAC\":1234567,\"nickname\":\"MiWhip\",\"timestamp\":10000,\"position\":[0,0],\"whereat\":0,\"orientation\":90,\"branches\":[],\"beaconangles\":[],\"tofleft\":10,\"tofright\":10,\"battery\":100}";
+    String timestamp = String(millis());
+    String battery = String(random(1,100));
+    String CPU = String(random(1,60));
+    String connection = String(random(1,3));
+    String postData = "{\"diagnostics\": {\"battery\":"+battery+",\"CPU\":"+CPU+",\"connection\":"+connection+"},\"MAC\":1000101,\"nickname\":\"6ix9ine\",\"timestamp\":"+timestamp+ ",\"position\":[0,0],\"whereat\":0,\"orientation\":90,\"branches\":[],\"beaconangles\":[],\"tofleft\":10,\"tofright\":10,\"battery\":100}";
     return http.POST(postData);
   }
 }
