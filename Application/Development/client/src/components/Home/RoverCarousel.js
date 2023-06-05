@@ -7,6 +7,8 @@ import Rover from './Rover.png';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 
 const RoverCarousel = ({ rovers }) => {
+  console.log("Fetched Rovers: " + rovers);
+
   const settings = {
     dots: true,
     infinite: false,
@@ -24,11 +26,20 @@ const RoverCarousel = ({ rovers }) => {
     //switch to Connected page
   };
 
-  const getOverlayStyle = (overlayText) => {
-    if (overlayText === 'CONNECT') {
+  const getOverlayText = (connectionStatus) => {
+    if (connectionStatus == true){
+      return "CONNECT"
+    }
+    else {
+      return "OFFLINE"
+    }
+  }
+
+  const getOverlayStyle = (connectionStatus) => {
+    if (connectionStatus === true) {
       return 'overlay-green_RoverCarousel';
     }
-    else if (overlayText === 'OFFLINE') {
+    else if (connectionStatus === false) {
       return 'overlay-red_RoverCarousel';
     }
     // Default style for other overlayText values
@@ -39,7 +50,7 @@ const RoverCarousel = ({ rovers }) => {
     <Slider {...settings}>
       {rovers.map((image, index) => (
         <div key={index} className="carousel-item_RoverCarousel">
-          <Link to={image.overlayText === 'OFFLINE' ? '#' : "/connected"} className="page-link" draggable={false}>
+          <Link to={image.connected === true ? "/connected" : '#' } className="page-link" draggable={false}>
             <button
               className="carousel-button_RoverCarousel"
               onClick={() => handleRoverClick(image.MAC, image.nickname)}
@@ -54,8 +65,8 @@ const RoverCarousel = ({ rovers }) => {
                 }}
               />
               <p className="image-caption_RoverCarousel">{image.nickname}</p>
-              <div className={getOverlayStyle(image.overlayText)}>
-                <p>{image.overlayText}</p>
+              <div className={getOverlayStyle(image.connected)}>
+                <p>{getOverlayText(image.connected)}</p>
               </div>
             </button>
           </Link>
