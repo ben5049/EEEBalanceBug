@@ -100,7 +100,7 @@ def allrovers():
     t = t[:-5]
     command = "SELECT * FROM Rovers WHERE "+t
     if command == "SELECT * FROM Rovers WHERE ":
-        return make_response(jsonify([]), 200)
+        command = "SELECT * FROM Rovers" 
     print(command)
     try:
         cur.execute(command)
