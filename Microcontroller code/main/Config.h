@@ -35,9 +35,6 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TOF_LEFT_CHANNEL 2
 #define TOF_SAMPLE_FREQUENCY 10 /* Max = 33Hz, default = 10Hz */
 
-#define FIND_JUNCTIONS_AVG true
-#define FIND_JUNCTIONS_MAX false
-
 /* Spin task */
 #define TASK_SPIN_FREQUENCY 10
 

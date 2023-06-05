@@ -1,0 +1,86 @@
+
+        /* RIGHT: IF we start at a peak then find its maximum */
+        if (rightPeakAtStart && (rightPeakCounter == 1) && (distanceRight > rightPeakAtStartDistance)) {
+          rightPeakAtStartDistance = distanceRight;
+          rightPeakAtStartAngle = yaw + 90.0;
+        }
+
+        /* RIGHT: If the distance rises above the threshold */
+        if ((rightPreviousDistance < peakThreshold) && (distanceRight >= peakThreshold)) {
+
+          /* Save the previous peak if it wasn't a start one */
+          if (((rightPeakCounter > 0) && !rightPeakAtStart) || ((rightPeakCounter > 1) && rightPeakAtStart)) {
+            junctionAngle = wrapAngle(rightPeakAngle - 90.0);
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+          }
+
+          rightPeakCounter++;
+          rightPeakDistance = 0;
+        }
+
+        /* LEFT: IF we start at a peak then find its maximum */
+        if (leftPeakAtStart && (leftPeakCounter == 1) && (distanceLeft > leftPeakAtStartDistance)) {
+          leftPeakAtStartDistance = distanceLeft;
+          leftPeakAtStartAngle = yaw + 90.0;
+        }
+
+        /* LEFT: If the distance rises above the threshold */
+        if ((leftPreviousDistance < peakThreshold) && (distanceLeft >= peakThreshold)) {
+
+          /* Save the previous peak if it wasn't a start one */
+          if (((leftPeakCounter > 0) && !leftPeakAtStart) || ((leftPeakCounter > 1) && leftPeakAtStart)) {
+            junctionAngle = wrapAngle(leftPeakAngle + 90.0);
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+          }
+
+          leftPeakCounter++;
+          leftPeakDistance = 0;
+        }
+
+
+
+
+
+          /* Logic if there was a peak at the start of right and end of left */
+          if (rightPeakAtStart && (leftPeakDistance > peakThreshold)) {
+            if (rightPeakAtStartDistance > leftPeakDistance) {
+              junctionAngle = wrapAngle(rightPeakAtStartAngle - 90.0);
+              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            } else {
+              junctionAngle = wrapAngle(leftPeakAngle + 90.0);
+              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            }
+          } else if (rightPeakAtStart && (leftPeakDistance < peakThreshold)) {
+            junctionAngle = wrapAngle(rightPeakAtStartAngle - 90.0);
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+          } else if (!rightPeakAtStart && (leftPeakDistance > peakThreshold)) {
+            junctionAngle = wrapAngle(leftPeakAngle + 90.0);
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+          }
+
+          /* Logic if there was a peak at the start of left and end of right */
+          if (leftPeakAtStart && (rightPeakDistance > peakThreshold)) {
+            if (leftPeakAtStartDistance > rightPeakDistance) {
+              junctionAngle = wrapAngle(leftPeakAtStartAngle + 90.0);
+              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            } else {
+              junctionAngle = wrapAngle(rightPeakAngle - 90.0);
+              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            }
+          } else if (leftPeakAtStart && (rightPeakDistance < peakThreshold)) {
+            junctionAngle = wrapAngle(leftPeakAtStartAngle + 90.0);
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+          } else if (!leftPeakAtStart && (rightPeakDistance > peakThreshold)) {
+            junctionAngle = wrapAngle(rightPeakAngle - 90.0);
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+          }
+        /* Get largest values of distance and angle it occurs at */
+        if (distanceLeft > leftPeakDistance) {
+          leftPeakDistance = distanceLeft;
+          leftPeakAngle = yaw;
+        }
+        if (distanceRight > rightPeakDistance) {
+          rightPeakDistance = distanceRight;
+          rightPeakAngle = yaw;
+        }
+      }

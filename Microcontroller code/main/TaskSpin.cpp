@@ -1,4 +1,3 @@
-#include "freertos/projdefs.h"
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
@@ -7,6 +6,9 @@
 /* Configuration headers */
 #include "Config.h"
 #include "PinAssignments.h"
+
+/* Arduino libraries */
+#include "Wire.h"
 
 //-------------------------------- Global Variables -------------------------------------
 
@@ -37,14 +39,15 @@ float wrapAngle(float angle) {
   return angle;
 }
 
-void pollFPGA(&redCoordinate, &blueCoordinate, &yellowCoordinate){
+/* Function to poll FPGA */
+void pollFPGA(uint16_t redCoordinate, uint16_t blueCoordinate, uint16_t yellowCoordinate) {
 
   /* Read 1 bytes from the slave */
-  uint8_t bytesReceived = Wire.requestFrom(FPGA_DEV_ADDR, 6);
-  Serial.printf("requestFrom: %u\n", bytesReceived);
-  if((bool)bytesReceived){ //If received more than zero bytes
+  uint8_t bytesReceived = I2C_PORT.requestFrom(FPGA_DEV_ADDR, 6);
+  SERIAL_PORT.printf("requestFrom: %u\n", bytesReceived);
+  if ((bool)bytesReceived) {  //If received more than zero bytes
     uint8_t temp[bytesReceived];
-    Wire.readBytes(temp, bytesReceived);
+    I2C_PORT.readBytes(temp, bytesReceived);
     log_print_buf(temp, bytesReceived);
   }
 }
@@ -125,21 +128,19 @@ void taskSpin(void *pvParameters) {
       /* TODO: Poll FPGA to get x coordinate of each colour on the screen */
       /* TODO: Implement detection to get closest angle of each colour to centre of screen */
 
-
-
       /* Swap from first half to second half */
-  #if SPIN_LEFT == true
+#if SPIN_LEFT == true
       if (firstHalf && (previousYaw < halfWayAngle) && (yaw > halfWayAngle)) {
-  #else
+#else
       if (firstHalf && (previousYaw > halfWayAngle) && (yaw < halfWayAngle)) {
-  #endif
+#endif
 
         /* Calculate the mean and standard deviation */
         mean = sum / counter;
         // standardDeviation = sqrt(sq(((float)sumSquares) / ((float)counter)) - sq(mean));
 
         /* Calculate the threshold for a peak */
-        peakThreshold = mean; // + (2.0 * standardDeviation);
+        peakThreshold = mean;  // + (2.0 * standardDeviation);
 
         /* Check if values start near peak */
         if (distanceRight > peakThreshold) {
@@ -174,65 +175,9 @@ void taskSpin(void *pvParameters) {
 
       /* In the second half, check whether we are facing down a junction, and the approximate angle of that junction */
       else {
-        
+
         // TODO: change detection method to average rising and falling edge angles
-
-        #if FIND_JUNCTIONS_AVG == true
-
-
-
-
-        #elif FIND_JUNCTIONS_MAX == true
-          /* RIGHT: IF we start at a peak then find its maximum */
-          if (rightPeakAtStart && (rightPeakCounter == 1) && (distanceRight > rightPeakAtStartDistance)) {
-            rightPeakAtStartDistance = distanceRight;
-            rightPeakAtStartAngle = yaw + 90.0;
-          }
-
-          /* RIGHT: If the distance rises above the threshold */
-          if ((rightPreviousDistance < peakThreshold) && (distanceRight >= peakThreshold)) {
-
-            /* Save the previous peak if it wasn't a start one */
-            if (((rightPeakCounter > 0) && !rightPeakAtStart) || ((rightPeakCounter > 1) && rightPeakAtStart)){
-              junctionAngle = wrapAngle(rightPeakAngle - 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            }
-
-            rightPeakCounter++;
-            rightPeakDistance = 0;
-          }
-
-          /* LEFT: IF we start at a peak then find its maximum */
-          if (leftPeakAtStart && (leftPeakCounter == 1) && (distanceLeft > leftPeakAtStartDistance)) {
-            leftPeakAtStartDistance = distanceLeft;
-            leftPeakAtStartAngle = yaw + 90.0;
-          }
-
-          /* LEFT: If the distance rises above the threshold */
-          if ((leftPreviousDistance < peakThreshold) && (distanceLeft >= peakThreshold)) {
-
-            /* Save the previous peak if it wasn't a start one */
-            if (((leftPeakCounter > 0) && !leftPeakAtStart) || ((leftPeakCounter > 1) && leftPeakAtStart)){
-              junctionAngle = wrapAngle(leftPeakAngle + 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            }
-
-            leftPeakCounter++;
-            leftPeakDistance = 0;
-          }
-
-          /* Get largest values of distance and angle it occurs at */
-          if (distanceLeft > leftPeakDistance) {
-            leftPeakDistance = distanceLeft;
-            leftPeakAngle = yaw;
-          }
-          if (distanceRight > rightPeakDistance) {
-            rightPeakDistance = distanceRight;
-            rightPeakAngle = yaw;
-          }
-        }
-
-      #endif
+      }
 
       /* If turn complete notification received */
       if (ulTaskNotifyTakeIndexed(0, pdTRUE, 1) != 0) {
@@ -241,39 +186,7 @@ void taskSpin(void *pvParameters) {
         /* If we were in the second half of the turn when it was completed (not necessary, just in case) */
         if (!firstHalf) {
 
-          /* Logic if there was a peak at the start of right and end of left */
-          if (rightPeakAtStart && (leftPeakDistance > peakThreshold)) {
-            if (rightPeakAtStartDistance > leftPeakDistance) {
-              junctionAngle = wrapAngle(rightPeakAtStartAngle - 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            } else {
-              junctionAngle = wrapAngle(leftPeakAngle + 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            }
-          } else if (rightPeakAtStart && (leftPeakDistance < peakThreshold)) {
-              junctionAngle = wrapAngle(rightPeakAtStartAngle - 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-          } else if (!rightPeakAtStart && (leftPeakDistance > peakThreshold)) {
-              junctionAngle = wrapAngle(leftPeakAngle + 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-          }
 
-          /* Logic if there was a peak at the start of left and end of right */
-          if (leftPeakAtStart && (rightPeakDistance > peakThreshold)) {
-            if (leftPeakAtStartDistance > rightPeakDistance) {
-              junctionAngle = wrapAngle(leftPeakAtStartAngle + 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            } else {
-              junctionAngle = wrapAngle(rightPeakAngle - 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            }
-          } else if (leftPeakAtStart && (rightPeakDistance < peakThreshold)) {
-              junctionAngle = wrapAngle(leftPeakAtStartAngle + 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-          } else if (!leftPeakAtStart && (rightPeakDistance > peakThreshold)) {
-              junctionAngle = wrapAngle(rightPeakAngle - 90.0);
-              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-          }
         }
       }
 
