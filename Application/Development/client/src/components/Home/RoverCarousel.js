@@ -3,6 +3,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import './RoverCarousel.css';
+import Rover from './Rover.png';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 
 const RoverCarousel = ({ rovers }) => {
@@ -44,7 +45,7 @@ const RoverCarousel = ({ rovers }) => {
               onClick={() => handleRoverClick(image.MAC, image.nickname)}
             >
               <img
-                src={"https://www.lifepng.com/wp-content/uploads/2020/11/Robot-Sideview-png-hd.png"}
+                src={Rover}
                 alt={image.alt}
                 style={{
                   width: '200px', // Set the desired width

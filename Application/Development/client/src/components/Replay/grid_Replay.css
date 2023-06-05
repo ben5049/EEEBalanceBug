@@ -1,25 +1,247 @@
-  .a_Replay {
-    grid-column: col / span 2;
-    grid-row: row;
-  }
-  
-  .b_Replay {
-    grid-column: col 3 / span 2;
-    grid-row: row;
-  }
-  
-  .c_Replay {
-    grid-column: col;
-    grid-row: row 2;
-  }
-  
-  .d_Replay {
-    grid-column: col 2 / span 3;
-    grid-row: row 2;
-  }
-  
-  .e_Replay {
-    grid-column: col / span 4;
-    grid-row: row 3;
-  }
-  
+.wrapper_Replay {
+  display: grid;
+  grid-gap: 0.2vh;
+  grid-template-columns: repeat(20, [col] 4.88vw);
+  grid-template-rows: repeat(20, [row] 4.88vw);
+  background-color: #ffffff;
+  color: #444;
+  height: 100vh;
+  padding: 0;
+}
+
+.DisplayMAC_Replay {
+  grid-column: col 15 / span 5;
+  grid-row: row 1 / span 1;
+  text-align: center;
+  line-height: 5px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
+}
+
+.StartText_Replay {
+  grid-column: col 14 / span 2;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  line-height: 30px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
+}
+
+.EndText_Replay {
+  grid-column: col 14 / span 2;
+  grid-row: row 7 / span 1;
+  text-align: center;
+  line-height: 30px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
+}
+
+.SelectStartButton_Replay {
+  grid-column: col 16 / span 2;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.SelectEndButton_Replay {
+  grid-column: col 16 / span 2;
+  grid-row: row 7 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.ShortestPathButton_Replay {
+  grid-column: col 14 / span 6;
+  grid-row: row 8 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none;
+  border: none;
+  cursor: pointer;
+}
+
+.SelectStartCoordinates_X_Replay {
+  grid-column: col 18 / span 1;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+}
+
+.SelectStartCoordinates_Y_Replay {
+  grid-column: col 19 / span 1;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+}
+
+.SelectEndCoordinates_X_Replay {
+  grid-column: col 18 / span 1;
+  grid-row: row 7 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+}
+
+.SelectEndCoordinates_Y_Replay {
+  grid-column: col 19 / span 1;
+  grid-row: row 7 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+}
+
+.SelectStartCoordinates_X_Replay input,
+.SelectStartCoordinates_Y_Replay input,
+.SelectEndCoordinates_X_Replay input,
+.SelectEndCoordinates_Y_Replay input {
+  width: 100%; /* Set the input width to 100% */
+  box-sizing: border-box; /* Include padding and border in the width calculation */
+  text-align: center
+}
+
+.Slider_Replay {
+  grid-column: col 14 / span 6;
+  grid-row: row 9 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+  color: green;
+  padding: 3vh;
+}
+
+.SliderElement_Replay {
+  width: 100%;
+}
+
+.ShortestPathStartControls_Rewind {
+  grid-column: col 14 / span 6;
+  grid-row: row 6 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.ShortestPathEndControls_Rewind {
+  grid-column: col 14 / span 6;
+  grid-row: row 7 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.PlaybackControls_Rewind {
+  grid-column: col 14 / span 6;
+  grid-row: row 9 / span 2;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.RewindButton_Replay {
+  grid-column: col 14 / span 1;
+  grid-row: row 10 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.PauseButton_Replay {
+  grid-column: col 15 / span 1;
+  grid-row: row 10 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.FastforwardButton_Replay {
+  grid-column: col 16 / span 1;
+  grid-row: row 10 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.LoopButton_Replay {
+  grid-column: col 19 / span 1;
+  grid-row: row 10 / span 1;
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+}
+
+.MenuButton_Replay {
+  grid-column: col 14 / span 6;
+  grid-row: row 12 / span 1;
+  text-align: center;
+  line-height: 40px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.Map_Replay {
+  grid-column: col 2 / span 11;
+  grid-row: row 2 / span 11;
+}
+
+.Data_Replay {
+  grid-column: col 14 / span 6;
+  grid-row: row 2 / span 3;
+  text-align: center;
+  line-height: 40px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none
+}
+
+.buttons_Replay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  position: relative; /* Add position relative */
+  text-align: center;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  user-select: none;
+  line-height: 70px;
+}

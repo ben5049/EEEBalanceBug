@@ -3,6 +3,7 @@ import RoverCarousel from '../components/Home/RoverCarousel';
 import ReplayCarousel from '../components/Home/ReplayCarousel';
 import '../components/Home/grid_Home.css';
 import '../components/grid.css';
+import AddIcon from '../components/Home/AddIcon.png';
 
 const Home = () => {
 	// Gets from server: MAC, Nickname, Connection status
@@ -16,9 +17,9 @@ const Home = () => {
 		{MAC: '11:11:11:11:11:11', nickname: 'David4', overlayText: 'CONNECT' },
 		{MAC: '13:13:13:13:13:13', nickname: 'Kyle2', overlayText: 'OFFLINE' },
 		{MAC: '00:00:00:00:00:00', nickname: 'David15', overlayText: 'OFFLINE' },
-	  ];
+	];
 
-	  const replays_list = [
+	const replays_list = [
 		{ID: '1', name: 'run1'},
 		{ID: '2', name: 'trial'},
 		{ID: '3', name: 'test'},
@@ -28,9 +29,11 @@ const Home = () => {
 		{ID: '7', name: 'ababa'},
 		{ID: '8', name: 'what'},
 		{ID: '9', name: 'wtf'},
-	  ];
+	];
 
-	  
+	const handleAddRover = () => {
+		console.log("Add New Rover");
+	}
 	
 
 	return (
@@ -45,8 +48,21 @@ const Home = () => {
 				<div className="box RoverCarousel_Home">
 					<RoverCarousel rovers={rovers_list}/>
 				</div>
-				<div className="box AddButton_Home">
-
+				<div className="box-nopadding AddButton_Home">
+					<button onClick={handleAddRover} className='buttons_Home'>
+						<img
+							src={AddIcon}
+							alt={"New Rover"}
+							style={{
+								width: '100px', // Set the desired width
+								height: '100px', // Set the desired height
+								objectFit: 'cover', // Adjust how the image fits within the container
+							}}
+						/>
+						<div className="overlay-Add_Home">
+							<p>New Rover</p>
+						</div>
+					</button>
 				</div>
 				<div className="box ReplaysText_Home">
 					Replays

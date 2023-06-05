@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
 const Slider = () => {
-  const [value, setValue] = useState(50);
+  const [SliderValue, setSliderValue] = useState(0);
 
   const handleSliderChange = (event) => {
-    setValue(event.target.value);
+    setSliderValue(event.target.value);
   };
 
   return (
@@ -14,12 +14,12 @@ const Slider = () => {
           type="range"
           min="1"
           max="100" // TODO: Change to number of entries in map table
-          value={value}
+          value={SliderValue}
           className="slider"
           id="myRange"
           onChange={handleSliderChange}
         />
-        <p>Value: <span id="demo">{value}</span></p>
+        <p>Value: <span id="demo">{SliderValue}</span></p>
       </div>
     </div>
   );
