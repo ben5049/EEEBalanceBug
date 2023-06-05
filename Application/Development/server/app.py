@@ -55,6 +55,9 @@ def rover():
             r.sessionId = x[0]
         
         rovers.append(r)
+    cur.execute("SELECT * FROM Rovers;")
+    for mac, nick in cur:
+        print(mac, nick, "HERE")
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
     resp = {"next_actions" : resp}
     
