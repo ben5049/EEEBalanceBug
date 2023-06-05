@@ -99,6 +99,8 @@ def allrovers():
         t+="MAC != "+str(i)+" AND "
     t = t[:-5]
     command = "SELECT * FROM Rovers WHERE "+t
+    if command == "SELECT * FROM Rovers WHERE ":
+        return make_response(jsonify([]), 200)
     print(command)
     try:
         cur.execute(command)
