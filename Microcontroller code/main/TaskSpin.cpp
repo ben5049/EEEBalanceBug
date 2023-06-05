@@ -76,24 +76,21 @@ void taskSpin(void *pvParameters) {
   static uint16_t peakThreshold;
 
   /* Junction detection */
+  static float angleDifference
   static float junctionAngle;
 
-  static uint8_t rightPeakCounter = 0;
-  static uint8_t leftPeakCounter = 0;
+  static bool rightJunctionAtStart;
+  static float rightJunctionAtStartAngle;
+  static bool leftJunctionAtStart;
+  static float leftJunctionAtStartAngle;
+
+  static uint8_t rightJunctionCounter;
+  static uint8_t leftJunctionCounter;
   static uint16_t rightPreviousDistance;
   static uint16_t leftPreviousDistance;
 
-  static bool rightPeakAtStart = false;
-  static uint16_t rightPeakAtStartDistance;
-  static float rightPeakAtStartAngle;
-  static bool leftPeakAtStart = false;
-  static uint16_t leftPeakAtStartDistance;
-  static float leftPeakAtStartAngle;
-
-  static uint16_t rightPeakDistance;
-  static float rightPeakAngle;
-  static uint16_t leftPeakDistance;
-  static float leftPeakAngle;
+  static float rightRisingEdgeAngle;
+  static float leftRisingEdgeAngle;
 
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TASK_SPIN_FREQUENCY;
@@ -114,11 +111,11 @@ void taskSpin(void *pvParameters) {
       previousYaw = yaw;
 
       sum = 0;
-      sumSquares = 0;
+      // sumSquares = 0;
       counter = 0;
 
-      rightPeakCounter = 0;
-      leftPeakCounter = 0;
+      rightJunctionCounter = 0;
+      leftJunctionCounter = 0;
     }
 
     /* If task is incomplete, execute the task at its set frequency */
@@ -142,23 +139,23 @@ void taskSpin(void *pvParameters) {
         /* Calculate the threshold for a peak */
         peakThreshold = mean;  // + (2.0 * standardDeviation);
 
-        /* Check if values start near peak */
+        /* Check if right sensor starts at a junction */
         if (distanceRight > peakThreshold) {
-          rightPeakAtStart = true;
-          rightPeakAtStartDistance = distanceRight;
-          rightPeakCounter++;
+          rightJunctionAtStart = true;
+          rightJunctionCounter++;
         } else {
-          rightPeakAtStart = false;
+          rightJunctionAtStart = false;
         }
 
+        /* Check if left sensor starts at a junction */
         if (distanceLeft > peakThreshold) {
-          leftPeakAtStart = true;
-          leftPeakAtStartDistance = distanceLeft;
-          leftPeakCounter++;
+          leftJunctionAtStart = true;
+          leftJunctionCounter++;
         } else {
-          leftPeakAtStart = false;
+          leftJunctionAtStart = false;
         }
 
+        /* Update variables */
         rightPreviousDistance = distanceRight;
         leftPreviousDistance = distanceLeft;
 
@@ -171,12 +168,43 @@ void taskSpin(void *pvParameters) {
         sum += distanceRight + distanceLeft;
         // sumSquares += sq(distanceRight) + sq(distanceLeft);
         counter += 2;
+        previousYaw = yaw;
       }
 
       /* In the second half, check whether we are facing down a junction, and the approximate angle of that junction */
       else {
 
         // TODO: change detection method to average rising and falling edge angles
+
+
+        /* Check for left rising edge */
+        if ((leftPreviousDistance < peakThreshold) && (distanceLeft >= peakThreshold)) {
+          leftRisingEdgeAngle = yaw;
+        }
+
+        /* Check for left falling edge */
+        else if ((leftPreviousDistance >= peakThreshold) && (distanceLeft < peakThreshold)) {
+
+          /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
+          if (leftJunctionAtStart && (leftJunctionCounter == 1)) {
+            leftJunctionAtStartAngle = yaw;
+          }
+
+          /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
+          else {
+
+            angleDifference = wrapAngle(yaw - leftRisingEdgeAngle)/2.0;
+            junctionAngle = leftRisingEdgeAngle + angleDifference;
+
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            leftPeakCounter++;
+          }
+        }
+
+
+        /* Keep track of previous values for next loop */
+        rightPreviousDistance = distanceRight;
+        leftPreviousDistance = distanceLeft;
       }
 
       /* If turn complete notification received */
@@ -186,14 +214,11 @@ void taskSpin(void *pvParameters) {
         /* If we were in the second half of the turn when it was completed (not necessary, just in case) */
         if (!firstHalf) {
 
+        } else {
 
+          /* TODO: What to do if spin task returns while not in second half (error occured) */
         }
       }
-
-      /* Keep track of previous values for next loop */
-      rightPreviousDistance = distanceRight;
-      leftPreviousDistance = distanceLeft;
-      previousYaw = yaw;
     }
   }
 }
