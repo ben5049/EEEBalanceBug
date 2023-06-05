@@ -18,7 +18,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -415,6 +415,11 @@
  <interface name="clk_sdram" internal="altpll_0.c1" type="clock" dir="start" />
  <interface name="clk_vga" internal="altpll_0.c3" type="clock" dir="start" />
  <interface name="d8m_xclkin" internal="altpll_0.c4" type="clock" dir="start" />
+ <interface
+   name="eee_imgproc_0_conduit_i2c"
+   internal="EEE_IMGPROC_0.conduit_i2c"
+   type="conduit"
+   dir="end" />
  <interface
    name="eee_imgproc_0_conduit_mode"
    internal="EEE_IMGPROC_0.conduit_mode"

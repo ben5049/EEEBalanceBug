@@ -43,7 +43,9 @@
 			terasic_camera_0_conduit_end_LVAL         : in    std_logic                     := 'X';             -- LVAL
 			terasic_camera_0_conduit_end_PIXCLK       : in    std_logic                     := 'X';             -- PIXCLK
 			uart_0_rx_tx_rxd                          : in    std_logic                     := 'X';             -- rxd
-			uart_0_rx_tx_txd                          : out   std_logic                                         -- txd
+			uart_0_rx_tx_txd                          : out   std_logic;                                        -- txd
+			eee_imgproc_0_conduit_i2c_new_signal      : in    std_logic                     := 'X';             -- new_signal
+			eee_imgproc_0_conduit_i2c_new_signal_1    : inout std_logic                     := 'X'              -- new_signal_1
 		);
 	end component Qsys;
 
@@ -92,6 +94,8 @@
 			terasic_camera_0_conduit_end_LVAL         => CONNECTED_TO_terasic_camera_0_conduit_end_LVAL,         --                                 .LVAL
 			terasic_camera_0_conduit_end_PIXCLK       => CONNECTED_TO_terasic_camera_0_conduit_end_PIXCLK,       --                                 .PIXCLK
 			uart_0_rx_tx_rxd                          => CONNECTED_TO_uart_0_rx_tx_rxd,                          --                     uart_0_rx_tx.rxd
-			uart_0_rx_tx_txd                          => CONNECTED_TO_uart_0_rx_tx_txd                           --                                 .txd
+			uart_0_rx_tx_txd                          => CONNECTED_TO_uart_0_rx_tx_txd,                          --                                 .txd
+			eee_imgproc_0_conduit_i2c_new_signal      => CONNECTED_TO_eee_imgproc_0_conduit_i2c_new_signal,      --        eee_imgproc_0_conduit_i2c.new_signal
+			eee_imgproc_0_conduit_i2c_new_signal_1    => CONNECTED_TO_eee_imgproc_0_conduit_i2c_new_signal_1     --                                 .new_signal_1
 		);
 
