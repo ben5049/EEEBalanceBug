@@ -20,7 +20,7 @@ static ICM_20948_SPI myICM;   /* Create an ICM_20948_SPI object */
 volatile float pitch;
 volatile float yaw;
 volatile float roll;
-
+volatile float angularVelocity;
 static float frequencyIMU;
 
 /* Task handles */
@@ -231,6 +231,7 @@ void taskIMU(void *pvParameters) {
 
       yaw = euler.angle.yaw;
       pitch = euler.angle.pitch;
+      angularVelocity = myICM.gyrY();
 
     }
   }
