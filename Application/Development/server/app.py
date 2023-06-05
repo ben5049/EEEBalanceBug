@@ -2,12 +2,13 @@ from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
+from time import time
 # TODO: error handling
 
 app = Flask(__name__)
 CORS(app)
 
-hostip = '54.163.169.94'
+hostip = '44.211.175.45'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -54,6 +55,7 @@ def rover():
         
         rovers.append(r)
     r.nickname = data["nickname"]
+    r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
     resp = {"next_actions" : resp}
     
@@ -84,11 +86,14 @@ def allrovers():
     d = []
     disallowedMacs = []
     for rover in rovers:
+        if time()-rover.lastSeen > 30:
+            rovers.remove(rover)
+    
+    for rover in rovers:
         temp = {}
         temp["MAC"] = rover.name
         disallowedMacs.append(rover.name)
         temp["nickname"] = rover.nickname
-        temp["connected"] = True
         temp["sessionid"] = rover.sessionId
         d.append(temp)
     # get the rest of unconnected rovers from database
