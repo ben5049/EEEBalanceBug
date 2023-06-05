@@ -15,14 +15,13 @@
 
 /* IMU */
 static ICM_20948_SPI myICM;   /* Create an ICM_20948_SPI object */
-volatile static float acc[3]; /* x, y ,z */
-volatile static float gyr[3]; /* x, y ,z */
-volatile static float mag[3]; /* x, y ,z */
 
 /* IMU DMP */
 volatile float pitch;
 volatile float yaw;
 volatile float roll;
+
+static float frequencyIMU;
 
 /* Task handles */
 TaskHandle_t taskIMUHandle = nullptr;
@@ -57,7 +56,11 @@ void configureIMU() {
   myICM.sleep(false);
   myICM.lowPower(false);
 
-  /* Initialise DMP*/
+/* Initialise DMP if enabled*/
+#if ENABLE_DMP == true
+
+  frequencyIMU = IMU_SAMPLING_FREQUENCY_DMP;
+
   static bool success = true;
   success &= (myICM.initializeDMP() == ICM_20948_Stat_Ok);
   success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_GAME_ROTATION_VECTOR) == ICM_20948_Stat_Ok);
@@ -76,6 +79,28 @@ void configureIMU() {
       delay(1000);
     }
   }
+
+/* If DMP is not initialised run the IMU faster */
+#else
+
+  frequencyIMU = IMU_SAMPLING_FREQUENCY_NO_DMP;
+
+  /* Set to continuous sample mode */
+  myICM.setSampleMode((ICM_20948_Internal_Acc | ICM_20948_Internal_Gyr), ICM_20948_Sample_Mode_Continuous);
+  if (myICM.status != ICM_20948_Stat_Ok) {
+    SERIAL_PORT.print(F("setSampleMode returned: "));
+    SERIAL_PORT.println(myICM.statusString());
+  }
+
+  /* Set the sample rate */
+  ICM_20948_smplrt_t mySmplrt;
+  mySmplrt.g = 1; /* 1.1 kHz/(1+GYRO_SMPLRT_DIV[7:0]), default = 19 */
+  mySmplrt.a = 1; /* 1.125 kHz/(1+ACCEL_SMPLRT_DIV[11:0]), default = 19 */
+  myICM.setSampleRate(ICM_20948_Internal_Gyr, mySmplrt);
+  SERIAL_PORT.print(F("setSampleRate returned: "));
+  SERIAL_PORT.println(myICM.statusString());
+
+#endif
 
   /* Start the magnetometer */
   myICM.startupMagnetometer();
@@ -118,7 +143,7 @@ void taskIMU(void *pvParameters) {
   FusionOffset offset;
   FusionAhrs ahrs;
 
-  FusionOffsetInitialise(&offset, IMU_SAMPLING_FREQUENCY);
+  FusionOffsetInitialise(&offset, frequencyIMU);
   FusionAhrsInitialise(&ahrs);
 
   /* Set AHRS algorithm settings */
@@ -127,7 +152,7 @@ void taskIMU(void *pvParameters) {
     .gain = 0.5f,
     .accelerationRejection = 10.0f,
     .magneticRejection = 20.0f,
-    .rejectionTimeout = 1 * IMU_SAMPLING_FREQUENCY, /* 1 seconds */
+    .rejectionTimeout = 100 * frequencyIMU,
   };
 
   FusionAhrsSetSettings(&ahrs, &settings);
@@ -142,7 +167,7 @@ void taskIMU(void *pvParameters) {
 
   /* Start the loop */
   while (true) {
-    
+
     /* Wait for the data ready interrupt before sampling the IMU */
     ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
@@ -150,9 +175,12 @@ void taskIMU(void *pvParameters) {
     if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE) {
       timestamp = micros();
       myICM.getAGMT();
+#if ENABLE_DMP == true
       myICM.readDMPdataFromFIFO(&angle_data);
+#endif
       xSemaphoreGive(mutexSPI);
 
+#if ENABLE_DMP == true
       /* Process the quaternion data from the DMP into Euler angles */
       if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) {  // Was valid data available?
         if ((angle_data.header & DMP_header_bitmap_Quat6) > 0) {
@@ -180,6 +208,8 @@ void taskIMU(void *pvParameters) {
         }
       }
 
+#endif
+
       // Acquire latest sensor data
       FusionVector gyroscope = { myICM.gyrX(), myICM.gyrY(), myICM.gyrZ() };
       FusionVector accelerometer = { myICM.accX() / 1000.0, myICM.accY() / 1000.0, myICM.accZ() / 1000.0 };
@@ -196,13 +226,12 @@ void taskIMU(void *pvParameters) {
       FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
 
       // Print algorithm outputs
-      // const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
-      const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
+      const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
+      // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
 
-      /* Store linear acceleration in volatile array so it can be accessed outside of this task */
-      // acceleration[0] = linearAcceleration.axis.x;
-      // acceleration[1] = linearAcceleration.axis.y;
-      // acceleration[2] = linearAcceleration.axis.z;
+      yaw = euler.angle.yaw;
+      pitch = euler.angle.pitch;
+
     }
   }
 }

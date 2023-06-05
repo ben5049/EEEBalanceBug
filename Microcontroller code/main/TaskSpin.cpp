@@ -13,14 +13,9 @@
 //-------------------------------- Global Variables -------------------------------------
 
 /* Variables */
-float junctionAngles[MAX_NUMBER_OF_JUNCTIONS];
-uint8_t numberOfJunctionsFound = 0;
 
 /* Task handles */
 TaskHandle_t taskSpinHandle = nullptr;
-
-extern volatile uint16_t distanceRight;
-extern volatile uint16_t distanceLeft;
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -76,7 +71,7 @@ void taskSpin(void *pvParameters) {
   static uint16_t peakThreshold;
 
   /* Junction detection */
-  static float angleDifference
+  static float angleDifference;
   static float junctionAngle;
 
   static bool rightJunctionAtStart;
@@ -176,6 +171,29 @@ void taskSpin(void *pvParameters) {
 
         // TODO: change detection method to average rising and falling edge angles
 
+        /* Check for right rising edge */
+        if ((rightPreviousDistance < peakThreshold) && (distanceRight >= peakThreshold)) {
+          rightRisingEdgeAngle = yaw;
+        }
+
+        /* Check for right falling edge */
+        else if ((rightPreviousDistance >= peakThreshold) && (distanceRight < peakThreshold)) {
+
+          /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
+          if (rightJunctionAtStart && (rightJunctionCounter == 1)) {
+            rightJunctionAtStartAngle = yaw;
+          }
+
+          /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
+          else {
+
+            angleDifference = (yaw - rightRisingEdgeAngle) / 2.0;
+            junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90.0);
+
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            rightJunctionCounter++;
+          }
+        }
 
         /* Check for left rising edge */
         if ((leftPreviousDistance < peakThreshold) && (distanceLeft >= peakThreshold)) {
@@ -193,11 +211,11 @@ void taskSpin(void *pvParameters) {
           /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
           else {
 
-            angleDifference = wrapAngle(yaw - leftRisingEdgeAngle)/2.0;
-            junctionAngle = leftRisingEdgeAngle + angleDifference;
+            angleDifference = (yaw - leftRisingEdgeAngle) / 2.0;
+            junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0);
 
             xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            leftPeakCounter++;
+            leftJunctionCounter++;
           }
         }
 
@@ -211,8 +229,18 @@ void taskSpin(void *pvParameters) {
       if (ulTaskNotifyTakeIndexed(0, pdTRUE, 1) != 0) {
         completed = true;
 
-        /* If we were in the second half of the turn when it was completed (not necessary, just in case) */
+        /* Make sure the robot was in the second half of the turn when it was completed (not necessary, just in case) */
         if (!firstHalf) {
+
+          /* Logic if there was a junction at the start of right and end of left */
+          if (rightJunctionAtStart) {
+
+
+            angleDifference = (leftRisingEdgeAngle - rightJunctionAtStartAngle) / 2.0;
+            junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0);
+
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+          }
 
         } else {
 

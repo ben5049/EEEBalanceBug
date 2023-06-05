@@ -21,8 +21,10 @@ Pin assignments for Group 1's EEEBalanceBug
 
 /* SPI & IMU */
 #define SPI_PORT SPI    /* Desired SPI port */
-#define SPI_FREQ 500000 /* Override the default SPI frequency */
-#define IMU_SAMPLING_FREQUENCY 57.49
+#define SPI_FREQ 2000000 /* Override the default SPI frequency */
+#define IMU_SAMPLING_FREQUENCY_DMP 57.49
+#define IMU_SAMPLING_FREQUENCY_NO_DMP 500
+#define ENABLE_DMP false
 
 /* UART */
 #define SERIAL_PORT Serial

@@ -94,7 +94,7 @@ void setup() {
   configureIMU();
 
   /* Start the ToF sensors */
-  configureToF();
+  // configureToF();
 
 #if ENABLE_SERVER_COMMUNICATION_TASK == true
   /* Begin WiFi */
@@ -136,68 +136,68 @@ void setup() {
   /* Create Tasks */
 
   xTaskCreatePinnedToCore(
-    taskIMU,         /* Function that implements the task */
-    "IMU",           /* Text name for the task */
-    10000,           /* Stack size in words, not bytes */
-    nullptr,         /* Parameter passed into the task */
-    10,              /* Task priority */
+    taskIMU,        /* Function that implements the task */
+    "IMU",          /* Text name for the task */
+    10000,          /* Stack size in words, not bytes */
+    nullptr,        /* Parameter passed into the task */
+    10,             /* Task priority */
     &taskIMUHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 
   xTaskCreatePinnedToCore(
-    taskMovement,         /* Function that implements the task */
-    "MOVEMENT",           /* Text name for the task */
-    5000,                 /* Stack size in words, not bytes */
-    nullptr,              /* Parameter passed into the task */
-    8,                    /* Task priority */
+    taskMovement,        /* Function that implements the task */
+    "MOVEMENT",          /* Text name for the task */
+    5000,                /* Stack size in words, not bytes */
+    nullptr,             /* Parameter passed into the task */
+    8,                   /* Task priority */
     &taskMovementHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 
+  // xTaskCreatePinnedToCore(
+  //   taskToF,        /* Function that implements the task */
+  //   "TOF",          /* Text name for the task */
+  //   10000,          /* Stack size in words, not bytes */
+  //   nullptr,        /* Parameter passed into the task */
+  //   8,              /* Task priority */
+  //   &taskToFHandle, /* Pointer to store the task handle */
+  //   tskNO_AFFINITY);
+
   xTaskCreatePinnedToCore(
-    taskToF,         /* Function that implements the task */
-    "TOF",           /* Text name for the task */
-    10000,            /* Stack size in words, not bytes */
-    nullptr,         /* Parameter passed into the task */
-    8,               /* Task priority */
-    &taskToFHandle, /* Pointer to store the task handle */
+    taskExecuteCommand,        /* Function that implements the task */
+    "COMMAND",                 /* Text name for the task */
+    2000,                      /* Stack size in words, not bytes */
+    nullptr,                   /* Parameter passed into the task */
+    10,                        /* Task priority */
+    &taskExecuteCommandHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 
   xTaskCreatePinnedToCore(
-    taskExecuteCommand,         /* Function that implements the task */
-    "COMMAND",           /* Text name for the task */
-    2000,            /* Stack size in words, not bytes */
-    nullptr,         /* Parameter passed into the task */
-    10,               /* Task priority */
-    &taskExecuteCommandHandle, /* Pointer to store the task handle */
-    tskNO_AFFINITY); 
-
-  xTaskCreatePinnedToCore(
-    taskSpin,         /* Function that implements the task */
-    "SPIN",           /* Text name for the task */
+    taskSpin,        /* Function that implements the task */
+    "SPIN",          /* Text name for the task */
     5000,            /* Stack size in words, not bytes */
     nullptr,         /* Parameter passed into the task */
-    10,               /* Task priority */
+    10,              /* Task priority */
     &taskSpinHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 
 #if ENABLE_SERVER_COMMUNICATION_TASK == true
   xTaskCreatePinnedToCore(
-    taskServerCommunication,         /* Function that implements the task */
-    "SERVER_COMMS",                  /* Text name for the task */
-    10000,                           /* Stack size in words, not bytes */
-    nullptr,                         /* Parameter passed into the task */
-    8,                               /* Task priority */
+    taskServerCommunication,        /* Function that implements the task */
+    "SERVER_COMMS",                 /* Text name for the task */
+    10000,                          /* Stack size in words, not bytes */
+    nullptr,                        /* Parameter passed into the task */
+    8,                              /* Task priority */
     &taskServerCommunicationHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
 
 #if ENABLE_DEBUG_TASK == true
   xTaskCreatePinnedToCore(
-    taskDebug,         /* Function that implements the task */
-    "DEBUG",           /* Text name for the task */
-    1000,              /* Stack size in words, not bytes */
-    nullptr,           /* Parameter passed into the task */
-    4,                 /* Task priority */
+    taskDebug,        /* Function that implements the task */
+    "DEBUG",          /* Text name for the task */
+    1000,             /* Stack size in words, not bytes */
+    nullptr,          /* Parameter passed into the task */
+    4,                /* Task priority */
     &taskDebugHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
@@ -206,15 +206,19 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
   // attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
   // attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
-  timerAttachInterrupt(motorTimer, &onTimer, true);
+  // timerAttachInterrupt(motorTimer, &onTimer, true);
 }
 
 //--------------------------------- Loop -----------------------------------------------
 
-void loop() {  
-  vTaskDelay(5000);
-  SERIAL_PORT.println("Sending start command");
-  robotCommand command = FIND_BEACONS;
-  xQueueSend(commandQueue, &command, 0);
-  vTaskDelay(25000);
+void loop() {
+  vTaskDelay(100);
+  SERIAL_PORT.print("Pitch:");
+  SERIAL_PORT.print(pitch);
+  SERIAL_PORT.print(", Yaw:");
+  SERIAL_PORT.println(yaw);
+  // SERIAL_PORT.println("Sending start command");
+  // robotCommand command = FIND_BEACONS;
+  // xQueueSend(commandQueue, &command, 0);
+  // vTaskDelay(25000);
 }
