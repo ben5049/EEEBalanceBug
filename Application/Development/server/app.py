@@ -129,7 +129,7 @@ def allrovers():
     return make_response(jsonify(d), 200)
 
 # works
-@app.route("/client/replay", methods=["GET"])
+@app.route("/client/replay", methods=["POST"])
 def replay():
     data = request.get_json()
     try:
@@ -158,7 +158,7 @@ def sessions():
     return make_response(jsonify(d), 200)
 
 # works
-@app.route("/client/diagnostics", methods=["GET"])
+@app.route("/client/diagnostics", methods=["POST"])
 def diagnostics():
     data = request.get_json()
     try:
@@ -242,7 +242,7 @@ def addnickname():
 
     return make_response(jsonify({"success":"successfully changed rover nickname"}), 200)
 
-@app.route("/client/shortestpath", methods=["GET"])
+@app.route("/client/shortestpath", methods=["POST"])
 def findShortestPath():
     data = request.get_json()
     try:
