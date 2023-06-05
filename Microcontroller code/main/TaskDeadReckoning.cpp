@@ -13,14 +13,9 @@
 //-------------------------------- Global Variables -------------------------------------
 
 TaskHandle_t taskDeadReckoningHandle = nullptr;
-uint16_t stepDifferenceThreshold = 10;
-int32_t priorStepperLeftSteps = 0;
-int32_t priorStepperLeftSteps = 0;
-float rotationsToDistance = PI*WHEEL_DIAMETER; // converts wheel rotations to units of xPos, yPos (mm)
 
 volatile float xPosition;
 volatile float yPosition;
-volatile uint16_t currentCommand;
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -30,6 +25,12 @@ volatile uint16_t currentCommand;
 void taskDeadReckoning(void *pvParameters) {
 
   (void)pvParameters;
+
+  /* Task variables */
+  uint16_t stepDifferenceThreshold = 10;
+  int32_t priorStepperRightSteps = 0;
+  int32_t priorStepperLeftSteps = 0;
+  float rotationsToDistance = PI*WHEEL_DIAMETER; // converts wheel rotations to units of xPos, yPos (mm)
 
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TASK_DEAD_RECKONING_FREQUENCY;
