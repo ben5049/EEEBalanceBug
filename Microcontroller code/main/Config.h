@@ -10,6 +10,8 @@ Pin assignments for Group 1's EEEBalanceBug
 #define CONFIG_H
 
 #define STEPS 1600 /* Steps per revolution */
+#define ROVER_WIDTH 159 /* Wheel-to-wheel width in mm*/
+#define WHEEL_DIAMETER 40 /* Wheel diameter in mm*/
 #define MIN_RPM 10
 #define MAX_RPM 1000
 #define MAX_MAZE_DIMENSION 3000 /* Largest dimension of the maze in mm, used for rejecting anomalous ToF sensor data */
