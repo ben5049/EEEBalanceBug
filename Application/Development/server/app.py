@@ -5,7 +5,7 @@ import mariadb
 
 app = Flask(__name__)
 
-hostip = '3.88.27.3'
+hostip = '54.163.169.94'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -15,6 +15,7 @@ try:
         port=3306,
         database='BalanceBug'
     )
+    print("Database connection ser up")
 except mariadb.Error as e:
     print(f"Error connecting to MariaDB platform: {e}")
 
