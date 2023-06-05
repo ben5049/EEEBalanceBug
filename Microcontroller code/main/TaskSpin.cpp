@@ -177,54 +177,62 @@ void taskSpin(void *pvParameters) {
         
         // TODO: change detection method to average rising and falling edge angles
 
-        /* RIGHT: IF we start at a peak then find its maximum */
-        if (rightPeakAtStart && (rightPeakCounter == 1) && (distanceRight > rightPeakAtStartDistance)) {
-          rightPeakAtStartDistance = distanceRight;
-          rightPeakAtStartAngle = yaw + 90.0;
-        }
+        #if FIND_JUNCTIONS_AVG == true
 
-        /* RIGHT: If the distance rises above the threshold */
-        if ((rightPreviousDistance < peakThreshold) && (distanceRight >= peakThreshold)) {
 
-          /* Save the previous peak if it wasn't a start one */
-          if (((rightPeakCounter > 0) && !rightPeakAtStart) || ((rightPeakCounter > 1) && rightPeakAtStart)){
-            junctionAngle = wrapAngle(rightPeakAngle - 90.0);
-            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+
+
+        #elif FIND_JUNCTIONS_MAX == true
+          /* RIGHT: IF we start at a peak then find its maximum */
+          if (rightPeakAtStart && (rightPeakCounter == 1) && (distanceRight > rightPeakAtStartDistance)) {
+            rightPeakAtStartDistance = distanceRight;
+            rightPeakAtStartAngle = yaw + 90.0;
           }
 
-          rightPeakCounter++;
-          rightPeakDistance = 0;
-        }
+          /* RIGHT: If the distance rises above the threshold */
+          if ((rightPreviousDistance < peakThreshold) && (distanceRight >= peakThreshold)) {
 
-        /* LEFT: IF we start at a peak then find its maximum */
-        if (leftPeakAtStart && (leftPeakCounter == 1) && (distanceLeft > leftPeakAtStartDistance)) {
-          leftPeakAtStartDistance = distanceLeft;
-          leftPeakAtStartAngle = yaw + 90.0;
-        }
+            /* Save the previous peak if it wasn't a start one */
+            if (((rightPeakCounter > 0) && !rightPeakAtStart) || ((rightPeakCounter > 1) && rightPeakAtStart)){
+              junctionAngle = wrapAngle(rightPeakAngle - 90.0);
+              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            }
 
-        /* LEFT: If the distance rises above the threshold */
-        if ((leftPreviousDistance < peakThreshold) && (distanceLeft >= peakThreshold)) {
-
-          /* Save the previous peak if it wasn't a start one */
-          if (((leftPeakCounter > 0) && !leftPeakAtStart) || ((leftPeakCounter > 1) && leftPeakAtStart)){
-            junctionAngle = wrapAngle(leftPeakAngle + 90.0);
-            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            rightPeakCounter++;
+            rightPeakDistance = 0;
           }
 
-          leftPeakCounter++;
-          leftPeakDistance = 0;
+          /* LEFT: IF we start at a peak then find its maximum */
+          if (leftPeakAtStart && (leftPeakCounter == 1) && (distanceLeft > leftPeakAtStartDistance)) {
+            leftPeakAtStartDistance = distanceLeft;
+            leftPeakAtStartAngle = yaw + 90.0;
+          }
+
+          /* LEFT: If the distance rises above the threshold */
+          if ((leftPreviousDistance < peakThreshold) && (distanceLeft >= peakThreshold)) {
+
+            /* Save the previous peak if it wasn't a start one */
+            if (((leftPeakCounter > 0) && !leftPeakAtStart) || ((leftPeakCounter > 1) && leftPeakAtStart)){
+              junctionAngle = wrapAngle(leftPeakAngle + 90.0);
+              xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+            }
+
+            leftPeakCounter++;
+            leftPeakDistance = 0;
+          }
+
+          /* Get largest values of distance and angle it occurs at */
+          if (distanceLeft > leftPeakDistance) {
+            leftPeakDistance = distanceLeft;
+            leftPeakAngle = yaw;
+          }
+          if (distanceRight > rightPeakDistance) {
+            rightPeakDistance = distanceRight;
+            rightPeakAngle = yaw;
+          }
         }
 
-        /* Get largest values of distance and angle it occurs at */
-        if (distanceLeft > leftPeakDistance) {
-          leftPeakDistance = distanceLeft;
-          leftPeakAngle = yaw;
-        }
-        if (distanceRight > rightPeakDistance) {
-          rightPeakDistance = distanceRight;
-          rightPeakAngle = yaw;
-        }
-      }
+      #endif
 
       /* If turn complete notification received */
       if (ulTaskNotifyTakeIndexed(0, pdTRUE, 1) != 0) {

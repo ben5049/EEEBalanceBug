@@ -28,6 +28,7 @@ extern volatile float yaw;
 extern volatile uint16_t distanceRight;
 extern volatile uint16_t distanceLeft;
 extern volatile float spinStartingAngle;
+extern volatile float xPosition;
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
