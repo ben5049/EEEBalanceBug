@@ -94,6 +94,7 @@ def allrovers():
         temp["MAC"] = rover.name
         disallowedMacs.append(rover.name)
         temp["nickname"] = rover.nickname
+        temp["connected"] = True
         temp["sessionid"] = rover.sessionId
         d.append(temp)
     # get the rest of unconnected rovers from database
