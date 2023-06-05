@@ -30,6 +30,7 @@ def hello():
 # rover communication - works
 @app.route("/rover", methods=["POST"])
 def rover():
+    print("hello")
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     r = 0
     flag = True
@@ -38,6 +39,7 @@ def rover():
             r = rover
             flag = False
             break
+    print("hello")
     if flag:
         r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
         r.pause = True
@@ -51,7 +53,7 @@ def rover():
             r.sessionId = x[0]
         
         rovers.append(r)
-
+    print("hello")
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
     resp = {"next_actions" : resp}
     
@@ -73,7 +75,7 @@ def rover():
     # cur.execute("SELECT * FROM Sessions")
     # for mac, sessionId, SessionNickname in cur:
     #     print(mac, sessionId, sessionNickname)
-
+    print("hello")
     return make_response(jsonify(resp), 200)
 
 # works
