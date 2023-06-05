@@ -230,7 +230,7 @@ def findShortestPath():
     for rover in rovers:
         if rover.name == mac:
             tree = rover.tree
-            flag= = False
+            flag= False
     if flag:
         return make_response(jsonify({"error":"Incorrectly formatted request: invalid MAC address"}), 400)
     P = dijkstra.dijkstra(tree, start)
