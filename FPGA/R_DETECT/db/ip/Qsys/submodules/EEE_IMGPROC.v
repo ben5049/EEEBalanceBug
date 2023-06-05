@@ -63,10 +63,10 @@ input									source_ready;
 output								source_sop;
 output								source_eop;
 
-//HSV conversion
+//HSV
 output reg[8:0] hsv_h; //0-360
-output reg[7:0] hsv_s, hsv_v; //0-255
-
+output reg[7:0] hsv_s; //0-255
+output reg[7:0] hsv_v; //0-255
 
 // conduit export
 input                         mode;
@@ -137,10 +137,6 @@ assign ryb_high = red_detect ? {8'hff, 8'h0, 8'h0} :  //red area
 						
 // Show bounding box
 wire [23:0] new_image;
-//wire bb_active;
-//assign bb_active = (x == left) | (x == right) | (y == top) | (y == bottom);
-//assign new_image = bb_active ? bb_col : red_high;
-
 wire rbb_active, ybb_active, bbb_active;
 assign rbb_active = (x == r_left) | (x == r_right) | (y == r_top) | (y == r_bottom);
 assign ybb_active = (x == y_left) | (x == y_right) | (y == y_top) | (y == y_bottom);
@@ -176,23 +172,48 @@ always@(posedge clk) begin
 	end
 end
 
-//Find first and last red pixels
-//reg [10:0] x_min, y_min, x_max, y_max;
-//always@(posedge clk) begin
-	//if (red_detect & in_valid) begin	//Update bounds when the pixel is red
-		//if (x < x_min) x_min <= x;
-		//if (x > x_max) x_max <= x;
-		//if (y < y_min) y_min <= y;
-		//y_max <= y;
-	//end
-	//if (sop & in_valid) begin	//Reset bounds on start of packet
-		//x_min <= IMAGE_W-11'h1;
-		//x_max <= 0;
-		//y_min <= IMAGE_H-11'h1;
-		//y_max <= 0;
-	//end
-//endZZ
+// Average x-coordinates for each colour
+reg [10:0] sum_red;
+reg [10:0] sum_yellow;
+reg [10:0] sum_blue;
+reg [10:0] count_red;
+reg [10:0] count_yellow;
+reg [10:0] count_blue;
+reg [10:0] r_x_avg;
+reg [10:0] y_x_avg;
+reg [10:0] b_x_avg;
 
+always @(posedge clk) begin
+    if (in_valid) begin
+        if (red_detect) begin
+            sum_red <= sum_red + x;
+            count_red <= count_red + 1;
+        end
+        if (yellow_detect) begin
+            sum_yellow <= sum_yellow + x;
+            count_yellow <= count_yellow + 1;
+        end
+        if (blue_detect) begin
+            sum_blue <= sum_blue + x;
+            count_blue <= count_blue + 1;
+        end
+    end
+end
+
+always @(posedge clk) begin
+    if (in_valid) begin
+        if (count_red != 0)
+            r_x_avg <= sum_red / count_red;
+        if (count_yellow != 0)
+            y_x_avg <= sum_yellow / count_yellow;
+        if (count_blue != 0)
+            b_x_avg <= sum_blue / count_blue;
+    end
+end
+	
+
+ 
+// Find first and last pixels for each colour detected
 reg [10:0] r_x_min, r_y_min, r_x_max, r_y_max;
 reg [10:0] y_x_min, y_y_min, y_x_max, y_y_max;
 reg [10:0] b_x_min, b_y_min, b_x_max, b_y_max;
