@@ -20,7 +20,7 @@ static ICM_20948_SPI myICM;   /* Create an ICM_20948_SPI object */
 volatile float pitch;
 volatile float yaw;
 volatile float roll;
-
+volatile float angularVelocity;
 static float frequencyIMU;
 
 /* Task handles */
@@ -152,7 +152,7 @@ void taskIMU(void *pvParameters) {
     .gain = 0.5f,
     .accelerationRejection = 10.0f,
     .magneticRejection = 20.0f,
-    .rejectionTimeout = 100 * frequencyIMU,
+    .rejectionTimeout = 5 * frequencyIMU,
   };
 
   FusionAhrsSetSettings(&ahrs, &settings);
@@ -231,6 +231,7 @@ void taskIMU(void *pvParameters) {
 
       yaw = euler.angle.yaw;
       pitch = euler.angle.pitch;
+      angularVelocity = myICM.gyrY();
 
     }
   }
