@@ -92,7 +92,7 @@ def allrovers():
     # get the rest of unconnected rovers from database
     t = ""
     for i in disallowedMacs:
-        t+="MAC <> "+str(i)+" AND "
+        t+="MAC != "+str(i)+" AND "
     t = t[:-5]
     command = "SELECT * FROM Rovers WHERE "+t
     cur.execute(command)
