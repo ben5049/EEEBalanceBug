@@ -91,12 +91,12 @@ wire         sop, eop, in_valid, out_ready;
 ////////////////////////////////////////////////////////////////////////
 
 //hsv, red
-assign red_detect_h = ((9'd10< hsv_h && hsv_h < 9'd30 )|| (9'd350 < hsv_h && hsv_h < 9'd360)) ? 1'b1 : 1'b0;
+assign red_detect_h = ((9'd0< hsv_h && hsv_h < 9'd10 )|| (9'd350 < hsv_h && hsv_h < 9'd360)) ? 1'b1 : 1'b0;
 assign red_detect_s = (8'd180 < hsv_s) ? 1'b1 : 1'b0;
 assign red_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
 
 //hsv, yellow
-assign yellow_detect_h = (9'd40 < hsv_h && hsv_h < 9'd60) ? 1'b1 : 1'b0;
+assign yellow_detect_h = (9'd30 < hsv_h && hsv_h < 9'd40) ? 1'b1 : 1'b0;
 assign yellow_detect_s = (8'd150 < hsv_s) ? 1'b1 : 1'b0;
 assign yellow_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
 

@@ -1,5 +1,5 @@
 Timing Analyzer report for DE10_LITE_D8M_VIP
-Mon Jun 05 02:21:31 2023
+Mon Jun 05 15:11:03 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
 
 
@@ -91,32 +91,32 @@ refer to the applicable agreement for further details.
 +----------------------------+-------------+
 ; Processors                 ; Number      ;
 +----------------------------+-------------+
-; Number detected on machine ; 8           ;
-; Maximum allowed            ; 8           ;
+; Number detected on machine ; 16          ;
+; Maximum allowed            ; 16          ;
 ;                            ;             ;
-; Average used               ; 2.84        ;
-; Maximum used               ; 8           ;
+; Average used               ; 3.73        ;
+; Maximum used               ; 16          ;
 ;                            ;             ;
 ; Usage by Processor         ; % Time Used ;
 ;     Processor 1            ; 100.0%      ;
-;     Processor 2            ;  30.8%      ;
-;     Processor 3            ;  27.0%      ;
-;     Processor 4            ;  25.7%      ;
-;     Processors 5-8         ;  25.2%      ;
+;     Processor 2            ;  24.2%      ;
+;     Processor 3            ;  18.7%      ;
+;     Processor 4            ;  18.1%      ;
+;     Processors 5-16        ;  17.6%      ;
 +----------------------------+-------------+
 
 
-+----------------------------------------------------------------------------------------------------------------------------------------------------------+
-; SDC File List                                                                                                                                            ;
-+----------------------------------------------------------------------------------------------------------------------+--------+--------------------------+
-; SDC File Path                                                                                                        ; Status ; Read at                  ;
-+----------------------------------------------------------------------------------------------------------------------+--------+--------------------------+
-; DE10_LITE_D8M_VIP.SDC                                                                                                ; OK     ; Mon Jun 05 02:21:23 2023 ;
-; c:/users/ukgc/desktop/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/qsys_nios2_gen2_cpu.sdc                      ; OK     ; Mon Jun 05 02:21:23 2023 ;
-; c:/users/ukgc/desktop/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/alt_vipitc131_cvo.sdc                        ; OK     ; Mon Jun 05 02:21:23 2023 ;
-; c:/users/ukgc/desktop/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/altera_avalon_st_handshake_clock_crosser.sdc ; OK     ; Mon Jun 05 02:21:23 2023 ;
-; c:/users/ukgc/desktop/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/altera_reset_controller.sdc                  ; OK     ; Mon Jun 05 02:21:23 2023 ;
-+----------------------------------------------------------------------------------------------------------------------+--------+--------------------------+
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; SDC File List                                                                                                                                                                           ;
++-----------------------------------------------------------------------------------------------------------------------------------------------------+--------+--------------------------+
+; SDC File Path                                                                                                                                       ; Status ; Read at                  ;
++-----------------------------------------------------------------------------------------------------------------------------------------------------+--------+--------------------------+
+; DE10_LITE_D8M_VIP.SDC                                                                                                                               ; OK     ; Mon Jun 05 15:10:56 2023 ;
+; c:/users/bens1/documents/uni/year_2/design_project_2/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/qsys_nios2_gen2_cpu.sdc                      ; OK     ; Mon Jun 05 15:10:56 2023 ;
+; c:/users/bens1/documents/uni/year_2/design_project_2/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/alt_vipitc131_cvo.sdc                        ; OK     ; Mon Jun 05 15:10:56 2023 ;
+; c:/users/bens1/documents/uni/year_2/design_project_2/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/altera_avalon_st_handshake_clock_crosser.sdc ; OK     ; Mon Jun 05 15:10:56 2023 ;
+; c:/users/bens1/documents/uni/year_2/design_project_2/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/altera_reset_controller.sdc                  ; OK     ; Mon Jun 05 15:10:56 2023 ;
++-----------------------------------------------------------------------------------------------------------------------------------------------------+--------+--------------------------+
 
 
 +----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -143,12 +143,12 @@ refer to the applicable agreement for further details.
 +------------+-----------------+-----------------------------+------+
 ; Fmax       ; Restricted Fmax ; Clock Name                  ; Note ;
 +------------+-----------------+-----------------------------+------+
-; 25.83 MHz  ; 25.83 MHz       ; u0|altpll_0|sd1|pll7|clk[2] ;      ;
-; 66.49 MHz  ; 66.49 MHz       ; MIPI_PIXEL_CLK              ;      ;
-; 72.36 MHz  ; 72.36 MHz       ; MAX10_CLK1_50               ;      ;
-; 98.41 MHz  ; 98.41 MHz       ; altera_reserved_tck         ;      ;
-; 103.28 MHz ; 103.28 MHz      ; MAX10_CLK2_50               ;      ;
-; 108.68 MHz ; 108.68 MHz      ; u0|altpll_0|sd1|pll7|clk[3] ;      ;
+; 26.07 MHz  ; 26.07 MHz       ; u0|altpll_0|sd1|pll7|clk[2] ;      ;
+; 71.63 MHz  ; 71.63 MHz       ; MAX10_CLK1_50               ;      ;
+; 80.21 MHz  ; 80.21 MHz       ; MIPI_PIXEL_CLK              ;      ;
+; 93.7 MHz   ; 93.7 MHz        ; MAX10_CLK2_50               ;      ;
+; 100.12 MHz ; 100.12 MHz      ; u0|altpll_0|sd1|pll7|clk[3] ;      ;
+; 102.33 MHz ; 102.33 MHz      ; altera_reserved_tck         ;      ;
 +------------+-----------------+-----------------------------+------+
 This panel reports FMAX for every clock in the design, regardless of the user-specified clock periods.  FMAX is only computed for paths where the source and destination registers or ports are driven by the same clock.  Paths of different clocks, including generated clocks, are ignored.  For paths between a clock and its inversion, FMAX is computed as if the rising and falling edges are scaled along with FMAX, such that the duty cycle (in terms of a percentage) is maintained. Altera recommends that you always use clock constraints and other slack reports for sign-off analysis.
 
@@ -158,13 +158,13 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+---------+---------------+
 ; Clock                       ; Slack   ; End Point TNS ;
 +-----------------------------+---------+---------------+
-; u0|altpll_0|sd1|pll7|clk[2] ; -28.720 ; -792.044      ;
+; u0|altpll_0|sd1|pll7|clk[2] ; -28.359 ; -495.760      ;
 ; clk_dram_ext                ; 3.916   ; 0.000         ;
-; MAX10_CLK1_50               ; 6.180   ; 0.000         ;
-; MAX10_CLK2_50               ; 9.172   ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 12.480  ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 30.799  ; 0.000         ;
-; altera_reserved_tck         ; 44.919  ; 0.000         ;
+; MAX10_CLK1_50               ; 6.040   ; 0.000         ;
+; MAX10_CLK2_50               ; 9.124   ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 12.903  ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 30.012  ; 0.000         ;
+; altera_reserved_tck         ; 45.114  ; 0.000         ;
 +-----------------------------+---------+---------------+
 
 
@@ -173,13 +173,13 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+-------+---------------+
 ; Clock                       ; Slack ; End Point TNS ;
 +-----------------------------+-------+---------------+
-; MAX10_CLK1_50               ; 0.204 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[2] ; 0.323 ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 0.217 ; 0.000         ;
+; MAX10_CLK1_50               ; 0.324 ; 0.000         ;
 ; altera_reserved_tck         ; 0.340 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 0.340 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 0.340 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 0.342 ; 0.000         ;
 ; MAX10_CLK2_50               ; 0.348 ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 0.378 ; 0.000         ;
-; clk_dram_ext                ; 2.177 ; 0.000         ;
+; clk_dram_ext                ; 2.188 ; 0.000         ;
 +-----------------------------+-------+---------------+
 
 
@@ -188,11 +188,11 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+--------+---------------+
 ; Clock                       ; Slack  ; End Point TNS ;
 +-----------------------------+--------+---------------+
-; u0|altpll_0|sd1|pll7|clk[2] ; 3.285  ; 0.000         ;
-; MAX10_CLK1_50               ; 3.924  ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 4.452  ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 37.445 ; 0.000         ;
-; altera_reserved_tck         ; 48.010 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 2.222  ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 3.369  ; 0.000         ;
+; MAX10_CLK1_50               ; 4.394  ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 36.803 ; 0.000         ;
+; altera_reserved_tck         ; 47.965 ; 0.000         ;
 +-----------------------------+--------+---------------+
 
 
@@ -201,11 +201,11 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+-------+---------------+
 ; Clock                       ; Slack ; End Point TNS ;
 +-----------------------------+-------+---------------+
-; u0|altpll_0|sd1|pll7|clk[3] ; 0.928 ; 0.000         ;
-; altera_reserved_tck         ; 1.356 ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 1.472 ; 0.000         ;
-; MAX10_CLK1_50               ; 1.601 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[2] ; 2.893 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 0.929 ; 0.000         ;
+; altera_reserved_tck         ; 1.140 ; 0.000         ;
+; MAX10_CLK1_50               ; 1.351 ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 1.795 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 2.216 ; 0.000         ;
 +-----------------------------+-------+---------------+
 
 
@@ -214,14 +214,14 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+--------+---------------+
 ; Clock                       ; Slack  ; End Point TNS ;
 +-----------------------------+--------+---------------+
-; u0|altpll_0|sd1|pll7|clk[2] ; 4.674  ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 4.676  ; 0.000         ;
 ; u0|altpll_0|sd1|pll7|clk[1] ; 4.853  ; 0.000         ;
 ; clk_dram_ext                ; 5.790  ; 0.000         ;
-; MAX10_CLK1_50               ; 9.443  ; 0.000         ;
-; MAX10_CLK2_50               ; 9.661  ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 19.592 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 19.710 ; 0.000         ;
-; altera_reserved_tck         ; 49.626 ; 0.000         ;
+; MAX10_CLK1_50               ; 9.444  ; 0.000         ;
+; MAX10_CLK2_50               ; 9.662  ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 19.542 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 19.706 ; 0.000         ;
+; altera_reserved_tck         ; 49.625 ; 0.000         ;
 ; ADC_CLK_10                  ; 96.000 ; 0.000         ;
 +-----------------------------+--------+---------------+
 
@@ -229,7 +229,18 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 -----------------------------------------------
 ; Slow 1200mV 85C Model Metastability Summary ;
 -----------------------------------------------
-Design MTBF is not calculated because the design doesn't meet its timing requirements.
+Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+
+Number of Synchronizer Chains Found: 81
+Shortest Synchronizer Chain: 2 Registers
+Fraction of Chains for which MTBFs Could Not be Calculated: 0.222
+Worst Case Available Settling Time: 10.558 ns
+
+Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
+  - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 1.8
+Typical MTBF values are calculated based on the nominal silicon characteristics, at nominal operating conditions.
+  - Under typical conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 3.7
 
 
 
@@ -238,12 +249,12 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +------------+-----------------+-----------------------------+------+
 ; Fmax       ; Restricted Fmax ; Clock Name                  ; Note ;
 +------------+-----------------+-----------------------------+------+
-; 28.41 MHz  ; 28.41 MHz       ; u0|altpll_0|sd1|pll7|clk[2] ;      ;
-; 72.03 MHz  ; 72.03 MHz       ; MIPI_PIXEL_CLK              ;      ;
-; 78.91 MHz  ; 78.91 MHz       ; MAX10_CLK1_50               ;      ;
-; 107.97 MHz ; 107.97 MHz      ; altera_reserved_tck         ;      ;
-; 113.74 MHz ; 113.74 MHz      ; MAX10_CLK2_50               ;      ;
-; 117.59 MHz ; 117.59 MHz      ; u0|altpll_0|sd1|pll7|clk[3] ;      ;
+; 28.68 MHz  ; 28.68 MHz       ; u0|altpll_0|sd1|pll7|clk[2] ;      ;
+; 77.77 MHz  ; 77.77 MHz       ; MAX10_CLK1_50               ;      ;
+; 86.61 MHz  ; 86.61 MHz       ; MIPI_PIXEL_CLK              ;      ;
+; 100.01 MHz ; 100.01 MHz      ; MAX10_CLK2_50               ;      ;
+; 109.28 MHz ; 109.28 MHz      ; u0|altpll_0|sd1|pll7|clk[3] ;      ;
+; 110.91 MHz ; 110.91 MHz      ; altera_reserved_tck         ;      ;
 +------------+-----------------+-----------------------------+------+
 This panel reports FMAX for every clock in the design, regardless of the user-specified clock periods.  FMAX is only computed for paths where the source and destination registers or ports are driven by the same clock.  Paths of different clocks, including generated clocks, are ignored.  For paths between a clock and its inversion, FMAX is computed as if the rising and falling edges are scaled along with FMAX, such that the duty cycle (in terms of a percentage) is maintained. Altera recommends that you always use clock constraints and other slack reports for sign-off analysis.
 
@@ -253,13 +264,13 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+---------+---------------+
 ; Clock                       ; Slack   ; End Point TNS ;
 +-----------------------------+---------+---------------+
-; u0|altpll_0|sd1|pll7|clk[2] ; -25.195 ; -571.885      ;
+; u0|altpll_0|sd1|pll7|clk[2] ; -24.868 ; -354.622      ;
 ; clk_dram_ext                ; 4.035   ; 0.000         ;
-; MAX10_CLK1_50               ; 7.328   ; 0.000         ;
-; MAX10_CLK2_50               ; 9.636   ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 12.844  ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 31.496  ; 0.000         ;
-; altera_reserved_tck         ; 45.369  ; 0.000         ;
+; MAX10_CLK1_50               ; 7.142   ; 0.000         ;
+; MAX10_CLK2_50               ; 9.595   ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 13.036  ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 30.849  ; 0.000         ;
+; altera_reserved_tck         ; 45.492  ; 0.000         ;
 +-----------------------------+---------+---------------+
 
 
@@ -268,13 +279,13 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+-------+---------------+
 ; Clock                       ; Slack ; End Point TNS ;
 +-----------------------------+-------+---------------+
-; MAX10_CLK1_50               ; 0.185 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[2] ; 0.290 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 0.304 ; 0.000         ;
-; altera_reserved_tck         ; 0.306 ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 0.220 ; 0.000         ;
+; MAX10_CLK1_50               ; 0.290 ; 0.000         ;
+; altera_reserved_tck         ; 0.305 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 0.305 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 0.306 ; 0.000         ;
 ; MAX10_CLK2_50               ; 0.312 ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 0.338 ; 0.000         ;
-; clk_dram_ext                ; 2.124 ; 0.000         ;
+; clk_dram_ext                ; 2.135 ; 0.000         ;
 +-----------------------------+-------+---------------+
 
 
@@ -283,11 +294,11 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+--------+---------------+
 ; Clock                       ; Slack  ; End Point TNS ;
 +-----------------------------+--------+---------------+
-; u0|altpll_0|sd1|pll7|clk[2] ; 3.934  ; 0.000         ;
-; MAX10_CLK1_50               ; 4.038  ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 4.990  ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 37.606 ; 0.000         ;
-; altera_reserved_tck         ; 48.191 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 2.889  ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 3.875  ; 0.000         ;
+; MAX10_CLK1_50               ; 4.463  ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 37.003 ; 0.000         ;
+; altera_reserved_tck         ; 48.163 ; 0.000         ;
 +-----------------------------+--------+---------------+
 
 
@@ -296,11 +307,11 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+-------+---------------+
 ; Clock                       ; Slack ; End Point TNS ;
 +-----------------------------+-------+---------------+
-; u0|altpll_0|sd1|pll7|clk[3] ; 0.853 ; 0.000         ;
-; altera_reserved_tck         ; 1.260 ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 1.336 ; 0.000         ;
-; MAX10_CLK1_50               ; 1.432 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[2] ; 2.660 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 0.856 ; 0.000         ;
+; altera_reserved_tck         ; 1.034 ; 0.000         ;
+; MAX10_CLK1_50               ; 1.214 ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 1.597 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 2.015 ; 0.000         ;
 +-----------------------------+-------+---------------+
 
 
@@ -309,12 +320,12 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 +-----------------------------+--------+---------------+
 ; Clock                       ; Slack  ; End Point TNS ;
 +-----------------------------+--------+---------------+
-; u0|altpll_0|sd1|pll7|clk[2] ; 4.691  ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 4.693  ; 0.000         ;
 ; u0|altpll_0|sd1|pll7|clk[1] ; 4.876  ; 0.000         ;
 ; clk_dram_ext                ; 5.790  ; 0.000         ;
-; MAX10_CLK1_50               ; 9.459  ; 0.000         ;
-; MAX10_CLK2_50               ; 9.667  ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 19.665 ; 0.000         ;
+; MAX10_CLK1_50               ; 9.454  ; 0.000         ;
+; MAX10_CLK2_50               ; 9.668  ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 19.609 ; 0.000         ;
 ; u0|altpll_0|sd1|pll7|clk[3] ; 19.699 ; 0.000         ;
 ; altera_reserved_tck         ; 49.648 ; 0.000         ;
 ; ADC_CLK_10                  ; 96.000 ; 0.000         ;
@@ -324,7 +335,18 @@ This panel reports FMAX for every clock in the design, regardless of the user-sp
 ----------------------------------------------
 ; Slow 1200mV 0C Model Metastability Summary ;
 ----------------------------------------------
-Design MTBF is not calculated because the design doesn't meet its timing requirements.
+Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+
+Number of Synchronizer Chains Found: 81
+Shortest Synchronizer Chain: 2 Registers
+Fraction of Chains for which MTBFs Could Not be Calculated: 0.222
+Worst Case Available Settling Time: 11.289 ns
+
+Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
+  - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 1.8
+Typical MTBF values are calculated based on the nominal silicon characteristics, at nominal operating conditions.
+  - Under typical conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 3.7
 
 
 
@@ -333,13 +355,13 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +-----------------------------+--------+---------------+
 ; Clock                       ; Slack  ; End Point TNS ;
 +-----------------------------+--------+---------------+
-; u0|altpll_0|sd1|pll7|clk[2] ; -5.447 ; -58.670       ;
+; u0|altpll_0|sd1|pll7|clk[2] ; -5.269 ; -55.139       ;
 ; clk_dram_ext                ; 3.996  ; 0.000         ;
-; MAX10_CLK2_50               ; 11.456 ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 13.371 ; 0.000         ;
-; MAX10_CLK1_50               ; 13.842 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 36.084 ; 0.000         ;
-; altera_reserved_tck         ; 48.117 ; 0.000         ;
+; MAX10_CLK2_50               ; 11.414 ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 13.477 ; 0.000         ;
+; MAX10_CLK1_50               ; 13.792 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 35.817 ; 0.000         ;
+; altera_reserved_tck         ; 48.206 ; 0.000         ;
 +-----------------------------+--------+---------------+
 
 
@@ -348,13 +370,13 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +-----------------------------+-------+---------------+
 ; Clock                       ; Slack ; End Point TNS ;
 +-----------------------------+-------+---------------+
-; MAX10_CLK1_50               ; 0.079 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[2] ; 0.141 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 0.147 ; 0.000         ;
-; altera_reserved_tck         ; 0.148 ; 0.000         ;
-; MAX10_CLK2_50               ; 0.153 ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 0.165 ; 0.000         ;
-; clk_dram_ext                ; 1.838 ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 0.014 ; 0.000         ;
+; MAX10_CLK1_50               ; 0.141 ; 0.000         ;
+; altera_reserved_tck         ; 0.146 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 0.147 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 0.149 ; 0.000         ;
+; MAX10_CLK2_50               ; 0.152 ; 0.000         ;
+; clk_dram_ext                ; 1.844 ; 0.000         ;
 +-----------------------------+-------+---------------+
 
 
@@ -363,11 +385,11 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +-----------------------------+--------+---------------+
 ; Clock                       ; Slack  ; End Point TNS ;
 +-----------------------------+--------+---------------+
-; MAX10_CLK1_50               ; 6.527  ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[2] ; 6.741  ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 7.164  ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 38.856 ; 0.000         ;
-; altera_reserved_tck         ; 49.329 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 6.209  ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 6.628  ; 0.000         ;
+; MAX10_CLK1_50               ; 7.016  ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 38.554 ; 0.000         ;
+; altera_reserved_tck         ; 49.324 ; 0.000         ;
 +-----------------------------+--------+---------------+
 
 
@@ -376,11 +398,11 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +-----------------------------+-------+---------------+
 ; Clock                       ; Slack ; End Point TNS ;
 +-----------------------------+-------+---------------+
-; u0|altpll_0|sd1|pll7|clk[3] ; 0.402 ; 0.000         ;
-; altera_reserved_tck         ; 0.585 ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 0.683 ; 0.000         ;
-; MAX10_CLK1_50               ; 0.684 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[2] ; 1.211 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 0.405 ; 0.000         ;
+; altera_reserved_tck         ; 0.482 ; 0.000         ;
+; MAX10_CLK1_50               ; 0.574 ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 0.796 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 0.931 ; 0.000         ;
 +-----------------------------+-------+---------------+
 
 
@@ -391,12 +413,12 @@ Design MTBF is not calculated because the design doesn't meet its timing require
 +-----------------------------+--------+---------------+
 ; clk_dram_ext                ; 2.000  ; 0.000         ;
 ; u0|altpll_0|sd1|pll7|clk[1] ; 2.000  ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[2] ; 4.712  ; 0.000         ;
-; MAX10_CLK1_50               ; 9.210  ; 0.000         ;
-; MAX10_CLK2_50               ; 9.331  ; 0.000         ;
-; MIPI_PIXEL_CLK              ; 19.179 ; 0.000         ;
-; u0|altpll_0|sd1|pll7|clk[3] ; 19.724 ; 0.000         ;
-; altera_reserved_tck         ; 49.420 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[2] ; 4.713  ; 0.000         ;
+; MAX10_CLK1_50               ; 9.234  ; 0.000         ;
+; MAX10_CLK2_50               ; 9.332  ; 0.000         ;
+; MIPI_PIXEL_CLK              ; 19.197 ; 0.000         ;
+; u0|altpll_0|sd1|pll7|clk[3] ; 19.725 ; 0.000         ;
+; altera_reserved_tck         ; 49.423 ; 0.000         ;
 ; ADC_CLK_10                  ; 96.000 ; 0.000         ;
 +-----------------------------+--------+---------------+
 
@@ -410,7 +432,7 @@ Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
 Number of Synchronizer Chains Found: 81
 Shortest Synchronizer Chain: 2 Registers
 Fraction of Chains for which MTBFs Could Not be Calculated: 0.222
-Worst Case Available Settling Time: 13.445 ns
+Worst Case Available Settling Time: 15.869 ns
 
 Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
   - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 1.8
@@ -424,17 +446,17 @@ Typical MTBF values are calculated based on the nominal silicon characteristics,
 +------------------------------+----------+-------+----------+---------+---------------------+
 ; Clock                        ; Setup    ; Hold  ; Recovery ; Removal ; Minimum Pulse Width ;
 +------------------------------+----------+-------+----------+---------+---------------------+
-; Worst-case Slack             ; -28.720  ; 0.079 ; 3.285    ; 0.402   ; 2.000               ;
+; Worst-case Slack             ; -28.359  ; 0.014 ; 2.222    ; 0.405   ; 2.000               ;
 ;  ADC_CLK_10                  ; N/A      ; N/A   ; N/A      ; N/A     ; 96.000              ;
-;  MAX10_CLK1_50               ; 6.180    ; 0.079 ; 3.924    ; 0.684   ; 9.210               ;
-;  MAX10_CLK2_50               ; 9.172    ; 0.153 ; N/A      ; N/A     ; 9.331               ;
-;  MIPI_PIXEL_CLK              ; 12.480   ; 0.165 ; 37.445   ; 0.683   ; 19.179              ;
-;  altera_reserved_tck         ; 44.919   ; 0.148 ; 48.010   ; 0.585   ; 49.420              ;
-;  clk_dram_ext                ; 3.916    ; 1.838 ; N/A      ; N/A     ; 2.000               ;
+;  MAX10_CLK1_50               ; 6.040    ; 0.141 ; 4.394    ; 0.574   ; 9.234               ;
+;  MAX10_CLK2_50               ; 9.124    ; 0.152 ; N/A      ; N/A     ; 9.332               ;
+;  MIPI_PIXEL_CLK              ; 12.903   ; 0.014 ; 36.803   ; 0.796   ; 19.197              ;
+;  altera_reserved_tck         ; 45.114   ; 0.146 ; 47.965   ; 0.482   ; 49.423              ;
+;  clk_dram_ext                ; 3.916    ; 1.844 ; N/A      ; N/A     ; 2.000               ;
 ;  u0|altpll_0|sd1|pll7|clk[1] ; N/A      ; N/A   ; N/A      ; N/A     ; 2.000               ;
-;  u0|altpll_0|sd1|pll7|clk[2] ; -28.720  ; 0.141 ; 3.285    ; 1.211   ; 4.674               ;
-;  u0|altpll_0|sd1|pll7|clk[3] ; 30.799   ; 0.147 ; 4.452    ; 0.402   ; 19.699              ;
-; Design-wide TNS              ; -792.044 ; 0.0   ; 0.0      ; 0.0     ; 0.0                 ;
+;  u0|altpll_0|sd1|pll7|clk[2] ; -28.359  ; 0.147 ; 2.222    ; 0.931   ; 4.676               ;
+;  u0|altpll_0|sd1|pll7|clk[3] ; 30.012   ; 0.149 ; 3.369    ; 0.405   ; 19.699              ;
+; Design-wide TNS              ; -495.76  ; 0.0   ; 0.0      ; 0.0     ; 0.0                 ;
 ;  ADC_CLK_10                  ; N/A      ; N/A   ; N/A      ; N/A     ; 0.000               ;
 ;  MAX10_CLK1_50               ; 0.000    ; 0.000 ; 0.000    ; 0.000   ; 0.000               ;
 ;  MAX10_CLK2_50               ; 0.000    ; 0.000 ; N/A      ; N/A     ; 0.000               ;
@@ -442,7 +464,7 @@ Typical MTBF values are calculated based on the nominal silicon characteristics,
 ;  altera_reserved_tck         ; 0.000    ; 0.000 ; 0.000    ; 0.000   ; 0.000               ;
 ;  clk_dram_ext                ; 0.000    ; 0.000 ; N/A      ; N/A     ; 0.000               ;
 ;  u0|altpll_0|sd1|pll7|clk[1] ; N/A      ; N/A   ; N/A      ; N/A     ; 0.000               ;
-;  u0|altpll_0|sd1|pll7|clk[2] ; -792.044 ; 0.000 ; 0.000    ; 0.000   ; 0.000               ;
+;  u0|altpll_0|sd1|pll7|clk[2] ; -495.760 ; 0.000 ; 0.000    ; 0.000   ; 0.000               ;
 ;  u0|altpll_0|sd1|pll7|clk[3] ; 0.000    ; 0.000 ; 0.000    ; 0.000   ; 0.000               ;
 +------------------------------+----------+-------+----------+---------+---------------------+
 
@@ -1140,7 +1162,7 @@ Typical MTBF values are calculated based on the nominal silicon characteristics,
 ; MAX10_CLK1_50               ; altera_reserved_tck         ; false path   ; 0          ; 0          ; 0        ;
 ; u0|altpll_0|sd1|pll7|clk[2] ; clk_dram_ext                ; 51           ; 0          ; 0          ; 0        ;
 ; altera_reserved_tck         ; MAX10_CLK1_50               ; false path   ; false path ; 0          ; 0        ;
-; MAX10_CLK1_50               ; MAX10_CLK1_50               ; 438343       ; 0          ; 0          ; 0        ;
+; MAX10_CLK1_50               ; MAX10_CLK1_50               ; 420330       ; 0          ; 0          ; 0        ;
 ; u0|altpll_0|sd1|pll7|clk[2] ; MAX10_CLK1_50               ; 49           ; 0          ; 0          ; 0        ;
 ; MAX10_CLK2_50               ; MAX10_CLK2_50               ; 1823         ; 0          ; 0          ; 0        ;
 ; MIPI_PIXEL_CLK_ext          ; MAX10_CLK2_50               ; 9            ; 0          ; 0          ; 0        ;
@@ -1167,7 +1189,7 @@ Entries labeled "false path" only account for clock-to-clock false paths and not
 ; MAX10_CLK1_50               ; altera_reserved_tck         ; false path   ; 0          ; 0          ; 0        ;
 ; u0|altpll_0|sd1|pll7|clk[2] ; clk_dram_ext                ; 51           ; 0          ; 0          ; 0        ;
 ; altera_reserved_tck         ; MAX10_CLK1_50               ; false path   ; false path ; 0          ; 0        ;
-; MAX10_CLK1_50               ; MAX10_CLK1_50               ; 438343       ; 0          ; 0          ; 0        ;
+; MAX10_CLK1_50               ; MAX10_CLK1_50               ; 420330       ; 0          ; 0          ; 0        ;
 ; u0|altpll_0|sd1|pll7|clk[2] ; MAX10_CLK1_50               ; 49           ; 0          ; 0          ; 0        ;
 ; MAX10_CLK2_50               ; MAX10_CLK2_50               ; 1823         ; 0          ; 0          ; 0        ;
 ; MIPI_PIXEL_CLK_ext          ; MAX10_CLK2_50               ; 9            ; 0          ; 0          ; 0        ;
@@ -1366,11 +1388,11 @@ No non-DPA dedicated SERDES Receiver circuitry present in device or used in desi
 Info: *******************************************************************
 Info: Running Quartus Prime Timing Analyzer
     Info: Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
-    Info: Processing started: Mon Jun 05 02:21:20 2023
+    Info: Processing started: Mon Jun 05 15:10:53 2023
 Info: Command: quartus_sta DE10_LITE_D8M_VIP -c DE10_LITE_D8M_VIP
 Info: qsta_default_script.tcl version: #1
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
-Info (20030): Parallel compilation is enabled and will use 8 of the 8 processors detected
+Info (20030): Parallel compilation is enabled and will use 16 of the 16 processors detected
 Info (21077): Low junction temperature is 0 degrees C
 Info (21077): High junction temperature is 85 degrees C
 Warning (335093): The Timing Analyzer is analyzing 24 combinational loops as latches. For more details, run the Check Timing command in the Timing Analyzer or view the "User-Specified and Inferred Latches" table in the Analysis & Synthesis report.
@@ -1436,135 +1458,135 @@ Info (332110): Deriving PLL clocks
     Info (332110): create_generated_clock -source {u0|altpll_0|sd1|pll7|inclk[0]} -divide_by 2 -duty_cycle 50.00 -name {u0|altpll_0|sd1|pll7|clk[3]} {u0|altpll_0|sd1|pll7|clk[3]}
     Info (332110): create_generated_clock -source {u0|altpll_0|sd1|pll7|inclk[0]} -divide_by 5 -multiply_by 2 -duty_cycle 50.00 -name {u0|altpll_0|sd1|pll7|clk[4]} {u0|altpll_0|sd1|pll7|clk[4]}
 Info (332151): Clock uncertainty is not calculated until you update the timing netlist.
-Warning (332174): Ignored filter at DE10_LITE_D8M_VIP.SDC(80): clk_vga_ext could not be matched with a clock File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 80
-Warning (332049): Ignored set_output_delay at DE10_LITE_D8M_VIP.SDC(80): Argument -clock is not an object ID File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 80
-    Info (332050): set_output_delay -max -clock clk_vga_ext  0.3 [get_ports {VGA_R* VGA_G* VGA_B* VGA_HS VGA_VS}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 80
-Warning (332049): Ignored set_output_delay at DE10_LITE_D8M_VIP.SDC(81): Argument -clock is not an object ID File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 81
-    Info (332050): set_output_delay -min -clock clk_vga_ext -1.6 [get_ports {VGA_R* VGA_G* VGA_B* VGA_HS VGA_VS}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 81
-Info (332104): Reading SDC File: 'c:/users/ukgc/desktop/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/qsys_nios2_gen2_cpu.sdc'
-Info (332104): Reading SDC File: 'c:/users/ukgc/desktop/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/alt_vipitc131_cvo.sdc'
+Warning (332174): Ignored filter at DE10_LITE_D8M_VIP.SDC(80): clk_vga_ext could not be matched with a clock File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 80
+Warning (332049): Ignored set_output_delay at DE10_LITE_D8M_VIP.SDC(80): Argument -clock is not an object ID File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 80
+    Info (332050): set_output_delay -max -clock clk_vga_ext  0.3 [get_ports {VGA_R* VGA_G* VGA_B* VGA_HS VGA_VS}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 80
+Warning (332049): Ignored set_output_delay at DE10_LITE_D8M_VIP.SDC(81): Argument -clock is not an object ID File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 81
+    Info (332050): set_output_delay -min -clock clk_vga_ext -1.6 [get_ports {VGA_R* VGA_G* VGA_B* VGA_HS VGA_VS}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.SDC Line: 81
+Info (332104): Reading SDC File: 'c:/users/bens1/documents/uni/year_2/design_project_2/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/qsys_nios2_gen2_cpu.sdc'
+Info (332104): Reading SDC File: 'c:/users/bens1/documents/uni/year_2/design_project_2/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/alt_vipitc131_cvo.sdc'
 Info: Adding SDC requirements for alt_vipitc131_IS2Vid instance u0|alt_vip_itc_0
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(64): u0|alt_vip_itc_0|mode_banks|u_calculate_mode_dynamic|* could not be matched with a net File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 64
-Warning (332049): Ignored set_multicycle_path at alt_vipitc131_cvo.sdc(64): Argument <through> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 64
-    Info (332050): set_multicycle_path -setup -start -through [get_nets "${inst}|mode_banks|u_calculate_mode_dynamic|*"] 2 File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 64
-Warning (332049): Ignored set_multicycle_path at alt_vipitc131_cvo.sdc(65): Argument <through> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 65
-    Info (332050): set_multicycle_path -hold -start -through [get_nets "${inst}|mode_banks|u_calculate_mode_dynamic|*"] 1 File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 65
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(68): *alt_vipitc131_IS2Vid:*|is_mode_match[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 68
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(68): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 68
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_mode_match[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 68
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(69): *alt_vipitc131_IS2Vid:*|is_interlaced[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 69
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(69): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 69
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_interlaced[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 69
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(70): *alt_vipitc131_IS2Vid:*|is_serial_output[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 70
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(70): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 70
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_serial_output[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 70
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(71): *alt_vipitc131_IS2Vid:*|is_sample_count[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 71
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(71): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 71
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_sample_count[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 71
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(72): *alt_vipitc131_IS2Vid:*|is_line_count_f0[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 72
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(72): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 72
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_line_count_f0[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 72
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(73): *alt_vipitc131_IS2Vid:*|is_line_count_f1[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 73
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(73): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 73
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_line_count_f1[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 73
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(74): *alt_vipitc131_IS2Vid:*|is_h_front_porch[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 74
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(74): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 74
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_h_front_porch[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 74
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(75): *alt_vipitc131_IS2Vid:*|is_h_sync_length[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 75
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(75): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 75
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_h_sync_length[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 75
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(76): *alt_vipitc131_IS2Vid:*|is_h_blank[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 76
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(76): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 76
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_h_blank[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 76
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(77): *alt_vipitc131_IS2Vid:*|is_v_front_porch[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 77
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(77): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 77
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v_front_porch[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 77
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(78): *alt_vipitc131_IS2Vid:*|is_v_sync_length[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 78
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(78): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 78
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v_sync_length[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 78
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(79): *alt_vipitc131_IS2Vid:*|is_v_blank[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 79
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(79): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 79
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v_blank[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 79
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(80): *alt_vipitc131_IS2Vid:*|is_v1_front_porch[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 80
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(80): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 80
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_front_porch[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 80
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(81): *alt_vipitc131_IS2Vid:*|is_v1_sync_length[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 81
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(81): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 81
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_sync_length[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 81
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(82): *alt_vipitc131_IS2Vid:*|is_v1_blank[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 82
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(82): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 82
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_blank[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 82
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(83): *alt_vipitc131_IS2Vid:*|is_ap_line[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 83
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(83): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 83
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_ap_line[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 83
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(84): *alt_vipitc131_IS2Vid:*|is_v1_rising_edge[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 84
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(84): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 84
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_rising_edge[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 84
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(85): *alt_vipitc131_IS2Vid:*|is_f_rising_edge[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 85
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(85): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 85
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_f_rising_edge[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 85
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(86): *alt_vipitc131_IS2Vid:*|is_f_falling_edge[*][*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 86
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(86): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 86
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_f_falling_edge[*][*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 86
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(87): *alt_vipitc131_IS2Vid:*|is_standard[*][* could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 87
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(87): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 87
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_standard[*][*}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 87
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(88): *alt_vipitc131_IS2Vid:*|is_sof_sample[*][* could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 88
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(88): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 88
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_sof_sample[*][*}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 88
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(89): *alt_vipitc131_IS2Vid:*|is_sof_subsample[*][* could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 89
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(89): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 89
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_sof_subsample[*][*}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 89
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(90): *alt_vipitc131_IS2Vid:*|is_sof_line[*][* could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 90
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(90): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 90
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_sof_line[*][*}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 90
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(91): *alt_vipitc131_IS2Vid:*|is_vcoclk_divider_value[*][* could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 91
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(91): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 91
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_vcoclk_divider_value[*][*}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 91
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(92): *alt_vipitc131_IS2Vid:*|is_anc_line[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 92
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(92): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 92
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_anc_line[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 92
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(93): *alt_vipitc131_IS2Vid:*|is_v1_anc_line[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 93
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(93): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 93
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_anc_line[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 93
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(94): *alt_vipitc131_IS2Vid:*|is_valid_mode[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 94
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(94): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 94
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_valid_mode[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 94
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(95): *alt_vipitc131_IS2Vid:*|dirty_mode[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 95
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(95): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 95
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|dirty_mode[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 95
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(98): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:clear_underflow_sticky_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 98
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(98): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 98
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:clear_underflow_sticky_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 98
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(99): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:enable_resync_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 99
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(99): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 99
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:enable_resync_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 99
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(101): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:genlocked_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 101
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(101): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 101
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:genlocked_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 101
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(102): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:genlock_enable_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 102
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(102): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 102
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:genlock_enable_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 102
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(103): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:underflow_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 103
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(103): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 103
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:underflow_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 103
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(104): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:av_waitrequest_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 104
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(104): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 104
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:av_waitrequest_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 104
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(105): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:av_write_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 105
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(105): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 105
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:av_write_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 105
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(106): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:mode_change_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 106
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(106): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 106
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:mode_change_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 106
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(107): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:sync_generation_generate.sof_cvi_locked_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 107
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(107): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 107
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:sync_generation_generate.sof_cvi_locked_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 107
-Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(108): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:sync_generation_generate.sof_cvi_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 108
-Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(108): Argument <to> is an empty collection File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 108
-    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:sync_generation_generate.sof_cvi_sync|data_out_sync0[*]}] File: C:/Users/UKGC/Desktop/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 108
-Info (332104): Reading SDC File: 'c:/users/ukgc/desktop/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/altera_avalon_st_handshake_clock_crosser.sdc'
-Info (332104): Reading SDC File: 'c:/users/ukgc/desktop/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/altera_reset_controller.sdc'
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(64): u0|alt_vip_itc_0|mode_banks|u_calculate_mode_dynamic|* could not be matched with a net File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 64
+Warning (332049): Ignored set_multicycle_path at alt_vipitc131_cvo.sdc(64): Argument <through> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 64
+    Info (332050): set_multicycle_path -setup -start -through [get_nets "${inst}|mode_banks|u_calculate_mode_dynamic|*"] 2 File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 64
+Warning (332049): Ignored set_multicycle_path at alt_vipitc131_cvo.sdc(65): Argument <through> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 65
+    Info (332050): set_multicycle_path -hold -start -through [get_nets "${inst}|mode_banks|u_calculate_mode_dynamic|*"] 1 File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 65
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(68): *alt_vipitc131_IS2Vid:*|is_mode_match[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 68
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(68): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 68
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_mode_match[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 68
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(69): *alt_vipitc131_IS2Vid:*|is_interlaced[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 69
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(69): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 69
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_interlaced[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 69
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(70): *alt_vipitc131_IS2Vid:*|is_serial_output[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 70
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(70): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 70
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_serial_output[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 70
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(71): *alt_vipitc131_IS2Vid:*|is_sample_count[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 71
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(71): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 71
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_sample_count[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 71
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(72): *alt_vipitc131_IS2Vid:*|is_line_count_f0[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 72
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(72): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 72
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_line_count_f0[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 72
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(73): *alt_vipitc131_IS2Vid:*|is_line_count_f1[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 73
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(73): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 73
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_line_count_f1[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 73
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(74): *alt_vipitc131_IS2Vid:*|is_h_front_porch[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 74
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(74): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 74
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_h_front_porch[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 74
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(75): *alt_vipitc131_IS2Vid:*|is_h_sync_length[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 75
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(75): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 75
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_h_sync_length[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 75
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(76): *alt_vipitc131_IS2Vid:*|is_h_blank[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 76
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(76): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 76
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_h_blank[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 76
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(77): *alt_vipitc131_IS2Vid:*|is_v_front_porch[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 77
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(77): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 77
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v_front_porch[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 77
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(78): *alt_vipitc131_IS2Vid:*|is_v_sync_length[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 78
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(78): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 78
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v_sync_length[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 78
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(79): *alt_vipitc131_IS2Vid:*|is_v_blank[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 79
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(79): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 79
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v_blank[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 79
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(80): *alt_vipitc131_IS2Vid:*|is_v1_front_porch[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 80
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(80): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 80
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_front_porch[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 80
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(81): *alt_vipitc131_IS2Vid:*|is_v1_sync_length[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 81
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(81): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 81
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_sync_length[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 81
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(82): *alt_vipitc131_IS2Vid:*|is_v1_blank[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 82
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(82): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 82
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_blank[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 82
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(83): *alt_vipitc131_IS2Vid:*|is_ap_line[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 83
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(83): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 83
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_ap_line[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 83
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(84): *alt_vipitc131_IS2Vid:*|is_v1_rising_edge[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 84
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(84): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 84
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_rising_edge[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 84
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(85): *alt_vipitc131_IS2Vid:*|is_f_rising_edge[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 85
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(85): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 85
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_f_rising_edge[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 85
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(86): *alt_vipitc131_IS2Vid:*|is_f_falling_edge[*][*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 86
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(86): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 86
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_f_falling_edge[*][*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 86
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(87): *alt_vipitc131_IS2Vid:*|is_standard[*][* could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 87
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(87): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 87
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_standard[*][*}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 87
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(88): *alt_vipitc131_IS2Vid:*|is_sof_sample[*][* could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 88
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(88): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 88
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_sof_sample[*][*}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 88
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(89): *alt_vipitc131_IS2Vid:*|is_sof_subsample[*][* could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 89
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(89): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 89
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_sof_subsample[*][*}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 89
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(90): *alt_vipitc131_IS2Vid:*|is_sof_line[*][* could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 90
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(90): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 90
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_sof_line[*][*}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 90
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(91): *alt_vipitc131_IS2Vid:*|is_vcoclk_divider_value[*][* could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 91
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(91): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 91
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_vcoclk_divider_value[*][*}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 91
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(92): *alt_vipitc131_IS2Vid:*|is_anc_line[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 92
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(92): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 92
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_anc_line[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 92
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(93): *alt_vipitc131_IS2Vid:*|is_v1_anc_line[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 93
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(93): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 93
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_v1_anc_line[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 93
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(94): *alt_vipitc131_IS2Vid:*|is_valid_mode[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 94
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(94): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 94
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|is_valid_mode[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 94
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(95): *alt_vipitc131_IS2Vid:*|dirty_mode[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 95
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(95): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 95
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|dirty_mode[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 95
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(98): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:clear_underflow_sticky_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 98
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(98): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 98
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:clear_underflow_sticky_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 98
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(99): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:enable_resync_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 99
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(99): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 99
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:enable_resync_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 99
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(101): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:genlocked_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 101
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(101): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 101
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:genlocked_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 101
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(102): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:genlock_enable_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 102
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(102): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 102
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:genlock_enable_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 102
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(103): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:underflow_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 103
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(103): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 103
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:underflow_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 103
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(104): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:av_waitrequest_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 104
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(104): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 104
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:av_waitrequest_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 104
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(105): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:av_write_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 105
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(105): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 105
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:av_write_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 105
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(106): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:mode_change_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 106
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(106): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 106
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_trigger_sync:mode_change_trigger_sync|alt_vipitc131_common_sync:toggle_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 106
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(107): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:sync_generation_generate.sof_cvi_locked_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 107
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(107): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 107
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:sync_generation_generate.sof_cvi_locked_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 107
+Warning (332174): Ignored filter at alt_vipitc131_cvo.sdc(108): *alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:sync_generation_generate.sof_cvi_sync|data_out_sync0[*] could not be matched with a keeper File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 108
+Warning (332049): Ignored set_false_path at alt_vipitc131_cvo.sdc(108): Argument <to> is an empty collection File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 108
+    Info (332050): set_false_path -to [get_keepers {*alt_vipitc131_IS2Vid:*|alt_vipitc131_common_sync:sync_generation_generate.sof_cvi_sync|data_out_sync0[*]}] File: C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_vipitc131_cvo.sdc Line: 108
+Info (332104): Reading SDC File: 'c:/users/bens1/documents/uni/year_2/design_project_2/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/altera_avalon_st_handshake_clock_crosser.sdc'
+Info (332104): Reading SDC File: 'c:/users/bens1/documents/uni/year_2/design_project_2/eeebalancebug/fpga/r_detect/db/ip/qsys/submodules/altera_reset_controller.sdc'
 Critical Warning (332012): Synopsys Design Constraints File file not found: 'c:/users/bens1/documents/uni/year 2/project/eee2rover/de10_lite_d8m_vip_16/db/ip/qsys/submodules/qsys_nios2_gen2_cpu.sdc'. A Synopsys Design Constraints File is required by the Timing Analyzer to get proper timing constraints. Without it, the Compiler will not properly optimize the design.
 Critical Warning (332012): Synopsys Design Constraints File file not found: 'c:/users/bens1/documents/uni/year 2/project/eee2rover/de10_lite_d8m_vip_16/db/ip/qsys/submodules/alt_vipitc131_cvo.sdc'. A Synopsys Design Constraints File is required by the Timing Analyzer to get proper timing constraints. Without it, the Compiler will not properly optimize the design.
 Critical Warning (332012): Synopsys Design Constraints File file not found: 'c:/users/bens1/documents/uni/year 2/project/eee2rover/de10_lite_d8m_vip_16/db/ip/qsys/submodules/altera_avalon_st_handshake_clock_crosser.sdc'. A Synopsys Design Constraints File is required by the Timing Analyzer to get proper timing constraints. Without it, the Compiler will not properly optimize the design.
@@ -1572,7 +1594,7 @@ Critical Warning (332012): Synopsys Design Constraints File file not found: 'c:/
 Warning (332060): Node: Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0] was determined to be a clock but was found without an associated clock assignment.
     Info (13166): Latch Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_buf_in[10] is being clocked by Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0]
 Warning (332060): Node: Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|STEP_f[8]~_emulated is being clocked by Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket
+    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|VCM_END is being clocked by Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket
 Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C was determined to be a clock but was found without an associated clock assignment.
     Info (13166): Latch Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|STEP_f[7]~21 is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C
 Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK was determined to be a clock but was found without an associated clock assignment.
@@ -1584,181 +1606,53 @@ Info: Found TIMING_ANALYZER_REPORT_SCRIPT_INCLUDE_DEFAULT_ANALYSIS = ON
 Info: Analyzing Slow 1200mV 85C Model
 Info: Can't run Report Timing Closure Recommendations. The current device family is not supported.
 Critical Warning (332148): Timing requirements not met
-Info (332146): Worst-case setup slack is -28.720
+Info (332146): Worst-case setup slack is -28.359
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):   -28.720            -792.044 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):   -28.359            -495.760 u0|altpll_0|sd1|pll7|clk[2] 
     Info (332119):     3.916               0.000 clk_dram_ext 
-    Info (332119):     6.180               0.000 MAX10_CLK1_50 
-    Info (332119):     9.172               0.000 MAX10_CLK2_50 
-    Info (332119):    12.480               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    30.799               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    44.919               0.000 altera_reserved_tck 
-Info (332146): Worst-case hold slack is 0.204
+    Info (332119):     6.040               0.000 MAX10_CLK1_50 
+    Info (332119):     9.124               0.000 MAX10_CLK2_50 
+    Info (332119):    12.903               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    30.012               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):    45.114               0.000 altera_reserved_tck 
+Info (332146): Worst-case hold slack is 0.217
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):     0.204               0.000 MAX10_CLK1_50 
-    Info (332119):     0.323               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     0.217               0.000 MIPI_PIXEL_CLK 
+    Info (332119):     0.324               0.000 MAX10_CLK1_50 
     Info (332119):     0.340               0.000 altera_reserved_tck 
-    Info (332119):     0.340               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     0.340               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     0.342               0.000 u0|altpll_0|sd1|pll7|clk[3] 
     Info (332119):     0.348               0.000 MAX10_CLK2_50 
-    Info (332119):     0.378               0.000 MIPI_PIXEL_CLK 
-    Info (332119):     2.177               0.000 clk_dram_ext 
-Info (332146): Worst-case recovery slack is 3.285
+    Info (332119):     2.188               0.000 clk_dram_ext 
+Info (332146): Worst-case recovery slack is 2.222
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):     3.285               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     3.924               0.000 MAX10_CLK1_50 
-    Info (332119):     4.452               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    37.445               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    48.010               0.000 altera_reserved_tck 
-Info (332146): Worst-case removal slack is 0.928
+    Info (332119):     2.222               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     3.369               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     4.394               0.000 MAX10_CLK1_50 
+    Info (332119):    36.803               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    47.965               0.000 altera_reserved_tck 
+Info (332146): Worst-case removal slack is 0.929
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):     0.928               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):     1.356               0.000 altera_reserved_tck 
-    Info (332119):     1.472               0.000 MIPI_PIXEL_CLK 
-    Info (332119):     1.601               0.000 MAX10_CLK1_50 
-    Info (332119):     2.893               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-Info (332146): Worst-case minimum pulse width slack is 4.674
+    Info (332119):     0.929               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     1.140               0.000 altera_reserved_tck 
+    Info (332119):     1.351               0.000 MAX10_CLK1_50 
+    Info (332119):     1.795               0.000 MIPI_PIXEL_CLK 
+    Info (332119):     2.216               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+Info (332146): Worst-case minimum pulse width slack is 4.676
     Info (332119):     Slack       End Point TNS Clock 
     Info (332119): ========= =================== =====================
-    Info (332119):     4.674               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     4.676               0.000 u0|altpll_0|sd1|pll7|clk[2] 
     Info (332119):     4.853               0.000 u0|altpll_0|sd1|pll7|clk[1] 
     Info (332119):     5.790               0.000 clk_dram_ext 
-    Info (332119):     9.443               0.000 MAX10_CLK1_50 
-    Info (332119):     9.661               0.000 MAX10_CLK2_50 
-    Info (332119):    19.592               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    19.710               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    49.626               0.000 altera_reserved_tck 
-    Info (332119):    96.000               0.000 ADC_CLK_10 
-Info (332114): Report Metastability: Found 81 synchronizer chains.
-    Info (332114): Design MTBF is not calculated because the design doesn't meet its timing requirements.
-Info: Analyzing Slow 1200mV 0C Model
-Info (334003): Started post-fitting delay annotation
-Info (334004): Delay annotation completed successfully
-Warning (332060): Node: Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0] was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Latch Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_buf_in[10] is being clocked by Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0]
-Warning (332060): Node: Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|STEP_f[8]~_emulated is being clocked by Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket
-Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Latch Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|STEP_f[7]~21 is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C
-Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|I2C_VCM_Controller:u0|SD_COUNTER[0] is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK
-Info (332097): The following timing edges are non-unate.  The Timing Analyzer will assume pos-unate behavior for these edges in the clock network.
-    Info (332098): Cell: altera_internal_jtag  from: tck  to: tckutap
-Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in the Timing Analyzer to see clock uncertainties.
-Critical Warning (332148): Timing requirements not met
-Info (332146): Worst-case setup slack is -25.195
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):   -25.195            -571.885 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     4.035               0.000 clk_dram_ext 
-    Info (332119):     7.328               0.000 MAX10_CLK1_50 
-    Info (332119):     9.636               0.000 MAX10_CLK2_50 
-    Info (332119):    12.844               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    31.496               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    45.369               0.000 altera_reserved_tck 
-Info (332146): Worst-case hold slack is 0.185
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):     0.185               0.000 MAX10_CLK1_50 
-    Info (332119):     0.290               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     0.304               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):     0.306               0.000 altera_reserved_tck 
-    Info (332119):     0.312               0.000 MAX10_CLK2_50 
-    Info (332119):     0.338               0.000 MIPI_PIXEL_CLK 
-    Info (332119):     2.124               0.000 clk_dram_ext 
-Info (332146): Worst-case recovery slack is 3.934
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):     3.934               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     4.038               0.000 MAX10_CLK1_50 
-    Info (332119):     4.990               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    37.606               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    48.191               0.000 altera_reserved_tck 
-Info (332146): Worst-case removal slack is 0.853
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):     0.853               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):     1.260               0.000 altera_reserved_tck 
-    Info (332119):     1.336               0.000 MIPI_PIXEL_CLK 
-    Info (332119):     1.432               0.000 MAX10_CLK1_50 
-    Info (332119):     2.660               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-Info (332146): Worst-case minimum pulse width slack is 4.691
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):     4.691               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     4.876               0.000 u0|altpll_0|sd1|pll7|clk[1] 
-    Info (332119):     5.790               0.000 clk_dram_ext 
-    Info (332119):     9.459               0.000 MAX10_CLK1_50 
-    Info (332119):     9.667               0.000 MAX10_CLK2_50 
-    Info (332119):    19.665               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    19.699               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    49.648               0.000 altera_reserved_tck 
-    Info (332119):    96.000               0.000 ADC_CLK_10 
-Info (332114): Report Metastability: Found 81 synchronizer chains.
-    Info (332114): Design MTBF is not calculated because the design doesn't meet its timing requirements.
-Info: Analyzing Fast 1200mV 0C Model
-Warning (332060): Node: Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0] was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Latch Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_buf_in[10] is being clocked by Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0]
-Warning (332060): Node: Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|STEP_f[8]~_emulated is being clocked by Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket
-Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Latch Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|STEP_f[7]~21 is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C
-Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK was determined to be a clock but was found without an associated clock assignment.
-    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|I2C_VCM_Controller:u0|SD_COUNTER[0] is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK
-Info (332097): The following timing edges are non-unate.  The Timing Analyzer will assume pos-unate behavior for these edges in the clock network.
-    Info (332098): Cell: altera_internal_jtag  from: tck  to: tckutap
-Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in the Timing Analyzer to see clock uncertainties.
-Critical Warning (332148): Timing requirements not met
-Info (332146): Worst-case setup slack is -5.447
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):    -5.447             -58.670 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     3.996               0.000 clk_dram_ext 
-    Info (332119):    11.456               0.000 MAX10_CLK2_50 
-    Info (332119):    13.371               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    13.842               0.000 MAX10_CLK1_50 
-    Info (332119):    36.084               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    48.117               0.000 altera_reserved_tck 
-Info (332146): Worst-case hold slack is 0.079
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):     0.079               0.000 MAX10_CLK1_50 
-    Info (332119):     0.141               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     0.147               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):     0.148               0.000 altera_reserved_tck 
-    Info (332119):     0.153               0.000 MAX10_CLK2_50 
-    Info (332119):     0.165               0.000 MIPI_PIXEL_CLK 
-    Info (332119):     1.838               0.000 clk_dram_ext 
-Info (332146): Worst-case recovery slack is 6.527
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):     6.527               0.000 MAX10_CLK1_50 
-    Info (332119):     6.741               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     7.164               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    38.856               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    49.329               0.000 altera_reserved_tck 
-Info (332146): Worst-case removal slack is 0.402
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):     0.402               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):     0.585               0.000 altera_reserved_tck 
-    Info (332119):     0.683               0.000 MIPI_PIXEL_CLK 
-    Info (332119):     0.684               0.000 MAX10_CLK1_50 
-    Info (332119):     1.211               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-Info (332146): Worst-case minimum pulse width slack is 2.000
-    Info (332119):     Slack       End Point TNS Clock 
-    Info (332119): ========= =================== =====================
-    Info (332119):     2.000               0.000 clk_dram_ext 
-    Info (332119):     2.000               0.000 u0|altpll_0|sd1|pll7|clk[1] 
-    Info (332119):     4.712               0.000 u0|altpll_0|sd1|pll7|clk[2] 
-    Info (332119):     9.210               0.000 MAX10_CLK1_50 
-    Info (332119):     9.331               0.000 MAX10_CLK2_50 
-    Info (332119):    19.179               0.000 MIPI_PIXEL_CLK 
-    Info (332119):    19.724               0.000 u0|altpll_0|sd1|pll7|clk[3] 
-    Info (332119):    49.420               0.000 altera_reserved_tck 
+    Info (332119):     9.444               0.000 MAX10_CLK1_50 
+    Info (332119):     9.662               0.000 MAX10_CLK2_50 
+    Info (332119):    19.542               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    19.706               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):    49.625               0.000 altera_reserved_tck 
     Info (332119):    96.000               0.000 ADC_CLK_10 
 Info (332114): Report Metastability: Found 81 synchronizer chains.
     Info (332114): Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
@@ -1767,7 +1661,157 @@ Info (332114): Report Metastability: Found 81 synchronizer chains.
     Info (332114): Number of Synchronizer Chains Found: 81
     Info (332114): Shortest Synchronizer Chain: 2 Registers
     Info (332114): Fraction of Chains for which MTBFs Could Not be Calculated: 0.222
-    Info (332114): Worst Case Available Settling Time: 13.445 ns
+    Info (332114): Worst Case Available Settling Time: 10.558 ns
+    Info (332114): 
+    Info (332114): Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
+    Info (332114):   - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 1.8
+    Info (332114): Typical MTBF values are calculated based on the nominal silicon characteristics, at nominal operating conditions.
+    Info (332114):   - Under typical conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 3.7
+Info: Analyzing Slow 1200mV 0C Model
+Info (334003): Started post-fitting delay annotation
+Info (334004): Delay annotation completed successfully
+Warning (332060): Node: Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0] was determined to be a clock but was found without an associated clock assignment.
+    Info (13166): Latch Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_buf_in[10] is being clocked by Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0]
+Warning (332060): Node: Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket was determined to be a clock but was found without an associated clock assignment.
+    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|VCM_END is being clocked by Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket
+Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C was determined to be a clock but was found without an associated clock assignment.
+    Info (13166): Latch Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|STEP_f[7]~21 is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C
+Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK was determined to be a clock but was found without an associated clock assignment.
+    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|I2C_VCM_Controller:u0|SD_COUNTER[0] is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK
+Info (332097): The following timing edges are non-unate.  The Timing Analyzer will assume pos-unate behavior for these edges in the clock network.
+    Info (332098): Cell: altera_internal_jtag  from: tck  to: tckutap
+Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in the Timing Analyzer to see clock uncertainties.
+Critical Warning (332148): Timing requirements not met
+Info (332146): Worst-case setup slack is -24.868
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):   -24.868            -354.622 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     4.035               0.000 clk_dram_ext 
+    Info (332119):     7.142               0.000 MAX10_CLK1_50 
+    Info (332119):     9.595               0.000 MAX10_CLK2_50 
+    Info (332119):    13.036               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    30.849               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):    45.492               0.000 altera_reserved_tck 
+Info (332146): Worst-case hold slack is 0.220
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.220               0.000 MIPI_PIXEL_CLK 
+    Info (332119):     0.290               0.000 MAX10_CLK1_50 
+    Info (332119):     0.305               0.000 altera_reserved_tck 
+    Info (332119):     0.305               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     0.306               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     0.312               0.000 MAX10_CLK2_50 
+    Info (332119):     2.135               0.000 clk_dram_ext 
+Info (332146): Worst-case recovery slack is 2.889
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     2.889               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     3.875               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     4.463               0.000 MAX10_CLK1_50 
+    Info (332119):    37.003               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    48.163               0.000 altera_reserved_tck 
+Info (332146): Worst-case removal slack is 0.856
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.856               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     1.034               0.000 altera_reserved_tck 
+    Info (332119):     1.214               0.000 MAX10_CLK1_50 
+    Info (332119):     1.597               0.000 MIPI_PIXEL_CLK 
+    Info (332119):     2.015               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+Info (332146): Worst-case minimum pulse width slack is 4.693
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     4.693               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     4.876               0.000 u0|altpll_0|sd1|pll7|clk[1] 
+    Info (332119):     5.790               0.000 clk_dram_ext 
+    Info (332119):     9.454               0.000 MAX10_CLK1_50 
+    Info (332119):     9.668               0.000 MAX10_CLK2_50 
+    Info (332119):    19.609               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    19.699               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):    49.648               0.000 altera_reserved_tck 
+    Info (332119):    96.000               0.000 ADC_CLK_10 
+Info (332114): Report Metastability: Found 81 synchronizer chains.
+    Info (332114): Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+    Info (332114): Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+
+    Info (332114): Number of Synchronizer Chains Found: 81
+    Info (332114): Shortest Synchronizer Chain: 2 Registers
+    Info (332114): Fraction of Chains for which MTBFs Could Not be Calculated: 0.222
+    Info (332114): Worst Case Available Settling Time: 11.289 ns
+    Info (332114): 
+    Info (332114): Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
+    Info (332114):   - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 1.8
+    Info (332114): Typical MTBF values are calculated based on the nominal silicon characteristics, at nominal operating conditions.
+    Info (332114):   - Under typical conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 3.7
+Info: Analyzing Fast 1200mV 0C Model
+Warning (332060): Node: Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0] was determined to be a clock but was found without an associated clock assignment.
+    Info (13166): Latch Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_buf_in[10] is being clocked by Qsys:u0|EEE_IMGPROC:eee_imgproc_0|msg_state[0]
+Warning (332060): Node: Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket was determined to be a clock but was found without an associated clock assignment.
+    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|VCM_END is being clocked by Qsys:u0|Qsys_alt_vip_vfb_0:alt_vip_vfb_0|ALT_CUSP181_AVALON_ST_OUTPUT:dout|startofpacket
+Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C was determined to be a clock but was found without an associated clock assignment.
+    Info (13166): Latch Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|STEP_f[7]~21 is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|VCM_CTRL_P:vcm_ctrl|F_VCM:f|V_C
+Warning (332060): Node: Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK was determined to be a clock but was found without an associated clock assignment.
+    Info (13166): Register Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|I2C_VCM_Controller:u0|SD_COUNTER[0] is being clocked by Qsys:u0|TERASIC_AUTO_FOCUS:terasic_auto_focus_0|I2C_VCM_Config:vcm_i2c|mI2C_CTRL_CLK
+Info (332097): The following timing edges are non-unate.  The Timing Analyzer will assume pos-unate behavior for these edges in the clock network.
+    Info (332098): Cell: altera_internal_jtag  from: tck  to: tckutap
+Info (332123): Deriving Clock Uncertainty. Please refer to report_sdc in the Timing Analyzer to see clock uncertainties.
+Critical Warning (332148): Timing requirements not met
+Info (332146): Worst-case setup slack is -5.269
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):    -5.269             -55.139 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     3.996               0.000 clk_dram_ext 
+    Info (332119):    11.414               0.000 MAX10_CLK2_50 
+    Info (332119):    13.477               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    13.792               0.000 MAX10_CLK1_50 
+    Info (332119):    35.817               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):    48.206               0.000 altera_reserved_tck 
+Info (332146): Worst-case hold slack is 0.014
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.014               0.000 MIPI_PIXEL_CLK 
+    Info (332119):     0.141               0.000 MAX10_CLK1_50 
+    Info (332119):     0.146               0.000 altera_reserved_tck 
+    Info (332119):     0.147               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     0.149               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     0.152               0.000 MAX10_CLK2_50 
+    Info (332119):     1.844               0.000 clk_dram_ext 
+Info (332146): Worst-case recovery slack is 6.209
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     6.209               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     6.628               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     7.016               0.000 MAX10_CLK1_50 
+    Info (332119):    38.554               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    49.324               0.000 altera_reserved_tck 
+Info (332146): Worst-case removal slack is 0.405
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     0.405               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):     0.482               0.000 altera_reserved_tck 
+    Info (332119):     0.574               0.000 MAX10_CLK1_50 
+    Info (332119):     0.796               0.000 MIPI_PIXEL_CLK 
+    Info (332119):     0.931               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+Info (332146): Worst-case minimum pulse width slack is 2.000
+    Info (332119):     Slack       End Point TNS Clock 
+    Info (332119): ========= =================== =====================
+    Info (332119):     2.000               0.000 clk_dram_ext 
+    Info (332119):     2.000               0.000 u0|altpll_0|sd1|pll7|clk[1] 
+    Info (332119):     4.713               0.000 u0|altpll_0|sd1|pll7|clk[2] 
+    Info (332119):     9.234               0.000 MAX10_CLK1_50 
+    Info (332119):     9.332               0.000 MAX10_CLK2_50 
+    Info (332119):    19.197               0.000 MIPI_PIXEL_CLK 
+    Info (332119):    19.725               0.000 u0|altpll_0|sd1|pll7|clk[3] 
+    Info (332119):    49.423               0.000 altera_reserved_tck 
+    Info (332119):    96.000               0.000 ADC_CLK_10 
+Info (332114): Report Metastability: Found 81 synchronizer chains.
+    Info (332114): Worst-Case MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+    Info (332114): Typical MTBF of Design is 1e+09 years or 3.15e+16 seconds.
+
+    Info (332114): Number of Synchronizer Chains Found: 81
+    Info (332114): Shortest Synchronizer Chain: 2 Registers
+    Info (332114): Fraction of Chains for which MTBFs Could Not be Calculated: 0.222
+    Info (332114): Worst Case Available Settling Time: 15.869 ns
     Info (332114): 
     Info (332114): Worst-Case MTBF values are calculated based on the worst-case silicon characteristics, with worst-case operating conditions.
     Info (332114):   - Under worst-case conditions, an increase of 100ps in available settling time will increase MTBF values by a factor of 1.8
@@ -1776,9 +1820,9 @@ Info (332114): Report Metastability: Found 81 synchronizer chains.
 Info (332102): Design is not fully constrained for setup requirements
 Info (332102): Design is not fully constrained for hold requirements
 Info: Quartus Prime Timing Analyzer was successful. 0 errors, 103 warnings
-    Info: Peak virtual memory: 5025 megabytes
-    Info: Processing ended: Mon Jun 05 02:21:31 2023
-    Info: Elapsed time: 00:00:11
-    Info: Total CPU time (on all processors): 00:00:18
+    Info: Peak virtual memory: 5119 megabytes
+    Info: Processing ended: Mon Jun 05 15:11:03 2023
+    Info: Elapsed time: 00:00:10
+    Info: Total CPU time (on all processors): 00:00:30
 
 

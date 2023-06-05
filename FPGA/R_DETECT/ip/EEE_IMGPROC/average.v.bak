@@ -2,7 +2,7 @@ module Averaging(
   input wire clk,
   input wire reset,
   input wire [10:0] x,
-  output wire [10:0] x_avg
+  output wire [10:0] x_avg,
 );
   parameter WINDOW_SIZE = 50;  
   parameter THRESHOLD = 10;    
