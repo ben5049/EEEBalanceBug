@@ -40,6 +40,7 @@ class Rover():
     priornode = 0
     priorwhereat = 0
     sessionId = -1
+    lastSeen = 0
 
     pause = False
 

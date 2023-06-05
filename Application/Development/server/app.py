@@ -1,11 +1,14 @@
 from flask import Flask, jsonify, request, make_response
+from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
+from time import time
 # TODO: error handling
 
 app = Flask(__name__)
+CORS(app)
 
-hostip = '54.163.169.94'
+hostip = '44.211.175.45'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -30,7 +33,6 @@ def hello():
 # rover communication - works
 @app.route("/rover", methods=["POST"])
 def rover():
-    print("hello")
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     r = 0
     flag = True
@@ -39,12 +41,21 @@ def rover():
             r = rover
             flag = False
             break
-    print("hello")
     if flag:
         r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
         r.pause = True
         try:
             cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", (data["MAC"], data["nickname"]))
+        except mariadb.Error as e:
+            cur.execute("SELECT * FROM Rovers WHERE MAC=?", (data["MAC"],))
+            flag = True
+            for mac, nick in cur:
+                if mac == data["MAC"]:
+                    flag = False
+            if flag:
+                return make_response(jsonify({"error":"Specified MAC does not exist"}), 400)                
+
+        try:
             cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], data["timestamp"]))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
@@ -53,7 +64,8 @@ def rover():
             r.sessionId = x[0]
         
         rovers.append(r)
-    print("hello")
+    r.nickname = data["nickname"]
+    r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
     resp = {"next_actions" : resp}
     
@@ -84,6 +96,10 @@ def allrovers():
     d = []
     disallowedMacs = []
     for rover in rovers:
+        if time()-rover.lastSeen > 30:
+            rovers.remove(rover)
+    
+    for rover in rovers:
         temp = {}
         temp["MAC"] = rover.name
         disallowedMacs.append(rover.name)
@@ -97,6 +113,8 @@ def allrovers():
         t+="MAC != "+str(i)+" AND "
     t = t[:-5]
     command = "SELECT * FROM Rovers WHERE "+t
+    if command == "SELECT * FROM Rovers WHERE ":
+        command = "SELECT * FROM Rovers" 
     print(command)
     try:
         cur.execute(command)

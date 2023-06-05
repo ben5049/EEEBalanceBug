@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Slider from '../components/Replay/Slider';
 import '../components/Replay/grid_Replay.css';
@@ -34,10 +34,7 @@ const Replay = () => {
 	const handleShortestPath = () => {
 		console.log('Shortest Path');
 	};
-	const handleRewind = () => {
-		console.log('Rewind');
-	};
-	const handlePause = () => {
+		const handlePause = () => {
 		console.log('Pause');
 	};
 	const handlePlay = () => {
@@ -47,12 +44,56 @@ const Replay = () => {
 		console.log('Replay');
 		setSliderValue(parseInt(0));
 	};
-	const handleFastforward = () => {
-		console.log('Fast Forward');
-	};
-	const handleRepeat = () => {
+		const handleRepeat = () => {
 		console.log('Repeat');
 	};
+
+	// Use useRef to keep track of the interval ID for the button actions
+	const rewindIntervalRef = useRef(null);
+	const fastforwardIntervalRef = useRef(null);
+
+	const handleRewindStart = () => {
+		console.log('Rewind Start');
+		// Check if an interval is already running to avoid starting multiple intervals
+		if (!rewindIntervalRef.current) {
+		  rewindIntervalRef.current = setInterval(() => {
+			// Update the slider value based on your rewind logic
+			// For example, decrease the slider value by a certain amount
+			setSliderValue((prevValue) => {
+			  const newValue = prevValue - 4; // Decrease the value by 10 (adjust the amount as needed)
+			  // Ensure the new value stays within the range of 0 and SliderValueMax
+			  return newValue < 0 ? 0 : newValue;
+			});
+		  }, 100); // Interval duration (adjust as desired)
+		}
+	  };
+	  const handleRewindStop = () => {
+		console.log('Rewind Stop');
+		// Clear the interval when the button is released
+		clearInterval(rewindIntervalRef.current);
+		rewindIntervalRef.current = null;
+	  };
+	  const handleFastforwardStart = () => {
+		console.log('Fast Forward Start');
+		// Check if an interval is already running to avoid starting multiple intervals
+		if (!fastforwardIntervalRef.current) {
+		  fastforwardIntervalRef.current = setInterval(() => {
+			// Update the slider value based on your fast forward logic
+			// For example, increase the slider value by a certain amount
+			setSliderValue((prevValue) => {
+			  const newValue = prevValue + 4; // Increase the value by 10 (adjust the amount as needed)
+			  // Ensure the new value stays within the range of 0 and SliderValueMax
+			  return newValue > SliderValueMax ? SliderValueMax : newValue;
+			});
+		  }, 100); // Interval duration (adjust as desired)
+		}
+	  };
+	  const handleFastforwardStop = () => {
+		console.log('Fast Forward Stop');
+		// Clear the interval when the button is released
+		clearInterval(fastforwardIntervalRef.current);
+		fastforwardIntervalRef.current = null;
+	  };
 
 	// Get starting state
 	const [PlayState, setPlayState] = useState('Pause');
@@ -131,11 +172,14 @@ const Replay = () => {
 	}, [PlayState]);
 
 	// User-editable Coordinates
-	const [startCoordinates_X, setStartCoordinates_X] = useState(''); // TODO: Set to replay default
-	const [startCoordinates_Y, setStartCoordinates_Y] = useState(''); // TODO: Set to replay default
-	const [endCoordinates_X, setEndCoordinates_X] = useState(''); // TODO: Set to replay default
-	const [endCoordinates_Y, setEndCoordinates_Y] = useState(''); // TODO: Set to replay default
-	
+	const [startCoordinates_X, setStartCoordinates_X] = useState('12'); // TODO: Set to replay default
+	const [startCoordinates_Y, setStartCoordinates_Y] = useState('42'); // TODO: Set to replay default
+	const [endCoordinates_X, setEndCoordinates_X] = useState('73'); // TODO: Set to replay default
+	const [endCoordinates_Y, setEndCoordinates_Y] = useState('13'); // TODO: Set to replay default
+	// Input Validation
+	const isCoordinate = (coordinate) => {
+		return /^\d+$/.test(coordinate);
+	}
 
 
 	return (
@@ -204,7 +248,7 @@ const Replay = () => {
 				</div>
 				<div className="box PlaybackControls_Rewind"/>	
 				<div className='box-nobackground RewindButton_Replay'>
-					<button onClick={handleRewind} className='box-green buttons_Replay'>
+					<button onMouseDown={handleRewindStart} onMouseUp={handleRewindStop} className='box-green buttons_Replay'>
 						<img
 							src={RewindIcon}
 							alt={"Rewind"}
@@ -265,7 +309,7 @@ const Replay = () => {
 					}
 				</div>
 				<div className='box-nobackground FastforwardButton_Replay'>
-					<button onClick={handleFastforward} className='box-green buttons_Replay'>
+					<button onMouseDown={handleFastforwardStart} onMouseUp={handleFastforwardStop} className='box-green buttons_Replay'>
 						<img
 							src={FastforwardIcon}
 							alt={"Fastforward"}

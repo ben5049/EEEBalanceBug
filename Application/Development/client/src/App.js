@@ -6,6 +6,10 @@ import Replay from './pages/Replay';
 import Connected from './pages/Connected';
 
 function App() {
+
+	// Set IPv4 for AWS then rebuild (AWS Learner account only active for 4h)
+	localStorage.setItem('ServerIP', '44.211.175.45');
+
 	return (
 			<Router>
 				<Routes>

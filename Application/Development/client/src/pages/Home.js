@@ -1,12 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import RoverCarousel from '../components/Home/RoverCarousel';
 import ReplayCarousel from '../components/Home/ReplayCarousel';
 import '../components/Home/grid_Home.css';
 import '../components/grid.css';
 import AddIcon from '../components/Home/AddIcon.png';
+import ReactPolling from "react-polling/lib/ReactPolling";
 
 const Home = () => {
+	const GetServerIP = localStorage.getItem('ServerIP');
+
 	// Gets from server: MAC, Nickname, Connection status
+	const [rovers_list, Update_rovers_list] = useState([]);
+	const RoverURL = "http://" + GetServerIP + ":5000/client/allrovers";
+	const fetchRoverList = () => {
+		console.log("URL = " + RoverURL);
+		return fetch(RoverURL);
+	}
+	const RoverPollingSuccess = (jsonResponse) => {
+		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
+		Update_rovers_list(jsonResponse);
+		return true;
+	}
+	const RoverPollingFailure = () => {
+		console.log("ROVER POLLING FAIL");
+		return true;
+	}
+	
+	{/*
 	const rovers_list = [
 		{MAC: '11:11:11:11:11:11', nickname: 'David2', overlayText: 'CONNECT' },
 		{MAC: '13:13:13:13:13:13', nickname: 'Kyle12', overlayText: 'OFFLINE' },
@@ -18,6 +38,7 @@ const Home = () => {
 		{MAC: '13:13:13:13:13:13', nickname: 'Kyle2', overlayText: 'OFFLINE' },
 		{MAC: '00:00:00:00:00:00', nickname: 'David15', overlayText: 'OFFLINE' },
 	];
+	*/}
 
 	const replays_list = [
 		{ID: '1', name: 'run1'},
@@ -68,7 +89,18 @@ const Home = () => {
 					Replays
 				</div>
 				<div className="box ReplayCarousel_Home">
-					<ReplayCarousel replays={replays_list} />
+					<ReactPolling
+						url={RoverURL}
+						interval= {3000} // in milliseconds(ms)
+						retryCount={3} // this is optional
+						onSuccess = {RoverPollingSuccess}
+						onFailure= {RoverPollingFailure}
+						promise={fetchRoverList} // custom api calling function that should return a promise
+						render={({ startPolling, stopPolling, isPolling }) => {
+							return <ReplayCarousel replays={replays_list} />;
+						}}
+					/>
+					{/*<ReplayCarousel replays={replays_list} />*/}
 				</div>
 			</div>
 		</div>
