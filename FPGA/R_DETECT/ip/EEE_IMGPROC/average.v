@@ -47,3 +47,60 @@ module Averaging(
   assign x_avg = sum / valid_data_count;
 
 endmodule
+
+// Calculate the average x-coordinate
+reg [10:0] sum;
+reg counter;
+reg [10:0] r_x_avg, y_x_avg, b_x_avg;
+
+always@(posedge clk) begin
+	if (red_detect & in_valid) begin
+		sum <= sum + x;
+	end
+	
+	else if (yellow_detect & in_valid) begin //Update bounds when the pixel is yellow
+		sum <= sum + x;
+	end
+	
+	else if (blue_detect & in_valid) begin //Update bounds when the pixel is blue
+		sum <= sum + x;
+	end
+	
+// find the average value for x-coordinate
+reg [10:0] sum_red;
+reg [10:0] sum_yellow;
+reg [10:0] sum_blue;
+reg [10:0] count_red;
+reg [10:0] count_yellow;
+reg [10:0] count_blue;
+reg [10:0] r_x_avg;
+reg [10:0] y_x_avg;
+reg [10:0] b_x_avg;
+
+always @(posedge clk) begin
+    if (in_valid) begin
+        if (red_detect) begin
+            sum_red <= sum_red + x;
+            count_red <= count_red + 1;
+        end
+        if (yellow_detect) begin
+            sum_yellow <= sum_yellow + x;
+            count_yellow <= count_yellow + 1;
+        end
+        if (blue_detect) begin
+            sum_blue <= sum_blue + x;
+            count_blue <= count_blue + 1;
+        end
+    end
+end
+
+always @(posedge clk) begin
+    if (in_valid) begin
+        if (count_red != 0)
+            r_x_avg <= sum_red / count_red;
+        if (count_yellow != 0)
+            y_x_avg <= sum_yellow / count_yellow;
+        if (count_blue != 0)
+            b_x_avg <= sum_blue / count_blue;
+    end
+end

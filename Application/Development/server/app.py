@@ -8,7 +8,7 @@ from time import time
 app = Flask(__name__)
 CORS(app)
 
-hostip = '44.211.175.45'
+hostip = '18.207.197.24'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -152,9 +152,14 @@ def replay():
 @app.route("/client/sessions", methods=["GET"])
 def sessions():
     cur.execute("SELECT * FROM Sessions ORDER BY SessionId DESC;")
-    d = {}
+    d = []
     for mac, sessionid, nickname in cur:
-        d[sessionid] = [mac, nickname]
+        temp = {}
+        temp["sessionid"] = sessionid
+        temp["MAC"] = mac
+        temp["nickname"] = nickname
+        d.append(temp)
+
     return make_response(jsonify(d), 200)
 
 # works
