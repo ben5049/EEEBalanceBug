@@ -46,6 +46,16 @@ def rover():
         r.pause = True
         try:
             cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", (data["MAC"], data["nickname"]))
+        except mariadb.Error as e:
+            cur.execute("SELECT * FROM Rovers WHERE MAC=?", (data["MAC"],))
+            flag = True
+            for mac, nick in cur:
+                if mac == data["MAC"]:
+                    flag = False
+            if flag:
+                return make_response(jsonify({"error":"Specified MAC does not exist"}), 400)                
+
+        try:
             cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], data["timestamp"]))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
