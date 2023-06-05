@@ -2,26 +2,88 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../components/Connected/grid_Connected.css';
 import '../components/grid.css';
+import ReactPolling from "react-polling/lib/ReactPolling";
 
 const Connected = () => {
+	const ServerIP = localStorage.getItem('ServerIP');
 	// Retrieve selected rover
 	const MAC = localStorage.getItem('MAC');
 	const nickname = localStorage.getItem('nickname');
 	console.log('CONNECTED MAC = ' + MAC)
 	console.log('CONNECTED nickname = ' + nickname)
 	
+	// Polling - Gets from server: diagnostic data
+	const [DiagnosticData, UpdateDiagnosticData] = useState([]);
+	const DiagnosticURL = "http://" + ServerIP + ":5000/client/diagnostics";
+	const fetchDiagnosticData = () => {
+		console.log("URL = " + DiagnosticURL);
+		return fetch(DiagnosticURL, {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json'
+		  },
+		  body: JSON.stringify({ "MAC": MAC })
+		});
+	};
+	const DiagnosticPollingSuccess = (jsonResponse) => {
+		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
+		UpdateDiagnosticData(jsonResponse);
+		return true;
+	}
+	const DiagnosticPollingFailure = () => {
+		console.log("DIAGNOSTIC POLLING FAIL");
+		return true;
+	}
+
+	// Polling - Gets from server: map data
+	const [MapData, UpdateMappingData] = useState([]);
+	const MappingURL = "http://" + ServerIP + ":5000/client/replay";
+	const fetchMappingData = () => {
+		console.log("URL = " + MappingURL);
+		return fetch(MappingURL, {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json'
+		  },
+		  body: JSON.stringify({ "MAC": MAC })
+		});
+	};
+	const MappingPollingSuccess = (jsonResponse) => {
+		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
+		UpdateMappingData(jsonResponse);
+		return true;
+	}
+	const MappingPollingFailure = () => {
+		console.log("MAPPING POLLING FAIL");
+		return true;
+	}
+
 	// Button click handles
 	const handlePause = () => {
 		console.log('Pause');
-		// TODO: Send Pause Post to server
-	};
-	const handleStart = () => {
-		console.log('Start');
-		// TODO: Send Pause Post to server
+		// Send Pause Post to server
+		const url = "http://" + ServerIP + "/pause"; // Pause endpoint
+		console.log("URL = " + url);
+		fetch(url, {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ "MAC": MAC })
+		})
 	};
 	const handlePlay = () => {
 		console.log('Play');
-		// TODO: Send Pause Post to server
+		// Send Play Post to server
+		const url = "http://" + ServerIP + "/play"; // Pause endpoint
+		console.log("URL = " + url);
+		fetch(url, {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ "MAC": MAC })
+		})
 	};
 	const handleViewReplay = () => {
 		console.log("View Replay")
@@ -38,15 +100,15 @@ const Connected = () => {
 
 	// Switch state on button click
 	const ChangeState = () => {
-		if (ConnectedState == "Start") {
+		if (ConnectedState === "Start") {
 			setConnectedState("Mapping");
-			handleStart();
+			handlePlay();
 		}
-		else if (ConnectedState == "Mapping") {
+		else if (ConnectedState === "Mapping") {
 			setConnectedState("Pause");
 			handlePause();
 		}
-		else if (ConnectedState == "Pause") {
+		else if (ConnectedState === "Pause") {
 			setConnectedState("Mapping");
 			handlePlay();
 		}
@@ -114,10 +176,30 @@ const Connected = () => {
 												  </div>
 												) : (<></>)}
 				<div className="box Map_Connected">
-					Map	
+					<ReactPolling
+						url={MappingURL}
+						interval= {100} // in milliseconds(ms)
+						retryCount={3} // this is optional
+						onSuccess = {MappingPollingSuccess}
+						onFailure= {MappingPollingFailure}
+						promise={fetchMappingData} // custom api calling function that should return a promise
+						render={({ startPolling, stopPolling, isPolling }) => {
+							return <p>Map</p>;
+						}}
+					/>
 				</div>
 				<div className="box Data_Connected">
-					<p>Data</p><p>Data</p><p>Data&#10;Data&#10;</p>
+					<ReactPolling
+						url={DiagnosticURL}
+						interval= {100} // in milliseconds(ms)
+						retryCount={3} // this is optional
+						onSuccess = {DiagnosticPollingSuccess}
+						onFailure= {DiagnosticPollingFailure}
+						promise={fetchDiagnosticData} // custom api calling function that should return a promise
+						render={({ startPolling, stopPolling, isPolling }) => {
+							return <p>CPU: {DiagnosticData.CPU}, MAC: {DiagnosticData.MAC}, Battery: {DiagnosticData.battery}, Connection: {DiagnosticData.connection}, Timestamp: {DiagnosticData.timestamp}</p>;
+						}}
+					/>
 				</div>
 			</div>
 		</div>

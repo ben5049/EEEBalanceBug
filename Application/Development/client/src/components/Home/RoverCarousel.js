@@ -4,7 +4,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import './RoverCarousel.css';
 import Rover from './Rover.png';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const RoverCarousel = ({ rovers }) => {
   console.log("Fetched Rovers: " + rovers);
@@ -27,14 +27,14 @@ const RoverCarousel = ({ rovers }) => {
   };
 
   const getOverlayText = (connectionStatus) => {
-    if (connectionStatus == true){
+    if (connectionStatus === true){
       return "CONNECT"
     }
     else {
       return "OFFLINE"
     }
   }
-
+  
   const getOverlayStyle = (connectionStatus) => {
     if (connectionStatus === true) {
       return 'overlay-green_RoverCarousel';

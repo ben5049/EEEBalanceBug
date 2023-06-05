@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Slider from '../components/Replay/Slider';
 import '../components/Replay/grid_Replay.css';
 import '../components/grid.css';
 import RewindIcon from '../components/Replay/RewindIcon.png';
@@ -13,6 +12,7 @@ import RepeatEnabledIcon from '../components/Replay/RepeatEnabledIcon.png';
 
 
 const Replay = () => {
+	const ServerIP = localStorage.getItem('ServerIP');
 	const ID = localStorage.getItem('ReplayID');
 	const MAC = localStorage.getItem('MAC');
 	const nickname = localStorage.getItem('nickname');
@@ -20,6 +20,55 @@ const Replay = () => {
 	console.log('CONNECTED MAC = ' + MAC)
 	console.log('CONNECTED nickname = ' + nickname)
 	
+	// Polling - Gets from server: map data
+	const [MapData, UpdateMappingData] = useState([]);
+	const MappingURL = "http://" + ServerIP + ":5000/client/replay";
+	const fetchMappingData = () => {
+		console.log("URL = " + MappingURL);
+		return fetch(MappingURL, {
+		  method: 'POST',
+		  headers: {
+			'Content-Type': 'application/json'
+		  },
+		  body: JSON.stringify({ "MAC": MAC })
+		});
+	};
+	const MappingPollingSuccess = (jsonResponse) => {
+		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
+		UpdateMappingData(jsonResponse);
+		return true;
+	}
+	const MappingPollingFailure = () => {
+		console.log("MAPPING POLLING FAIL");
+		return true;
+	}
+
+	console.log("URL = " + DiagnosticURL);
+
+	const [ShortestPath, UpdateShortestPath] = useState([]);
+	const postStartEnd = async (StartX, StartY) => {
+	try {
+		const response = await fetch(DiagnosticURL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ "MAC": MAC, "start_x": StartX, "start_y": StartY})
+		});
+		if (response.ok) {
+			const responseData = await response.json();
+			console.log("Response data:", responseData);
+			// Store the responseData in a variable or use it as needed
+			UpdateShortestPath(responseData);
+		} else {
+			console.log("Diagnostic request failed");
+			// Handle the error or throw an error
+		}
+		} catch (error) {
+			console.log("Error:", error);
+		}
+	};
+
 	
 	// Button click handles
 	const handleMenu = () => {
@@ -33,6 +82,9 @@ const Replay = () => {
 	};
 	const handleShortestPath = () => {
 		console.log('Shortest Path');
+		// POST shortest path
+		postStartEnd(startCoordinates_X, startCoordinates_Y);
+		// TODO: Visualise shortest path
 	};
 		const handlePause = () => {
 		console.log('Pause');
@@ -43,9 +95,6 @@ const Replay = () => {
 	const handleReplay = () => {
 		console.log('Replay');
 		setSliderValue(parseInt(0));
-	};
-		const handleRepeat = () => {
-		console.log('Repeat');
 	};
 
 	// Use useRef to keep track of the interval ID for the button actions
@@ -99,15 +148,15 @@ const Replay = () => {
 	const [PlayState, setPlayState] = useState('Pause');
 	// Switch state on button click
 	const ChangePlayState = () => {
-		if (PlayState == "Pause") {
+		if (PlayState === "Pause") {
 			setPlayState("Play");
 			handlePlay();
 		}
-		else if (PlayState == "Play") {
+		else if (PlayState === "Play") {
 			setPlayState("Pause");
 			handlePause();
 		}
-		else if (PlayState == "End") {
+		else if (PlayState === "End") {
 			setPlayState("Play");
 			handleReplay();
 		}
@@ -117,10 +166,10 @@ const Replay = () => {
 	const [RepeatToggleState, setRepeatToggleState] = useState(false);
 	// Switch state on button click
 	const ChangeRepeatToggleState = () => {
-		if (RepeatToggleState == true) {
+		if (RepeatToggleState === true) {
 			setRepeatToggleState(false);
 		}
-		else if (RepeatToggleState == false) {
+		else if (RepeatToggleState === false) {
 			setRepeatToggleState(true);
 		}
 	};
@@ -132,8 +181,8 @@ const Replay = () => {
 
 	const handleSliderChange = (event) => {
 		setSliderValue(parseInt(event.target.value));
-		if      (RepeatToggleState == false) {
-			if (event.target.value == SliderValueMax) {
+		if      (RepeatToggleState === false) {
+			if (event.target.value === SliderValueMax) {
 				setPlayState("End");
 			}
 			else {
@@ -153,13 +202,13 @@ const Replay = () => {
 			interval = setInterval(() => {
 				setSliderValue((prevValue) => {
 				const newValue = prevValue + 1;
-				if      (RepeatToggleState == false) {
-					if (newValue == SliderValueMax) {
+				if      (RepeatToggleState === false) {
+					if (newValue === SliderValueMax) {
 						setPlayState("End");
 					}
 					return newValue > SliderValueMax ? SliderValueMax : newValue;
 				}
-				else if (RepeatToggleState == true) {
+				else if (RepeatToggleState === true) {
 					return newValue > SliderValueMax ? 0 : newValue;
 				}
 				});
@@ -262,7 +311,7 @@ const Replay = () => {
 					</button>
 				</div>
 				<div className='box-nobackground PauseButton_Replay'>
-					{ PlayState == "Pause" ? (
+					{ PlayState === "Pause" ? (
 						<button onClick={ChangePlayState} className='box-green buttons_Replay'>
 							<img
 								src={PlayIcon}
@@ -277,7 +326,7 @@ const Replay = () => {
 						</button>
 					) : (<></>)
 					}
-					{ PlayState == "Play" ? (
+					{ PlayState === "Play" ? (
 						<button onClick={ChangePlayState} className='box-green buttons_Replay'>
 							<img
 								src={PauseIcon}
@@ -292,7 +341,7 @@ const Replay = () => {
 						</button>
 					) : (<></>)
 					}
-					{ PlayState == "End" ? (
+					{ PlayState === "End" ? (
 						<button onClick={ChangePlayState} className='box-green buttons_Replay'>
 							<img
 								src={ReplayIcon}
@@ -337,7 +386,17 @@ const Replay = () => {
 					</button>
 				</div>
 				<div className="box Map_Replay">
-					Map	
+					<ReactPolling
+						url={MappingURL}
+						interval= {100} // in milliseconds(ms)
+						retryCount={3} // this is optional
+						onSuccess = {MappingPollingSuccess}
+						onFailure= {MappingPollingFailure}
+						promise={fetchMappingData} // custom api calling function that should return a promise
+						render={({ startPolling, stopPolling, isPolling }) => {
+							return <p>Map</p>;
+						}}
+					/>	
 				</div>
 				<div className="box Data_Replay">
 					<p>Data</p><p>Data</p>
