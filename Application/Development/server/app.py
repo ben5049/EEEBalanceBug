@@ -1,9 +1,11 @@
 from flask import Flask, jsonify, request, make_response
+from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
 # TODO: error handling
 
 app = Flask(__name__)
+CORS(app)
 
 hostip = '54.163.169.94'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
