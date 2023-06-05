@@ -252,7 +252,8 @@ def findShortestPath():
     data = request.get_json()
     try:
         mac = data["MAC"]
-        start = data["start"]
+        start_x = data["start_x"]
+        start_y = data["start_y"]
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC or start"}), 400)
     tree = 0
@@ -263,7 +264,7 @@ def findShortestPath():
             flag= False
     if flag:
         return make_response(jsonify({"error":"Incorrectly formatted request: invalid MAC address"}), 400)
-    P = dijkstra.dijkstra(tree, start)
+    P = dijkstra.dijkstra(tree, [start_x, start_y])
     betterP = {}
     for key, value in P:
         if value is not None:

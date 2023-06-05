@@ -45,11 +45,27 @@ void taskDeadReckoning(void *pvParameters) {
     if (currentCommand == FORWARD){
       int32_t leftSteps = stepperLeftSteps-priorStepperLeftSteps;
       int32_t rightSteps = stepperRightSteps-priorStepperRightSteps;
-      if (leftSteps-rightSteps < stepDifferenceThreshold && leftSteps-rightSteps>-stepDifferenceThreshold ){
-        xPosition = xPosition + stepperLeftSteps/STEPS*cos(yaw*PI/180);
-        yPosition = yPosition - stepperLeftSteps/STEPS*sin(yaw*PI/180);
+      if (leftSteps-rightSteps < stepDifferenceThreshold && leftSteps-rightSteps>-stepDifferenceThreshold){
+        xPosition = xPosition + leftSteps/STEPS*cos(yaw*PI/180)*rotationsToDistance;
+        yPosition = yPosition - leftSteps/STEPS*sin(yaw*PI/180)*rotationsToDistance;
         priorStepperLeftSteps = stepperLeftSteps;
         priorStepperRightSteps = stepperRightSteps;
+      }
+      else if (leftSteps-rightSteps>stepDifferenceThreshold){
+        float theta = (leftSteps-rightSteps)/ROVER_WIDTH;
+        float r = leftSteps/STEPS*rotationsToDistance/theta;
+        float triangle_sides = r-ROVER_WIDTH/2;
+        float a = sqrt(2*triangle_sides*triangle_sides*(1-cos(theta)));
+        xPosition = xPosition + a*sin(theta);
+        yPosition = yPosition - a*cos(theta); 
+      }
+      else if (leftSteps-rightSteps<-stepDifferenceThreshold){
+        float theta = (rightSteps-leftSteps)/ROVER_WIDTH;
+        float r = rightSteps/STEPS*rotationsToDistance/theta;
+        float triangle_sides = r-ROVER_WIDTH/2;
+        float a = sqrt(2*triangle_sides*triangle_sides*(1-cos(theta)));
+        xPosition = xPosition - a*sin(theta);
+        yPosition = yPosition + a*cos(theta); 
       }
     }
   }
