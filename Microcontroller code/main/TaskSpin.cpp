@@ -37,6 +37,18 @@ float wrapAngle(float angle) {
   return angle;
 }
 
+void pollFPGA(&redCoordinate, &blueCoordinate, &yellowCoordinate){
+
+  /* Read 1 bytes from the slave */
+  uint8_t bytesReceived = Wire.requestFrom(FPGA_DEV_ADDR, 6);
+  Serial.printf("requestFrom: %u\n", bytesReceived);
+  if((bool)bytesReceived){ //If received more than zero bytes
+    uint8_t temp[bytesReceived];
+    Wire.readBytes(temp, bytesReceived);
+    log_print_buf(temp, bytesReceived);
+  }
+}
+
 //-------------------------------- Task Functions ---------------------------------------
 
 /* Task to detect junctions and beacons as the rover makes a 360 degree turn on the spot */
@@ -113,6 +125,8 @@ void taskSpin(void *pvParameters) {
       /* TODO: Poll FPGA to get x coordinate of each colour on the screen */
       /* TODO: Implement detection to get closest angle of each colour to centre of screen */
 
+
+
       /* Swap from first half to second half */
   #if SPIN_LEFT == true
       if (firstHalf && (previousYaw < halfWayAngle) && (yaw > halfWayAngle)) {
@@ -156,11 +170,12 @@ void taskSpin(void *pvParameters) {
         sum += distanceRight + distanceLeft;
         // sumSquares += sq(distanceRight) + sq(distanceLeft);
         counter += 2;
-
       }
 
       /* In the second half, check whether we are facing down a junction, and the approximate angle of that junction */
       else {
+        
+        // TODO: change detection method to average rising and falling edge angles
 
         /* RIGHT: IF we start at a peak then find its maximum */
         if (rightPeakAtStart && (rightPeakCounter == 1) && (distanceRight > rightPeakAtStartDistance)) {
