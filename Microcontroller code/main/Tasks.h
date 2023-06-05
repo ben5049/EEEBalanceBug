@@ -33,7 +33,7 @@ extern volatile uint16_t distanceLeft;
 extern volatile float spinStartingAngle;
 extern volatile float xPosition;
 extern volatile float yPosition;
-extern volatile uint16_t currentCommand;
+extern volatile robotCommand currentCommand;
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
