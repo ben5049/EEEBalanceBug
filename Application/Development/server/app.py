@@ -96,7 +96,10 @@ def allrovers():
     t = t[:-5]
     command = "SELECT * FROM Rovers WHERE "+t
     print(command)
-    cur.execute(command)
+    try:
+        cur.execute(command)
+    except mariadb.Error as e:
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     for rover in cur:
         temp = {}
         temp["MAC"] = rover[0]
