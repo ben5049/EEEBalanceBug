@@ -95,6 +95,7 @@ def allrovers():
         t+="MAC != "+str(i)+" AND "
     t = t[:-5]
     command = "SELECT * FROM Rovers WHERE "+t
+    print(command)
     cur.execute(command)
     for rover in cur:
         temp = {}
