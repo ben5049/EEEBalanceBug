@@ -12,8 +12,8 @@
 /* Motor variables */
 volatile static bool stepperLeftDirection = true;
 volatile static bool stepperRightDirection = true;
-volatile static int32_t stepperLeftSteps = 0;
-volatile static int32_t stepperRightSteps = 0;
+volatile int32_t stepperLeftSteps = 0;
+volatile int32_t stepperRightSteps = 0;
 
 /* Controller variables */
 static double pitch_out;

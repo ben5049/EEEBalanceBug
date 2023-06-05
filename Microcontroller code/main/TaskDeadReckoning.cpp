@@ -8,18 +8,20 @@
 #include "PinAssignments.h"
 
 /* Arduino header */
+#include "math.h"
 
 //-------------------------------- Global Variables -------------------------------------
 
 TaskHandle_t taskDeadReckoningHandle = nullptr;
 
 volatile float xPosition;
+volatile float yPosition;
 
 //-------------------------------- Functions --------------------------------------------
 
 //-------------------------------- Task Functions ---------------------------------------
 
-/* Task to record debug information */
+/* Task to get rover position */
 void taskDeadReckoning(void *pvParameters) {
 
   (void)pvParameters;
@@ -32,7 +34,8 @@ void taskDeadReckoning(void *pvParameters) {
   while (true) {
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-    yaw
-
+    /*
+    PUT DEAD RECKONING CODE HERE TO RUN IN A LOOP
+    */
   }
 }

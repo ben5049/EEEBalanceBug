@@ -25,10 +25,13 @@ typedef enum {
 /* Variables */
 extern volatile float pitch;
 extern volatile float yaw;
+extern volatile int32_t stepperRightSteps;
+extern volatile int32_t stepperLeftSteps;
 extern volatile uint16_t distanceRight;
 extern volatile uint16_t distanceLeft;
 extern volatile float spinStartingAngle;
 extern volatile float xPosition;
+extern volatile float yPosition;
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
@@ -48,6 +51,7 @@ extern TaskHandle_t taskMovementHandle;
 extern TaskHandle_t taskSpinHandle;
 extern TaskHandle_t taskExecuteCommandHandle;
 extern TaskHandle_t taskToFHandle;
+extern TaskHandle_t taskDeadReckoningHandle;
 extern TaskHandle_t taskServerCommunicationHandle;
 extern TaskHandle_t taskDebugHandle;
 
@@ -57,6 +61,7 @@ void taskMovement(void *pvParameters);
 void taskSpin(void *pvParameters);
 void taskExecuteCommand(void *pvParameters);
 void taskToFCommand(void *pvParameters);
+void taskDeadReckoning(void *pvParameters);
 void taskServerCommunication(void *pvParameters);
 void taskDebug(void *pvParameters);
 
