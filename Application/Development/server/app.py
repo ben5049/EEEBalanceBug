@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, make_response
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import tremaux, dijkstra
 import mariadb
 from time import time
