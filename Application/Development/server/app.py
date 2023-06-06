@@ -182,7 +182,6 @@ def pause():
         mac = int(data["MAC"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
-    print(mac, data)
     flag = True
     for rover in rovers:
         if rover.name == mac:
@@ -205,12 +204,12 @@ def play():
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
     for rover in rovers:
-        print(rover, mac)
+        print(rover.name == mac)
         if rover.name == mac:
             rover.pause = False
             flag = False
     if flag:
-        return make_response(jsonify({"error":"Selected rover does not exist, or is not currently connected"}), 400)
+        return make_response(jsonify({"error":"Selected rover does not exist on play, or is not currently connected"}), 400)
     
     return make_response(jsonify({"success":"successfully played rover"}), 200)
 
