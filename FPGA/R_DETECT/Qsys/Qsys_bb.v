@@ -15,6 +15,8 @@ module Qsys (
 	clk_sdram_clk,
 	clk_vga_clk,
 	d8m_xclkin_clk,
+	eee_imgproc_0_conduit_i2c_new_signal,
+	eee_imgproc_0_conduit_i2c_new_signal_1,
 	eee_imgproc_0_conduit_mode_new_signal,
 	i2c_opencores_camera_export_scl_pad_io,
 	i2c_opencores_camera_export_sda_pad_io,
@@ -43,9 +45,7 @@ module Qsys (
 	terasic_camera_0_conduit_end_LVAL,
 	terasic_camera_0_conduit_end_PIXCLK,
 	uart_0_rx_tx_rxd,
-	uart_0_rx_tx_txd,
-	eee_imgproc_0_conduit_i2c_new_signal,
-	eee_imgproc_0_conduit_i2c_new_signal_1);	
+	uart_0_rx_tx_txd);	
 
 	input		alt_vip_itc_0_clocked_video_vid_clk;
 	output	[23:0]	alt_vip_itc_0_clocked_video_vid_data;
@@ -62,6 +62,8 @@ module Qsys (
 	output		clk_sdram_clk;
 	output		clk_vga_clk;
 	output		d8m_xclkin_clk;
+	input		eee_imgproc_0_conduit_i2c_new_signal;
+	inout		eee_imgproc_0_conduit_i2c_new_signal_1;
 	input		eee_imgproc_0_conduit_mode_new_signal;
 	inout		i2c_opencores_camera_export_scl_pad_io;
 	inout		i2c_opencores_camera_export_sda_pad_io;
@@ -91,6 +93,4 @@ module Qsys (
 	input		terasic_camera_0_conduit_end_PIXCLK;
 	input		uart_0_rx_tx_rxd;
 	output		uart_0_rx_tx_txd;
-	input		eee_imgproc_0_conduit_i2c_new_signal;
-	inout		eee_imgproc_0_conduit_i2c_new_signal_1;
 endmodule

@@ -83,6 +83,14 @@ mSetup_ST.0000 0 0 0
 mSetup_ST.0001 1 0 1 
 mSetup_ST.0010 1 1 0 
 
+State Machine - |DE10_LITE_D8M_VIP|Qsys:u0|EEE_IMGPROC:eee_imgproc_0|i2c:i2c_slave|state
+Name state.STATE_IDX_PTR state.STATE_READ state.STATE_DEV_ADDR state.STATE_IDLE state.STATE_WRITE 
+state.STATE_IDLE 0 0 0 0 0 
+state.STATE_DEV_ADDR 0 0 1 1 0 
+state.STATE_READ 0 1 0 1 0 
+state.STATE_IDX_PTR 1 0 0 1 0 
+state.STATE_WRITE 0 0 0 1 1 
+
 State Machine - |DE10_LITE_D8M_VIP|Qsys:u0|EEE_IMGPROC:eee_imgproc_0|rgb_to_hsv:hsv_inst|rgb_se_n
 Name rgb_se_n.111 rgb_se_n.110 rgb_se_n.100 rgb_se_n.011 rgb_se_n.000 rgb_se_n.001 rgb_se_n.010 
 rgb_se_n.010 0 0 0 0 0 0 0 

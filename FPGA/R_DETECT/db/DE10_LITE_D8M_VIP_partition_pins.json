@@ -272,6 +272,14 @@
 					"strict" : false
 				},
 				{
+					"name" : "ARDUINO_IO[12]",
+					"strict" : false
+				},
+				{
+					"name" : "ARDUINO_IO[13]",
+					"strict" : false
+				},
+				{
 					"name" : "CAMERA_I2C_SCL",
 					"strict" : false
 				},
