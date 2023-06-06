@@ -176,11 +176,13 @@ def diagnostics():
 # works
 @app.route("/client/pause", methods=["POST"])
 def pause():
+    print("PAUSED")
     data = request.get_json()
     try:
         mac = data["MAC"]
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
+    print(mac, data)
     flag = True
     for rover in rovers:
         if rover.name == mac:
@@ -195,6 +197,7 @@ def pause():
 # works
 @app.route("/client/play", methods=["POST"])
 def play():
+    print("PLAYED")
     data = request.get_json()
     try:
         mac = data["MAC"]
