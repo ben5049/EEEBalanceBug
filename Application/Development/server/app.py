@@ -179,7 +179,7 @@ def pause():
     print("PAUSED")
     data = request.get_json()
     try:
-        mac = data["MAC"]
+        mac = int(data["MAC"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     print(mac, data)
@@ -205,6 +205,7 @@ def play():
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
     for rover in rovers:
+        print(rover, mac)
         if rover.name == mac:
             rover.pause = False
             flag = False
