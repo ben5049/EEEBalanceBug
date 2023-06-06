@@ -1,3 +1,11 @@
+/*
+Authors: Ben Smith
+Date created: 30/05/23
+Date updated: 03/06/23
+
+Code to initialise and sample the time of flight sensors
+*/
+
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
@@ -76,7 +84,7 @@ void configureToF() {
 
   /* Begin the multiplexer */
   I2CMux.begin(I2C_PORT);
-  
+
   SERIAL_PORT.print("1: ");
   checkI2CBusMembers();
 
@@ -207,12 +215,14 @@ void taskToF(void *pvParameters) {
       }
     }
 
-    // SERIAL_PORT.print("Yaw: ");
-    // SERIAL_PORT.print(yaw);
-    // SERIAL_PORT.print(", Left: ");
-    // SERIAL_PORT.print(distanceLeft);
-    // SERIAL_PORT.print(", Right: ");
-    // SERIAL_PORT.println(distanceRight);
+    /* Detect if we are at a junction and alert taskExecuteCommand */
+    if ((currentCommand == FORWARD) && ((distanceLeft >= THRESHOLD_DISTANCE) || (distanceRight >= THRESHOLD_DISTANCE))){
+      
+      // TODO: Make detection more sophistocated
+
+      /* Notify taskExecuteCommand that a junction has been found */
+      xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+    }
 
     // if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
     //   tofRight.clearInterruptMask(false);
