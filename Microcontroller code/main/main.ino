@@ -1,5 +1,5 @@
 /*
-Authors: Ben Smith, David Cai
+Authors: Ben Smith
 Date created: 25/05/23
 
 Main ESP32 program for Group 1's EEEBalanceBug
@@ -9,11 +9,6 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 /* Task headers */
 #include "Tasks.h"
-
-// #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-// #include "freertos/timers.h"
-// #include "freertos/event_groups.h"
 
 /* Configuration headers */
 #include "PinAssignments.h"
@@ -26,16 +21,6 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 //-------------------------------- Global Variables -------------------------------------
 
-/* Hardware timers */
-extern hw_timer_t *motorTimer;
-
-/* Task handles */
-extern TaskHandle_t taskIMUHandle;
-extern TaskHandle_t taskMovementHandle;
-extern TaskHandle_t taskToFHandle;
-extern TaskHandle_t taskExecuteCommandHandle;
-extern TaskHandle_t taskSpinHandle;
-
 /* Semaphores */
 SemaphoreHandle_t mutexSPI; /* SPI Mutex so only one task can access the SPI peripheral at a time */
 SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C peripheral at a time */
@@ -43,24 +28,6 @@ SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C per
 /* Queues */
 QueueHandle_t commandQueue;
 QueueHandle_t junctionAngleQueue;
-
-//-------------------------------- Interrupt Servce Routines ----------------------------
-
-extern void IRAM_ATTR IMUDataReadyISR();
-extern void IRAM_ATTR onTimer();
-extern void IRAM_ATTR ToFRightISR();
-extern void IRAM_ATTR ToFLeftISR();
-
-//-------------------------------- Functions --------------------------------------------
-
-//-------------------------------- Task Functions ---------------------------------------
-
-/* Task protoype functions */
-extern void taskIMU(void *pvParameters);
-extern void taskMovement(void *pvParameters);
-extern void taskToF(void *pvParameters);
-extern void taskExeculteCommand(void *pvParameters);
-extern void taskSpin(void *pvParameters);
 
 //--------------------------------- Setup -----------------------------------------------
 
@@ -210,7 +177,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
   // attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
   // attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
-  // timerAttachInterrupt(motorTimer, &onTimer, true);
+  timerAttachInterrupt(motorTimer, &onTimer, true);
 }
 
 //--------------------------------- Loop -----------------------------------------------

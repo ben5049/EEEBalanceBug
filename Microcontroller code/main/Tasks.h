@@ -1,6 +1,9 @@
 /*
 Authors: Ben Smith
 Date created: 02/06/23
+Date updated: 06/06/23
+
+Header file for tasks
 */
 
 #ifndef TASKS_H
@@ -19,21 +22,21 @@ typedef enum {
   IDLE = 0x00,
   FORWARD = 0x01,
   TURN = 0x02,
-  FIND_BEACONS = 0x03
+  SPIN = 0x03
 } robotCommand;
 
 /* Variables */
-extern volatile float pitch;
-extern volatile float yaw;
-extern volatile float angularVelocity;
-extern volatile int32_t stepperRightSteps;
-extern volatile int32_t stepperLeftSteps;
-extern volatile uint16_t distanceRight;
-extern volatile uint16_t distanceLeft;
-extern volatile float spinStartingAngle;
-extern volatile float xPosition;
-extern volatile float yPosition;
-extern volatile robotCommand currentCommand;
+extern volatile float pitch;                 /* Pitch in degrees between -180 and 180 */
+extern volatile float yaw;                   /* Yaw in degrees between -180 and 180 */
+extern volatile float angularVelocity;       /* Angular velocity in degrees per second around y axis (pitch axis) */
+extern volatile int32_t stepperRightSteps;   /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
+extern volatile int32_t stepperLeftSteps;    /* Total number of steps taken by the left stepper motor (forwards = +1, backwards = -1) */
+extern volatile uint16_t distanceRight;      /* Distance in mm measured by the right time of flight sensor */
+extern volatile uint16_t distanceLeft;       /* Distance in mm measured by the left time of flight sensor */
+extern volatile float spinStartingAngle;     /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
+extern volatile float xPosition;             /* The x position */
+extern volatile float yPosition;             /* The y position */
+extern volatile robotCommand currentCommand; /* The current command being implemented by the rover */
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
@@ -48,7 +51,7 @@ void configureWiFi();
 void motor_start(double RPM);
 
 /* Task handles */
-extern TaskHandle_t taskIMUhandle;
+extern TaskHandle_t taskIMUHandle;
 extern TaskHandle_t taskMovementHandle;
 extern TaskHandle_t taskSpinHandle;
 extern TaskHandle_t taskExecuteCommandHandle;
