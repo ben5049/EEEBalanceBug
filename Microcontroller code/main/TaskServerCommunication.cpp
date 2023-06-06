@@ -51,7 +51,9 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     String orientation = String(yaw);
     String tofleft = String(distanceLeft);
     String tofright = String(distanceRight);
-    String postData = "{\"diagnostics\": {\"battery\":100,\"CPU\":10,\"connection\":100},\"MAC\":1234567,\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":0,\"orientation\":"+orientation+",\"branches\":[],\"beaconangles\":[],\"tofleft\":"+tofleft+",\"tofright\":"+tofright+"}";
+    String mac = String(WiFi.macAddress());
+    String rssi = String(WiFi.RSSI());
+    String postData = "{\"diagnostics\": {\"battery\":100,\"connection\":"+rssi+"},\"MAC\":"+mac+",\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":0,\"orientation\":"+orientation+",\"branches\":[],\"beaconangles\":[],\"tofleft\":"+tofleft+",\"tofright\":"+tofright+"}";
     return http.POST(postData);
   }
 }

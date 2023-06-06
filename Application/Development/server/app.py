@@ -72,15 +72,15 @@ def rover():
     # store positions and timestamp in database
     try:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, CPU, connection) VALUES (?, ?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["CPU"], data["diagnostics"]["connection"]))
+        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
     except mariadb.Error as e:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     # cur.execute("SELECT * FROM Rovers")
     # for mac, nickname in cur:
     #     print(mac, nickname)
     # cur.execute("SELECT * FROM Diagnostics")
-    # for mac, timestamp, battery, cpu, connection in cur:
-    #     print(mac, timestamp, battery, cpu, connection)
+    # for mac, timestamp, battery, connection in cur:
+    #     print(mac, timestamp, battery, connection)
     # cur.execute("SELECT * FROM ReplayInfo")
     # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
     #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
@@ -169,8 +169,8 @@ def diagnostics():
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid MAC address"}), 400)
     d = {}
-    for mac, timestamp, battery, cpu, connection in cur:
-        d = {"MAC":mac, "timestamp":timestamp, "battery":battery, "CPU":cpu, "connection":connection}
+    for mac, timestamp, battery, connection in cur:
+        d = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
     return make_response(jsonify(d), 200)
 
 # works
