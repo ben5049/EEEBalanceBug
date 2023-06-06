@@ -76,32 +76,37 @@ String handleResponse(uint16_t httpResponseCode, HTTPClient& http) {
   return http.getString();
 }
 
-void parsePayload(String payload) {
+robotCommand* parsePayload(String payload) {
   JSONVar data = JSON.parse(payload);
+  robotCommand commands[10];
 
   // JSON.typeof(jsonVar) can be used to get the type of the var
   if (JSON.typeof(data) == "undefined") {
     SERIAL_PORT.println("Parsing input failed!");
     vTaskDelay(pdMS_TO_TICKS(1000));
-    return;
+    return commands;
   }
 
   SERIAL_PORT.print("JSON object = ");
   SERIAL_PORT.println(data);
-  // TODO: change these so the rover actually does something
-  String actions[] = data["next_actions"]
+  String actions[] = data["next_actions"];
+
   for (int i=0; i<actions.size(); i++){
     switch(actions[i].substring(0, 2)){
       case "st":
         float dist = (float) actions[i].substring(5);
         SERIAL_PORT.println(dist);
+        commands[i] = FORWARD;
       case "sp":
         SERIAL_PORT.println("spin");
+        commands[i] = SPIN;
       case "an":
         float ang = (float) actions[i].substring(6);
         SERIAL_PORT.println(ang);
+        commands[i] = TURN;
       case "id":
         SERIAL_PORT.println("idle");
+        commands[i] = IDLE;
       case "up":
         String newpos = actions[i].substring(16);
         int spaceindex = newpos.indexOf(" ");
@@ -109,10 +114,13 @@ void parsePayload(String payload) {
         float newy = (float) newpos.substring(spaceindex+1);
         SERIAL_PORT.print(newx);
         SERIAL_PORT.println(newy);
+        xPos = newx;
+        yPos = newy;
       default:
         SERIAL_PORT.println("idle");
+        commands[i] = IDLE;
     }
-
+  return commands;
   }
 }
 
@@ -139,7 +147,6 @@ void taskServerCommunication(void* pvParameters) {
 
       // Send HTTP request
       uint16_t httpResponseCode = makeRequest(requestType, http);
-
       // Manage response
       String payload = handleResponse(httpResponseCode, http);
 
@@ -147,7 +154,11 @@ void taskServerCommunication(void* pvParameters) {
       http.end();
 
       // parse payload string
-      parsePayload(payload);
+      robotCommand commands[10] = parsePayload(payload);
+      for (int i=0; i<10; i++){
+        xQueueSend(commandQueue, commands[i], portMAX_DELAY);
+      }
+      
 
       vTaskDelay(pdMS_TO_TICKS(5000));
     }
