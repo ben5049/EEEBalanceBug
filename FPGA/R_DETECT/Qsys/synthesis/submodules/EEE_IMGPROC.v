@@ -185,9 +185,9 @@ reg [10:0] sum_blue;
 reg [10:0] count_red;
 reg [10:0] count_yellow;
 reg [10:0] count_blue;
-reg [10:0] r_x_avg;
-reg [10:0] y_x_avg;
-reg [10:0] b_x_avg;
+reg [15:0] r_x_avg;
+reg [15:0] y_x_avg;
+reg [15:0] b_x_avg;
 
 always @(posedge clk) begin
     if (in_valid) begin
@@ -209,11 +209,11 @@ end
 always @(posedge clk) begin
     if (in_valid) begin
         if (count_red != 0)
-            r_x_avg <= sum_red / count_red;
+            r_x_avg <= {5'b0, sum_red[10:0]} / count_red;
         if (count_yellow != 0)
-            y_x_avg <= sum_yellow / count_yellow;
+            y_x_avg <= {5'b0, sum_yellow[10:0]} / count_yellow;
         if (count_blue != 0)
-            b_x_avg <= sum_blue / count_blue;
+            b_x_avg <= {5'b0, sum_blue[10:0]} / count_blue;
     end
 end
 	

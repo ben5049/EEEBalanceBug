@@ -31,7 +31,9 @@ module EEE_IMGPROC(
 	hsv_v,
 	
 	// conduit
-	mode
+	mode,
+	conduit_i2c_scl,
+	conduit_i2c_sda
 	
 );
 
@@ -70,6 +72,10 @@ output reg[7:0] hsv_v; //0-255
 
 // conduit export
 input                         mode;
+
+inout									conduit_i2c_sda;
+inout                         conduit_i2c_scl;
+
 ////////////////////////////////////////////////////////////////////////
 //
 parameter IMAGE_W = 11'd640;
@@ -137,14 +143,16 @@ assign ryb_high = red_detect ? {8'hff, 8'h0, 8'h0} :  //red area
 						
 // Show bounding box
 wire [23:0] new_image;
-wire rbb_active, ybb_active, bbb_active;
+wire rbb_active, ybb_active, bbb_active, mid_line;
 assign rbb_active = (x == r_left) | (x == r_right) | (y == r_top) | (y == r_bottom);
 assign ybb_active = (x == y_left) | (x == y_right) | (y == y_top) | (y == y_bottom);
 assign bbb_active = (x == b_left) | (x == b_right) | (y == b_top) | (y == b_bottom);
+assign mid_line = (x == r_x_avg) | (x == y_x_avg) | (x == b_x_avg); // middle line across the mid point
 
 assign new_image = rbb_active ? {8'hff, 8'h0, 8'h0} :
 						 ybb_active ? {8'hff, 8'hff, 8'h0} :
 						 bbb_active ? {8'h0, 8'h0, 8'hff} :
+						 mid_line ? {8'h0, 8'h0, 8'h0}: // middle line across the mid point
 						 ryb_high;
 						 
 // Switch output pixels depending on mode switch
@@ -179,9 +187,9 @@ reg [10:0] sum_blue;
 reg [10:0] count_red;
 reg [10:0] count_yellow;
 reg [10:0] count_blue;
-reg [10:0] r_x_avg;
-reg [10:0] y_x_avg;
-reg [10:0] b_x_avg;
+reg [15:0] r_x_avg;
+reg [15:0] y_x_avg;
+reg [15:0] b_x_avg;
 
 always @(posedge clk) begin
     if (in_valid) begin
@@ -202,12 +210,12 @@ end
 
 always @(posedge clk) begin
     if (in_valid) begin
-        if (count_red != 0)
-            r_x_avg <= sum_red / count_red;
-        if (count_yellow != 0)
-            y_x_avg <= sum_yellow / count_yellow;
-        if (count_blue != 0)
-            b_x_avg <= sum_blue / count_blue;
+        if (count_red != 0 && count_red > count_yellow && count_red > count_blue)
+            r_x_avg <= {5'b0, sum_red[10:0]} / count_red;
+        if (count_yellow != 0 && count_yellow > count_red && count_yellow > count_blue)
+            y_x_avg <= {5'b0, sum_yellow[10:0]} / count_yellow;
+        if (count_blue != 0 && count_blue > count_red && count_blue > count_yellow)
+            b_x_avg <= {5'b0, sum_blue[10:0]} / count_blue;
     end
 end
 	
@@ -460,6 +468,17 @@ end
 assign msg_buf_rd = s_chipselect & s_read & ~read_d & ~msg_buf_empty & (s_address == `READ_MSG);
 						
 
+wire [17:0] LEDG;
+wire [7:0] LEDR;	
+
+i2c i2c_slave(
+	.clk(clk),
+	.SCL(conduit_i2c_scl),
+	.SDA(conduit_i2c_sda),
+	.RST(1'b0),
+	.LEDG(LEDG),
+	.LEDR(LEDR),
+	.SW_1(1'b1));
 
 endmodule
 

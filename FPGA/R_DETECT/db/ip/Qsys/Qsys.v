@@ -19,6 +19,8 @@ module Qsys (
 		output wire        clk_sdram_clk,                             //                        clk_sdram.clk
 		output wire        clk_vga_clk,                               //                          clk_vga.clk
 		output wire        d8m_xclkin_clk,                            //                       d8m_xclkin.clk
+		input  wire        eee_imgproc_0_conduit_i2c_new_signal,      //        eee_imgproc_0_conduit_i2c.new_signal
+		inout  wire        eee_imgproc_0_conduit_i2c_new_signal_1,    //                                 .new_signal_1
 		input  wire        eee_imgproc_0_conduit_mode_new_signal,     //       eee_imgproc_0_conduit_mode.new_signal
 		inout  wire        i2c_opencores_camera_export_scl_pad_io,    //      i2c_opencores_camera_export.scl_pad_io
 		inout  wire        i2c_opencores_camera_export_sda_pad_io,    //                                 .sda_pad_io
@@ -202,25 +204,27 @@ module Qsys (
 	wire         rst_controller_002_reset_out_reset_req;                            // rst_controller_002:reset_req -> [nios2_gen2:reset_req, onchip_memory2_0:reset_req, rst_translator:reset_req_in]
 
 	EEE_IMGPROC eee_imgproc_0 (
-		.clk          (altpll_0_c2_clk),                                     //                   clock.clk
-		.reset_n      (~rst_controller_reset_out_reset),                     //                   reset.reset_n
-		.sink_data    (terasic_auto_focus_0_dout_data),                      //   avalon_streaming_sink.data
-		.sink_valid   (terasic_auto_focus_0_dout_valid),                     //                        .valid
-		.sink_ready   (terasic_auto_focus_0_dout_ready),                     //                        .ready
-		.sink_sop     (terasic_auto_focus_0_dout_startofpacket),             //                        .startofpacket
-		.sink_eop     (terasic_auto_focus_0_dout_endofpacket),               //                        .endofpacket
-		.source_data  (eee_imgproc_0_avalon_streaming_source_data),          // avalon_streaming_source.data
-		.source_eop   (eee_imgproc_0_avalon_streaming_source_endofpacket),   //                        .endofpacket
-		.source_ready (eee_imgproc_0_avalon_streaming_source_ready),         //                        .ready
-		.source_sop   (eee_imgproc_0_avalon_streaming_source_startofpacket), //                        .startofpacket
-		.source_valid (eee_imgproc_0_avalon_streaming_source_valid),         //                        .valid
-		.s_chipselect (mm_interconnect_0_eee_imgproc_0_s1_chipselect),       //                      s1.chipselect
-		.s_read       (mm_interconnect_0_eee_imgproc_0_s1_read),             //                        .read
-		.s_write      (mm_interconnect_0_eee_imgproc_0_s1_write),            //                        .write
-		.s_readdata   (mm_interconnect_0_eee_imgproc_0_s1_readdata),         //                        .readdata
-		.s_writedata  (mm_interconnect_0_eee_imgproc_0_s1_writedata),        //                        .writedata
-		.s_address    (mm_interconnect_0_eee_imgproc_0_s1_address),          //                        .address
-		.mode         (eee_imgproc_0_conduit_mode_new_signal)                //            conduit_mode.new_signal
+		.clk             (altpll_0_c2_clk),                                     //                   clock.clk
+		.reset_n         (~rst_controller_reset_out_reset),                     //                   reset.reset_n
+		.sink_data       (terasic_auto_focus_0_dout_data),                      //   avalon_streaming_sink.data
+		.sink_valid      (terasic_auto_focus_0_dout_valid),                     //                        .valid
+		.sink_ready      (terasic_auto_focus_0_dout_ready),                     //                        .ready
+		.sink_sop        (terasic_auto_focus_0_dout_startofpacket),             //                        .startofpacket
+		.sink_eop        (terasic_auto_focus_0_dout_endofpacket),               //                        .endofpacket
+		.source_data     (eee_imgproc_0_avalon_streaming_source_data),          // avalon_streaming_source.data
+		.source_eop      (eee_imgproc_0_avalon_streaming_source_endofpacket),   //                        .endofpacket
+		.source_ready    (eee_imgproc_0_avalon_streaming_source_ready),         //                        .ready
+		.source_sop      (eee_imgproc_0_avalon_streaming_source_startofpacket), //                        .startofpacket
+		.source_valid    (eee_imgproc_0_avalon_streaming_source_valid),         //                        .valid
+		.s_chipselect    (mm_interconnect_0_eee_imgproc_0_s1_chipselect),       //                      s1.chipselect
+		.s_read          (mm_interconnect_0_eee_imgproc_0_s1_read),             //                        .read
+		.s_write         (mm_interconnect_0_eee_imgproc_0_s1_write),            //                        .write
+		.s_readdata      (mm_interconnect_0_eee_imgproc_0_s1_readdata),         //                        .readdata
+		.s_writedata     (mm_interconnect_0_eee_imgproc_0_s1_writedata),        //                        .writedata
+		.s_address       (mm_interconnect_0_eee_imgproc_0_s1_address),          //                        .address
+		.mode            (eee_imgproc_0_conduit_mode_new_signal),               //            conduit_mode.new_signal
+		.conduit_i2c_scl (eee_imgproc_0_conduit_i2c_new_signal),                //             conduit_i2c.new_signal
+		.conduit_i2c_sda (eee_imgproc_0_conduit_i2c_new_signal_1)               //                        .new_signal_1
 	);
 
 	TERASIC_AUTO_FOCUS #(
