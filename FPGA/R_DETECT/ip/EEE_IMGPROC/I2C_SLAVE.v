@@ -60,7 +60,7 @@ reg [3:0]       bit_counter;//(from 0 to 8)9counters-> one byte=8bits and one ac
 reg [7:0]       input_shift;
 reg             master_ack;
 reg [2:0]       state;
-reg [7:0]       reg_00,reg_01,reg_02,reg_03;//slave_reg
+reg [7:0]       reg_00,reg_01,reg_02,reg_03,reg_04,reg_05;//slave_reg
 reg [7:0]       output_shift;
 reg             output_control;
 reg [7:0]       index_pointer;
@@ -257,10 +257,12 @@ begin
         if (lsb_bit)//at one byte that can be load the output_shift
         begin   
                 case (index_pointer)
-                8'h00: output_shift <= reg_00;
+                8'h00: output_shift <= reg_00; 
                 8'h01: output_shift <= reg_01;
                 8'h02: output_shift <= reg_02;
                 8'h03: output_shift <= reg_03;
+					 8'h04: output_shift <= reg_04;
+					 8'h05: output_shift <= reg_05;
                 // ... and so on ...
 
                 endcase
