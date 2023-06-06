@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 28/05/23
+Date updated: 06/06/23
 
 Pin assignments for Group 1's EEEBalanceBug
 */
@@ -38,6 +38,8 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TOF_RIGHT_CHANNEL 0
 #define TOF_LEFT_CHANNEL 2
 #define TOF_SAMPLE_FREQUENCY 10 /* Max = 33Hz, default = 10Hz */
+#define THRESHOLD_DISTANCE 150 /* Threshold for what counts as a junction in mm*/
+
 
 /* Spin task */
 #define TASK_SPIN_FREQUENCY 10
