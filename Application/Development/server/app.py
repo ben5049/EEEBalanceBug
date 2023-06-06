@@ -7,7 +7,6 @@ from time import time
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-app.config['CORS_HEADERS'] = 'application/json'
 
 hostip = '44.201.77.138'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
