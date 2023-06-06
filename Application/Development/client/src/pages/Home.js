@@ -1,3 +1,10 @@
+/*
+Authors: Advik Chitre
+Date created: 03/05/23
+*/
+
+//-------------------------------- Imports ----------------------------------------------
+
 import React, { useState } from 'react';
 import RoverCarousel from '../components/Home/RoverCarousel';
 import ReplayCarousel from '../components/Home/ReplayCarousel';
@@ -6,57 +13,97 @@ import '../components/grid.css';
 import AddIcon from '../components/Home/AddIcon.png';
 import ReactPolling from "react-polling/lib/ReactPolling";
 
+//-------------------------------- Main -------------------------------------------------
+
+/* 
+Home Page - Landing page when user first requests page from server.
+    		Polls server for all rovers and replays, allowing user to select.
+*/
+
 const Home = () => {
+
+	//---------------------------- Get Stored Values ------------------------------------
+
 	const GetServerIP = localStorage.getItem('ServerIP');
 
-	// Polling - Gets from server: MAC, Nickname, Connection status
+	//---------------------------- Polling: Rovers --------------------------------------
+
+	/* 
+	Rovers - Gets from server: MAC, Nickname, Connection status
+	*/
+
+	/* Create updating variables */
 	const [rovers_list, Update_rovers_list] = useState([]);
+
+	/* Send POST request to get Rover Data list */
 	const RoverURL = "http://" + GetServerIP + ":5000/client/allrovers";
 	const fetchRoverList = () => {
 		console.log("URL = " + RoverURL);
 		return fetch(RoverURL);
 	}
+
+	/* On GOOD POST response */
 	const RoverPollingSuccess = (jsonResponse) => {
 		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
 		Update_rovers_list(jsonResponse);
 		return true;
 	}
+
+	/* On BAD POST response */
 	const RoverPollingFailure = () => {
 		console.log("ROVER POLLING FAIL");
 		return true;
 	}
 
-	// Polling - Gets from server: MAC, Nickname, Connection status
+	//---------------------------- Polling: Replays -------------------------------------
+
+	/* 
+	Replays - Gets from server: MAC, Nickname, Connection status
+	*/
+
+	/* Create updating variables */
 	const [replays_list, Update_replays_list] = useState([]);
+
+	/* Send POST request to get Replay Data list */
 	const ReplayURL = "http://" + GetServerIP + ":5000/client/sessions";
 	const fetchReplayList = () => {
 		console.log("URL = " + ReplayURL);
 		return fetch(ReplayURL);
 	}
+
+	/* On GOOD POST response */
 	const ReplayPollingSuccess = (jsonResponse) => {
 		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
 		Update_replays_list(jsonResponse);
 		return true;
 	}
+
+	/* On BAD POST response */
 	const ReplayPollingFailure = () => {
 		console.log("REPLAY POLLING FAIL");
 		return true;
 	}
 
+	//---------------------------- Button Functions: onClick ----------------------------
+
+	/* Add Rover button */
 	const handleAddRover = () => {
 		console.log("Add New Rover");
 	}
-	
+
+	//---------------------------- Display ----------------------------------------------
 
 	return (
 		<div className="background">
 			<div className="wrapper">
+				{/* Display Text */}
 				<div className="box Group1_Home">
 					Group 1				
 				</div>
 				<div className="box RoversText_Home">
 					Rovers
 				</div>
+				{/* Display rovers List */}
 				<div className="box RoverCarousel_Home">
 					<ReactPolling
 						url={RoverURL}
@@ -70,6 +117,7 @@ const Home = () => {
 						}}
 					/>
 				</div>
+				{/* Add new rover button */}
 				<div className="box-nopadding AddButton_Home">
 					<button onClick={handleAddRover} className='buttons_Home'>
 						<img
@@ -86,9 +134,11 @@ const Home = () => {
 						</div>
 					</button>
 				</div>
+				{/* Display text */}
 				<div className="box ReplaysText_Home">
 					Replays
 				</div>
+				{/* Display replays List */}
 				<div className="box ReplayCarousel_Home">
 					<ReactPolling
 						url={ReplayURL}
@@ -101,7 +151,6 @@ const Home = () => {
 							return <ReplayCarousel replays={replays_list} />;
 						}}
 					/>
-					{/*<ReplayCarousel replays={replays_list} />*/}
 				</div>
 			</div>
 		</div>

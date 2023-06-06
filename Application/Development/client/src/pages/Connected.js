@@ -62,20 +62,31 @@ const Connected = () => {
 	const handlePause = () => {
 		console.log('Pause');
 		// Send Pause Post to server
-		const url = "http://" + ServerIP + "/pause"; // Pause endpoint
+		const url = "http://" + ServerIP + ":5000/client/pause"; // Pause endpoint
 		console.log("URL = " + url);
 		fetch(url, {
-			method: 'POST',
-			headers: {
+		  method: 'POST',
+		  headers: {
 			'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ "MAC": MAC })
+		  },
+		  body: JSON.stringify({ "MAC": MAC })
 		})
-	};
+		.then(response => response.json())  // Parse response as JSON
+		.then(data => {
+		  console.log("Response from server:", data);  // Print the response data
+		  // Handle the response data as needed
+		})
+		.catch(error => {
+		  console.log("Error:", error);
+		  // Handle any errors
+		});
+	  };
+
+
 	const handlePlay = () => {
 		console.log('Play');
 		// Send Play Post to server
-		const url = "http://" + ServerIP + "/play"; // Pause endpoint
+		const url = "http://" + ServerIP + ":5000/client/play"; // Play endpoint
 		console.log("URL = " + url);
 		fetch(url, {
 			method: 'POST',
@@ -84,7 +95,17 @@ const Connected = () => {
 			},
 			body: JSON.stringify({ "MAC": MAC })
 		})
+		.then(response => response.json())  // Parse response as JSON
+		.then(data => {
+			console.log("Response from server:", data);  // Print the response data
+			// Handle the response data as needed
+		})
+		.catch(error => {
+			console.log("Error:", error);
+			// Handle any errors
+		});
 	};
+
 	const handleViewReplay = () => {
 		console.log("View Replay")
 		// TODO: set ReplayID of Session (given by server)
@@ -178,7 +199,7 @@ const Connected = () => {
 				<div className="box Map_Connected">
 					<ReactPolling
 						url={MappingURL}
-						interval= {100} // in milliseconds(ms)
+						interval= {2000} // in milliseconds(ms)
 						retryCount={3} // this is optional
 						onSuccess = {MappingPollingSuccess}
 						onFailure= {MappingPollingFailure}
@@ -191,7 +212,7 @@ const Connected = () => {
 				<div className="box Data_Connected">
 					<ReactPolling
 						url={DiagnosticURL}
-						interval= {100} // in milliseconds(ms)
+						interval= {2000} // in milliseconds(ms)
 						retryCount={3} // this is optional
 						onSuccess = {DiagnosticPollingSuccess}
 						onFailure= {DiagnosticPollingFailure}
