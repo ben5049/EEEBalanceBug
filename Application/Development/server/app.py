@@ -204,7 +204,7 @@ def play():
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
     for rover in rovers:
-        print(rover.name == mac)
+        print(rover.name == mac, type(rover.name), type(mac), rover.name, mac)
         if rover.name == mac:
             rover.pause = False
             flag = False
