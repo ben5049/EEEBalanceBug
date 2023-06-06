@@ -277,4 +277,4 @@ def findShortestPath():
 def led_driver():
     data = request.get_json()
     print(data)
-    return make_response(jsonify({"success":"received data", "switch":0}), 200)
+    return make_response(jsonify({"success":"received data", "switch":1}), 200)
