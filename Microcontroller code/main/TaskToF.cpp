@@ -216,8 +216,8 @@ void taskToF(void *pvParameters) {
     }
 
     /* Detect if we are at a junction and alert taskExecuteCommand */
-    if ((currentCommand == FORWARD) && ((distanceLeft >= THRESHOLD_DISTANCE) || (distanceRight >= THRESHOLD_DISTANCE))){
-      
+    if ((currentCommand == FORWARD) && ((distanceLeft >= THRESHOLD_DISTANCE) || (distanceRight >= THRESHOLD_DISTANCE))) {
+
       // TODO: Make detection more sophistocated
 
       /* Notify taskExecuteCommand that a junction has been found */
