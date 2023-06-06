@@ -6,7 +6,7 @@ from time import time
 # TODO: error handling
 
 app = Flask(__name__)
-CORS(app)
+cors = CORS(app, resources={r"/*":{"origins":"*"}})
 
 hostip = '44.201.77.138'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
@@ -176,9 +176,10 @@ def diagnostics():
 # works
 @app.route("/client/pause", methods=["POST"])
 def pause():
+    print("PAUSED")
     data = request.get_json()
     try:
-        mac = data["MAC"]
+        mac = int(data["MAC"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
@@ -195,9 +196,10 @@ def pause():
 # works
 @app.route("/client/play", methods=["POST"])
 def play():
+    print("PLAYED")
     data = request.get_json()
     try:
-        mac = data["MAC"]
+        mac = int(data["MAC"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
@@ -206,7 +208,7 @@ def play():
             rover.pause = False
             flag = False
     if flag:
-        return make_response(jsonify({"error":"Selected rover does not exist, or is not currently connected"}), 400)
+        return make_response(jsonify({"error":"Selected rover does not exist on play, or is not currently connected"}), 400)
     
     return make_response(jsonify({"success":"successfully played rover"}), 200)
 
