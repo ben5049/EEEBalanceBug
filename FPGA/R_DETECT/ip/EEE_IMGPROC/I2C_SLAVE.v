@@ -34,13 +34,25 @@ SDA,
 RST,
 LEDG,
 LEDR,
-SW_1
+SW_1,
+sum_red,
+sum_yellow,
+sum_blue,
+count_red,
+count_yellow,
+count_blue
 );
 input RST;//asynchronous reset input
 input clk;
 inout SDA;
 input SCL;
 input SW_1;
+input [31:0] sum_red;
+input [31:0] sum_yellow;
+input [31:0] sum_blue;
+input [23:0] count_red;
+input [23:0] count_yellow;
+input [23:0] count_blue;
 output [7:0] LEDG;
 output [17:0] LEDR;
 parameter [2:0] STATE_IDLE      = 3'h0,//idle
@@ -257,12 +269,13 @@ begin
         if (lsb_bit)//at one byte that can be load the output_shift
         begin   
                 case (index_pointer)
-                8'h00: output_shift <= reg_00; 
-                8'h01: output_shift <= reg_01;
-                8'h02: output_shift <= reg_02;
-                8'h03: output_shift <= reg_03;
-					 8'h04: output_shift <= reg_04;
-					 8'h05: output_shift <= reg_05;
+                8'h00: output_shift <= sum_blue [31:24]; 
+                8'h01: output_shift <= sum_blue [23:16]; 
+                8'h02: output_shift <= sum_blue [15:8]; 
+                8'h03: output_shift <= sum_blue [7:0]; 
+					 8'h04: output_shift <= count_blue [23:16]; 
+					 8'h05: output_shift <= count_blue [15:8]; 
+					 8'h06: output_shift <= count_blue [7:0]; 
                 // ... and so on ...
 
                 endcase

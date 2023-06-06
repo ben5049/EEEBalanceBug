@@ -11,7 +11,7 @@ void setup() {
 }
 
 void loop() {
-  delay(100);
+  delay(500);
 
   //Write message to the slave
   // Wire.beginTransmission(I2C_DEV_ADDR);
@@ -20,7 +20,7 @@ void loop() {
   // Serial.printf("endTransmission: %u\n", error);
   
   //Read 1 bytes from the slave
-  uint8_t bytesReceived = Wire.requestFrom(I2C_DEV_ADDR, 4);
+  uint8_t bytesReceived = Wire.requestFrom(I2C_DEV_ADDR, 7);
   Serial.printf("requestFrom: %u\n", bytesReceived);
   if((bool)bytesReceived){ //If received more than zero bytes
     uint8_t temp[bytesReceived];
