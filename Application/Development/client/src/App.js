@@ -7,10 +7,10 @@ Date created: 03/05/23
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
 import Home from './pages/Home';
 import Replay from './pages/Replay';
 import Connected from './pages/Connected';
+//import './App.css';
 
 //-------------------------------- Main -------------------------------------------------
 

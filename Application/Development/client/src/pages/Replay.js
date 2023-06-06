@@ -190,7 +190,7 @@ const Replay = () => {
 	//---------------------------- State Machine: Playback ------------------------------
 
 	/*
-	Keeps track of whether in 'Play' state or 'Pause' state.
+	Keeps track of whether in states: ['Play', 'Pause']
 	Another 'End' state is added to change the icon for a better UI.
 	*/
 
@@ -216,7 +216,7 @@ const Replay = () => {
 	//---------------------------- State Machine: Toggle Repeat -------------------------
 
 	/*
-	Keeps track of whether 'Repeat Toggle' is true or false.
+	Keeps track of whether in Repeat Toggle states: [true, false]
 	*/
 
 	/* Set starting state */

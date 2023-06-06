@@ -6,12 +6,12 @@ Date created: 03/05/23
 //-------------------------------- Imports ----------------------------------------------
 
 import React, { useState } from 'react';
+import ReactPolling from "react-polling/lib/ReactPolling";
 import RoverCarousel from '../components/Home/RoverCarousel';
 import ReplayCarousel from '../components/Home/ReplayCarousel';
 import '../components/Home/grid_Home.css';
 import '../components/grid.css';
 import AddIcon from '../components/Home/AddIcon.png';
-import ReactPolling from "react-polling/lib/ReactPolling";
 
 //-------------------------------- Main -------------------------------------------------
 
