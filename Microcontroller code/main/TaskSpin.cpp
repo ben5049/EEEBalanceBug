@@ -1,3 +1,11 @@
+/*
+Authors: Ben Smith
+Date created: 02/06/23
+Date updated: 06/06/23
+
+Task to detect junctions and beacons while robot is spinning
+*/
+
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
@@ -11,8 +19,6 @@
 #include "Wire.h"
 
 //-------------------------------- Global Variables -------------------------------------
-
-/* Variables */
 
 /* Task handles */
 TaskHandle_t taskSpinHandle = nullptr;
@@ -174,6 +180,7 @@ void taskSpin(void *pvParameters) {
         /* Check for right rising edge */
         if ((rightPreviousDistance < peakThreshold) && (distanceRight >= peakThreshold)) {
           rightRisingEdgeAngle = yaw;
+          rightJunctionCounter++;
         }
 
         /* Check for right falling edge */
@@ -181,23 +188,21 @@ void taskSpin(void *pvParameters) {
 
           /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
           if (rightJunctionAtStart && (rightJunctionCounter == 1)) {
-            rightJunctionAtStartAngle = yaw;
+            rightJunctionAtStartAngle = yaw - 90.0;
           }
 
           /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
           else {
-
             angleDifference = (yaw - rightRisingEdgeAngle) / 2.0;
             junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90.0);
-
             xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            rightJunctionCounter++;
           }
         }
 
         /* Check for left rising edge */
         if ((leftPreviousDistance < peakThreshold) && (distanceLeft >= peakThreshold)) {
           leftRisingEdgeAngle = yaw;
+          leftJunctionCounter++;
         }
 
         /* Check for left falling edge */
@@ -205,17 +210,14 @@ void taskSpin(void *pvParameters) {
 
           /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
           if (leftJunctionAtStart && (leftJunctionCounter == 1)) {
-            leftJunctionAtStartAngle = yaw;
+            leftJunctionAtStartAngle = yaw + 90.0;
           }
 
           /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
           else {
-
             angleDifference = (yaw - leftRisingEdgeAngle) / 2.0;
             junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0);
-
             xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-            leftJunctionCounter++;
           }
         }
 
@@ -226,7 +228,7 @@ void taskSpin(void *pvParameters) {
       }
 
       /* If turn complete notification received */
-      if (ulTaskNotifyTakeIndexed(0, pdTRUE, 1) != 0) {
+      if (ulTaskNotifyTakeIndexed(0, pdTRUE, 0) != 0) {
         completed = true;
 
         /* Make sure the robot was in the second half of the turn when it was completed (not necessary, just in case) */
@@ -234,16 +236,22 @@ void taskSpin(void *pvParameters) {
 
           /* Logic if there was a junction at the start of right and end of left */
           if (rightJunctionAtStart) {
-
-
-            angleDifference = (leftRisingEdgeAngle - rightJunctionAtStartAngle) / 2.0;
-            junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0);
-
+            angleDifference = (rightJunctionAtStartAngle - leftRisingEdgeAngle - 90.0) / 2.0;
+            junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90);
             xQueueSend(junctionAngleQueue, &junctionAngle, 0);
           }
 
-        } else {
+          /* Logic if there was a junction at the start of left and end of right */
+          if (rightJunctionAtStart) {
+            angleDifference = (leftJunctionAtStartAngle - rightRisingEdgeAngle + 90.0) / 2.0;
+            junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90);
+            xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+          }
 
+          /* Notify taskExecuteCommand that the queue is complete */
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+
+        } else {
           /* TODO: What to do if spin task returns while not in second half (error occured) */
         }
       }
