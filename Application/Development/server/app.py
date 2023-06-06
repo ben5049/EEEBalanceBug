@@ -6,7 +6,6 @@ from time import time
 # TODO: error handling
 
 app = Flask(__name__)
-app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(app, resources={r"/*":{"origins":"*"}})
 
 hostip = '44.201.77.138'
@@ -54,17 +53,13 @@ def rover():
                 if mac == data["MAC"]:
                     flag = False
             if flag:
-                response = make_response(jsonify({"error":"Specified MAC does not exist"}), 400) 
-                response.headers["Access-Control-Allow-Origin"] = '*'
-                return response             
+                return make_response(jsonify({"error":"Specified MAC does not exist"}), 400)                
 
         try:
             cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], data["timestamp"]))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
-            response = make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
-            response.headers["Access-Control-Allow-Origin"] = '*'
-            return response
+            return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
         for x in cur:
             r.sessionId = x[0]
         
@@ -79,9 +74,7 @@ def rover():
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
     except mariadb.Error as e:
-        response = make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
-        response.headers["Access-Control-Allow-Origin"] = '*'
-        return response
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     # cur.execute("SELECT * FROM Rovers")
     # for mac, nickname in cur:
     #     print(mac, nickname)
@@ -94,9 +87,7 @@ def rover():
     # cur.execute("SELECT * FROM Sessions")
     # for mac, sessionId, SessionNickname in cur:
     #     print(mac, sessionId, sessionNickname)
-    resp =  make_response(jsonify(resp), 200)
-    resp.headers["Access-Control-Allow-Origin"] = '*'
-    return resp
+    return make_response(jsonify(resp), 200)
 
 # works
 @app.route("/client/allrovers", methods=["GET"])
@@ -126,18 +117,14 @@ def allrovers():
     try:
         cur.execute(command)
     except mariadb.Error as e:
-        response = make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
-        response.headers["Access-Control-Allow-Origin"] = '*'
-        return response
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     for rover in cur:
         temp = {}
         temp["MAC"] = rover[0]
         temp["nickname"] = rover[1]
         temp["connected"] = False
         d.append(temp)
-    d = make_response(jsonify(d), 200)
-    d.headers["Access-Control-Allow-Origin"] = '*'
-    return d
+    return make_response(jsonify(d), 200)
 
 # works
 @app.route("/client/replay", methods=["POST"])
@@ -207,27 +194,22 @@ def pause():
 
 # works
 @app.route("/client/play", methods=["POST"])
+@cross_origin()
 def play():
     data = request.get_json()
     try:
         mac = data["MAC"]
     except:
-        response = make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
-        response.headers["Access-Control-Allow-Origin"] = '*'
-        return response
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
     for rover in rovers:
         if rover.name == mac:
             rover.pause = False
             flag = False
     if flag:
-        response = make_response(jsonify({"error":"Selected rover does not exist, or is not currently connected"}), 400) 
-        response.headers["Access-Control-Allow-Origin"] = '*'
-        return response
+        return make_response(jsonify({"error":"Selected rover does not exist, or is not currently connected"}), 400)
     
-    response = make_response(jsonify({"success":"successfully played rover"}), 200)
-    response.headers["Access-Control-Allow-Origin"] = '*'
-    return response   
+    return make_response(jsonify({"success":"successfully played rover"}), 200)
 
 # works
 @app.route("/client/sessionnickname", methods=["POST"])
