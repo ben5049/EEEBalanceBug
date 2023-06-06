@@ -1,12 +1,13 @@
 from flask import Flask, jsonify, request, make_response
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
 from time import time
 # TODO: error handling
 
 app = Flask(__name__)
-CORS(app, resources={r"/*":{"origins":"*"}})
+cors = CORS(app, resources={r"/*":{"origins":"*"}})
+app.config['CORS_HEADERS'] = 'application/json'
 
 hostip = '44.201.77.138'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
@@ -194,7 +195,6 @@ def pause():
 
 # works
 @app.route("/client/play", methods=["POST"])
-@cross_origin()
 def play():
     data = request.get_json()
     try:
