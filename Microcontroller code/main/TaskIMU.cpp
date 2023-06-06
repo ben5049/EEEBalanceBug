@@ -1,3 +1,11 @@
+/*
+Authors: Ben Smith
+Date created: 28/05/23
+Date updated: 06/06/23
+
+IMU sampling and sensor fusion
+*/
+
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
@@ -14,7 +22,7 @@
 //-------------------------------- Global Variables -------------------------------------
 
 /* IMU */
-static ICM_20948_SPI myICM;   /* Create an ICM_20948_SPI object */
+static ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
 
 /* IMU DMP */
 volatile float pitch;
@@ -127,12 +135,15 @@ void IRAM_ATTR IMUDataReadyISR() {
 
 //-------------------------------- Task Functions ---------------------------------------
 
-/* Task to sample the IMU */
+/* Task to sample the IMU and process data */
 void taskIMU(void *pvParameters) {
 
   (void)pvParameters;
 
   SERIAL_PORT.println("pog"); /* !!DO NOT REMOVE!! FOR SOME GODFORSAKEN REASON REMOVING THIS LINE CAUSES THE MCU TO BOOT LOOP */
+
+  /* Create object to store DMP data */
+  static icm_20948_DMP_data_t angle_data;
 
   /* This algorithm is based on the revised AHRS algorithm presented in chapter 7 of
     Madgwick's PhD thesis: https://ethos.bl.uk/OrderDetails.do?uin=uk.bl.ethos.681552
@@ -140,30 +151,27 @@ void taskIMU(void *pvParameters) {
     The source code can be found in: https://github.com/xioTechnologies/Fusion */
 
   /* Initialise algorithms */
-  FusionOffset offset;
+  // FusionOffset offset;
   FusionAhrs ahrs;
 
-  FusionOffsetInitialise(&offset, frequencyIMU);
+  // FusionOffsetInitialise(&offset, frequencyIMU);
   FusionAhrsInitialise(&ahrs);
 
   /* Set AHRS algorithm settings */
-  const FusionAhrsSettings settings = {
-    .convention = FusionConventionNwu,
-    .gain = 0.5f,
-    .accelerationRejection = 10.0f,
-    .magneticRejection = 20.0f,
-    .rejectionTimeout = 5 * frequencyIMU,
-  };
+  // const FusionAhrsSettings settings = {
+  //   .convention = FusionConventionNwu,
+  //   .gain = 0.5f,
+  //   .accelerationRejection = 10.0f,
+  //   .magneticRejection = 20.0f,
+  //   .rejectionTimeout = 5 * frequencyIMU,
+  // };
 
-  FusionAhrsSetSettings(&ahrs, &settings);
+  // FusionAhrsSetSettings(&ahrs, &settings);
 
   /* Create timing variables */
   static unsigned long timestamp;         /* Timestamp of samples taken in microseconds */
   static unsigned long previousTimestamp; /* Time since last sample in microseconds */
   static float deltaTime;                 /* Time between samples in seconds */
-
-  /* Create object to store DMP data */
-  static icm_20948_DMP_data_t angle_data;
 
   /* Start the loop */
   while (true) {
@@ -171,7 +179,7 @@ void taskIMU(void *pvParameters) {
     /* Wait for the data ready interrupt before sampling the IMU */
     ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
-    /* Get data from the IMU and timestamp */
+    /* Get data from the IMU and DMP and timestamp it */
     if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE) {
       timestamp = micros();
       myICM.getAGMT();
@@ -210,29 +218,29 @@ void taskIMU(void *pvParameters) {
 
 #endif
 
-      // Acquire latest sensor data
+      /* Acquire latest sensor data */
       FusionVector gyroscope = { myICM.gyrX(), myICM.gyrY(), myICM.gyrZ() };
       FusionVector accelerometer = { myICM.accX() / 1000.0, myICM.accY() / 1000.0, myICM.accZ() / 1000.0 };
-      FusionVector magnetometer = { myICM.magX(), myICM.magY(), myICM.magZ() };
+      // FusionVector magnetometer = { myICM.magX(), myICM.magY(), myICM.magZ() };
 
-      // Update gyroscope offset correction algorithm
-      gyroscope = FusionOffsetUpdate(&offset, gyroscope);
+      /* Update gyroscope offset correction algorithm */
+      // gyroscope = FusionOffsetUpdate(&offset, gyroscope);
 
-      // Calculate delta time (in seconds) to account for gyroscope sample clock error
+      /* Calculate delta time (in seconds) to account for gyroscope sample clock error */
       deltaTime = (float)(timestamp - previousTimestamp) / (float)1000000.0;
       previousTimestamp = timestamp;
 
-      // Update gyroscope AHRS algorithm
-      FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+      /* Update gyroscope AHRS algorithm */
+      // FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+      FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, deltaTime);
 
-      // Print algorithm outputs
+      /* Print algorithm outputs */
       const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
       // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
 
       yaw = euler.angle.yaw;
       pitch = euler.angle.pitch;
       angularVelocity = myICM.gyrY();
-
     }
   }
 }
