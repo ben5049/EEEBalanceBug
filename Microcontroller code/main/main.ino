@@ -82,10 +82,12 @@ void setup() {
   pinMode(STEPPER_STEP, OUTPUT);
   pinMode(STEPPER_L_DIR, OUTPUT);
   pinMode(STEPPER_R_DIR, OUTPUT);
+  
+  /* Set microstepping */
+#if USE_PCB_PINS == false
   pinMode(STEPPER_MS2, OUTPUT);
-
-  /* Set pin initial states */
   digitalWrite(STEPPER_MS2, HIGH);
+#endif
 
   /* Create SPI mutex */
   if (mutexSPI == NULL) {

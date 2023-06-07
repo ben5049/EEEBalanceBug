@@ -9,6 +9,8 @@ Pin assignments for Group 1's EEEBalanceBug
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define USE_PCB_PINS false
+
 #define STEPS 1600 /* Steps per revolution */
 #define ROVER_WIDTH 159 /* Wheel-to-wheel width in mm*/
 #define WHEEL_DIAMETER 40 /* Wheel diameter in mm*/
@@ -39,8 +41,16 @@ Pin assignments for Group 1's EEEBalanceBug
 #define FPGA_B_THRESHOLD 50
 #define TOF_RIGHT_ADDRESS 0x30
 #define TOF_LEFT_ADDRESS 0x31
-#define TOF_RIGHT_CHANNEL 0
-#define TOF_LEFT_CHANNEL 2
+
+/* I2C Mux channels */
+#if USE_PCB_PINS == true
+  #define TOF_RIGHT_CHANNEL 0
+  #define TOF_LEFT_CHANNEL 3
+#else
+  #define TOF_RIGHT_CHANNEL 0
+  #define TOF_LEFT_CHANNEL 2
+#endif
+
 #define TOF_SAMPLE_FREQUENCY 10 /* Max = 33Hz, default = 10Hz */
 #define THRESHOLD_DISTANCE 150 /* Threshold for what counts as a junction in mm*/
 
