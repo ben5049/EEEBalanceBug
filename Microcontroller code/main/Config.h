@@ -32,7 +32,11 @@ Pin assignments for Group 1's EEEBalanceBug
 /* I2C: FPGA, Multiplexer & ToF sensors */
 #define I2C_PORT Wire
 #define I2C_FREQ 400000
-#define FPGA_DEV_ADDR 0x55
+#define ENABLE_FPGA_CAMERA true
+#define FPGA_ADDR 0x55
+#define FPGA_R_THRESHOLD 50
+#define FPGA_Y_THRESHOLD 50
+#define FPGA_B_THRESHOLD 50
 #define TOF_RIGHT_ADDRESS 0x30
 #define TOF_LEFT_ADDRESS 0x31
 #define TOF_RIGHT_CHANNEL 0

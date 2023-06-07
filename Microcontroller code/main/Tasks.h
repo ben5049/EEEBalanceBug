@@ -48,6 +48,7 @@ void IRAM_ATTR ToFLeftISR();
 void configureIMU();
 void configureToF();
 void configureWiFi();
+void configureFPGACam();
 void motor_start(double RPM);
 
 /* Task handles */
