@@ -269,13 +269,27 @@ begin
         if (lsb_bit)//at one byte that can be load the output_shift
         begin   
                 case (index_pointer)
-                8'h00: output_shift <= sum_blue [31:24]; 
-                8'h01: output_shift <= sum_blue [23:16]; 
-                8'h02: output_shift <= sum_blue [15:8]; 
-                8'h03: output_shift <= sum_blue [7:0]; 
-					 8'h04: output_shift <= count_blue [23:16]; 
-					 8'h05: output_shift <= count_blue [15:8]; 
-					 8'h06: output_shift <= count_blue [7:0]; 
+					 // red
+                8'h00: output_shift <= count_red[18:11];
+                8'h01: output_shift <= count_red[10:3];
+                8'h02: output_shift <= {count_red[2:0], 2'b00, sum_red[26:24]};
+                8'h03: output_shift <= sum_red[23:16];
+					 8'h04: output_shift <= sum_red[15:8];
+					 8'h05: output_shift <= sum_red[7:0];
+					 // yellow
+					 8'h06: output_shift <= count_yellow[18:11];
+                8'h07: output_shift <= count_yellow[10:3];
+                8'h08: output_shift <= {count_yellow[2:0], 2'b00, sum_yellow[26:24]};
+                8'h09: output_shift <= sum_yellow[23:16];
+					 8'h010: output_shift <= sum_yellow[15:8];
+					 8'h011: output_shift <= sum_yellow[7:0];
+					 //blue 
+					 8'h12: output_shift <= count_blue[18:11];
+                8'h13: output_shift <= count_blue[10:3];
+                8'h14: output_shift <= {count_blue[2:0], 2'b00, sum_red[26:24]};
+                8'h15: output_shift <= sum_blue[23:16];
+					 8'h16: output_shift <= sum_blue[15:8];
+					 8'h17: output_shift <= sum_blue[7:0];
                 // ... and so on ...
 
                 endcase

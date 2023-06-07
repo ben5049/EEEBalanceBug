@@ -12,6 +12,7 @@ Header file for tasks
 #include "Arduino.h"
 #include "freertos/FreeRTOS.h"
 
+
 //-------------------------------- Exported ---------------------------------------
 
 /* Hardware timers */
@@ -37,6 +38,11 @@ extern volatile float spinStartingAngle;     /* The yaw angle in degrees at the 
 extern volatile float xPosition;             /* The x position */
 extern volatile float yPosition;             /* The y position */
 extern volatile robotCommand currentCommand; /* The current command being implemented by the rover */
+extern volatile float loopFreq;
+extern volatile float angleKp;
+extern volatile float angleKi;
+extern volatile float angleKd;
+
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
@@ -48,8 +54,9 @@ void IRAM_ATTR ToFLeftISR();
 void configureIMU();
 void configureToF();
 void configureWiFi();
-void configureFPGACam();
+void motorSetDPS(float DPS);
 void motor_start(double RPM);
+>>>>>>> 26e9e065a703e1ba9c37ebda966b4e067d572500
 
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;

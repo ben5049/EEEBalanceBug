@@ -6,6 +6,8 @@
 /* Configuration headers */
 #include "Config.h"
 #include "PinAssignments.h"
+#include "src/pidautotuner.h"
+
 
 //-------------------------------- Global Variables -------------------------------------
 
@@ -20,6 +22,10 @@ static float robotLinearDPS = 0;
 volatile static float robotFilteredLinearDPS = 0;
 
 /* Angle Control Variables*/
+volatile float angleKp = KP_ANGLE;
+volatile float angleKi = KI_ANGLE;
+volatile float angleKd = KD_ANGLE;
+static float angleOffset = 0;
 static float angleSetpoint = 0;
 static float motorSetpoint = 0;
 static float angleCumError = 0;
@@ -33,8 +39,8 @@ static float speedPrevError = 0;
 static float speedLastTime = millis();
 
 
-
 /* Controller frequency in Hz */
+volatile float loopFreq = 50;
 
 /* Task handles */
 TaskHandle_t taskMovementHandle = nullptr;
@@ -42,8 +48,12 @@ TaskHandle_t taskMovementHandle = nullptr;
 /* Hardware timers */
 hw_timer_t* motorTimer = NULL;
 
+
+
+
 //-------------------------------- Functions --------------------------------------------
 
+/* Main PID function */
 float PID(float setpoint, float input, float& cumError, float& prevError, float lastTime, float Kp, float Ki, float Kd) {
   float error;
   float output;
@@ -57,6 +67,20 @@ float PID(float setpoint, float input, float& cumError, float& prevError, float 
   output = Kp * error + Ki * cumError + Kd * (error - prevError) / DT;
   prevError = error;
   return output;
+}
+
+/* Sent Debug Messages */
+void debug(){
+  Serial.print("Pitch:");
+  Serial.println(pitch);
+  Serial.print(",motorSetpoint:");
+  Serial.println(motorSetpoint);
+  Serial.print(",robotFilteredLinearDPS:");
+  Serial.println(robotFilteredLinearDPS);
+  Serial.print(",Max:");
+  Serial.println(300);
+  Serial.print(",Min:");
+  Serial.println(-300);
 }
 
 /* Update the timer to step the motors at the specified RPM */
@@ -112,7 +136,7 @@ void taskMovement(void* pvParameters) {
 
   (void)pvParameters;
   /* Make the task execute at a specified frequency */
-  const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
+  const TickType_t xFrequency = configTICK_RATE_HZ / loopFreq;
   TickType_t xLastWakeTime = xTaskGetTickCount();
 
   /* Start the loop */
@@ -125,15 +149,20 @@ void taskMovement(void* pvParameters) {
     robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
 
     /* Angle Loop */
-
-    motorSetpoint = PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, KP_ANGLE, KI_ANGLE, KD_ANGLE);
+    
+    motorSetpoint = PID(0, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
     angleLastTime = millis();
     motorSetpoint = constrain(motorSetpoint, -MAX_DPS, MAX_DPS);
+    motorSetDPS(-motorSetpoint);
 
     /* Speed Loop */
 
     angleSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, KP_SPEED, KI_SPEED, KD_SPEED);
     speedLastTime = millis();
     angleSetpoint = constrain(angleSetpoint, -MAX_ANGLE, MAX_ANGLE);
+
+    if(CONTROL_DEBUG){
+      debug();
+    }
   }
 }

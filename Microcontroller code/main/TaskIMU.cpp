@@ -288,8 +288,8 @@ void taskIMU(void *pvParameters) {
       const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
       // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
 
-      yaw = euler.angle.yaw;
-      pitch = euler.angle.pitch;
+      // yaw = euler.angle.yaw;
+      // pitch = euler.angle.pitch;
       angularVelocity = myICM.gyrY();
     }
   }

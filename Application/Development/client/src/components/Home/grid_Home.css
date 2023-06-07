@@ -12,6 +12,8 @@
     grid-column: col 3  / span 3;
     grid-row:    row 3 / span 2;
     font-family: "Lucida Console", "Courier New", monospace;
+    justify-content: center;
+    align-items: center;
     user-select: none
   }
   

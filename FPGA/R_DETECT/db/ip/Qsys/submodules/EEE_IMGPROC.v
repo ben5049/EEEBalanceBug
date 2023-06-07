@@ -194,8 +194,7 @@ reg [23:0] count_blue;
 always @(posedge clk) begin
     if (in_valid) begin
         if (red_detect) begin
-    
-	 sum_red <= sum_red + x;
+				sum_red <= sum_red + x;
             count_red <= count_red + 1;
         end
         if (yellow_detect) begin

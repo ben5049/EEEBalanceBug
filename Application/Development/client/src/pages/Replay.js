@@ -36,7 +36,7 @@ const Replay = () => {
 	const nickname = localStorage.getItem('nickname');
 	console.log('CONNECTED nickname = ' + nickname);
 
-	//---------------------------- Polling ----------------------------------------------
+	//---------------------------- Get Mapping Data -------------------------------------
 
 	/* 
 	Mapping - Gets from server: map data 
@@ -62,13 +62,12 @@ const Replay = () => {
 
 	//---------------------------- Shortest Path ----------------------------------------
 
-	const ShortestPathURL = "http://" + ServerIP + ":5000/client/shortestpath";
-	console.log("URL = " + ShortestPathURL);
-
 	/* Create updating variables */
 	const [ShortestPath, UpdateShortestPath] = useState([]);
 
 	/* sends request to server for shortest path to every node from a given point (arguments: Start coordinates) */
+	const ShortestPathURL = "http://" + ServerIP + ":5000/client/shortestpath";
+	console.log("URL = " + ShortestPathURL);
 	const postStartEnd = async (StartX, StartY) => {
 		try {
 			/* Sends POST request to server */
@@ -83,18 +82,27 @@ const Replay = () => {
 			if (response.ok) {
 				const responseData = await response.json();
 				console.log("Response data:", responseData);
-				// Store the responseData in a variable or use it as needed
 				UpdateShortestPath(responseData);
 			} 
 			/* BAD response from server: throw error */
 			else {
 				console.log("ShortestPath request failed");
-				// Handle the error or throw an error
 			}
 		/* Error Handling */
 		} catch (error) {
 			console.log("Error:", error);
 		}
+	};
+
+	/* Draws a circle at coordinates */
+	const renderPoints = (ctx, x, y, color) => {
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 2;
+	  
+		/* Draw a circle */
+		ctx.beginPath();
+		ctx.arc(x, y, 5, 0, 2 * Math.PI); /* Radius = 5 */
+		ctx.stroke();
 	};
 
 	//---------------------------- Button Functions: onClick ----------------------------
@@ -104,19 +112,15 @@ const Replay = () => {
 		console.log('Menu');
 	};
 
-	/* User select start button */
-	const handleSelectStart = () => {
-		console.log('User select start');
-	};
-
-	/* User select start button */
-	const handleSelectEnd = () => {
-		console.log('User select end');
-	};
-
 	/* Calculate shortest path */
 	const handleShortestPath = () => {
 		console.log('Shortest Path');
+		/* Input Validation: Check if start and end coordinates are digits */
+		if (!isDigit(startCoordinates_X) || !isDigit(startCoordinates_Y) || !isDigit(endCoordinates_X) || !isDigit(endCoordinates_Y)) {
+			console.log('Invalid coordinates.');
+			alert('Invalid coordinates. Please enter digits.');
+			return;
+		}
 		postStartEnd(startCoordinates_X, startCoordinates_Y);
 		// TODO: Visualise shortest path
 	};
@@ -236,7 +240,7 @@ const Replay = () => {
 
 	/* Initialise variables */
 	const [SliderValue, setSliderValue] = useState(0); /* Position in replay (initial = start) */
-	const SliderValueMax = 100; /* Number of Replay values, TODO: get from server */
+	const SliderValueMax = 700; /* Number of Replay values, TODO: get from server */
 	const SliderRate = 40; /* Time Interval (ms) */
 
 	/* Slider onChange (Dragged by user) */
@@ -279,7 +283,7 @@ const Replay = () => {
 		return () => {
 			clearInterval(interval);
 		};
-	}, [PlayState]); /* Keeps track of dependencies */
+	}, [PlayState, RepeatToggleState]); /* Keeps track of dependencies */
 
 	//---------------------------- Start/End Coordinates --------------------------------
 
@@ -294,6 +298,126 @@ const Replay = () => {
 		return /^\d+$/.test(coordinate);
 	}
 
+	//---------------------------- Canvas -----------------------------------------------
+
+	/* Create a ref for the canvas element */
+	const canvasRef = useRef(null);
+
+	/* Top level function to draw on the canvas */
+	const drawOnCanvas = () => {
+		const canvas = canvasRef.current;
+		const ctx = canvas.getContext('2d');
+	  
+		/* Clear the canvas */
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	  
+		/* Draws black background rectangle */
+		ctx.fillStyle = 'black';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		/* Draw circle at Start X, Y and End X, Y coordinates */
+		renderPoints(ctx, startCoordinates_X, startCoordinates_Y, 'lime');
+		renderPoints(ctx, endCoordinates_X, endCoordinates_Y, 'pink');
+	  
+		/* Re-renders map */
+		renderBoundaries();
+	};
+	
+	/* Draws lane boundaries given data from rover */
+	const renderBoundaries = () => {
+		for (let i = 0; i < SliderValue; i++) {
+			draw([i,i], 135, 30, 30); // TODO: Connect to fetched
+		}
+	};
+
+	/* Redraw canvas when change in current replay position or coordinates */
+	useEffect(() => {
+		drawOnCanvas();
+	}, [SliderValue, startCoordinates_X, startCoordinates_Y, endCoordinates_X, endCoordinates_Y]);
+
+	//---------------------------- Canvas Drawing ---------------------------------------
+
+	/* Draws Visual line on canvas */
+	function drawLine(ctx, begin, end, stroke = 'white', width = 1) {
+		if (stroke) {
+			ctx.strokeStyle = stroke;
+		}
+		if (width) {
+			ctx.lineWidth = width;
+		}
+		ctx.beginPath();
+		ctx.moveTo(...begin);
+		ctx.lineTo(...end);
+		ctx.stroke();
+	}
+
+	/* draws small line in correct direction with correct distances using TOF sensors */
+	function draw(position, orientation, tofleft, tofright) {
+		const canvas = document.querySelector('#canvas');
+		if (canvas.getContext) {
+			const ctx = canvas.getContext('2d');
+			let l = 5; /* Change to alter length of each line */
+			let theta = orientation*Math.PI/180
+			/* Draw */
+			drawLine(ctx, [position[0] + tofleft * Math.cos(theta), position[1] + tofleft * Math.sin(theta)], [position[0] + tofleft * Math.cos(theta) + l * Math.sin(theta), position[1] + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
+			drawLine(ctx, [position[0] - tofright * Math.cos(theta), position[1] - tofright * Math.sin(theta)], [position[0] - tofright * Math.cos(theta) + l * Math.sin(theta), position[1] - tofright * Math.sin(theta) - l * Math.cos(theta)]);
+		}
+	}
+
+	//---------------------------- Mouse click coordinate select ------------------------
+
+	/* Button onClick: start select */
+	const handleSelectStart = () => {
+		console.log('User select start');
+
+		/* Add event listener to the canvas for start point selection */
+		const canvas = canvasRef.current;
+		canvas.addEventListener('click', handleCanvasClickStart);
+	};
+	
+	/* Canvas onClick (start) */
+	const handleCanvasClickStart = (event) => {
+		const canvas = canvasRef.current;
+		const rect = canvas.getBoundingClientRect();
+	  
+		/* Calculate the mouse position relative to the canvas */
+		const x = event.clientX - rect.left;
+		const y = event.clientY - rect.top;
+	  
+		/* Update the start coordinates with the mouse position */
+		setStartCoordinates_X(String(Math.round(x)));
+		setStartCoordinates_Y(String(Math.round(y)));
+	  
+		/* Remove the event listener after selecting the start point */
+		canvas.removeEventListener('click', handleCanvasClickStart);
+	};
+	  
+	/* Button onClick: end select */
+	const handleSelectEnd = () => {
+		console.log('User select end');
+	  
+		/* Add event listener to the canvas for end point selection */
+		const canvas = canvasRef.current;
+		canvas.addEventListener('click', handleCanvasClickEnd);
+	};
+	
+	/* Canvas onClick (end) */
+	const handleCanvasClickEnd = (event) => {
+		const canvas = canvasRef.current;
+		const rect = canvas.getBoundingClientRect();
+	  
+		/* Calculate the mouse position relative to the canvas */
+		const x = event.clientX - rect.left;
+		const y = event.clientY - rect.top;
+	  
+		/* Update the end coordinates with the mouse position */
+		setEndCoordinates_X(String(Math.round(x)));
+		setEndCoordinates_Y(String(Math.round(y)));
+	  
+		/* Remove the event listener after selecting the end point */
+		canvas.removeEventListener('click', handleCanvasClickEnd);
+	};
+	  
 	//---------------------------- Display ----------------------------------------------
 
 	return (
@@ -381,9 +505,9 @@ const Replay = () => {
 							src={RewindIcon}
 							alt={"Rewind"}
 							style={{
-								width: '40px', // Set the desired width
-								height: '40px', // Set the desired height
-								objectFit: 'cover', // Adjust how the image fits within the container
+								width: '40px',
+								height: '40px',
+								objectFit: 'cover', /* Adjusts how the image fits within the container */
 							}}
 							draggable={false}
 						/>
@@ -397,9 +521,9 @@ const Replay = () => {
 								src={PlayIcon}
 								alt={"Play"}
 								style={{
-									width: '40px', // Set the desired width
-									height: '40px', // Set the desired height
-									objectFit: 'cover', // Adjust how the image fits within the container
+									width: '40px',
+									height: '40px',
+									objectFit: 'cover', /* Adjust how the image fits within the container */
 								}}
 								draggable={false}
 							/>
@@ -412,9 +536,9 @@ const Replay = () => {
 								src={PauseIcon}
 								alt={"Pause"}
 								style={{
-									width: '40px', // Set the desired width
-									height: '40px', // Set the desired height
-									objectFit: 'cover', // Adjust how the image fits within the container
+									width: '40px',
+									height: '40px',
+									objectFit: 'cover', /* Adjust how the image fits within the container */
 								}}
 								draggable={false}
 							/>
@@ -427,9 +551,9 @@ const Replay = () => {
 								src={ReplayIcon}
 								alt={"Replay"}
 								style={{
-									width: '40px', // Set the desired width
-									height: '40px', // Set the desired height
-									objectFit: 'cover', // Adjust how the image fits within the container
+									width: '40px',
+									height: '40px',
+									objectFit: 'cover', /* Adjust how the image fits within the container */
 								}}
 								draggable={false}
 							/>
@@ -444,9 +568,9 @@ const Replay = () => {
 							src={FastforwardIcon}
 							alt={"Fastforward"}
 							style={{
-								width: '40px', // Set the desired width
-								height: '40px', // Set the desired height
-								objectFit: 'cover', // Adjust how the image fits within the container
+								width: '40px',
+								height: '40px',
+								objectFit: 'cover', /* Adjust how the image fits within the container */
 							}}
 							draggable={false}
 						/>
@@ -459,9 +583,9 @@ const Replay = () => {
 							src={ RepeatToggleState ? RepeatEnabledIcon : RepeatIcon }
 							alt={"Repeat"}
 							style={{
-								width: '40px', // Set the desired width
-								height: '40px', // Set the desired height
-								objectFit: 'cover', // Adjust how the image fits within the container
+								width: '40px',
+								height: '40px',
+								objectFit: 'cover', /* Adjust how the image fits within the container */
 							}}
 							draggable={false}
 						/>
@@ -469,7 +593,7 @@ const Replay = () => {
 				</div>
 				{/* Display Map */}
 				<div className="box Map_Replay">
-					<p>Map</p>;
+					<canvas ref={canvasRef} id='canvas' width={715} height={715} />
 				</div>
 				{/* Display Data */}
 				<div className="box Data_Replay">
@@ -481,7 +605,7 @@ const Replay = () => {
 					<input
 						type="range"
 						min="1"
-						max="100" // TODO: Change to number of entries in map table
+						max={SliderValueMax} // TODO: Change to number of entries in map table
 						value={SliderValue}
 						className="SliderElement_Replay"
 						id="myRange"
