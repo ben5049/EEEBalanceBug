@@ -12,6 +12,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import './RoverCarousel.css';
 import Rover from './Rover.png';
+import RoverWireframe from './RoverWireframe.png';
 
 //-------------------------------- Main -------------------------------------------------
 
@@ -42,7 +43,7 @@ const RoverCarousel = ({ rovers }) => {
 		localStorage.setItem('ConnectedState', 'Start');
 	};
 
-	//---------------------------- Button Overlay Functions: ----------------------------
+	//---------------------------- Get Connected/Offline style --------------------------
 
 	/* Get overlay text based on connection status */
 	const getOverlayText = (connectionStatus) => {
@@ -66,6 +67,18 @@ const RoverCarousel = ({ rovers }) => {
 		return {};
 	};
 
+	/* Get overlay style className based on connection status */
+	const getImage = (connectionStatus) => {
+		if (connectionStatus === true) {
+			return Rover;
+		}
+		else if (connectionStatus === false) {
+			return RoverWireframe;
+		}
+		/* Default style for other overlayText values (Error handling) */
+		return {};
+	};
+
 	//---------------------------- Display ----------------------------------------------
 
 	return (
@@ -79,7 +92,7 @@ const RoverCarousel = ({ rovers }) => {
 							onClick={() => handleRoverClick(image.MAC, image.nickname)}
 							>
 							<img
-								src={Rover}
+								src={getImage(image.connected)}
 								alt={image.alt}
 								style={{
 								width: '200px', // Set the desired width
