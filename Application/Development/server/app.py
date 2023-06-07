@@ -6,7 +6,7 @@ from time import time
 # TODO: error handling
 
 app = Flask(__name__)
-CORS(app)
+cors = CORS(app, resources={r"/*":{"origins":"*"}})
 
 hostip = '44.201.77.138'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
@@ -72,15 +72,15 @@ def rover():
     # store positions and timestamp in database
     try:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, CPU, connection) VALUES (?, ?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["CPU"], data["diagnostics"]["connection"]))
+        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
     except mariadb.Error as e:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     # cur.execute("SELECT * FROM Rovers")
     # for mac, nickname in cur:
     #     print(mac, nickname)
     # cur.execute("SELECT * FROM Diagnostics")
-    # for mac, timestamp, battery, cpu, connection in cur:
-    #     print(mac, timestamp, battery, cpu, connection)
+    # for mac, timestamp, battery, connection in cur:
+    #     print(mac, timestamp, battery, connection)
     # cur.execute("SELECT * FROM ReplayInfo")
     # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
     #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
@@ -169,16 +169,17 @@ def diagnostics():
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid MAC address"}), 400)
     d = {}
-    for mac, timestamp, battery, cpu, connection in cur:
-        d = {"MAC":mac, "timestamp":timestamp, "battery":battery, "CPU":cpu, "connection":connection}
+    for mac, timestamp, battery, connection in cur:
+        d = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
     return make_response(jsonify(d), 200)
 
 # works
 @app.route("/client/pause", methods=["POST"])
 def pause():
+    print("PAUSED")
     data = request.get_json()
     try:
-        mac = data["MAC"]
+        mac = int(data["MAC"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
@@ -195,9 +196,10 @@ def pause():
 # works
 @app.route("/client/play", methods=["POST"])
 def play():
+    print("PLAYED")
     data = request.get_json()
     try:
-        mac = data["MAC"]
+        mac = int(data["MAC"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
@@ -206,7 +208,7 @@ def play():
             rover.pause = False
             flag = False
     if flag:
-        return make_response(jsonify({"error":"Selected rover does not exist, or is not currently connected"}), 400)
+        return make_response(jsonify({"error":"Selected rover does not exist on play, or is not currently connected"}), 400)
     
     return make_response(jsonify({"success":"successfully played rover"}), 200)
 
@@ -277,4 +279,4 @@ def findShortestPath():
 def led_driver():
     data = request.get_json()
     print(data)
-    return make_response(jsonify({"success":"received data"}), 200)
+    return make_response(jsonify({"success":"received data", "switch":1}), 200)

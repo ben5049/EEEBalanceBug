@@ -47,8 +47,8 @@ refer to the applicable agreement for further details.
 	(port
 		(pt 0 360)
 		(input)
-		(text "eee_imgproc_0_conduit_i2c_new_signal" (rect 0 0 160 12)(font "Arial" (font_size 8)))
-		(text "eee_imgproc_0_conduit_i2c_new_signal" (rect 4 349 220 360)(font "Arial" (font_size 8)))
+		(text "eee_imgproc_0_conduit_i2c_scl" (rect 0 0 128 12)(font "Arial" (font_size 8)))
+		(text "eee_imgproc_0_conduit_i2c_scl" (rect 4 349 178 360)(font "Arial" (font_size 8)))
 		(line (pt 0 360)(pt 240 360)(line_width 1))
 	)
 	(port
@@ -292,8 +292,8 @@ refer to the applicable agreement for further details.
 	(port
 		(pt 0 376)
 		(bidir)
-		(text "eee_imgproc_0_conduit_i2c_new_signal_1" (rect 0 0 169 12)(font "Arial" (font_size 8)))
-		(text "eee_imgproc_0_conduit_i2c_new_signal_1" (rect 4 365 232 376)(font "Arial" (font_size 8)))
+		(text "eee_imgproc_0_conduit_i2c_sda" (rect 0 0 132 12)(font "Arial" (font_size 8)))
+		(text "eee_imgproc_0_conduit_i2c_sda" (rect 4 365 178 376)(font "Arial" (font_size 8)))
 		(line (pt 0 376)(pt 240 376)(line_width 1))
 	)
 	(port
@@ -369,8 +369,8 @@ refer to the applicable agreement for further details.
 		(text "d8m_xclkin" (rect 337 123 734 259)(font "Arial" (color 128 0 0)(font_size 9)))
 		(text "clk" (rect 321 147 660 304)(font "Arial" (color 0 0 0)))
 		(text "eee_imgproc_0_conduit_i2c" (rect 78 331 306 675)(font "Arial" (color 128 0 0)(font_size 9)))
-		(text "new_signal" (rect 245 355 550 720)(font "Arial" (color 0 0 0)))
-		(text "new_signal_1" (rect 245 371 562 752)(font "Arial" (color 0 0 0)))
+		(text "scl" (rect 245 355 508 720)(font "Arial" (color 0 0 0)))
+		(text "sda" (rect 245 371 508 752)(font "Arial" (color 0 0 0)))
 		(text "eee_imgproc_0_conduit_mode" (rect 62 387 280 787)(font "Arial" (color 128 0 0)(font_size 9)))
 		(text "new_signal" (rect 245 411 550 832)(font "Arial" (color 0 0 0)))
 		(text "i2c_opencores_camera_export" (rect 62 427 286 867)(font "Arial" (color 128 0 0)(font_size 9)))

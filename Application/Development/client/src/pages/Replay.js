@@ -18,6 +18,7 @@ import RepeatIcon from '../components/Replay/RepeatIcon.png';
 import RepeatEnabledIcon from '../components/Replay/RepeatEnabledIcon.png';
 
 //-------------------------------- Main -------------------------------------------------
+
 /* 
 Replay Page - given a replayID, this page displays a replay while also giving the user control.
     		  It also allows the user to change the shortest path start and end points.
@@ -29,11 +30,11 @@ const Replay = () => {
 
 	const ServerIP = localStorage.getItem('ServerIP');
 	const ID = localStorage.getItem('ReplayID');
+	console.log('Replay ID = ' + ID);
 	const MAC = localStorage.getItem('MAC');
+	console.log('CONNECTED MAC = ' + MAC);
 	const nickname = localStorage.getItem('nickname');
-	console.log('Replay ID = ' + ID)
-	console.log('CONNECTED MAC = ' + MAC)
-	console.log('CONNECTED nickname = ' + nickname)
+	console.log('CONNECTED nickname = ' + nickname);
 
 	//---------------------------- Polling ----------------------------------------------
 
@@ -44,34 +45,25 @@ const Replay = () => {
 	/* Create updating variables */
 	const [MapData, UpdateMappingData] = useState([]);
 
-	/* ReactPolling calls Fetch */
+	/* Send POST request to get Map Data */
 	const MappingURL = "http://" + ServerIP + ":5000/client/replay";
-	const fetchMappingData = () => {
-		console.log("URL = " + MappingURL);
-		return fetch(MappingURL, {
-		  method: 'POST',
-		  headers: {
-			'Content-Type': 'application/json'
-		  },
-		  body: JSON.stringify({ "MAC": MAC })
-		});
-	};
-	/* ReactPolling calls on Success */
-	const MappingPollingSuccess = (jsonResponse) => {
-		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
-		UpdateMappingData(jsonResponse);
-		return true;
-	}
-	/* ReactPolling calls on Failure */
-	const MappingPollingFailure = () => {
-		console.log("MAPPING POLLING FAIL");
-		return true;
-	}
+	useEffect(() => {
+		fetch(MappingURL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ "MAC": MAC })
+		})
+		.then(response => response.json()) /* Parse the response as JSON */
+		.then(data => UpdateMappingData(data)) /* Update the state with the data */
+		.catch(error => console.log(error)); /* Error Handling */
+	}, []);
 
 	//---------------------------- Shortest Path ----------------------------------------
 
-	const DiagnosticURL = "http://" + ServerIP + ":5000/client/diagnostics";
-	console.log("URL = " + DiagnosticURL);
+	const ShortestPathURL = "http://" + ServerIP + ":5000/client/shortestpath";
+	console.log("URL = " + ShortestPathURL);
 
 	/* Create updating variables */
 	const [ShortestPath, UpdateShortestPath] = useState([]);
@@ -80,7 +72,7 @@ const Replay = () => {
 	const postStartEnd = async (StartX, StartY) => {
 		try {
 			/* Sends POST request to server */
-			const response = await fetch(DiagnosticURL, {
+			const response = await fetch(ShortestPathURL, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -96,7 +88,7 @@ const Replay = () => {
 			} 
 			/* BAD response from server: throw error */
 			else {
-				console.log("Diagnostic request failed");
+				console.log("ShortestPath request failed");
 				// Handle the error or throw an error
 			}
 		/* Error Handling */
@@ -105,7 +97,7 @@ const Replay = () => {
 		}
 	};
 
-	//---------------------------- Button Click Handles ---------------------------------
+	//---------------------------- Button Functions: onClick ----------------------------
 	
 	/* Menu button */
 	const handleMenu = () => {
@@ -125,72 +117,87 @@ const Replay = () => {
 	/* Calculate shortest path */
 	const handleShortestPath = () => {
 		console.log('Shortest Path');
-		// POST shortest path
 		postStartEnd(startCoordinates_X, startCoordinates_Y);
 		// TODO: Visualise shortest path
 	};
-	
+
+	/* Pause button */
 	const handlePause = () => {
 		console.log('Pause');
 	};
+
+	/* Play button */
 	const handlePlay = () => {
 		console.log('Play');
 	};
+
+	/* Replay button */
 	const handleReplay = () => {
 		console.log('Replay');
 		setSliderValue(parseInt(0));
 	};
 
-	// Use useRef to keep track of the interval ID for the button actions
-	const rewindIntervalRef = useRef(null);
-	const fastforwardIntervalRef = useRef(null);
+	//---------------------------- Button Functions: onMouseDown & onMouseUp ------------
+	
+	/* Initialise variables */
+	const FastforwardStrength = 4; /* Slider increment changed each time Fastforward and Rewind buttons are pressed */
+	const FastforwardInterval = 100; /* ms interval between slider changes */
 
+	/* Rewind */
+	const rewindIntervalRef = useRef(null); /* Use useRef to keep track of the interval ID for the button actions */
 	const handleRewindStart = () => {
 		console.log('Rewind Start');
-		// Check if an interval is already running to avoid starting multiple intervals
-		if (!rewindIntervalRef.current) {
+		if (!rewindIntervalRef.current) { /* Check if an interval is already running to avoid starting multiple intervals */
 		  rewindIntervalRef.current = setInterval(() => {
-			// Update the slider value based on your rewind logic
-			// For example, decrease the slider value by a certain amount
+			/* Update the slider value based on your rewind logic
+			For example, decrease the slider value by a certain amount */
 			setSliderValue((prevValue) => {
-			  const newValue = prevValue - 4; // Decrease the value by 10 (adjust the amount as needed)
-			  // Ensure the new value stays within the range of 0 and SliderValueMax
-			  return newValue < 0 ? 0 : newValue;
+			  const newValue = prevValue - FastforwardStrength; /* Get new value of slider  */
+			  return newValue < 0 ? 0 : newValue; /* Ensure the new value stays above 0 */
 			});
-		  }, 100); // Interval duration (adjust as desired)
+		  }, FastforwardInterval); /* Interval duration */
 		}
-	  };
-	  const handleRewindStop = () => {
+	};
+	const handleRewindStop = () => {
 		console.log('Rewind Stop');
-		// Clear the interval when the button is released
+		/* Clear the interval when the button is released */
 		clearInterval(rewindIntervalRef.current);
 		rewindIntervalRef.current = null;
 	  };
+
+	  /* Fastforward */
+	  const fastforwardIntervalRef = useRef(null); /* Use useRef to keep track of the interval ID for the button actions */
 	  const handleFastforwardStart = () => {
 		console.log('Fast Forward Start');
-		// Check if an interval is already running to avoid starting multiple intervals
-		if (!fastforwardIntervalRef.current) {
+		if (!fastforwardIntervalRef.current) { /* Check if an interval is already running to avoid starting multiple intervals */
 		  fastforwardIntervalRef.current = setInterval(() => {
-			// Update the slider value based on your fast forward logic
-			// For example, increase the slider value by a certain amount
+			/* Update the slider value based on your fast forward logic
+			For example, increase the slider value by a certain amount */
 			setSliderValue((prevValue) => {
-			  const newValue = prevValue + 4; // Increase the value by 10 (adjust the amount as needed)
-			  // Ensure the new value stays within the range of 0 and SliderValueMax
-			  return newValue > SliderValueMax ? SliderValueMax : newValue;
+			  const newValue = prevValue + 4; /* Get new value of slider  */
+			  return newValue >= SliderValueMax ? SliderValueMax : newValue; /* Ensure the new value stays below SliderValueMax */
 			});
-		  }, 100); // Interval duration (adjust as desired)
+		  }, FastforwardInterval); /* Interval duration */
 		}
 	  };
 	  const handleFastforwardStop = () => {
 		console.log('Fast Forward Stop');
-		// Clear the interval when the button is released
+		/* Clear the interval when the button is released */
 		clearInterval(fastforwardIntervalRef.current);
 		fastforwardIntervalRef.current = null;
 	  };
 
-	// Get starting state
+	//---------------------------- State Machine: Playback ------------------------------
+
+	/*
+	Keeps track of whether in states: ['Play', 'Pause']
+	Another 'End' state is added to change the icon for a better UI.
+	*/
+
+	/* Set starting state */
 	const [PlayState, setPlayState] = useState('Pause');
-	// Switch state on button click
+
+	/* Switch state on button click */
 	const ChangePlayState = () => {
 		if (PlayState === "Pause") {
 			setPlayState("Play");
@@ -206,9 +213,16 @@ const Replay = () => {
 		}
 	};
 
-	// Get starting state
+	//---------------------------- State Machine: Toggle Repeat -------------------------
+
+	/*
+	Keeps track of whether in Repeat Toggle states: [true, false]
+	*/
+
+	/* Set starting state */
 	const [RepeatToggleState, setRepeatToggleState] = useState(false);
-	// Switch state on button click
+
+	/* Switch state on button click */
 	const ChangeRepeatToggleState = () => {
 		if (RepeatToggleState === true) {
 			setRepeatToggleState(false);
@@ -218,14 +232,18 @@ const Replay = () => {
 		}
 	};
 
-	// Slider
-	const [SliderValue, setSliderValue] = useState(0);
-	const SliderValueMax = 100; // Number of Replay values, TODO: get from server
-	const SliderRate = 40; // Time Interval (ms)
+	//---------------------------- Slider -----------------------------------------------
 
+	/* Initialise variables */
+	const [SliderValue, setSliderValue] = useState(0); /* Position in replay (initial = start) */
+	const SliderValueMax = 100; /* Number of Replay values, TODO: get from server */
+	const SliderRate = 40; /* Time Interval (ms) */
+
+	/* Slider onChange (Dragged by user) */
 	const handleSliderChange = (event) => {
 		setSliderValue(parseInt(event.target.value));
-		if      (RepeatToggleState === false) {
+		if (RepeatToggleState === false) {
+			/* Switches to replay button if at end */
 			if (event.target.value === SliderValueMax) {
 				setPlayState("End");
 			}
@@ -234,53 +252,58 @@ const Replay = () => {
 			}
 		}
 		else {
+			/* Pauses playback if user changes slider */
 			setPlayState("Pause");
 		}
 	};
 
-	// Increment SliderValue every 0.1 seconds when PlayState is "Play"
+	/* Increment SliderValue with SliderRate delay between increments (when PlayState is "Play") */
 	useEffect(() => {
 		let interval = null;
-	
 		if (PlayState === "Play") {
 			interval = setInterval(() => {
 				setSliderValue((prevValue) => {
-				const newValue = prevValue + 1;
-				if      (RepeatToggleState === false) {
+				const newValue = prevValue + 1; /* Increment */
+				if (RepeatToggleState === false) {
 					if (newValue === SliderValueMax) {
 						setPlayState("End");
 					}
-					return newValue > SliderValueMax ? SliderValueMax : newValue;
+					return newValue > SliderValueMax ? SliderValueMax : newValue; /* Ensure increment stops at SliderValueMax */
 				}
 				else if (RepeatToggleState === true) {
-					return newValue > SliderValueMax ? 0 : newValue;
+					return newValue > SliderValueMax ? 0 : newValue; /* Restarts if Toggle Repeat on */
 				}
 				});
-			}, SliderRate); 
+			}, SliderRate); /* Delay between increments */
 		}
-
 		return () => {
 			clearInterval(interval);
 		};
-	}, [PlayState]);
+	}, [PlayState]); /* Keeps track of dependencies */
 
-	// User-editable Coordinates
+	//---------------------------- Start/End Coordinates --------------------------------
+
+	/* Set starting state */
 	const [startCoordinates_X, setStartCoordinates_X] = useState('12'); // TODO: Set to replay default
 	const [startCoordinates_Y, setStartCoordinates_Y] = useState('42'); // TODO: Set to replay default
 	const [endCoordinates_X, setEndCoordinates_X] = useState('73'); // TODO: Set to replay default
 	const [endCoordinates_Y, setEndCoordinates_Y] = useState('13'); // TODO: Set to replay default
-	// Input Validation
-	const isCoordinate = (coordinate) => {
+
+	/* Input Validation: checks if digit */
+	const isDigit = (coordinate) => {
 		return /^\d+$/.test(coordinate);
 	}
 
+	//---------------------------- Display ----------------------------------------------
 
 	return (
 		<div className="background">
 			<div className="wrapper_Replay">
+				{/* MAC address */}
 				<div className="box-nobackground DisplayMAC_Replay">
 					{nickname} / {MAC}
 				</div>
+				{/* Menu button */}
 				<div className='box-red MenuButton_Replay'>
 					<Link to='/' className="page-link" draggable={false}>
 						<button onClick={handleMenu} className='box-red buttons_Replay'>
@@ -288,24 +311,30 @@ const Replay = () => {
 						</button>
 					</Link>
 				</div>
+				{/* Display boxes */}
 				<div className="box ShortestPathStartControls_Rewind"/>
 				<div className="box ShortestPathEndControls_Rewind"/>
+				{/* Display text */}
 				<div className="box StartText_Replay">
 					Start
 				</div>
+				{/* Display text */}
 				<div className="box EndText_Replay">
 					End
 				</div>
+				{/* User-select start button */}
 				<div className='box-green SelectStartButton_Replay'>
 					<button onClick={handleSelectStart} className='box-green buttons_Replay'>
 						select
 					</button>
 				</div>
+				{/* User-select end button */}
 				<div className='box-green SelectEndButton_Replay'>
 					<button onClick={handleSelectEnd} className='box-green buttons_Replay'>
 						select
 					</button>
 				</div>
+				{/* User-editable and display Start X coordinate box */}
 				<div className="box SelectStartCoordinates_X_Replay">
 					<input
 						type="text"
@@ -313,6 +342,7 @@ const Replay = () => {
 						onChange={(e) => setStartCoordinates_X(e.target.value)}
 					/>
 				</div>
+				{/* User-editable and display Start Y coordinate box */}
 				<div className="box SelectStartCoordinates_Y_Replay">
 					<input
 						type="text"
@@ -320,6 +350,7 @@ const Replay = () => {
 						onChange={(e) => setStartCoordinates_Y(e.target.value)}
 					/>
 				</div>
+				{/* User-editable and display End X coordinate box */}
 				<div className="box SelectEndCoordinates_X_Replay">
 					<input
 						type="text"
@@ -327,6 +358,7 @@ const Replay = () => {
 						onChange={(e) => setEndCoordinates_X(e.target.value)}
 					/>
 				</div>
+				{/* User-editable and display End Y coordinate box */}
 				<div className="box SelectEndCoordinates_Y_Replay">
 					<input
 						type="text"
@@ -334,12 +366,15 @@ const Replay = () => {
 						onChange={(e) => setEndCoordinates_Y(e.target.value)}
 					/>
 				</div>
+				{/* Calculate shortest path button */}
 				<div className='box-green ShortestPathButton_Replay'>
 					<button onClick={handleShortestPath} className='box-green buttons_Replay'>
 						Shortest Path
 					</button>
 				</div>
-				<div className="box PlaybackControls_Rewind"/>	
+				{/* Display boxes */}
+				<div className="box PlaybackControls_Rewind"/>
+				{/* Rewind button */}
 				<div className='box-nobackground RewindButton_Replay'>
 					<button onMouseDown={handleRewindStart} onMouseUp={handleRewindStop} className='box-green buttons_Replay'>
 						<img
@@ -354,6 +389,7 @@ const Replay = () => {
 						/>
 					</button>
 				</div>
+				{/* Pause / Play / Replay button */}
 				<div className='box-nobackground PauseButton_Replay'>
 					{ PlayState === "Pause" ? (
 						<button onClick={ChangePlayState} className='box-green buttons_Replay'>
@@ -401,6 +437,7 @@ const Replay = () => {
 					) : (<></>)
 					}
 				</div>
+				{/* Fastforward button */}
 				<div className='box-nobackground FastforwardButton_Replay'>
 					<button onMouseDown={handleFastforwardStart} onMouseUp={handleFastforwardStop} className='box-green buttons_Replay'>
 						<img
@@ -415,6 +452,7 @@ const Replay = () => {
 						/>
 					</button>
 				</div>
+				{/* Toggle loop button */}
 				<div className='box-nobackground LoopButton_Replay'>
 					<button onClick={ChangeRepeatToggleState} className='box-green buttons_Replay'>
 						<img
@@ -429,33 +467,26 @@ const Replay = () => {
 						/>
 					</button>
 				</div>
+				{/* Display Map */}
 				<div className="box Map_Replay">
-					<ReactPolling
-						url={MappingURL}
-						interval= {100} // in milliseconds(ms)
-						retryCount={3} // this is optional
-						onSuccess = {MappingPollingSuccess}
-						onFailure= {MappingPollingFailure}
-						promise={fetchMappingData} // custom api calling function that should return a promise
-						render={({ startPolling, stopPolling, isPolling }) => {
-							return <p>Map</p>;
-						}}
-					/>	
+					<p>Map</p>;
 				</div>
+				{/* Display Data */}
 				<div className="box Data_Replay">
-					<p>Data</p><p>Data</p>
+					<p>Data</p>
+					<p>Data</p>
 				</div>
+				{/* Slider */}
 				<div className="box-nobackground Slider_Replay">
-						<input
-							type="range"
-							min="1"
-							max="100" // TODO: Change to number of entries in map table
-							value={SliderValue}
-							className="SliderElement_Replay"
-							id="myRange"
-							onChange={handleSliderChange}
-						/>
-					{/*<p>Value: <span id="demo">{SliderValue}</span></p>*/}
+					<input
+						type="range"
+						min="1"
+						max="100" // TODO: Change to number of entries in map table
+						value={SliderValue}
+						className="SliderElement_Replay"
+						id="myRange"
+						onChange={handleSliderChange}
+					/>
 				</div>
 			</div>
 		</div>

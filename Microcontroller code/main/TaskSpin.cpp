@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 02/06/23
-Date updated: 06/06/23
+Date updated: 07/06/23
 
 Task to detect junctions and beacons while robot is spinning
 */
@@ -18,10 +18,15 @@ Task to detect junctions and beacons while robot is spinning
 /* Arduino libraries */
 #include "Wire.h"
 
+/* Personal libraries */
+#include "FPGACam.h"
+
 //-------------------------------- Global Variables -------------------------------------
 
 /* Task handles */
 TaskHandle_t taskSpinHandle = nullptr;
+
+FPGACam fpga;
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -40,16 +45,16 @@ float wrapAngle(float angle) {
   return angle;
 }
 
-/* Function to poll FPGA */
-void pollFPGA(uint16_t redCoordinate, uint16_t blueCoordinate, uint16_t yellowCoordinate) {
-
-  /* Read 1 bytes from the slave */
-  uint8_t bytesReceived = I2C_PORT.requestFrom(FPGA_DEV_ADDR, 6);
-  SERIAL_PORT.printf("requestFrom: %u\n", bytesReceived);
-  if ((bool)bytesReceived) {  //If received more than zero bytes
-    uint8_t temp[bytesReceived];
-    I2C_PORT.readBytes(temp, bytesReceived);
-    log_print_buf(temp, bytesReceived);
+/* Configure the FPGA camera for beacon detection */
+void configureFPGACam() {
+  if (fpga.begin(FPGA_ADDR, I2C_PORT, false)) {
+    fpga.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
+    SERIAL_PORT.println("FPGA camera initialised");
+  } else {
+    while (true) {
+      SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
+      delay(1000);
+    }
   }
 }
 

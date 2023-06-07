@@ -19,8 +19,8 @@ module Qsys (
 		output wire        clk_sdram_clk,                             //                        clk_sdram.clk
 		output wire        clk_vga_clk,                               //                          clk_vga.clk
 		output wire        d8m_xclkin_clk,                            //                       d8m_xclkin.clk
-		input  wire        eee_imgproc_0_conduit_i2c_new_signal,      //        eee_imgproc_0_conduit_i2c.new_signal
-		inout  wire        eee_imgproc_0_conduit_i2c_new_signal_1,    //                                 .new_signal_1
+		input  wire        eee_imgproc_0_conduit_i2c_scl,             //        eee_imgproc_0_conduit_i2c.scl
+		inout  wire        eee_imgproc_0_conduit_i2c_sda,             //                                 .sda
 		input  wire        eee_imgproc_0_conduit_mode_new_signal,     //       eee_imgproc_0_conduit_mode.new_signal
 		inout  wire        i2c_opencores_camera_export_scl_pad_io,    //      i2c_opencores_camera_export.scl_pad_io
 		inout  wire        i2c_opencores_camera_export_sda_pad_io,    //                                 .sda_pad_io
@@ -223,8 +223,8 @@ module Qsys (
 		.s_writedata     (mm_interconnect_0_eee_imgproc_0_s1_writedata),        //                        .writedata
 		.s_address       (mm_interconnect_0_eee_imgproc_0_s1_address),          //                        .address
 		.mode            (eee_imgproc_0_conduit_mode_new_signal),               //            conduit_mode.new_signal
-		.conduit_i2c_scl (eee_imgproc_0_conduit_i2c_new_signal),                //             conduit_i2c.new_signal
-		.conduit_i2c_sda (eee_imgproc_0_conduit_i2c_new_signal_1)               //                        .new_signal_1
+		.conduit_i2c_scl (eee_imgproc_0_conduit_i2c_scl),                       //             conduit_i2c.scl
+		.conduit_i2c_sda (eee_imgproc_0_conduit_i2c_sda)                        //                        .sda
 	);
 
 	TERASIC_AUTO_FOCUS #(

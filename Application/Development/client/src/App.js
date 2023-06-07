@@ -7,19 +7,20 @@ Date created: 03/05/23
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
 import Home from './pages/Home';
 import Replay from './pages/Replay';
 import Connected from './pages/Connected';
+//import './App.css';
 
 //-------------------------------- Main -------------------------------------------------
+
 /*
 Top Level File - Contains intra-page navigation system
 */
 
 function App() {
 	/* Set IPv4 for AWS then rebuild (AWS Learner account only active for 4h) */
-	localStorage.setItem('ServerIP', '18.207.197.24');
+	localStorage.setItem('ServerIP', '44.201.77.138');
 
 	/* Connect pages to URL endpoints */
 	return (

@@ -55,6 +55,8 @@ void configureIMU();
 void configureToF();
 void configureWiFi();
 void motorSetDPS(float DPS);
+void motor_start(double RPM);
+>>>>>>> 26e9e065a703e1ba9c37ebda966b4e067d572500
 
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;

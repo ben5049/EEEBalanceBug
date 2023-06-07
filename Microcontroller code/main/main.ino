@@ -70,6 +70,11 @@ void setup() {
   configureWiFi();
 #endif
 
+#if ENABLE_FPGA_CAMERA == true
+  /* Configure the FPGA camera over I2C */
+  configureFPGACam();
+#endif
+
   /* Configure pins */
   pinMode(IMU_INT, INPUT_PULLUP);
   pinMode(TOF_R_INT, INPUT_PULLUP);
