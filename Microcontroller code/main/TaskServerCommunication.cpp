@@ -76,50 +76,58 @@ String handleResponse(uint16_t httpResponseCode, HTTPClient& http) {
   return http.getString();
 }
 
-robotCommand* parsePayload(String payload) {
+robotCommand* parsePayload(String payload, int& numCommands) {
   JSONVar data = JSON.parse(payload);
   robotCommand commands[10];
+  numCommands = 0;
 
   // JSON.typeof(jsonVar) can be used to get the type of the var
   if (JSON.typeof(data) == "undefined") {
     SERIAL_PORT.println("Parsing input failed!");
-    vTaskDelay(pdMS_TO_TICKS(1000));
     return commands;
   }
 
   SERIAL_PORT.print("JSON object = ");
   SERIAL_PORT.println(data);
   String actions[] = data["next_actions"];
-
-  for (int i=0; i<actions.size(); i++){
-    switch(actions[i].substring(0, 2)){
-      case "st":
-        float dist = (float) actions[i].substring(5);
-        SERIAL_PORT.println(dist);
-        commands[i] = FORWARD;
-      case "sp":
-        SERIAL_PORT.println("spin");
-        commands[i] = SPIN;
-      case "an":
-        float ang = (float) actions[i].substring(6);
-        SERIAL_PORT.println(ang);
-        commands[i] = TURN;
-      case "id":
-        SERIAL_PORT.println("idle");
-        commands[i] = IDLE;
-      case "up":
-        String newpos = actions[i].substring(16);
-        int spaceindex = newpos.indexOf(" ");
-        float newx = (float) newpos.substring(0, spaceindex);
-        float newy = (float) newpos.substring(spaceindex+1);
-        SERIAL_PORT.print(newx);
-        SERIAL_PORT.println(newy);
-        xPos = newx;
-        yPos = newy;
-      default:
-        SERIAL_PORT.println("idle");
-        commands[i] = IDLE;
+  String clear  = data["clear_queue"];
+  if (clear=="true"){
+    xQueueReset(commandQueue);
+    numCommands = 0;
+  }
+  else{
+    for (int i=0; i<actions.size(); i++){
+      switch(actions[i].substring(0, 2)){
+        case "st":
+          float dist = (float) actions[i].substring(5);
+          SERIAL_PORT.println(dist);
+          commands[i] = FORWARD;
+        case "sp":
+          SERIAL_PORT.println("spin");
+          commands[i] = SPIN;
+        case "an":
+          float ang = (float) actions[i].substring(6);
+          SERIAL_PORT.println(ang);
+          commands[i] = TURN;
+        case "id":
+          SERIAL_PORT.println("idle");
+          commands[i] = IDLE;
+        case "up":
+          String newpos = actions[i].substring(16);
+          int spaceindex = newpos.indexOf(" ");
+          float newx = (float) newpos.substring(0, spaceindex);
+          float newy = (float) newpos.substring(spaceindex+1);
+          SERIAL_PORT.print(newx);
+          SERIAL_PORT.println(newy);
+          xPos = newx;
+          yPos = newy;
+        default:
+          SERIAL_PORT.println("idle");
+          commands[i] = IDLE;
+      }
+      numCommands = actions.size();
     }
+  
   return commands;
   }
 }
@@ -131,11 +139,22 @@ void taskServerCommunication(void* pvParameters) {
 
   (void)pvParameters;
 
+  static uint16_t requestType;
+  static uint16_t httpResponseCode;
+  static uint8_t numCommands;
+
+  const TickType_t xFrequency = configTICK_RATE_HZ / TASK_SERVER_COMMUNICATION_FREQUENCY;
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+
   /* Start the loop */
   while (true) {
 
+    /* Run the task at a set frequency */
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+
     String endpoint = "rover";
-    uint16_t requestType = 1;
+    requestType = 1;
 
     String serverPath = serverName + endpoint;
 
@@ -146,7 +165,8 @@ void taskServerCommunication(void* pvParameters) {
       http.begin(serverPath.c_str());
 
       // Send HTTP request
-      uint16_t httpResponseCode = makeRequest(requestType, http);
+      httpResponseCode = makeRequest(requestType, http);
+
       // Manage response
       String payload = handleResponse(httpResponseCode, http);
 
@@ -154,13 +174,10 @@ void taskServerCommunication(void* pvParameters) {
       http.end();
 
       // parse payload string
-      robotCommand commands[10] = parsePayload(payload);
-      for (int i=0; i<10; i++){
+      robotCommand commands[] = parsePayload(payload, numCommands);
+      for (int i=0; i<numCommands; i++){
         xQueueSend(commandQueue, commands[i], portMAX_DELAY);
       }
-      
-
-      vTaskDelay(pdMS_TO_TICKS(5000));
     }
   }
 }
