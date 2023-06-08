@@ -1,7 +1,6 @@
 # Aranya Gupta
 # 31/5/2023
 from triangulate import triangulate
-from math import abs 
 # TODO: general testing & work on threshold checking
 THRESHOLD = 2
 class Node:
@@ -27,12 +26,6 @@ class Node:
 
     def __str__(self):
         return str(self.position)
-
-    def thresholding(pos1, pos2):
-        if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
-            return True
-        else:
-            return False
             
 
 
@@ -70,6 +63,12 @@ class Rover():
     
     def __str__(self):
         return str(self.name)
+    
+    def thresholding(self, pos1, pos2):
+        if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
+            return True
+        else:
+            return False
     
     # these all update toreturn, which gives the actual things the rover will do
     
@@ -178,3 +177,5 @@ class Rover():
             self.toreturn.append("DONE")
 
         return self.toreturn
+
+r = Rover([0,0], 0, 0)
