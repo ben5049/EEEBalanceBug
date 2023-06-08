@@ -82,9 +82,9 @@ def rover():
     # cur.execute("SELECT * FROM Diagnostics")
     # for mac, timestamp, battery, connection in cur:
     #     print(mac, timestamp, battery, connection)
-    # cur.execute("SELECT * FROM ReplayInfo")
-    # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-    #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+    cur.execute("SELECT * FROM ReplayInfo")
+    for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
+        print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
     # cur.execute("SELECT * FROM Sessions")
     # for mac, sessionId, SessionNickname in cur:
     #     print(mac, sessionId, sessionNickname)
@@ -140,7 +140,7 @@ def replay():
     except mariadb.Error as e:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
 
-    if cur is None or len(cur)==0:
+    if cur is None:
         return make_response(jsonify({"error":"Session does not exist"}), 404)
     resp = {}
     for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, sessionid in cur:

@@ -9,7 +9,7 @@ class Node:
     # re-traversed, but will be added to children of prior node
     state = 0 
     position = 0
-    estop = False    
+       
     def __init__(self, position):
         self.position = position
         self.state = 1
@@ -40,6 +40,7 @@ class Rover():
     priorwhereat = 0
     sessionId = -1
     lastSeen = 0
+    estop = False 
 
     pause = False
 
