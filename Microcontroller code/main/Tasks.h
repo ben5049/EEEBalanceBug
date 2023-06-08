@@ -42,13 +42,16 @@ extern volatile float loopFreq;
 extern volatile float angleKp;
 extern volatile float angleKi;
 extern volatile float angleKd;
-
+extern volatile bool IRRightCollision;
+extern volatile bool IRLeftCollision;
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
 void IRAM_ATTR onTimer();
 void IRAM_ATTR ToFRightISR();
 void IRAM_ATTR ToFLeftISR();
+void IRAM_ATTR IRRightISR();
+void IRAM_ATTR IRLeftISR();
 
 /* Functions */
 void configureIMU();

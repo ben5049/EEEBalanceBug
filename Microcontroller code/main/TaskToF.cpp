@@ -35,6 +35,8 @@ static TCA9548A I2CMux;
 /* Variables */
 static volatile bool rightToFDataReady = false;
 static volatile bool leftToFDataReady = false;
+volatile bool IRRightCollision = false;
+volatile bool IRLeftCollision = false;
 
 /* Task handles */
 TaskHandle_t taskToFHandle = nullptr;
@@ -175,6 +177,11 @@ void IRAM_ATTR ToFRightISR() {
 /* ISR that triggers on left ToF sensor interrupt */
 void IRAM_ATTR ToFLeftISR() {
   leftToFDataReady = true;
+}
+
+/* ISR that triggers when left forward IR sensor level changes */
+void IRAM_ATTR IRRightISR(){
+  if (digitalRead() == 
 }
 
 //-------------------------------- Task Functions ---------------------------------------

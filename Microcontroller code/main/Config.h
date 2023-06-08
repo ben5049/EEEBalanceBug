@@ -60,6 +60,8 @@ Pin assignments for Group 1's EEEBalanceBug
 
 #define TASK_DEAD_RECKONING_FREQUENCY 10 /* Frequency to run the dead reckoning task at in Hz */
 
+#define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
+
 /* Controller */
 #define KP_Position 0.06
 #define KD_Position 0.45
@@ -72,14 +74,16 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KI_ANGLE 0.00
 #define KD_ANGLE 0.05
 
+#define CONTROL_DEBUG == false
+
 #define MAX_ANGLE 14
 #define MAX_DPS 360
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
 
-#define ENABLE_TOF_TASK false
-#define ENABLE_SERVER_COMMUNICATION_TASK false
-#define ENABLE_DEBUG_TASK false
+#define ENABLE_TOF_TASK true
+#define ENABLE_SERVER_COMMUNICATION_TASK true
+#define ENABLE_DEBUG_TASK true
 
 #if ENABLE_DEBUG_TASK == true
   #define CONFIG_FREERTOS_USE_TRACE_FACILITY

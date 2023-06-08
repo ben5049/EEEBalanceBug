@@ -49,6 +49,8 @@ Pin assignments for Group 1's EEEBalanceBug
   #define I2C3_INT 15
 
   /* Backwards compatibility */
+  #define IR_R_INT I2C1_INT
+  #define IR_L_INT I2C2_INT
   #define TOF_R_INT I2C0_INT
   #define TOF_L_INT I2C3_INT
   #define STEPPER_STEP STEPPER_1_STEP

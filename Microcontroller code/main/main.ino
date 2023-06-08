@@ -164,7 +164,7 @@ void setup() {
     "SERVER_COMMS",                 /* Text name for the task */
     10000,                          /* Stack size in words, not bytes */
     nullptr,                        /* Parameter passed into the task */
-    8,                              /* Task priority */
+    4,                              /* Task priority */
     &taskServerCommunicationHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
@@ -184,6 +184,8 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
   // attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
   // attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(IR_R_INT), IRRightISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(IR_L_INT), IRLeftISR, CHANGE);
   timerAttachInterrupt(motorTimer, &onTimer, true);
 }
 
