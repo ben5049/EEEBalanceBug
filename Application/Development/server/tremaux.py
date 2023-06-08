@@ -1,7 +1,9 @@
 # Aranya Gupta
 # 31/5/2023
 from triangulate import triangulate
-# todo: make triangulation more robust, and generally test thoroughly
+from math import abs 
+# TODO: general testing & work on threshold checking
+THRESHOLD = 2
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
     # 3 is special state - signifies its the exit of the maze
@@ -9,7 +11,7 @@ class Node:
     # re-traversed, but will be added to children of prior node
     state = 0 
     position = 0
-       
+    
     def __init__(self, position):
         self.position = position
         self.state = 1
@@ -25,6 +27,14 @@ class Node:
 
     def __str__(self):
         return str(self.position)
+
+    def thresholding(pos1, pos2):
+        if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
+            return True
+        else:
+            return False
+            
+
 
 class Rover():
     DEFAULT_DIST = 100
@@ -64,7 +74,7 @@ class Rover():
     # these all update toreturn, which gives the actual things the rover will do
     
     def step_forward(self):
-        self.toreturn.append("step") # this will be a JSON in reality
+        self.toreturn.append("step")
     
     def spin(self):
         self.toreturn.append("spin")

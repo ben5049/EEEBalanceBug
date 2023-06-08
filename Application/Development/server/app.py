@@ -8,7 +8,7 @@ from time import time
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 
-hostip = '54.175.207.180'
+hostip = '3.89.65.188'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -272,7 +272,7 @@ def findShortestPath():
             betterP[key.position] = betterP[value.position]
         else:
             betterP[key.position] = 0
-
+    return make_response(jsonify({[0,0]:0, [100,0]:[0,0], [100,100]:[100,0], [50,50]:[0,0]}), 200) # for testing
     return make_response(jsonify(betterP), 200)
 
 
