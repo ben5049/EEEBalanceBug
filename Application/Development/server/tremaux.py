@@ -110,14 +110,14 @@ class Rover():
             if currentAction == 1:
                 if whereat == 0:
                     if position not in [nodes.position for nodes in self.tree]:
+                        n = Node(position)
+                        self.tree[n] = []
+                        self.tree[self.priornode].append(n)
+                        self.priornode = n
+                        self.priorwhereat = 0
+                        self.actions = [1] + self.actions
                         if self.priorwhereat == 1:
-                            n = Node(position)
-                            self.tree[n] = []
-                            self.tree[self.priornode].append(n)
-                            self.priornode = n
-                            self.priorwhereat = 0
-                            self.actions = [1] + self.actions
-                        self.step_forward()
+                            self.step_forward()
                     else:
                         for node in self.tree:
                             if node.position == position:
