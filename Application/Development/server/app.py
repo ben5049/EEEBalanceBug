@@ -82,9 +82,9 @@ def rover():
     # cur.execute("SELECT * FROM Diagnostics")
     # for mac, timestamp, battery, connection in cur:
     #     print(mac, timestamp, battery, connection)
-    # cur.execute("SELECT * FROM ReplayInfo")
-    # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-    #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+    cur.execute("SELECT * FROM ReplayInfo")
+    for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
+        print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
     # cur.execute("SELECT * FROM Sessions")
     # for mac, sessionId, SessionNickname in cur:
     #     print(mac, sessionId, sessionNickname)
