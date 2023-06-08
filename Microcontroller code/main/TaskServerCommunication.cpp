@@ -102,16 +102,20 @@ robotCommand* parsePayload(String payload, int& numCommands) {
           float dist = (float) actions[i].substring(5);
           SERIAL_PORT.println(dist);
           commands[i] = FORWARD;
+          break;
         case "sp":
           SERIAL_PORT.println("spin");
           commands[i] = SPIN;
+          break
         case "an":
           float ang = (float) actions[i].substring(6);
           SERIAL_PORT.println(ang);
           commands[i] = TURN;
+          break;
         case "id":
           SERIAL_PORT.println("idle");
           commands[i] = IDLE;
+          break;
         case "up":
           String newpos = actions[i].substring(16);
           int spaceindex = newpos.indexOf(" ");
@@ -121,6 +125,7 @@ robotCommand* parsePayload(String payload, int& numCommands) {
           SERIAL_PORT.println(newy);
           xPos = newx;
           yPos = newy;
+          break;
         default:
           SERIAL_PORT.println("idle");
           commands[i] = IDLE;
@@ -142,6 +147,7 @@ void taskServerCommunication(void* pvParameters) {
   static uint16_t requestType;
   static uint16_t httpResponseCode;
   static uint8_t numCommands;
+  static robotCommand newCommand;
 
   const TickType_t xFrequency = configTICK_RATE_HZ / TASK_SERVER_COMMUNICATION_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -176,7 +182,8 @@ void taskServerCommunication(void* pvParameters) {
       // parse payload string
       robotCommand commands[] = parsePayload(payload, numCommands);
       for (int i=0; i<numCommands; i++){
-        xQueueSend(commandQueue, commands[i], portMAX_DELAY);
+        newCommand = commands[i];
+        xQueueSend(commandQueue, newCommand, portMAX_DELAY);
       }
     }
   }

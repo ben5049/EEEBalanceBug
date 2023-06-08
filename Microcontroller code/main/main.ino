@@ -79,6 +79,8 @@ void setup() {
   pinMode(IMU_INT, INPUT_PULLUP);
   pinMode(TOF_R_INT, INPUT_PULLUP);
   pinMode(TOF_L_INT, INPUT_PULLUP);
+  pinMode(IR_R_INT, INPUT);
+  pinMode(IR_L_INT, INPUT);
   pinMode(STEPPER_STEP, OUTPUT);
   pinMode(STEPPER_L_DIR, OUTPUT);
   pinMode(STEPPER_R_DIR, OUTPUT);

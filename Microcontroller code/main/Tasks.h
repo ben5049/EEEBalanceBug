@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 02/06/23
-Date updated: 06/06/23
+Date updated: 08/06/23
 
 Header file for tasks
 */
@@ -57,9 +57,9 @@ void IRAM_ATTR IRLeftISR();
 void configureIMU();
 void configureToF();
 void configureWiFi();
+void configureFPGACam();
 void motorSetDPS(float DPS);
 void motor_start(double RPM);
->>>>>>> 26e9e065a703e1ba9c37ebda966b4e067d572500
 
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;
@@ -76,7 +76,7 @@ void taskIMU(void *pvParameters);
 void taskMovement(void *pvParameters);
 void taskSpin(void *pvParameters);
 void taskExecuteCommand(void *pvParameters);
-void taskToFCommand(void *pvParameters);
+void taskToF(void *pvParameters);
 void taskDeadReckoning(void *pvParameters);
 void taskServerCommunication(void *pvParameters);
 void taskDebug(void *pvParameters);

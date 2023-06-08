@@ -9,7 +9,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define USE_PCB_PINS false
+#define USE_PCB_PINS true
 
 #define STEPS 1600 /* Steps per revolution */
 #define ROVER_WIDTH 159 /* Wheel-to-wheel width in mm*/
@@ -74,7 +74,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KI_ANGLE 0.00
 #define KD_ANGLE 0.05
 
-#define CONTROL_DEBUG == false
+#define CONTROL_DEBUG false
 
 #define MAX_ANGLE 14
 #define MAX_DPS 360
@@ -82,8 +82,8 @@ Pin assignments for Group 1's EEEBalanceBug
 #define MAX_CUM_ERROR 10000
 
 #define ENABLE_TOF_TASK true
-#define ENABLE_SERVER_COMMUNICATION_TASK true
-#define ENABLE_DEBUG_TASK true
+#define ENABLE_SERVER_COMMUNICATION_TASK false
+#define ENABLE_DEBUG_TASK false
 
 #if ENABLE_DEBUG_TASK == true
   #define CONFIG_FREERTOS_USE_TRACE_FACILITY

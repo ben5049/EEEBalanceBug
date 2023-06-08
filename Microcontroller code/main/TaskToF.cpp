@@ -179,9 +179,22 @@ void IRAM_ATTR ToFLeftISR() {
   leftToFDataReady = true;
 }
 
+/* ISR that triggers when right forward IR sensor level changes */
+void IRAM_ATTR IRRightISR() {
+  if (digitalRead(IR_R_INT) == HIGH) {
+    IRRightCollision = false;
+  } else {
+    IRRightCollision = true;
+  }
+}
+
 /* ISR that triggers when left forward IR sensor level changes */
-void IRAM_ATTR IRRightISR(){
-  if (digitalRead() == 
+void IRAM_ATTR IRLeftISR() {
+  if (digitalRead(IR_L_INT) == HIGH) {
+    IRLeftCollision = false;
+  } else {
+    IRLeftCollision = true;
+  }
 }
 
 //-------------------------------- Task Functions ---------------------------------------
