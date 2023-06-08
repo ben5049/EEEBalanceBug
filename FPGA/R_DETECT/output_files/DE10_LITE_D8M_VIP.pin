@@ -110,7 +110,7 @@ RESERVED_INPUT_WITH_WEAK_PULLUP : AA16      :        :                   :      
 ARDUINO_IO[9]                : AA17      : bidir  : 3.3-V LVTTL       :         : 4         : Y              
 GND                          : AA18      : gnd    :                   :         :           :                
 ARDUINO_IO[11]               : AA19      : bidir  : 3.3-V LVTTL       :         : 4         : Y              
-ARDUINO_IO[15]               : AA20      : bidir  : 3.3-V LVTTL       :         : 4         : Y              
+ARDUINO_IO[15]               : AA20      : bidir  : 3.3 V Schmitt Trigger :         : 4         : Y              
 DRAM_DQ[3]                   : AA21      : bidir  : 3.3-V LVTTL       :         : 5         : Y              
 DRAM_DQ[2]                   : AA22      : bidir  : 3.3-V LVTTL       :         : 5         : Y              
 GND                          : AB1       : gnd    :                   :         :           :                
@@ -549,7 +549,7 @@ GND                          : Y15       : gnd    :                   :         
 RESERVED_INPUT_WITH_WEAK_PULLUP : Y16       :        :                   :         : 4         :                
 RESERVED_INPUT_WITH_WEAK_PULLUP : Y17       :        :                   :         : 4         :                
 RESERVED_INPUT_WITH_WEAK_PULLUP : Y18       :        :                   :         : 4         :                
-ARDUINO_IO[12]               : Y19       : bidir  : 3.3 V Schmitt Trigger :         : 4         : Y              
+ARDUINO_IO[12]               : Y19       : bidir  : 3.3-V LVTTL       :         : 4         : Y              
 DRAM_DQ[1]                   : Y20       : bidir  : 3.3-V LVTTL       :         : 5         : Y              
 DRAM_DQ[0]                   : Y21       : bidir  : 3.3-V LVTTL       :         : 5         : Y              
 DRAM_DQ[4]                   : Y22       : bidir  : 3.3-V LVTTL       :         : 5         : Y              
