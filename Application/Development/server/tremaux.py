@@ -1,6 +1,5 @@
 # Aranya Gupta
 # 31/5/2023
-from math import atan, degrees
 from triangulate import triangulate
 # todo: make triangulation more robust, and generally test thoroughly
 class Node:
@@ -10,7 +9,7 @@ class Node:
     # re-traversed, but will be added to children of prior node
     state = 0 
     position = 0
-    
+    estop = False    
     def __init__(self, position):
         self.position = position
         self.state = 1

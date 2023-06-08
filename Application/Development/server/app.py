@@ -66,8 +66,9 @@ def rover():
         rovers.append(r)
     r.nickname = data["nickname"]
     r.lastSeen = time()
-    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
+    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     resp = {"next_actions" : resp}
+    resp["clear_queue"] = r.estop 
     
     # store positions and timestamp in database
     try:
@@ -280,3 +281,11 @@ def led_driver():
     data = request.get_json()
     print(data)
     return make_response(jsonify({"success":"received data", "switch":1}), 200)
+
+@app.route("/client/estop", methods=["POST"])
+def estop():
+    data = request.get_json()
+    for rover in rovers:
+        if rover.name == data["MAC"]:
+            rover.estop = True
+    return make_response(jsonify({"success":"estopped"}))
