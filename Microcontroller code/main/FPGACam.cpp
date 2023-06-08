@@ -129,6 +129,10 @@ bool FPGACam::getRYB() {
     averageYellowX = 0xffff;
   }
   if (countB >= thresholdB) {
+    Serial.print("count: ");
+    Serial.print(countB);
+    Serial.print(",sum: ");
+    Serial.println(sumB);
     averageBlueX = sumB / countB;
   } else{
     averageBlueX = 0xffff;

@@ -34,7 +34,7 @@ Pin assignments for Group 1's EEEBalanceBug
 /* I2C: FPGA, Multiplexer & ToF sensors */
 #define I2C_PORT Wire
 #define I2C_FREQ 400000
-#define ENABLE_FPGA_CAMERA true
+#define ENABLE_FPGA_CAMERA false
 #define FPGA_ADDR 0x55
 #define FPGA_R_THRESHOLD 50
 #define FPGA_Y_THRESHOLD 50
@@ -81,7 +81,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
 
-#define ENABLE_TOF_TASK true
+#define ENABLE_TOF_TASK false
 #define ENABLE_SERVER_COMMUNICATION_TASK false
 #define ENABLE_DEBUG_TASK false
 
