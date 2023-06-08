@@ -140,7 +140,7 @@ def replay():
     except mariadb.Error as e:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
 
-    if cur is None or len(cur)==0:
+    if cur is None:
         return make_response(jsonify({"error":"Session does not exist"}), 404)
     resp = {}
     for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, sessionid in cur:
