@@ -30,7 +30,7 @@ class Node:
 class Rover():
     DEFAULT_DIST = 100
     name = ""
-    # next actions to take - 0: idle, 1: step forward, 2: spin, 3: visit branch, 4: go back, 5: update position, 6: set angle
+    # next actions to take - 0: idle, 1: step forward, 2: spin, 3: visit branch, 4: go back, 5: update position, 6: set angle, 7: ignore until reached position
     actions = []
     # tree containing nodes and their edges
     tree = {}
@@ -63,8 +63,8 @@ class Rover():
     
     # these all update toreturn, which gives the actual things the rover will do
     
-    def step_forward(self, dist=DEFAULT_DIST):
-        self.toreturn.append("step " + str(dist)) # this will be a JSON in reality
+    def step_forward(self):
+        self.toreturn.append("step") # this will be a JSON in reality
     
     def spin(self):
         self.toreturn.append("spin")
@@ -72,21 +72,10 @@ class Rover():
     def setAngle(self, angle):
         self.toreturn.append("angle " + str(angle))
     
-    def go_back(self, node, position):
-        if node.position[0]-position[0]==0:
-            if node.position[1]-position[1]==0:
-                self.toreturn.append("idle")
-            else:
-                if self.position[0]>position[0]:
-                    self.toreturn.append("angle 0")
-                    self.toreturn.append(self.step_forward(node.position[1]-position[1]))
-                else:
-                    self.toreturn.append("angle 180")
-                    self.toreturn.append(self.step_forward( position[1]-node.position[1]))
-        else:
-            angle = degrees(atan( (node.position[1]-position[1])/(node.position[0]-position[0]) ))-90
-            self.toreturn.append("angle " + str(angle))
-            self.toreturn.append(self.step_forward( ((node.position[1]-position[1])**2 + (node.position[0]-position[0])**2)**0.5 ))
+    def go_back(self, node, orientation):
+        self.setAngle(orientation+180)
+        self.step_forward()
+        self.actions = [[7, node]] + self.actions
         
     
     def idle(self):
@@ -96,7 +85,7 @@ class Rover():
         self.toreturn.append("update position " + str(newx) + " " + str(newy))
 
 
-    def tremaux(self, position, whereat, potentialbranches, beaconangles):
+    def tremaux(self, position, whereat, potentialbranches, beaconangles, orientation):
         if self.pause:
             return ["idle"]
         if self.toreturn[0] == -1:
@@ -168,10 +157,13 @@ class Rover():
                 self.actions = [[6,currentAction[1]], 1] + self.actions
             elif currentAction[0] == 4:
                 currentAction[1].visit()
-                self.go_back(currentAction[1], position)
+                self.go_back(currentAction[1], orientation)
             elif currentAction[0] == 6:
                 self.setAngle(currentAction[1], position)
                 self.step_forward()
+            elif currentAction[0] == 7:
+                if position != currentAction[1].position:
+                    self.actions = [[7, currentAction[1]]] + self.actions
         else:
             self.toreturn.append("DONE")
 
