@@ -285,7 +285,16 @@ def led_driver():
 @app.route("/client/estop", methods=["POST"])
 def estop():
     data = request.get_json()
+    try:
+        mac = data["MAC"]
+    except:
+        return make_response(jsonify({"error":"Missing MAC address"}))
+    flag = True
     for rover in rovers:
-        if rover.name == data["MAC"]:
+        if rover.name == mac:
             rover.estop = True
+            flag = False
+    
+    if flag:
+        return make_response(jsonify({"error":"Invalid MAC address"}))
     return make_response(jsonify({"success":"estopped"}))
