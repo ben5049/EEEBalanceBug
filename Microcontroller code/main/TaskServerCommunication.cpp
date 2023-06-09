@@ -17,12 +17,13 @@ TaskHandle_t taskServerCommunicationHandle = nullptr;
 
 //-------------------------------- Global Variables -------------------------------------
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "OnePlus 8";
+const char* password = "abc123def";
 
-String serverName = "http://3.86.226.249:5000/";
+String serverName = "http://34.205.64.125:5000/";
 String hostname = "ESP32 Node";
 
+float ang;
 //-------------------------------- Functions --------------------------------------------
 
 void configureWiFi() {
@@ -76,7 +77,7 @@ String handleResponse(uint16_t httpResponseCode, HTTPClient& http) {
   return http.getString();
 }
 
-robotCommand* parsePayload(String payload, int& numCommands) {
+robotCommand* parsePayload(String payload, uint8_t& numCommands) {
   JSONVar data = JSON.parse(payload);
   robotCommand commands[10];
   numCommands = 0;
@@ -89,48 +90,49 @@ robotCommand* parsePayload(String payload, int& numCommands) {
 
   SERIAL_PORT.print("JSON object = ");
   SERIAL_PORT.println(data);
-  String actions[] = data["next_actions"];
-  String clear  = data["clear_queue"];
-  if (clear=="true"){
+  const int length = data["next_actions"].length();
+  int actions[length] = {data["next_actions"]};
+  int clear = data["clear_queue"];
+  if (clear==1){
     xQueueReset(commandQueue);
     numCommands = 0;
   }
   else{
-    for (int i=0; i<actions.size(); i++){
-      String s = actions[i].substring(0,2);
-      if (s=="st"){
-        float dist = (float) actions[i].substring(5);
-        SERIAL_PORT.println(dist);
-        commands[i] = FORWARD;
+    for (int i=0; i<length; i++){
+      switch (actions[i]){
+        case 0:
+          SERIAL_PORT.println("FORWARD");
+          commands[i] = FORWARD;
+          break;
+        case 1:
+          SERIAL_PORT.println("SPIN");
+          commands[i] = SPIN;
+          break;
+        case 2:
+          ang = actions[i+1];
+          SERIAL_PORT.println(ang);
+          commands[i] = TURN;
+          break;
+        case 3:
+          SERIAL_PORT.println("idle");
+          commands[i] = IDLE;
+          break;
+        case 4:{
+          float newx = actions[i+1];
+          float newy = actions[i+2];
+          xPosition = newx;
+          yPosition = newy;
+          break;
+        }
+        case 5:{
+          SERIAL_PORT.println("DONE");
+          commands[i] = IDLE;
+          break;
+        }
+        default:
+          break;
       }
-      else if (s=="sp"){
-        SERIAL_PORT.println("spin");
-        commands[i] = SPIN;
-      }
-      else if (s=="an"){
-        float ang = (float) actions[i].substring(6);
-        SERIAL_PORT.println(ang);
-        commands[i] = TURN;
-      }
-      else if (s=="id"){
-        SERIAL_PORT.println("idle");
-        commands[i] = IDLE;
-      }
-      else if (s=="up"){
-        String newpos = actions[i].substring(16);
-        int spaceindex = newpos.indexOf(" ");
-        float newx = (float) newpos.substring(0, spaceindex);
-        float newy = (float) newpos.substring(spaceindex+1);
-        SERIAL_PORT.print(newx);
-        SERIAL_PORT.println(newy);
-        xPos = newx;
-        yPos = newy;
-      }
-      else{
-        SERIAL_PORT.println("idle");
-        commands[i] = IDLE;
-      }          
-      numCommands = actions.size();
+      numCommands = length;
     }
   
   return commands;
@@ -162,6 +164,7 @@ void taskServerCommunication(void* pvParameters) {
     String endpoint = "rover";
     requestType = 1;
 
+
     String serverPath = serverName + endpoint;
 
     if (WiFi.status() == WL_CONNECTED) {
@@ -180,10 +183,10 @@ void taskServerCommunication(void* pvParameters) {
       http.end();
 
       // parse payload string
-      robotCommand commands[] = parsePayload(payload, numCommands);
+      robotCommand* commands = parsePayload(payload, numCommands);
       for (int i=0; i<numCommands; i++){
         newCommand = commands[i];
-        xQueueSend(commandQueue, newCommand, portMAX_DELAY);
+        xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
       }
     }
   }

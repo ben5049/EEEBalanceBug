@@ -195,15 +195,15 @@ void setup() {
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
 
-  // if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
-  //   fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
-  //   SERIAL_PORT.println("FPGA camera initialised");
-  // } else {
-  //   while (true) {
-  //     SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
-  //     delay(1000);
-  //   }
-  // }
+  if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
+    fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
+    SERIAL_PORT.println("FPGA camera initialised");
+  } else {
+    while (true) {
+      SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
+      delay(1000);
+    }
+  }
 
 }
 
@@ -211,20 +211,22 @@ void setup() {
 
 void loop() {
   vTaskDelay(100);
-  SERIAL_PORT.print("Pitch:");
-  SERIAL_PORT.print(pitch);
-  SERIAL_PORT.print(", Yaw:");
-  SERIAL_PORT.println(yaw);
+  // SERIAL_PORT.print("Pitch:");
+  // SERIAL_PORT.print(pitch);
+  // SERIAL_PORT.print(", Yaw:");
+  // SERIAL_PORT.println(yaw);
   // SERIAL_PORT.println("Sending start command");
   // robotCommand command = FIND_BEACONS;
   // xQueueSend(commandQueue, &command, 0);
   // vTaskDelay(25000);
   
 
-  // fpga1.getRYB();
-
-  // Serial.println(fpga1.averageRedX);
-  // Serial.println(fpga1.averageYellowX);
-  // Serial.println(fpga1.averageBlueX);
+  fpga1.getRYB();
+  Serial.print("RED: ");
+  Serial.print(fpga1.averageRedX);
+  Serial.print(",Yellow: ");
+  Serial.print(fpga1.averageYellowX);
+  Serial.print(", Blue :");
+  Serial.println(fpga1.averageBlueX);
 
 }

@@ -37,7 +37,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define ENABLE_FPGA_CAMERA false
 #define FPGA_ADDR 0x55
 #define FPGA_R_THRESHOLD 50
-#define FPGA_Y_THRESHOLD 50
+#define FPGA_Y_THRESHOLD 30
 #define FPGA_B_THRESHOLD 50
 #define TOF_RIGHT_ADDRESS 0x30
 #define TOF_LEFT_ADDRESS 0x31

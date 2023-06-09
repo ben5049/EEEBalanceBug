@@ -155,36 +155,36 @@ bool FPGACam::getRYB() {
   sumB |= _i2c->read();
 
   /* Detect if beacon is present, if it is calculate its x coordinate */
-  // Serial.print("count: ");
-  // Serial.print(countR);
-  // Serial.print(",threshold: ");
-  // Serial.print(thresholdR);
-  // Serial.print(",sum: ");
-  // Serial.println(sumR);
+  Serial.print("count: ");
+  Serial.print(countR);
+  Serial.print(",threshold: ");
+  Serial.print(thresholdR);
+  Serial.print(",sum: ");
+  Serial.println(sumR);
   if (countR >= thresholdR) {
     averageRedX = sumR / countR;
   } else {
     averageRedX = 0xffff;
   }
 
-  // Serial.print("count: ");
-  // Serial.print(countY);
-  // Serial.print(",threshold: ");
-  // Serial.print(thresholdY);
-  // Serial.print(",sum: ");
-  // Serial.println(sumY);
+  Serial.print("count: ");
+  Serial.print(countY);
+  Serial.print(",threshold: ");
+  Serial.print(thresholdY);
+  Serial.print(",sum: ");
+  Serial.println(sumY);
   if (countY >= thresholdY) {
     averageYellowX = sumY / countY;
   } else {
     averageYellowX = 0xffff;
   }
 
-  // Serial.print("count: ");
-  // Serial.print(countB);
-  // Serial.print(",threshold: ");
-  // Serial.print(thresholdB);
-  // Serial.print(",sum: ");
-  // Serial.println(sumB);
+  Serial.print("count: ");
+  Serial.print(countB);
+  Serial.print(",threshold: ");
+  Serial.print(thresholdB);
+  Serial.print(",sum: ");
+  Serial.println(sumB);
   if (countB >= thresholdB) {
     averageBlueX = sumB / countB;
   } else {
