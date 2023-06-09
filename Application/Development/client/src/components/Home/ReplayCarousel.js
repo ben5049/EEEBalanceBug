@@ -34,9 +34,11 @@ const ReplayCarousel = ({ replays }) => {
 	//---------------------------- Button Functions: onClick ----------------------------
 
 	/* Select replay button */
-    const handleReplayClick = (ReplayID) => {
+    const handleReplayClick = (ReplayID, MAC) => {
         console.log("SELECTED " + ReplayID)
         localStorage.setItem('ReplayID', ReplayID);
+		console.log("SELECTED " + MAC)
+        localStorage.setItem('MAC', MAC);
     };
 
 	//---------------------------- Display ----------------------------------------------
@@ -49,7 +51,7 @@ const ReplayCarousel = ({ replays }) => {
 					<Link to="/replay" className="page-link" draggable={false}>
 						<button
 						className="carousel-button"
-						onClick={() => handleReplayClick(image.ID)}
+						onClick={() => handleReplayClick(image.sessionid, image.MAC)}
 						>
 							<img
 								src={"https://www.dataplusscience.com/images/MapExample4.PNG"} // TODO: Change to replay canvas
@@ -60,7 +62,7 @@ const ReplayCarousel = ({ replays }) => {
 								objectFit: 'cover', // Adjust how the image fits within the container
 								}}
 							/>
-							<p className="image-caption">{image.name}</p>
+							<p className="image-caption">{image.nickname}</p>
 							<div className="overlay-grey_ReplayCarousel">
 								<img
 								src={"https://www.transparentpng.com/thumb/play-button/rqkcPN-play-button-cut-out.png"}

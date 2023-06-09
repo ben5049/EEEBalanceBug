@@ -5,7 +5,7 @@ Date created: 03/05/23
 
 //-------------------------------- Imports ----------------------------------------------
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ReactPolling from "react-polling/lib/ReactPolling";
 import '../components/Connected/grid_Connected.css';
@@ -55,6 +55,9 @@ const Connected = () => {
 	const DiagnosticPollingSuccess = (jsonResponse) => {
 		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
 		UpdateDiagnosticData(jsonResponse);
+		if (jsonResponse.response.isfinished) {// TODO: Change isfinished once added to response on server side
+			setConnectedState("Finish");
+		}
 		return true;
 	}
 
@@ -126,6 +129,29 @@ const Connected = () => {
 		});
 	};
 
+	/* Pause Button */
+	const handleEmergencyStop = () => {
+		console.log('Emergency Stop');
+		/* Send Pause POST to server */
+		const url = "http://" + ServerIP + ":5000/client/estop"; /* Emergency Stop endpoint */
+		console.log("URL = " + url);
+		fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ "MAC": MAC }) /* Gives MAC to server */
+		})
+		.then(response => response.json())  /* Parse response as JSON */
+		.then(data => {
+			console.log("Response from server:", data);  /* Log response data */
+		})
+		.catch(error => {
+			console.log("Error:", error);
+			/* Error handling */
+		});
+	};
+	
 	/* Play Button */
 	const handlePlay = () => {
 		console.log('Play');
@@ -171,7 +197,7 @@ const Connected = () => {
 	*/
 
 	/* Create updating variables */
-	const [ConnectedState, setConnectedState] = useState('Start'); // TODO: Retreieve from server (check diagnostic data contains finish=true)
+	const [ConnectedState, setConnectedState] = useState('Mapping'); /* Default State */ // TODO: Retreieve from server (check diagnostic data contains finish=true)
 
 	/* Switch function (called on successful response from server pause/play POST) */
 	const ChangeState = () => {
@@ -185,6 +211,68 @@ const Connected = () => {
 			setConnectedState("Mapping");
 		}
 	};
+
+	//---------------------------- Canvas -----------------------------------------------
+
+	/* Create a ref for the canvas element */
+	const canvasRef = useRef(null);
+
+	/* Top level function to draw on the canvas */
+	const drawOnCanvas = () => {
+		const canvas = canvasRef.current;
+		const ctx = canvas.getContext('2d');
+	  
+		/* Clear the canvas */
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	  
+		/* Draws black background rectangle */
+		ctx.fillStyle = 'black';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		/* Re-renders map */
+		renderBoundaries();
+	};
+
+	/* Draws lane boundaries given data from rover */
+	const renderBoundaries = () => {
+		for (let i = 0; i < 700; i++) { //replace 700 with Object.keys(MapData).length
+			draw([i,i], 135, 30, 30); // TODO: Connect to fetched MapData
+		}
+	};
+
+	/* Redraw canvas when new data from server */
+	useEffect(() => {
+		drawOnCanvas();
+	}, [MapData]);
+
+	//---------------------------- Canvas Drawing ---------------------------------------
+
+	/* Draws Visual line on canvas */
+	function drawLine(ctx, begin, end, stroke = 'white', width = 1) {
+		if (stroke) {
+			ctx.strokeStyle = stroke;
+		}
+		if (width) {
+			ctx.lineWidth = width;
+		}
+		ctx.beginPath();
+		ctx.moveTo(...begin);
+		ctx.lineTo(...end);
+		ctx.stroke();
+	}
+
+	/* draws small line in correct direction with correct distances using TOF sensors */
+	function draw(position, orientation, tofleft, tofright) {
+		const canvas = document.querySelector('#canvas');
+		if (canvas.getContext) {
+			const ctx = canvas.getContext('2d');
+			let l = 5; /* Change to alter length of each line */
+			let theta = orientation*Math.PI/180
+			/* Draw */
+			drawLine(ctx, [position[0] + tofleft * Math.cos(theta), position[1] + tofleft * Math.sin(theta)], [position[0] + tofleft * Math.cos(theta) + l * Math.sin(theta), position[1] + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
+			drawLine(ctx, [position[0] - tofright * Math.cos(theta), position[1] - tofright * Math.sin(theta)], [position[0] - tofright * Math.cos(theta) + l * Math.sin(theta), position[1] - tofright * Math.sin(theta) - l * Math.cos(theta)]);
+		}
+	}
 
 	//---------------------------- Display ----------------------------------------------
 
@@ -212,9 +300,14 @@ const Connected = () => {
 													</div>
 												  </div>
 												) : (<></>)}
-				{ConnectedState === 'Mapping' ? ( <button onClick={handlePause()} className='box-green LargeButton_Connected'>
-													Pause
-												  </button>
+				{ConnectedState === 'Mapping' ? ( <div className="wrapper_Connected">
+												  	<button onClick={handlePause()} className='box-green PauseButton_Connected'>
+														Pause
+													</button>
+													<button onClick={handleEmergencyStop()} className='box-red EmergencyStopButton_Connected'>
+														Emergency Stop
+													</button>
+												  </div>
 										  		) : (<></>)}
 				{ConnectedState === 'Pause'   ? (<div className="wrapper_Connected">
 													<div className='box-red SmallRightButton_Connected'>
@@ -260,7 +353,7 @@ const Connected = () => {
 						onFailure= {MappingPollingFailure}
 						promise={fetchMappingData} // custom api calling function that should return a promise
 						render={({ startPolling, stopPolling, isPolling }) => {
-							return <p>Map</p>;
+							return <canvas ref={canvasRef} id='canvas' width={715} height={715} />;
 						}}
 					/>
 				</div>
@@ -274,6 +367,7 @@ const Connected = () => {
 						onFailure= {DiagnosticPollingFailure}
 						promise={fetchDiagnosticData} // custom api calling function that should return a promise
 						render={({ startPolling, stopPolling, isPolling }) => {
+							// TODO: select which diagnostics to display
 							return <p>CPU: {DiagnosticData.CPU}, MAC: {DiagnosticData.MAC}, Battery: {DiagnosticData.battery}, Connection: {DiagnosticData.connection}, Timestamp: {DiagnosticData.timestamp}</p>;
 						}}
 					/>
