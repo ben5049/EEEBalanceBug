@@ -288,12 +288,6 @@ def findShortestPath():
     return make_response(jsonify(betterP), 200)
 
 
-@app.route("/led_driver", methods=["POST"])
-def led_driver():
-    data = request.get_json()
-    print(data)
-    return make_response(jsonify({"success":"received data", "switch":1}), 200)
-
 @app.route("/client/estop", methods=["POST"])
 def estop():
     data = request.get_json()
@@ -310,3 +304,22 @@ def estop():
     if flag:
         return make_response(jsonify({"error":"Invalid MAC address"}))
     return make_response(jsonify({"success":"estopped"}))
+
+@app.route("/led_driver/red", methods=["POST"])
+def led_driver():
+    data = request.get_json()
+    print(data, "red")
+    return make_response(jsonify({"success":"received data", "switch":1}), 200)
+
+@app.route("/led_driver/blue", methods=["POST"])
+def led_driver():
+    data = request.get_json()
+    print(data, "blue")
+    return make_response(jsonify({"success":"received data", "switch":1}), 200)
+
+@app.route("/led_driver/yellow", methods=["POST"])
+def led_driver():
+    data = request.get_json()
+    print(data, "yellow")
+    return make_response(jsonify({"success":"received data", "switch":1}), 200)
+
