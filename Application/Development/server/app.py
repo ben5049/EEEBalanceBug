@@ -276,12 +276,11 @@ def findShortestPath():
         return make_response(jsonify({"error":"Incorrectly formatted request: missing SessionID or nickname"}), 400)
 
     for sid, node_x, node_y, children in cur:
-        print(sid, node_x, node_y, children)
         tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
     
     print(tree, "tree")
 
-    P = dijkstra.dijkstra(tree, [start_x, start_y])
+    P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
     betterP = {}
     for key, value in P:
         if value is not None:
