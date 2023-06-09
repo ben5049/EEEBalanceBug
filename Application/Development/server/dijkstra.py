@@ -34,8 +34,12 @@ def dijkstra(graph, startPos):
         if thresholding(startPos, node):
             startNode = node
             break
-    G = {startNode: 0} # distance from startNode to given node
-    P = {startNode: None} # predecessor graph - shortest path from given node to start node
+    try:
+        G = {startNode: 0} # distance from startNode to given node
+        P = {startNode: None} # predecessor graph - shortest path from given node to start node
+    except:
+        return None
+
     for node in graph:
         if node not in G:
             G[node] = 1e7
