@@ -2,10 +2,10 @@
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "OnePlus 8";
+const char* password = "abc123def";
 
-String serverName = "http://44.211.175.45:5000/";
+String serverName = "http://34.205.64.125:5000/";
 
 String hostname = "ESP32 Node";
 
