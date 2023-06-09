@@ -9,7 +9,7 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
 
-hostip = '54.175.40.130'
+hostip = '34.205.64.125'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
