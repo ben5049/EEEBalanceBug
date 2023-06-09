@@ -14,7 +14,7 @@ def assertValid(graph):
 
 # just because it looks ugly otherwise
 def findDist(node1, node2):
-    return ((node1.position[0] - node2.position[0])**2 + (node1.position[1] - node2.position[1])**2)**0.5
+    return ((node1[0] - node2[0])**2 + (node1[1] - node2[1])**2)**0.5
 
 THRESHOLD = 3
 
@@ -31,7 +31,7 @@ def thresholding(pos1, pos2):
 
 def dijkstra(graph, startPos):
     for node in graph:
-        if thresholding(startPos, node.position):
+        if thresholding(startPos, node):
             startNode = node
             break
     G = {startNode: 0} # distance from startNode to given node
