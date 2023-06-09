@@ -4,12 +4,12 @@ import tremaux, dijkstra
 import mariadb
 from time import time
 from json import loads
-# TODO: error handling
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
-
+isSpinning = False
+spinTime = time()
 hostip = '54.175.40.130'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
@@ -71,6 +71,9 @@ def rover():
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     resp = {"next_actions" : resp}
     resp["clear_queue"] = r.estop 
+    if "spin" in resp["next_actions"]:
+        isSpinning = True
+        spinTime = time()
     
     # store positions and timestamp in database
     # also store tree in database if rover is done
@@ -312,26 +315,29 @@ def estop():
 def led_driver_red():
     data = request.get_json()
     print(data, "red")
-    if data["swR"]==1:
+    if isSpinning and time()-spinTime < TIMEOUT/3:
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
+        isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
     data = request.get_json()
     print(data, "blue")
-    if data["swB"]==1:
+    if isSpinning and time()-spinTime < TIMEOUT/3:
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
+        isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
     data = request.get_json()
     print(data, "yellow")
-    if data["swY"]==1:
+    if isSpinning and time()-spinTime < TIMEOUT/3:
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
+        isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
