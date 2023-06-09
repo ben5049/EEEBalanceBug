@@ -309,17 +309,17 @@ def estop():
 def led_driver_red():
     data = request.get_json()
     print(data, "red")
-    return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
     data = request.get_json()
     print(data, "blue")
-    return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
     data = request.get_json()
     print(data, "yellow")
-    return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
