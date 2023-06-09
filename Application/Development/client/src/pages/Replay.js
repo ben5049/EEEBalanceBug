@@ -89,13 +89,13 @@ const Replay = () => {
 			alert('Invalid coordinates. Please enter digits.');
 			return;
 		}
-		postStartEnd(startCoordinates_X, startCoordinates_Y);
+		postStart(startCoordinates_X, startCoordinates_Y);
 		/* Visualise shortest path */
 		renderShortestPath();
 	};
 
 	/* Sends request to server for shortest path to every node from a given point (arguments: MAC, Start coordinates) */
-	const postStartEnd = async (StartX, StartY) => {
+	const postStart = async (StartX, StartY) => {
 		/* Sends POST request to server */
 		const ShortestPathURL = "http://" + ServerIP + ":5000/client/shortestpath"; /* Pause endpoint */
 		console.log("URL = " + ShortestPathURL);
@@ -327,8 +327,8 @@ const Replay = () => {
 	//---------------------------- Start/End Coordinates --------------------------------
 
 	/* Set starting state */
-	const [startCoordinates_X, setStartCoordinates_X] = useState('10'); // TODO: Set to first MapData
-	const [startCoordinates_Y, setStartCoordinates_Y] = useState('10'); // TODO: Set to first MapData
+	const [startCoordinates_X, setStartCoordinates_X] = useState('3'); // TODO: Set to first MapData
+	const [startCoordinates_Y, setStartCoordinates_Y] = useState('3'); // TODO: Set to first MapData
 	const [endCoordinates_X, setEndCoordinates_X] = useState('700'); // TODO?: Set to replay default
 	const [endCoordinates_Y, setEndCoordinates_Y] = useState('700'); // TODO?: Set to replay default
 
@@ -418,7 +418,7 @@ const Replay = () => {
 			let l = 5; /* Change to alter length of each line */
 			let theta = orientation*Math.PI/180
 			/* Scale to canvas */
-			position_x  = ( position_x / MapDataMax ) * 700 + 30
+			position_x  = ( position_x / MapDataMax ) * 700 + 30 /* WARNING: if edit, also change in postStart */
 			position_y  = ( position_y / MapDataMax ) * 700 + 30
 			/* Draw */
 			drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
