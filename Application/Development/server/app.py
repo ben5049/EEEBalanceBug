@@ -267,6 +267,7 @@ def findShortestPath():
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC or start"}), 400)
     tree = {}
+    print(start_x, start_y, "shortestPath")
     try:
         cur.execute("SELECT * FROM Trees WHERE SessionID=? ", (sessionid,))
     except:
@@ -276,6 +277,8 @@ def findShortestPath():
 
     for sid, node_x, node_y, children in cur:
         tree[(node_x, node_y)] = [(float(x[0]), float(x[1])) for x in loads(children)]
+    
+    print(tree, "tree")
 
     P = dijkstra.dijkstra(tree, [start_x, start_y])
     betterP = {}
