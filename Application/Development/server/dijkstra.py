@@ -16,7 +16,7 @@ def assertValid(graph):
 def findDist(node1, node2):
     return ((node1[0] - node2[0])**2 + (node1[1] - node2[1])**2)**0.5
 
-THRESHOLD = 3
+THRESHOLD = 10
 
 # graph is hash table of Node as defined in tremaux 
 # each Node has its position, Dijkstra will calculate 
