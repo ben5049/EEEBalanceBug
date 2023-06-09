@@ -97,39 +97,39 @@ robotCommand* parsePayload(String payload, int& numCommands) {
   }
   else{
     for (int i=0; i<actions.size(); i++){
-      switch(actions[i].substring(0, 2)){
-        case "st":
-          float dist = (float) actions[i].substring(5);
-          SERIAL_PORT.println(dist);
-          commands[i] = FORWARD;
-          break;
-        case "sp":
-          SERIAL_PORT.println("spin");
-          commands[i] = SPIN;
-          break
-        case "an":
-          float ang = (float) actions[i].substring(6);
-          SERIAL_PORT.println(ang);
-          commands[i] = TURN;
-          break;
-        case "id":
-          SERIAL_PORT.println("idle");
-          commands[i] = IDLE;
-          break;
-        case "up":
-          String newpos = actions[i].substring(16);
-          int spaceindex = newpos.indexOf(" ");
-          float newx = (float) newpos.substring(0, spaceindex);
-          float newy = (float) newpos.substring(spaceindex+1);
-          SERIAL_PORT.print(newx);
-          SERIAL_PORT.println(newy);
-          xPos = newx;
-          yPos = newy;
-          break;
-        default:
-          SERIAL_PORT.println("idle");
-          commands[i] = IDLE;
+      String s = actions[i].substring(0,2);
+      if (s=="st"){
+        float dist = (float) actions[i].substring(5);
+        SERIAL_PORT.println(dist);
+        commands[i] = FORWARD;
       }
+      else if (s=="sp"){
+        SERIAL_PORT.println("spin");
+        commands[i] = SPIN;
+      }
+      else if (s=="an"){
+        float ang = (float) actions[i].substring(6);
+        SERIAL_PORT.println(ang);
+        commands[i] = TURN;
+      }
+      else if (s=="id"){
+        SERIAL_PORT.println("idle");
+        commands[i] = IDLE;
+      }
+      else if (s=="up"){
+        String newpos = actions[i].substring(16);
+        int spaceindex = newpos.indexOf(" ");
+        float newx = (float) newpos.substring(0, spaceindex);
+        float newy = (float) newpos.substring(spaceindex+1);
+        SERIAL_PORT.print(newx);
+        SERIAL_PORT.println(newy);
+        xPos = newx;
+        yPos = newy;
+      }
+      else{
+        SERIAL_PORT.println("idle");
+        commands[i] = IDLE;
+      }          
       numCommands = actions.size();
     }
   

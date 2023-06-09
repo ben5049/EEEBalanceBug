@@ -3,12 +3,13 @@ from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
 from time import time
-# TODO: error handling
+from json import loads
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
+TIMEOUT = 30
 
-hostip = '54.175.207.180'
+hostip = '54.175.40.130'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -25,6 +26,9 @@ except mariadb.Error as e:
 cur = conn.cursor()
 
 rovers = []
+
+isSpinning = False
+spinTime = time()
 
 @app.route("/")
 def hello():
@@ -69,11 +73,21 @@ def rover():
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     resp = {"next_actions" : resp}
     resp["clear_queue"] = r.estop 
+    if "spin" in resp["next_actions"]:
+        isSpinning = True
+        spinTime = time()
     
     # store positions and timestamp in database
+    # also store tree in database if rover is done
     try:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
+        if "DONE" in resp["next_actions"]:
+            for node in r.tree:
+                neighbours = []
+                for neighbour in r.tree[node]:
+                    neighbours.append(str(neighbour))
+                cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (r.sessionId, node.position[0], node.position[1], str(neighbours)))
     except mariadb.Error as e:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     # cur.execute("SELECT * FROM Rovers")
@@ -96,7 +110,7 @@ def allrovers():
     d = []
     disallowedMacs = []
     for rover in rovers:
-        if time()-rover.lastSeen > 30:
+        if time()-rover.lastSeen > TIMEOUT:
             rovers.remove(rover)
     
     for rover in rovers:
@@ -252,40 +266,77 @@ def addnickname():
 def findShortestPath():
     data = request.get_json()
     try:
-        mac = data["MAC"]
+        sessionid = data["sessionid"]
         start_x = data["start_x"]
         start_y = data["start_y"]
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC or start"}), 400)
-    tree = 0
-    flag = True
-    for rover in rovers:
-        if rover.name == mac:
-            tree = rover.tree
-            flag= False
-    if flag:
-        return make_response(jsonify({"error":"Incorrectly formatted request: invalid MAC address"}), 400)
-    P = dijkstra.dijkstra(tree, [start_x, start_y])
-    betterP = {}
-    for key, value in P:
-        if value is not None:
-            betterP[key.position] = betterP[value.position]
-        else:
-            betterP[key.position] = 0
+    tree = {}
+    print(start_x, start_y, "shortestPath")
+    try:
+        cur.execute("SELECT * FROM Trees WHERE SessionID=? ", (sessionid,))
+    except:
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
+    if cur is None:
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing SessionID or nickname"}), 400)
 
+    for sid, node_x, node_y, children in cur:
+        tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
+    
+    print(tree, "tree")
+
+    P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
+    if P is None:
+        return make_response(jsonify({"error":"start point too far away from any given node"}), 400)
+    print(P, "P")
+    return make_response(jsonify({"tree":"{[0,0]:0, [100,0]:[0,0], [100,100]:[100,0], [50,50]:[0,0]}"}), 200) # for testing
     return make_response(jsonify(betterP), 200)
 
-
-@app.route("/led_driver", methods=["POST"])
-def led_driver():
-    data = request.get_json()
-    print(data)
-    return make_response(jsonify({"success":"received data", "switch":1}), 200)
 
 @app.route("/client/estop", methods=["POST"])
 def estop():
     data = request.get_json()
+    try:
+        mac = data["MAC"]
+    except:
+        return make_response(jsonify({"error":"Missing MAC address"}))
+    flag = True
     for rover in rovers:
-        if rover.name == data["MAC"]:
+        if rover.name == mac:
             rover.estop = True
+            flag = False
+    
+    if flag:
+        return make_response(jsonify({"error":"Invalid MAC address"}))
     return make_response(jsonify({"success":"estopped"}))
+
+@app.route("/led_driver/red", methods=["POST"])
+def led_driver_red():
+    data = request.get_json()
+    print(data, "red")
+    if isSpinning and time()-spinTime < TIMEOUT/3:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    else:
+        isSpinning = False
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+
+@app.route("/led_driver/blue", methods=["POST"])
+def led_driver_blue():
+    data = request.get_json()
+    print(data, "blue")
+    if isSpinning and time()-spinTime < TIMEOUT/3:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    else:
+        isSpinning = False
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+
+@app.route("/led_driver/yellow", methods=["POST"])
+def led_driver_yellow():
+    data = request.get_json()
+    print(data, "yellow")
+    if isSpinning and time()-spinTime < TIMEOUT/3:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    else:
+        isSpinning = False
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+

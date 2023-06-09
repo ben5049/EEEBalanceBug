@@ -1,7 +1,8 @@
 # Aranya Gupta
 # 31/5/2023
 from triangulate import triangulate
-# todo: make triangulation more robust, and generally test thoroughly
+# TODO: general testing & work on threshold checking
+THRESHOLD = 2
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
     # 3 is special state - signifies its the exit of the maze
@@ -9,7 +10,7 @@ class Node:
     # re-traversed, but will be added to children of prior node
     state = 0 
     position = 0
-       
+    
     def __init__(self, position):
         self.position = position
         self.state = 1
@@ -25,6 +26,8 @@ class Node:
 
     def __str__(self):
         return str(self.position)
+            
+
 
 class Rover():
     DEFAULT_DIST = 100
@@ -61,10 +64,16 @@ class Rover():
     def __str__(self):
         return str(self.name)
     
+    def thresholding(self, pos1, pos2):
+        if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
+            return True
+        else:
+            return False
+    
     # these all update toreturn, which gives the actual things the rover will do
     
     def step_forward(self):
-        self.toreturn.append("step") # this will be a JSON in reality
+        self.toreturn.append("step")
     
     def spin(self):
         self.toreturn.append("spin")
@@ -98,7 +107,7 @@ class Rover():
             currentAction = self.actions.pop(0)
             if currentAction == 1:
                 if whereat == 0:
-                    if position not in [nodes.position for nodes in self.tree]:
+                    if True not in [self.thresholding(nodes.position, position) for nodes in self.tree]:
                         n = Node(position)
                         self.tree[n] = []
                         self.tree[self.priornode].append(n)
@@ -109,16 +118,16 @@ class Rover():
                             self.step_forward()
                     else:
                         for node in self.tree:
-                            if node.position == position:
+                            if self.thresholding(node.position, position):
                                 node.visit()
                         self.actions = [[4, self.priornode]] + self.actions
                 elif whereat == 1:
-                    if position not in [nodes.position for nodes in self.tree]:
+                    if True not in [self.thresholding(nodes.position, position) for nodes in self.tree]:
                         self.actions = [2] + self.actions
                         self.idle()
                     else:
                         for node in self.tree:
-                            if node.position == position:
+                            if self.thresholding(node.position, position):
                                 node.visit()
                         self.actions= [[4,self.priornode]] + self.actions
                 elif whereat == 2:
@@ -135,9 +144,9 @@ class Rover():
                 self.actions = [3] + self.actions
                 self.spin()
             elif currentAction == 3:
-                if position in [nodes.position for nodes in self.tree]:
+                if True in [self.thresholding(nodes.position, position) for nodes in self.tree]:
                     for node in self.tree:
-                        if node.position == position:
+                        if self.thresholding(node.position, position):
                             node.visit()
                     self.actions = [[4, self.priornode]] + self.actions
                 else:
@@ -162,9 +171,11 @@ class Rover():
                 self.setAngle(currentAction[1], position)
                 self.step_forward()
             elif currentAction[0] == 7:
-                if position != currentAction[1].position:
+                if not self.thresholding(position, currentAction[1].position):
                     self.actions = [[7, currentAction[1]]] + self.actions
         else:
             self.toreturn.append("DONE")
 
         return self.toreturn
+
+r = Rover([0,0], 0, 0)

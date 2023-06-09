@@ -14,20 +14,32 @@ def assertValid(graph):
 
 # just because it looks ugly otherwise
 def findDist(node1, node2):
-    return ((node1.position[0] - node2.position[0])**2 + (node1.position[1] - node2.position[1])**2)**0.5
+    return ((node1[0] - node2[0])**2 + (node1[1] - node2[1])**2)**0.5
 
+THRESHOLD = 10
 
 # graph is hash table of Node as defined in tremaux 
 # each Node has its position, Dijkstra will calculate 
 # distances based on position
 # returns predecessor graph showing shortest path from startNode to every point
+
+def thresholding(pos1, pos2):
+        if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
+            return True
+        else:
+            return False
+
 def dijkstra(graph, startPos):
     for node in graph:
-        if startPos == node.position:
+        if thresholding(startPos, node):
             startNode = node
             break
-    G = {startNode: 0} # distance from startNode to given node
-    P = {startNode: None} # predecessor graph - shortest path from given node to start node
+    try:
+        G = {startNode: 0} # distance from startNode to given node
+        P = {startNode: None} # predecessor graph - shortest path from given node to start node
+    except:
+        return None
+
     for node in graph:
         if node not in G:
             G[node] = 1e7

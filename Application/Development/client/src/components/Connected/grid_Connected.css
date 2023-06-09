@@ -40,8 +40,20 @@
   user-select: none;
 }
 
-.LargeButton_Connected {
-  grid-column: col 14 / span 6;
+.PauseButton_Connected {
+  grid-column: col 14 / span 3;
+  grid-row: row 12 / span 1;
+  text-align: center;
+  line-height: 40px;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  border: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.EmergencyStopButton_Connected {
+  grid-column: col 17 / span 3;
   grid-row: row 12 / span 1;
   text-align: center;
   line-height: 40px;

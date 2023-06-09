@@ -29,8 +29,8 @@ const Replay = () => {
 	//---------------------------- Get Stored Values ------------------------------------
 
 	const ServerIP = localStorage.getItem('ServerIP');
-	const ID = localStorage.getItem('ReplayID');
-	console.log('Replay ID = ' + ID);
+	const replayID = localStorage.getItem('ReplayID');
+	console.log('Replay ID = ' + replayID);
 	const MAC = localStorage.getItem('MAC');
 	console.log('CONNECTED MAC = ' + MAC);
 	const nickname = localStorage.getItem('nickname');
@@ -43,7 +43,7 @@ const Replay = () => {
 	*/
 
 	/* Create updating variables */
-	const [MapData, UpdateMappingData] = useState([]);
+	const [MapData, UpdateMappingData] = useState({0 : [100, 100, 100, 90, 100, 100], 2 : [110, 100, 100, 90, 100, 100]});
 
 	/* Send POST request to get Map Data */
 	const MappingURL = "http://" + ServerIP + ":5000/client/replay";
@@ -53,45 +53,68 @@ const Replay = () => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "MAC": MAC })
+			body: JSON.stringify({ "sessionid": replayID })
 		})
 		.then(response => response.json()) /* Parse the response as JSON */
 		.then(data => UpdateMappingData(data)) /* Update the state with the data */
 		.catch(error => console.log(error)); /* Error Handling */
 	}, []);
 
+	/* Get max magnitude in MapData when changed */
+	const [MapDataMax, setMapDataMax] = useState(1);/* Number of Replay values (in MapData) */
+	useEffect(() => {
+		Object.entries(MapData).forEach(([key, value]) => {
+			const firstTwoElements = value.slice(0, 2);
+			const CoordinateMax = Math.max(...firstTwoElements);
+			if (CoordinateMax > MapDataMax) {
+				setMapDataMax(CoordinateMax);
+				console.log("MapDataMax = " + MapDataMax);
+			}
+		})
+	}, [MapData]);
+
 	//---------------------------- Shortest Path ----------------------------------------
 
 	/* Create updating variables */
-	const [ShortestPath, UpdateShortestPath] = useState([]);
+	const [ShortestPath, UpdateShortestPath] = useState([]); /* Initially no shortest path selected */
+	const [ShowShortestPath, UpdateShowShortestPath] = useState(false); /* Initially no shortest path displayed */
 
-	/* sends request to server for shortest path to every node from a given point (arguments: Start coordinates) */
-	const ShortestPathURL = "http://" + ServerIP + ":5000/client/shortestpath";
-	console.log("URL = " + ShortestPathURL);
-	const postStartEnd = async (StartX, StartY) => {
-		try {
-			/* Sends POST request to server */
-			const response = await fetch(ShortestPathURL, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ "MAC": MAC, "start_x": StartX, "start_y": StartY})
-			});
-			/* GOOD response from server: update shortest path */
-			if (response.ok) {
-				const responseData = await response.json();
-				console.log("Response data:", responseData);
-				UpdateShortestPath(responseData);
-			} 
-			/* BAD response from server: throw error */
-			else {
-				console.log("ShortestPath request failed");
-			}
-		/* Error Handling */
-		} catch (error) {
-			console.log("Error:", error);
+	/* Calculate shortest path */
+	const handleShortestPath = () => {
+		console.log('Shortest Path');
+		UpdateShowShortestPath(true);
+		/* Input Validation: Check if start and end coordinates are digits */
+		if (!isDigit(startCoordinates_X) || !isDigit(startCoordinates_Y) || !isDigit(endCoordinates_X) || !isDigit(endCoordinates_Y)) {
+			console.log('Invalid coordinates.');
+			alert('Invalid coordinates. Please enter digits.');
+			return;
 		}
+		postStartEnd(startCoordinates_X, startCoordinates_Y);
+		/* Visualise shortest path */
+		renderShortestPath();
+	};
+
+	/* Sends request to server for shortest path to every node from a given point (arguments: MAC, Start coordinates) */
+	const postStartEnd = async (StartX, StartY) => {
+		/* Sends POST request to server */
+		const ShortestPathURL = "http://" + ServerIP + ":5000/client/shortestpath"; /* Pause endpoint */
+		console.log("URL = " + ShortestPathURL);
+		fetch(ShortestPathURL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ "sessionid": replayID, "start_x": StartX, "start_y": StartY }) /* Gives sessionID, start coordinate to server */
+		})
+		.then(response => response.json())  /* Parse response as JSON */
+		.then(data => {
+			console.log("Response from server:", data);  /* Log response data */
+			UpdateShortestPath(data);
+		})
+		/* Error handling */
+		.catch(error => {
+			console.log("Error:", error);
+		});
 	};
 
 	/* Draws a circle at coordinates */
@@ -101,28 +124,37 @@ const Replay = () => {
 	  
 		/* Draw a circle */
 		ctx.beginPath();
-		ctx.arc(x, y, 5, 0, 2 * Math.PI); /* Radius = 5 */
+		ctx.arc(x, y, 4, 0, 2 * Math.PI); /* Radius = 4 */
 		ctx.stroke();
 	};
+
+	const renderShortestPath = () => {
+		// TODO: add for all nodes in ShortestPath
+		/* Snap end coordinate to nearest node */
+
+		/* Draw path to node in predecessor graph
+		   Follow till [0,0] or length of graph */
+		renderShortestPathSegment(startCoordinates_X, startCoordinates_Y, endCoordinates_X, endCoordinates_Y);
+	}
+
+	/* Draw straight line between two nodes */
+	const renderShortestPathSegment = (x1, y1, x2, y2) => {
+		const canvas = canvasRef.current;
+		const ctx = canvas.getContext('2d');
+		ctx.beginPath();
+		ctx.moveTo(x1, y1);
+		ctx.lineTo(x2, y2);
+		ctx.strokeStyle = "yellow"; // Set the line color
+		ctx.setLineDash([5,5]); // Set the dash segments
+		ctx.stroke();
+		ctx.setLineDash([])
+	}
 
 	//---------------------------- Button Functions: onClick ----------------------------
 	
 	/* Menu button */
 	const handleMenu = () => {
 		console.log('Menu');
-	};
-
-	/* Calculate shortest path */
-	const handleShortestPath = () => {
-		console.log('Shortest Path');
-		/* Input Validation: Check if start and end coordinates are digits */
-		if (!isDigit(startCoordinates_X) || !isDigit(startCoordinates_Y) || !isDigit(endCoordinates_X) || !isDigit(endCoordinates_Y)) {
-			console.log('Invalid coordinates.');
-			alert('Invalid coordinates. Please enter digits.');
-			return;
-		}
-		postStartEnd(startCoordinates_X, startCoordinates_Y);
-		// TODO: Visualise shortest path
 	};
 
 	/* Pause button */
@@ -240,8 +272,15 @@ const Replay = () => {
 
 	/* Initialise variables */
 	const [SliderValue, setSliderValue] = useState(0); /* Position in replay (initial = start) */
-	const SliderValueMax = 700; /* Number of Replay values, TODO: get from server */
 	const SliderRate = 40; /* Time Interval (ms) */
+
+	/* sliderValueMax updates when MapData is changed */
+	const [SliderValueMax, setSliderValueMax] = useState(100);/* Number of Replay values (in MapData) */
+	useEffect(() => {
+		setSliderValueMax(Object.keys(MapData).length);
+		console.log("Slider Value Max = " + Object.keys(MapData).length);
+	}, [MapData]);
+
 
 	/* Slider onChange (Dragged by user) */
 	const handleSliderChange = (event) => {
@@ -269,7 +308,7 @@ const Replay = () => {
 				setSliderValue((prevValue) => {
 				const newValue = prevValue + 1; /* Increment */
 				if (RepeatToggleState === false) {
-					if (newValue === SliderValueMax) {
+					if (newValue >= SliderValueMax) {
 						setPlayState("End");
 					}
 					return newValue > SliderValueMax ? SliderValueMax : newValue; /* Ensure increment stops at SliderValueMax */
@@ -288,10 +327,10 @@ const Replay = () => {
 	//---------------------------- Start/End Coordinates --------------------------------
 
 	/* Set starting state */
-	const [startCoordinates_X, setStartCoordinates_X] = useState('12'); // TODO: Set to replay default
-	const [startCoordinates_Y, setStartCoordinates_Y] = useState('42'); // TODO: Set to replay default
-	const [endCoordinates_X, setEndCoordinates_X] = useState('73'); // TODO: Set to replay default
-	const [endCoordinates_Y, setEndCoordinates_Y] = useState('13'); // TODO: Set to replay default
+	const [startCoordinates_X, setStartCoordinates_X] = useState('10'); // TODO: Set to first MapData
+	const [startCoordinates_Y, setStartCoordinates_Y] = useState('10'); // TODO: Set to first MapData
+	const [endCoordinates_X, setEndCoordinates_X] = useState('700'); // TODO?: Set to replay default
+	const [endCoordinates_Y, setEndCoordinates_Y] = useState('700'); // TODO?: Set to replay default
 
 	/* Input Validation: checks if digit */
 	const isDigit = (coordinate) => {
@@ -317,16 +356,36 @@ const Replay = () => {
 
 		/* Draw circle at Start X, Y and End X, Y coordinates */
 		renderPoints(ctx, startCoordinates_X, startCoordinates_Y, 'lime');
-		renderPoints(ctx, endCoordinates_X, endCoordinates_Y, 'pink');
+		renderPoints(ctx, endCoordinates_X, endCoordinates_Y, 'magenta');
 	  
 		/* Re-renders map */
+		//console.log(MapData);
 		renderBoundaries();
+
+		/* display shortest path if button was pressed */
+		if (ShowShortestPath) {
+			renderShortestPath();
+		}
+		console.log("showShortestPath = " + ShowShortestPath);
 	};
+
+	/* Removes shortest path when coordinates changed */
+	useEffect(() => {
+		UpdateShowShortestPath(false);
+	}, [startCoordinates_X, startCoordinates_Y, endCoordinates_X, endCoordinates_Y]);
 	
 	/* Draws lane boundaries given data from rover */
 	const renderBoundaries = () => {
-		for (let i = 0; i < SliderValue; i++) {
-			draw([i,i], 135, 30, 30); // TODO: Connect to fetched
+		const entries = Object.entries(MapData);
+		for (let i = 0; i < SliderValue && i < entries.length; i++) {
+			const [, entry] = entries[i];
+			const pos_x = entry[0];
+			const pos_y = entry[1];
+			const orientation = entry[3];
+			const TOF_left = entry[4];
+			const TOF_right = entry[5];
+			draw(pos_x, pos_y, orientation, TOF_left, TOF_right);
+			console.log(entry[0] + " " + entry[1] + " " + entry[3] + " " + entry[4] + " " + entry[5]);
 		}
 	};
 
@@ -352,15 +411,18 @@ const Replay = () => {
 	}
 
 	/* draws small line in correct direction with correct distances using TOF sensors */
-	function draw(position, orientation, tofleft, tofright) {
+	function draw(position_x, position_y, orientation, tofleft, tofright) {
 		const canvas = document.querySelector('#canvas');
 		if (canvas.getContext) {
 			const ctx = canvas.getContext('2d');
 			let l = 5; /* Change to alter length of each line */
 			let theta = orientation*Math.PI/180
+			/* Scale to canvas */
+			position_x  = ( position_x / MapDataMax ) * 700 + 30
+			position_y  = ( position_y / MapDataMax ) * 700 + 30
 			/* Draw */
-			drawLine(ctx, [position[0] + tofleft * Math.cos(theta), position[1] + tofleft * Math.sin(theta)], [position[0] + tofleft * Math.cos(theta) + l * Math.sin(theta), position[1] + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
-			drawLine(ctx, [position[0] - tofright * Math.cos(theta), position[1] - tofright * Math.sin(theta)], [position[0] - tofright * Math.cos(theta) + l * Math.sin(theta), position[1] - tofright * Math.sin(theta) - l * Math.cos(theta)]);
+			drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
+			drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
 		}
 	}
 
@@ -605,7 +667,7 @@ const Replay = () => {
 					<input
 						type="range"
 						min="1"
-						max={SliderValueMax} // TODO: Change to number of entries in map table
+						max={SliderValueMax}
 						value={SliderValue}
 						className="SliderElement_Replay"
 						id="myRange"
