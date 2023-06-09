@@ -8,6 +8,7 @@ from json import loads
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
+global isSpinning, spinTime
 isSpinning = False
 spinTime = time()
 hostip = '54.175.40.130'
