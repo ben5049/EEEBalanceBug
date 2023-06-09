@@ -276,7 +276,8 @@ def findShortestPath():
         return make_response(jsonify({"error":"Incorrectly formatted request: missing SessionID or nickname"}), 400)
 
     for sid, node_x, node_y, children in cur:
-        tree[(node_x, node_y)] = [(float(x[0]), float(x[1])) for x in loads(children)]
+        print(sid, node_x, node_y, children)
+        tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
     
     print(tree, "tree")
 
@@ -312,17 +313,26 @@ def estop():
 def led_driver_red():
     data = request.get_json()
     print(data, "red")
-    return make_response(jsonify({"success":"received data", "switch":0}), 200)
+    if data["swR"]==1:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    else:
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
     data = request.get_json()
     print(data, "blue")
-    return make_response(jsonify({"success":"received data", "switch":0}), 200)
+    if data["swB"]==1:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    else:
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
     data = request.get_json()
     print(data, "yellow")
-    return make_response(jsonify({"success":"received data", "switch":0}), 200)
+    if data["swY"]==1:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    else:
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
