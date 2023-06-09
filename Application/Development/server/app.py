@@ -8,9 +8,7 @@ from json import loads
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
-global isSpinning, spinTime
-isSpinning = False
-spinTime = time()
+
 hostip = '54.175.40.130'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
@@ -28,6 +26,9 @@ except mariadb.Error as e:
 cur = conn.cursor()
 
 rovers = []
+
+isSpinning = False
+spinTime = time()
 
 @app.route("/")
 def hello():
@@ -288,13 +289,7 @@ def findShortestPath():
     if P is None:
         return make_response(jsonify({"error":"start point too far away from any given node"}), 400)
     print(P, "P")
-    # betterP = {}
-    # for key, value in P:
-    #     if value is not None:
-    #         betterP[key] = betterP[value]
-    #     else:
-    #         betterP[key] = 0
-    return make_response(jsonify({[0,0]:0, [100,0]:[0,0], [100,100]:[100,0], [50,50]:[0,0]}), 200) # for testing
+    return make_response(jsonify({"tree":"{[0,0]:0, [100,0]:[0,0], [100,100]:[100,0], [50,50]:[0,0]}"}), 200) # for testing
     return make_response(jsonify(betterP), 200)
 
 
