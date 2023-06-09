@@ -56,11 +56,48 @@ void FPGACam::setThresholds(uint32_t newThresholdR, uint32_t newThresholdY, uint
 }
 
 /* Get data */
-float FPGACam::getR() {
+bool FPGACam::getR() {
+  uint32_t countR = 0;
+  uint32_t sumR = 0;
+
+  _i2c->beginTransmission(_addr);
+  _i2c->write(FPGA_CAM_R_ADDR);
+  _i2c->endTransmission();
+
+  _i2c->requestFrom(FPGA_CAM_I2C_ADDR, 6);
+
+  // TODO: Add more error handling
+
+  if (_i2c->available()) {
+
+    /* Format countR from register values */
+    countR |= _i2c->read() << 11;
+    countR |= _i2c->read() << 3;
+    countR |= (_i2c->peek() & 0xE0) >> 5;
+
+    /* Format sumR from register values */
+    sumR |= (_i2c->read() & 0x03) << 24;
+    sumR |= _i2c->read() << 16;
+    sumR |= _i2c->read() << 8;
+    sumR |= _i2c->read();
+
+  } else {
+    return false;
+  }
+
+  /* Detect if beacon is present, if it is calculate its x coordinate */
+  if (countR >= thresholdR) {
+    averageRedX = sumR / countR;
+  } else {
+    averageRedX = 0xffff;
+  }
+
+  return true;
 }
-float FPGACam::getY() {
+
+bool FPGACam::getY() {
 }
-float FPGACam::getB() {
+bool FPGACam::getB() {
 }
 
 bool FPGACam::getRYB() {
@@ -75,66 +112,82 @@ bool FPGACam::getRYB() {
   _i2c->write(FPGA_CAM_R_ADDR);
   _i2c->endTransmission();
 
-  _i2c->requestFrom(FPGA_CAM_I2C_ADDR, 12);
+  _i2c->requestFrom(FPGA_CAM_I2C_ADDR, 18);
 
-  // TODO: Add more error handling
+  // TODO: ADD EXCEPTION TO WHILE LOOP
 
-  if (_i2c->available()) {
-
-    /* Format countR from register values */
-    countR |= _i2c->read() << 11;
-    countR |= _i2c->read() << 3;
-    countR |= (_i2c->read() & 0xE0) >> 5;
-
-    /* Format sumR from register values */
-    sumR |= (_i2c->read() & 0x03) << 24;
-    sumR |= _i2c->read() << 16;
-    sumR |= _i2c->read() << 8;
-    sumR |= _i2c->read();
-
-    /* Format countY from register values */
-    countY |= Wire.read() << 11;
-    countY |= Wire.read() << 3;
-    countY |= (Wire.read() & 0xE0) >> 5;
-
-    /* Format sumY from register values */
-    sumY |= (_i2c->read() & 0x03) << 24;
-    sumY |= _i2c->read() << 16;
-    sumY |= _i2c->read() << 8;
-    sumY |= _i2c->read();
-
-    /* Format countB from register values */
-    countB |= _i2c->read() << 11;
-    countB |= _i2c->read() << 3;
-    countB |= (_i2c->read() & 0xE0) >> 5;
-
-    /* Format sumB from register values */
-    sumB |= (_i2c->read() & 0x03) << 24;
-    sumB |= _i2c->read() << 16;
-    sumB |= _i2c->read() << 8;
-    sumB |= _i2c->read();
-  } else {
-    return false;
+  while (_i2c->available() != 18) {
+    delay(1);
   }
+
+  /* Format countR from register values */
+  countR |= _i2c->read() << 11;
+  countR |= _i2c->read() << 3;
+  countR |= (_i2c->peek() & 0xE0) >> 5;
+
+  /* Format sumR from register values */
+  sumR |= (_i2c->read() & 0x03) << 24;
+  sumR |= _i2c->read() << 16;
+  sumR |= _i2c->read() << 8;
+  sumR |= _i2c->read();
+
+  /* Format countY from register values */
+  countY |= _i2c->read() << 11;
+  countY |= _i2c->read() << 3;
+  countY |= (_i2c->peek() & 0xE0) >> 5;
+
+  /* Format sumY from register values */
+  sumY |= (_i2c->read() & 0x03) << 24;
+  sumY |= _i2c->read() << 16;
+  sumY |= _i2c->read() << 8;
+  sumY |= _i2c->read();
+
+  /* Format countB from register values */
+
+  countB |= _i2c->read() << 11;
+  countB |= _i2c->read() << 3;
+  countB |= (_i2c->peek() & 0xE0) >> 5;
+
+  /* Format sumB from register values */
+  sumB |= (_i2c->read() & 0x03) << 24;
+  sumB |= _i2c->read() << 16;
+  sumB |= _i2c->read() << 8;
+  sumB |= _i2c->read();
 
   /* Detect if beacon is present, if it is calculate its x coordinate */
+  // Serial.print("count: ");
+  // Serial.print(countR);
+  // Serial.print(",threshold: ");
+  // Serial.print(thresholdR);
+  // Serial.print(",sum: ");
+  // Serial.println(sumR);
   if (countR >= thresholdR) {
     averageRedX = sumR / countR;
-  } else{
+  } else {
     averageRedX = 0xffff;
   }
+
+  // Serial.print("count: ");
+  // Serial.print(countY);
+  // Serial.print(",threshold: ");
+  // Serial.print(thresholdY);
+  // Serial.print(",sum: ");
+  // Serial.println(sumY);
   if (countY >= thresholdY) {
     averageYellowX = sumY / countY;
-  } else{
+  } else {
     averageYellowX = 0xffff;
   }
+
+  // Serial.print("count: ");
+  // Serial.print(countB);
+  // Serial.print(",threshold: ");
+  // Serial.print(thresholdB);
+  // Serial.print(",sum: ");
+  // Serial.println(sumB);
   if (countB >= thresholdB) {
-    Serial.print("count: ");
-    Serial.print(countB);
-    Serial.print(",sum: ");
-    Serial.println(sumB);
     averageBlueX = sumB / countB;
-  } else{
+  } else {
     averageBlueX = 0xffff;
   }
 

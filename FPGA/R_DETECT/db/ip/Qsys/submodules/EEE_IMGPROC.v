@@ -194,12 +194,35 @@ reg [31:0] sum_blue;
 reg [23:0] count_red;
 reg [23:0] count_yellow;
 reg [23:0] count_blue;
+
 //reg [15:0] r_x_avg;
 //reg [15:0] y_x_avg;
 //reg [15:0] b_x_avg;
 
 always @(posedge clk) begin
-	if (in_valid) begin
+	
+	// If we are on the first pixel of the frame, reset all counters and sums
+	if (x == 11'b0 & y == 11'b0) begin
+		r_sum <= 32'b0;
+		y_sum <= 32'b0;
+		b_sum <= 32'b0;
+		r_count <= 24'b0;
+		y_count <= 24'b0;
+		b_count <= 24'b0;
+	end
+	
+	// If we are on the last pixel of the frame, send the data to the I2C registers
+	else if ((x == IMAGE_W-1) & (y == IMAGE_H-1)) begin
+		sum_red <= r_sum;
+		sum_yellow <= y_sum;
+		sum_blue <= b_sum;
+		count_red <= r_count;
+		count_yellow <= y_count;
+		count_blue <= b_count;
+	end
+	
+	// Otherwise count coloured pixels and their x coordinates
+	else if (in_valid) begin
 		if (red_detect) begin
 			r_sum <= r_sum + x;
 			r_count <= r_count + 1;
@@ -207,53 +230,15 @@ always @(posedge clk) begin
      if (yellow_detect) begin
 			y_sum <= y_sum + x;
 			y_count <= y_count + 1;
-     end
+		end
      if (blue_detect) begin
 			b_sum <= b_sum + x;
 			b_count <= b_count + 1;
-     end
-   end
-	 
-	if (sop & in_valid) begin
-		r_sum <= 1'b0;
-		y_sum <= 1'b0;
-		b_sum <= 1'b0;
-		r_count <= 1'b0;
-		y_count <= 1'b0;
-		b_count <= 1'b0;
-	end
-	 
+		end
+   end	 
 end
 
-always @(posedge clk) begin
-	if (x == 640 && y == 480) begin
-		sum_red <= r_sum;
-		sum_yellow <= y_sum;
-		sum_blue <= b_sum;
-		count_red <= r_count;
-		count_yellow <= y_count;
-		count_blue <= b_count;
-	end else begin
-		sum_red <= 1'b0;
-		sum_yellow <= 1'b0;
-		sum_blue <= 1'b0;
-	end
-end
-		
 
-//always @(posedge clk) begin
-//    if (x == 640 && y == 480) begin
-//        if (count_red > 19'd20 && count_red > count_yellow && count_red > count_blue)
-//            r_x_avg <= {5'b0, sum_red[10:0]} / count_red;
-//        if (count_yellow > 19'd20 && count_yellow > count_red && count_yellow > count_blue)
-//            y_x_avg <= {5'b0, sum_yellow[10:0]} / count_yellow;
-//        if (count_blue > 19'd20 && count_blue > count_red && count_blue > count_yellow)
-//            b_x_avg <= {5'b0, sum_blue[10:0]} / count_blue;
-//    end
-//end
-	
-
- 
 // Find first and last pixels for each colour detected
 reg [10:0] r_x_min, r_y_min, r_x_max, r_y_max;
 reg [10:0] y_x_min, y_y_min, y_x_max, y_y_max;

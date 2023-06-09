@@ -1,3 +1,4 @@
+#include "HardwareSerial.h"
 /*
 Authors: Ben Smith
 Date created: 30/05/23
@@ -100,44 +101,65 @@ void configureToF() {
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
   SERIAL_PORT.print("3: ");
   checkI2CBusMembers();
-  // if (!findI2CDevice(TOF_RIGHT_ADDRESS)) {
-  if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
-    while (true) {
-      SERIAL_PORT.println(F("Failed to boot right ToF sensor"));
-      delay(1000);
+  if (!findI2CDevice(TOF_RIGHT_ADDRESS)) {
+    if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
+      while (true) {
+        SERIAL_PORT.println(F("Failed to boot right ToF sensor"));
+        delay(1000);
+      }
+    } else {
+      tofRight.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+      tofRight.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+      tofRight.startMeasurement();
+      SERIAL_PORT.println("Right ToF sensor connected");
     }
-  } else {
-    tofRight.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
-    tofRight.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
-    tofRight.startMeasurement();
-    SERIAL_PORT.println("Right ToF sensor connected");
   }
-  // }
+  else{
+    SERIAL_PORT.println("Right ToF sensor already connected");
+  }
 
-
+  SERIAL_PORT.print("4: ");
+  checkI2CBusMembers();
 
   /* Close the first sensor's channel */
   I2CMux.closeChannel(TOF_RIGHT_CHANNEL);
 
+  SERIAL_PORT.print("5: ");
+  checkI2CBusMembers();
+
   /* Begin the second sensor if it isn't already connected */
   I2CMux.openChannel(TOF_LEFT_CHANNEL);
 
-  // if (!findI2CDevice(TOF_LEFT_ADDRESS)) {
-  if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
-    while (true) {
-      SERIAL_PORT.println(F("Failed to boot left ToF sensor"));
-      delay(1000);
+  SERIAL_PORT.print("6: ");
+  checkI2CBusMembers();
+
+  if (!findI2CDevice(TOF_LEFT_ADDRESS)) {
+    if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
+      while (true) {
+        SERIAL_PORT.println(F("Failed to boot left ToF sensor"));
+        delay(1000);
+      }
+    } else {
+      tofLeft.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+      tofLeft.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+      tofLeft.startMeasurement();
+      SERIAL_PORT.println("Left ToF sensor connected");
     }
-  } else {
-    tofLeft.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
-    tofLeft.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
-    tofLeft.startMeasurement();
-    SERIAL_PORT.println("Left ToF sensor connected");
   }
-  // }
+  else{
+    SERIAL_PORT.println("Left ToF sensor already connected");
+  }
+
+  SERIAL_PORT.print("7: ");
+  checkI2CBusMembers();
 
   /* Open all channels */
-  I2CMux.openAll();
+  // I2CMux.openAll();
+  I2CMux.openChannel(TOF_RIGHT_CHANNEL);
+  // I2CMux.openChannel(TOF_LEFT_CHANNEL);
+
+  SERIAL_PORT.print("8: ");
+  checkI2CBusMembers();
 }
 
 /* Reads data from two ToF sensors. Used for debugging  */
@@ -204,6 +226,8 @@ void taskToF(void *pvParameters) {
 
   (void)pvParameters;
 
+  uint8_t overThresholdCounter = 0;
+
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -233,14 +257,33 @@ void taskToF(void *pvParameters) {
       } else {
         // What to do if the range is invalid
       }
+
+      /* If we are at a junction while going forwards alert taskExecuteCommand */
+      if ((currentCommand == FORWARD) && ((distanceLeft >= THRESHOLD_DISTANCE) || (distanceRight >= THRESHOLD_DISTANCE))) {
+        overThresholdCounter += 1;
+
+        /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
+        if (overThresholdCounter >= THRESHOLD_COUNTER_MAX){
+
+          /* Notify taskExecuteCommand that a junction has been found */
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+        }
+      }
+      else{
+        overThresholdCounter = 0;
+      }
+
+      // Serial.print("Right: ");
+      // Serial.print(distanceRight);
+      // Serial.print(",Left: ");
+      // Serial.println(distanceLeft);
+
     }
 
-    /* Detect if we are at a junction and alert taskExecuteCommand */
-    if ((currentCommand == FORWARD) && ((distanceLeft >= THRESHOLD_DISTANCE) || (distanceRight >= THRESHOLD_DISTANCE))) {
+    /* IF we hit a wall while going forwards alert taskExecuteCommand */
+    if ((currentCommand == FORWARD) && (IRLeftCollision || IRLeftCollision)){
 
-      // TODO: Make detection more sophistocated
-
-      /* Notify taskExecuteCommand that a junction has been found */
+      /* Notify taskExecuteCommand that we have hit a wall */
       xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
     }
 

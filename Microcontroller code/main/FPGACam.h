@@ -37,9 +37,9 @@ public:
   void setThresholds(uint32_t newThresholdR = 50, uint32_t newThresholdY = 50, uint32_t newThresholdB = 50);
 
   /* Get data */
-  float getR(); // UNIMPLEMENTED
-  float getY(); // UNIMPLEMENTED
-  float getB(); // UNIMPLEMENTED
+  bool getR();
+  bool getY(); // UNIMPLEMENTED
+  bool getB(); // UNIMPLEMENTED
   bool getRYB();
 
 private:

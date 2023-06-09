@@ -141,7 +141,7 @@ void setup() {
     "TOF",          /* Text name for the task */
     10000,          /* Stack size in words, not bytes */
     nullptr,        /* Parameter passed into the task */
-    8,              /* Task priority */
+    9,              /* Task priority */
     &taskToFHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
@@ -190,40 +190,41 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
   // attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
   // attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
-  attachInterrupt(digitalPinToInterrupt(IR_R_INT), IRRightISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(IR_L_INT), IRLeftISR, CHANGE);
+  // attachInterrupt(digitalPinToInterrupt(IR_R_INT), IRRightISR, CHANGE);
+  // attachInterrupt(digitalPinToInterrupt(IR_L_INT), IRLeftISR, CHANGE);
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
 
-  if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
-    fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
-    SERIAL_PORT.println("FPGA camera initialised");
-  } else {
-    while (true) {
-      SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
-      delay(1000);
-    }
-  }
+  // if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
+  //   fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
+  //   SERIAL_PORT.println("FPGA camera initialised");
+  // } else {
+  //   while (true) {
+  //     SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
+  //     delay(1000);
+  //   }
+  // }
 
 }
 
 //--------------------------------- Loop -----------------------------------------------
 
 void loop() {
-  vTaskDelay(500);
-  // SERIAL_PORT.print("Pitch:");
-  // SERIAL_PORT.print(pitch);
-  // SERIAL_PORT.print(", Yaw:");
-  // SERIAL_PORT.println(yaw);
+  vTaskDelay(100);
+  SERIAL_PORT.print("Pitch:");
+  SERIAL_PORT.print(pitch);
+  SERIAL_PORT.print(", Yaw:");
+  SERIAL_PORT.println(yaw);
   // SERIAL_PORT.println("Sending start command");
   // robotCommand command = FIND_BEACONS;
   // xQueueSend(commandQueue, &command, 0);
   // vTaskDelay(25000);
   
 
-  fpga1.getRYB();
+  // fpga1.getRYB();
 
-  Serial.println(fpga1.averageBlueX);
-
+  // Serial.println(fpga1.averageRedX);
+  // Serial.println(fpga1.averageYellowX);
+  // Serial.println(fpga1.averageBlueX);
 
 }

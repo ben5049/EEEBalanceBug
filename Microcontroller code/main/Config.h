@@ -11,8 +11,8 @@ Pin assignments for Group 1's EEEBalanceBug
 
 #define USE_PCB_PINS true
 
-#define STEPS 1600 /* Steps per revolution */
-#define ROVER_WIDTH 159 /* Wheel-to-wheel width in mm*/
+#define STEPS 1600        /* Steps per revolution */
+#define ROVER_WIDTH 159   /* Wheel-to-wheel width in mm*/
 #define WHEEL_DIAMETER 40 /* Wheel diameter in mm*/
 #define MIN_RPM 10
 #define MAX_RPM 1000
@@ -22,11 +22,11 @@ Pin assignments for Group 1's EEEBalanceBug
 #define SPIN_LEFT true /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
 
 /* SPI & IMU */
-#define SPI_PORT SPI    /* Desired SPI port */
-#define SPI_FREQ 2000000 /* Override the default SPI frequency */
+#define SPI_PORT SPI     /* Desired SPI port */
+#define SPI_FREQ 500000 /* Override the default SPI frequency */
 #define IMU_SAMPLING_FREQUENCY_DMP 57.49
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500
-#define ENABLE_DMP false
+#define ENABLE_DMP true
 
 /* UART */
 #define SERIAL_PORT Serial
@@ -44,16 +44,16 @@ Pin assignments for Group 1's EEEBalanceBug
 
 /* I2C Mux channels */
 #if USE_PCB_PINS == true
-  #define TOF_RIGHT_CHANNEL 0
-  #define TOF_LEFT_CHANNEL 3
+#define TOF_RIGHT_CHANNEL 0
+#define TOF_LEFT_CHANNEL 3
 #else
-  #define TOF_RIGHT_CHANNEL 0
-  #define TOF_LEFT_CHANNEL 2
+#define TOF_RIGHT_CHANNEL 0
+#define TOF_LEFT_CHANNEL 2
 #endif
 
 #define TOF_SAMPLE_FREQUENCY 10 /* Max = 33Hz, default = 10Hz */
-#define THRESHOLD_DISTANCE 150 /* Threshold for what counts as a junction in mm*/
-
+#define THRESHOLD_DISTANCE 150  /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
+#define THRESHOLD_COUNTER_MAX 5 /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
 
 /* Spin task */
 #define TASK_SPIN_FREQUENCY 10
@@ -86,7 +86,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define ENABLE_DEBUG_TASK false
 
 #if ENABLE_DEBUG_TASK == true
-  #define CONFIG_FREERTOS_USE_TRACE_FACILITY
+#define CONFIG_FREERTOS_USE_TRACE_FACILITY
 #endif
 
 #endif

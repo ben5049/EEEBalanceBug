@@ -160,12 +160,12 @@ void configureIMU() {
 
 #endif
 
-  /* Start the magnetometer */
-  myICM.startupMagnetometer();
-  if (myICM.status != ICM_20948_Stat_Ok) {
-    SERIAL_PORT.print(F("startupMagnetometer returned: "));
-    SERIAL_PORT.println(myICM.statusString());
-  }
+  // /* Start the magnetometer */
+  // myICM.startupMagnetometer();
+  // if (myICM.status != ICM_20948_Stat_Ok) {
+  //   SERIAL_PORT.print(F("startupMagnetometer returned: "));
+  //   SERIAL_PORT.println(myICM.statusString());
+  // }
 
   /* Enable data ready interrupt */
   myICM.cfgIntActiveLow(true);
@@ -266,7 +266,7 @@ void taskIMU(void *pvParameters) {
         }
       }
 
-#endif
+#else
 
       /* Acquire latest sensor data */
       FusionVector gyroscope = { myICM.gyrX(), myICM.gyrY(), myICM.gyrZ() };
@@ -274,7 +274,7 @@ void taskIMU(void *pvParameters) {
       // FusionVector magnetometer = { myICM.magX(), myICM.magY(), myICM.magZ() };
 
       /* Update gyroscope offset correction algorithm */
-      gyroscope = FusionOffsetUpdate(&offset, gyroscope);
+      // gyroscope = FusionOffsetUpdate(&offset, gyroscope);
 
       /* Calculate delta time (in seconds) to account for gyroscope sample clock error */
       deltaTime = (float)(timestamp - previousTimestamp) / (float)1000000.0;
@@ -288,9 +288,10 @@ void taskIMU(void *pvParameters) {
       const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
       // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
 
-      // yaw = euler.angle.yaw;
-      // pitch = euler.angle.pitch;
+      yaw = euler.angle.yaw;
+      pitch = euler.angle.pitch;
       angularVelocity = myICM.gyrY();
+#endif
     }
   }
 }
