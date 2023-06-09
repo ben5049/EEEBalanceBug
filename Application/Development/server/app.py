@@ -289,7 +289,7 @@ def findShortestPath():
     if P is None:
         return make_response(jsonify({"error":"start point too far away from any given node"}), 400)
     print(P, "P")
-    return make_response(jsonify({"tree":"{[0,0]:0, [100,0]:[0,0], [100,100]:[100,0], [50,50]:[0,0]}"}), 200) # for testing
+    return make_response(jsonify({"tree":"{(0,0):0, (100,0):(0,0), (100,100]):(100,0), (50,50):(0,0)}"}), 200) # for testing
     return make_response(jsonify(betterP), 200)
 
 

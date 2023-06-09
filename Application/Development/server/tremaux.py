@@ -71,15 +71,16 @@ class Rover():
             return False
     
     # these all update toreturn, which gives the actual things the rover will do
-    
+    # step - 0, spin - 1, angle - 2, idle - 3, update position - 4, done - 5
     def step_forward(self):
-        self.toreturn.append("step")
+        self.toreturn.append(0) 
     
     def spin(self):
-        self.toreturn.append("spin")
+        self.toreturn.append(1)
     
     def setAngle(self, angle):
-        self.toreturn.append("angle " + str(angle))
+        self.toreturn.append(2)
+        self.toreturn.append(float(angle))
     
     def go_back(self, node, orientation):
         self.setAngle(orientation+180)
@@ -88,15 +89,17 @@ class Rover():
         
     
     def idle(self):
-        self.toreturn.append("idle")
+        self.toreturn.append(3)
     
     def updatePos(self, newx, newy):
-        self.toreturn.append("update position " + str(newx) + " " + str(newy))
+        self.toreturn.append(4)
+        self.toreturn.append(float(newx))
+        self.toreturn.append(float(newy))
 
 
     def tremaux(self, position, whereat, potentialbranches, beaconangles, orientation):
         if self.pause:
-            return ["idle"]
+            return [3]
         if self.toreturn[0] == -1:
             self.step_forward()
             self.toreturn.pop(0)
@@ -174,7 +177,7 @@ class Rover():
                 if not self.thresholding(position, currentAction[1].position):
                     self.actions = [[7, currentAction[1]]] + self.actions
         else:
-            self.toreturn.append("DONE")
+            self.toreturn.append(5)
 
         return self.toreturn
 
