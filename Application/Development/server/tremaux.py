@@ -107,7 +107,7 @@ class Rover():
             currentAction = self.actions.pop(0)
             if currentAction == 1:
                 if whereat == 0:
-                    if position not in [nodes.position for nodes in self.tree]:
+                    if True not in [self.thresholding(nodes.position, position) for nodes in self.tree]:
                         n = Node(position)
                         self.tree[n] = []
                         self.tree[self.priornode].append(n)
@@ -118,16 +118,16 @@ class Rover():
                             self.step_forward()
                     else:
                         for node in self.tree:
-                            if node.position == position:
+                            if self.thresholding(node.position, position):
                                 node.visit()
                         self.actions = [[4, self.priornode]] + self.actions
                 elif whereat == 1:
-                    if position not in [nodes.position for nodes in self.tree]:
+                    if True not in [self.thresholding(nodes.position, position) for nodes in self.tree]:
                         self.actions = [2] + self.actions
                         self.idle()
                     else:
                         for node in self.tree:
-                            if node.position == position:
+                            if self.thresholding(node.position, position):
                                 node.visit()
                         self.actions= [[4,self.priornode]] + self.actions
                 elif whereat == 2:
@@ -144,9 +144,9 @@ class Rover():
                 self.actions = [3] + self.actions
                 self.spin()
             elif currentAction == 3:
-                if position in [nodes.position for nodes in self.tree]:
+                if True in [self.thresholding(nodes.position, position) for nodes in self.tree]:
                     for node in self.tree:
-                        if node.position == position:
+                        if self.thresholding(node.position, position):
                             node.visit()
                     self.actions = [[4, self.priornode]] + self.actions
                 else:
@@ -171,7 +171,7 @@ class Rover():
                 self.setAngle(currentAction[1], position)
                 self.step_forward()
             elif currentAction[0] == 7:
-                if position != currentAction[1].position:
+                if not self.thresholding(position, currentAction[1].position):
                     self.actions = [[7, currentAction[1]]] + self.actions
         else:
             self.toreturn.append("DONE")

@@ -3,10 +3,12 @@ from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
 from time import time
+from json import loads
 # TODO: error handling
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
+TIMEOUT = 30
 
 hostip = '54.175.40.130'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
@@ -71,9 +73,16 @@ def rover():
     resp["clear_queue"] = r.estop 
     
     # store positions and timestamp in database
+    # also store tree in database if rover is done
     try:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
+        if "DONE" in resp["next_actions"]:
+            for node in r.tree:
+                neighbours = []
+                for neighbour in r.tree[node]:
+                    neighbours.append(str(neighbour))
+                cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (r.sessionId, node.position[0], node.position[1], str(neighbours)))
     except mariadb.Error as e:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     # cur.execute("SELECT * FROM Rovers")
@@ -96,7 +105,7 @@ def allrovers():
     d = []
     disallowedMacs = []
     for rover in rovers:
-        if time()-rover.lastSeen > 30:
+        if time()-rover.lastSeen > TIMEOUT:
             rovers.remove(rover)
     
     for rover in rovers:
@@ -252,19 +261,22 @@ def addnickname():
 def findShortestPath():
     data = request.get_json()
     try:
-        mac = data["MAC"]
+        sessionid = data["sessionid"]
         start_x = data["start_x"]
         start_y = data["start_y"]
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC or start"}), 400)
-    tree = 0
-    flag = True
-    for rover in rovers:
-        if rover.name == mac:
-            tree = rover.tree
-            flag= False
-    if flag:
-        return make_response(jsonify({"error":"Incorrectly formatted request: invalid MAC address"}), 400)
+    tree = {}
+    try:
+        cur.execute("SELECT * FROM Trees WHERE SessionID=? ", (sessionid,))
+    except:
+        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
+    if cur in None:
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing SessionID or nickname"}), 400)
+
+    for sid, node_x, node_y, children in cur:
+        tree[(node_x, node_y)] = [(float(x[0]), float(x[1])) for x in loads(children)]
+
     P = dijkstra.dijkstra(tree, [start_x, start_y])
     betterP = {}
     for key, value in P:
