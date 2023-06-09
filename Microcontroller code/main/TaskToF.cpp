@@ -20,6 +20,9 @@ Code to initialise and sample the time of flight sensors
 #include "TCA9548A.h"
 #include "Adafruit_VL53L0X.h"
 
+/* Personal libraries */
+#include "src/FIRFilter.h"
+
 //-------------------------------- Global Variables -------------------------------------
 
 /* Time of flight (ToF) sensors */
@@ -32,6 +35,10 @@ static VL53L0X_RangingMeasurementData_t measureLeft;
 
 /* I2C multiplexer */
 static TCA9548A I2CMux;
+
+/* FIR Filters */
+static rightFIR FIRFilter;
+static leftFIR FIRFilter;
 
 /* Variables */
 static volatile bool rightToFDataReady = false;
@@ -160,6 +167,9 @@ void configureToF() {
 
   SERIAL_PORT.print("8: ");
   checkI2CBusMembers();
+
+  
+
 }
 
 /* Reads data from two ToF sensors. Used for debugging  */

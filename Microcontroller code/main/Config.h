@@ -51,7 +51,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TOF_LEFT_CHANNEL 2
 #endif
 
-#define TOF_SAMPLE_FREQUENCY 10 /* Max = 33Hz, default = 10Hz */
+#define TOF_SAMPLE_FREQUENCY 20 /* Max = 33Hz, default = 10Hz */
 #define THRESHOLD_DISTANCE 150  /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
 #define THRESHOLD_COUNTER_MAX 5 /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
 
