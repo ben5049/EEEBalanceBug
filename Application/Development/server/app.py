@@ -286,12 +286,13 @@ def findShortestPath():
     P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
     if P is None:
         return make_response(jsonify({"error":"start point too far away from any given node"}), 400)
-    betterP = {}
-    for key, value in P:
-        if value is not None:
-            betterP[key] = betterP[value]
-        else:
-            betterP[key] = 0
+    print(P, "P")
+    # betterP = {}
+    # for key, value in P:
+    #     if value is not None:
+    #         betterP[key] = betterP[value]
+    #     else:
+    #         betterP[key] = 0
     return make_response(jsonify({[0,0]:0, [100,0]:[0,0], [100,100]:[100,0], [50,50]:[0,0]}), 200) # for testing
     return make_response(jsonify(betterP), 200)
 
