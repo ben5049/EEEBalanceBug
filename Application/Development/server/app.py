@@ -306,19 +306,19 @@ def estop():
     return make_response(jsonify({"success":"estopped"}))
 
 @app.route("/led_driver/red", methods=["POST"])
-def led_driver():
+def led_driver_red():
     data = request.get_json()
     print(data, "red")
     return make_response(jsonify({"success":"received data", "switch":1}), 200)
 
 @app.route("/led_driver/blue", methods=["POST"])
-def led_driver():
+def led_driver_blue():
     data = request.get_json()
     print(data, "blue")
     return make_response(jsonify({"success":"received data", "switch":1}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
-def led_driver():
+def led_driver_yellow():
     data = request.get_json()
     print(data, "yellow")
     return make_response(jsonify({"success":"received data", "switch":1}), 200)
