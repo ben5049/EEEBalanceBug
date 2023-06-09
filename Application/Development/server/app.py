@@ -340,4 +340,17 @@ def led_driver_yellow():
     else:
         isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
+    
 
+#---------------------ERROR HANDLING------------------------#
+@app.errorhandler(400)
+def bad_request(e):
+    return make_response(jsonify({"error":str(e)}), 400)
+
+@app.errorhandler(404)
+def not_found(e):
+    return make_response(jsonify({"error":str(e)}), 404)
+
+@app.errorhandler(500)
+def bad_request(e):
+    return make_response(jsonify({"error":str(e)}), 500)
