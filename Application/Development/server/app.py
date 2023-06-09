@@ -271,7 +271,7 @@ def findShortestPath():
         cur.execute("SELECT * FROM Trees WHERE SessionID=? ", (sessionid,))
     except:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
-    if cur in None:
+    if cur is None:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing SessionID or nickname"}), 400)
 
     for sid, node_x, node_y, children in cur:
