@@ -9,7 +9,7 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
 
-hostip = '54.175.40.130'
+hostip = '34.205.64.125'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -38,6 +38,7 @@ def hello():
 @app.route("/rover", methods=["POST"])
 def rover():
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
+    print(data)
     r = 0
     flag = True
     for rover in rovers:
@@ -289,7 +290,7 @@ def findShortestPath():
     if P is None:
         return make_response(jsonify({"error":"start point too far away from any given node"}), 400)
     print(P, "P")
-    return make_response(jsonify({"tree":"{[0,0]:0, [100,0]:[0,0], [100,100]:[100,0], [50,50]:[0,0]}"}), 200) # for testing
+    return make_response(jsonify({"tree":"{(0,0):0, (100,0):(0,0), (100,100]):(100,0), (50,50):(0,0)}"}), 200) # for testing
     return make_response(jsonify(betterP), 200)
 
 
