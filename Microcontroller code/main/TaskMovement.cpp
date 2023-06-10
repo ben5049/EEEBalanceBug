@@ -16,6 +16,7 @@ volatile static bool stepperLeftDirection = true;
 volatile static bool stepperRightDirection = true;
 volatile int32_t stepperLeftSteps = 0;
 volatile int32_t stepperRightSteps = 0;
+float maxAccel = MAX_ACCEL;
 
 /* Robot Speed Variables */
 static float robotLinearDPS = 0;
@@ -25,9 +26,10 @@ volatile static float robotFilteredLinearDPS = 0;
 volatile float angleKp = KP_ANGLE;
 volatile float angleKi = KI_ANGLE;
 volatile float angleKd = KD_ANGLE;
-static float angleOffset = 0;
+static float angleOffset = ANGLE_OFFSET;
 static float angleSetpoint = 0;
 static float motorSetpoint = 0;
+static float motorSpeed = 0;
 static float angleCumError = 0;
 static float anglePrevError = 0;
 static float angleLastTime = millis();
@@ -48,10 +50,57 @@ TaskHandle_t taskMovementHandle = nullptr;
 /* Hardware timers */
 hw_timer_t* motorTimer = NULL;
 
+/* Autotuning Variables */
+bool angleTuned = true;
+
+
 
 
 
 //-------------------------------- Functions --------------------------------------------
+
+/* PID Autotuning */
+void autoTuneAngle(){
+    double loopInterval = 20000;
+    PIDAutotuner tuner = PIDAutotuner();
+    tuner.setTargetInputValue(angleOffset);
+    tuner.setLoopInterval(loopInterval);
+    tuner.setOutputRange(-MAX_DPS, MAX_DPS);
+    tuner.setZNMode(PIDAutotuner::ZNModeBasicPID);
+    tuner.startTuningLoop(micros());
+    long microseconds;
+    if(CONTROL_DEBUG){
+      Serial.println("Starting Autotuning!");
+    }
+    while (!tuner.isFinished()) {
+
+        long prevMicroseconds = microseconds;
+        microseconds = micros();
+
+        double input = pitch;
+
+        double output = tuner.tunePID(input, microseconds);
+
+        motorSetDPS(output);
+
+        while (micros() - microseconds < loopInterval) delayMicroseconds(1);
+    }
+
+    motorSetDPS(0);
+    angleKp = tuner.getKp();
+    angleKi = tuner.getKi();
+    angleKd = tuner.getKd();
+    if(CONTROL_DEBUG){
+    Serial.println("Autotuning finished with values:");
+    Serial.print("Kp: ");
+    Serial.println(angleKp);
+    Serial.print("Ki: ");
+    Serial.println(angleKi);
+    Serial.print("Kd: ");
+    Serial.println(angleKd);
+    }
+    angleTuned = true;
+}
 
 /* Main PID function */
 float PID(float setpoint, float input, float& cumError, float& prevError, float lastTime, float Kp, float Ki, float Kd) {
@@ -71,22 +120,70 @@ float PID(float setpoint, float input, float& cumError, float& prevError, float 
 
 /* Sent Debug Messages */
 void debug(){
+  Serial.println("/*");
+  /* Angle Control Messages */
   Serial.print("Pitch:");
-  Serial.println(pitch);
-  Serial.print(",motorSetpoint:");
-  Serial.println(motorSetpoint);
-  Serial.print(",robotFilteredLinearDPS:");
-  Serial.println(robotFilteredLinearDPS);
-  Serial.print(",Max:");
-  Serial.println(300);
-  Serial.print(",Min:");
-  Serial.println(-300);
+  Serial.print(pitch);
+  Serial.println(",");
+  Serial.print("motorSetpoint:");
+  Serial.print(motorSetpoint);
+  Serial.println(",");
+  Serial.print("robotFilteredLinearDPS:");
+  Serial.print(robotFilteredLinearDPS);
+  Serial.println(",");
+  Serial.print("Max1:");
+  Serial.print(300);
+  Serial.println(",");
+  Serial.print("Min1:");
+  Serial.print(-300);
+  Serial.println(",");
+  Serial.print("PitchError:");
+  Serial.print(angleSetpoint-pitch);
+  Serial.println(",");
+
+  /* Speed Control Messages */
+  Serial.print("Speed:");
+  Serial.print((robotFilteredLinearDPS/360)*3.14*0.091);
+  Serial.println(",");
+  Serial.print("angleSetpoint:");
+  Serial.print(angleSetpoint-MAX_ANGLE);
+  Serial.println(",");
+  Serial.println(",");
+  Serial.print("Max2:");
+  Serial.print(10);
+  Serial.println(",");
+  Serial.print("Min2:");
+  Serial.print(-10);
+  Serial.println(",");
+  Serial.print("speedError:");
+  Serial.print(0-robotFilteredLinearDPS);
+  Serial.println(",");
+
+  /* Battery Voltage */
+  Serial.print("VBat:");
+  Serial.print(analogRead(VBAT)*4*3.3*1.1/4096);
+  Serial.println(",");
+
+
+  Serial.println("*/");
 }
 
 /* Update the timer to step the motors at the specified RPM */
 void motorSetDPS(float DPS) {
+  float microsBetweenSteps;
+  if((DPS - motorSpeed)>maxAccel){
+    // Serial.println("ACCEL TOO FAST");
+    DPS = motorSpeed + maxAccel;
+  }else if ((DPS - motorSpeed) < (-maxAccel)){
+    // Serial.println("ACCEL TOO FAST");
+    DPS = motorSpeed - maxAccel;;
+  }
 
-  float microsBetweenSteps = 360 * 1000000 / (STEPS * abs(DPS));  // microseconds
+  if(DPS==0){
+    microsBetweenSteps = FLT_MAX; 
+  }else{
+    microsBetweenSteps = 360 * 1000000 / (STEPS * abs(DPS));  // microseconds
+  }
 
   if (DPS > 0) {
     digitalWrite(STEPPER_R_DIR, LOW);
@@ -101,7 +198,7 @@ void motorSetDPS(float DPS) {
   } else {
     return;
   }
-
+  motorSpeed = DPS;
   timerAlarmWrite(motorTimer, microsBetweenSteps, true);
   timerAlarmEnable(motorTimer);
 }
@@ -143,23 +240,28 @@ void taskMovement(void* pvParameters) {
   while (true) {
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    
+    /*Autotuning*/
+    while(!angleTuned){
+      autoTuneAngle();
+    }
 
     /* Calculate Robot Actual Speed */
-    robotLinearDPS = -motorSetpoint + angularVelocity;
+    robotLinearDPS = -motorSpeed + angularVelocity;
     robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
 
     /* Angle Loop */
     
-    motorSetpoint = PID(0, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+    motorSetpoint = PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
     angleLastTime = millis();
-    motorSetpoint = constrain(motorSetpoint, -MAX_DPS, MAX_DPS);
-    motorSetDPS(-motorSetpoint);
+    motorSetpoint = constrain(motorSetpoint, -200, 200);
+    motorSetDPS(motorSetpoint);
 
     /* Speed Loop */
 
     angleSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, KP_SPEED, KI_SPEED, KD_SPEED);
     speedLastTime = millis();
-    angleSetpoint = constrain(angleSetpoint, -MAX_ANGLE, MAX_ANGLE);
+    angleSetpoint = constrain(angleSetpoint, angleOffset-MAX_ANGLE, angleOffset+MAX_ANGLE);
 
     if(CONTROL_DEBUG){
       debug();
