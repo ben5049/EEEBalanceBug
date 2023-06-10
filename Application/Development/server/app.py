@@ -9,7 +9,7 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
 
-hostip = '54.208.81.89'
+hostip = '18.233.159.49'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -284,14 +284,16 @@ def findShortestPath():
     for sid, node_x, node_y, children in cur:
         tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
     
+    tree = dijkstra.assertValid(tree)
     print(tree, "tree")
 
     P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
+
     if P is None:
         return make_response(jsonify({"error":"start point too far away from any given node"}), 400)
     print(P, "P")
-    return make_response(jsonify({"tree":"{(0,0):0, (100,0):(0,0), (100,100]):(100,0), (50,50):(0,0)}"}), 200) # for testing
-    return make_response(jsonify(betterP), 200)
+    P = dijkstra.formatPredecessor(P)
+    return make_response(jsonify(P), 200) # for testing
 
 
 @app.route("/client/estop", methods=["POST"])

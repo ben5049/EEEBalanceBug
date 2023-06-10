@@ -57,24 +57,45 @@ def dijkstra(graph, startPos):
     
     return P
 
+def formatPredecessor(P):
+    d = {}
+    i=0
+    for key in P:
+        d[i] = {"mapsto":-1, "xcoord":key[0], "ycoord":key[1]}
+        i+=1
+    print("\n")
+    print(d)
+    for key in P:
+        pred = P[key] #pred is (0,0), (100,0)
+        prednode = -1
+        for node in d:
+            if pred is None:
+                pass
+            elif d[node]["xcoord"] == pred[0] and d[node]["ycoord"] == pred[1]:
+                prednode = node
+        for node in d:
+            if key[0] == d[node]["xcoord"] and key[1]==d[node]["ycoord"]:
+                d[node]["mapsto"] = prednode
+    
+    return d
+    
+        
 
-"""
-Some tester code, if needed for debugging
-a = Node((0,0)) 
-b = Node((3,0)) 
-c = Node((7,0)) 
-d = Node((2.969,7.429)) 
-e = Node((5,-1)) 
+    # d = {0:{mapsto:-1, xcoord:0, ycoord:0}, 1:{mapsto:0, xcoord:100, ycoord:0}, 2:{mapsto:1, xcoord:100, ycoord:100}, 3:{mapsto:0, xcoord:50, ycoord:50}}
+
+
+
+# Some tester code, if needed for debugging
 
 graph = {
-    a:[b,c,d],
-    b:[a,e,c],
-    c: [a,b,e,d],
-    d:[a,c],
-    e:[b,c]
+    (0,0):[(100,0),(50,50)],
+    (50,50):[(0,0)],
+    (100,0): [(0,0),(100,100)],
+    (100,100):[(100,0)],
 }
 
 graph = assertValid(graph)
-P = dijkstra(graph, b)
-print([str(i.position) + ":" + str(P[i]) for i in P])
-"""
+P = dijkstra(graph, (3,0))
+print(P)
+P = formatPredecessor(P)
+print(P)
