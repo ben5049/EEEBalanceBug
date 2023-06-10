@@ -26,6 +26,7 @@ Task to detect junctions and beacons while robot is spinning
 /* Task handles */
 TaskHandle_t taskSpinHandle = nullptr;
 
+/* FPGA Camera object */
 FPGACam fpga;
 
 //-------------------------------- Functions --------------------------------------------
@@ -98,6 +99,17 @@ void taskSpin(void *pvParameters) {
   static float rightRisingEdgeAngle;
   static float leftRisingEdgeAngle;
 
+  /* Beacon detection */
+  static int16_t redBeaconDistanceToCentre;
+  static int16_t yellowBeaconDistanceToCentre;
+  static int16_t blueBeaconDistanceToCentre;
+  static int16_t redBeaconClosestDistanceToCentre;
+  static int16_t yellowBeaconClosestDistanceToCentre;
+  static int16_t blueBeaconClosestDistanceToCentre;
+  static float redBeaconAngle;
+  static float yellowBeaconAngle;
+  static float blueBeaconAngle;
+
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TASK_SPIN_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -122,14 +134,44 @@ void taskSpin(void *pvParameters) {
 
       rightJunctionCounter = 0;
       leftJunctionCounter = 0;
+
+      redBeaconClosestDistanceToCentre = 0x7fff;
+      yellowBeaconClosestDistanceToCentre = 0x7fff;
+      blueBeaconClosestDistanceToCentre = 0x7fff;
     }
 
     /* If task is incomplete, execute the task at its set frequency */
     else {
       vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-      /* TODO: Poll FPGA to get x coordinate of each colour on the screen */
-      /* TODO: Implement detection to get closest angle of each colour to centre of screen */
+#if ENABLE_FPGA_CAMERA == true
+      /* Poll FPGA to get x coordinate of each colour from the frame */
+      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
+        fpga.getRYB();
+        xSemaphoreGive(mutexI2C);
+
+        /* If the current position of the red beacon is closer to the centre of the frame than any previous position of the red beacon, record the distance from the centre and the yaw */
+        redBeaconDistanceToCentre = abs(fpga.averageRedX - FPGA_IMAGE_WIDTH / 2);
+        if (redBeaconDistanceToCentre < redBeaconClosestDistanceToCentre) {
+          redBeaconClosestDistanceToCentre = redBeaconDistanceToCentre;
+          redBeaconAngle = yaw;
+        }
+
+        /* If the current position of the yellow beacon is closer to the centre of the frame than any previous position of the yellow beacon, record the distance from the centre and the yaw */
+        yellowBeaconDistanceToCentre = abs(fpga.averageYellowX - FPGA_IMAGE_WIDTH / 2);
+        if (yellowBeaconDistanceToCentre < yellowBeaconClosestDistanceToCentre) {
+          yellowBeaconClosestDistanceToCentre = yellowBeaconDistanceToCentre;
+          yellowBeaconAngle = yaw;
+        }
+
+        /* If the current position of the blue beacon is closer to the centre of the frame than any previous position of the blue beacon, record the distance from the centre and the yaw */
+        blueBeaconDistanceToCentre = abs(fpga.averageBlueX - FPGA_IMAGE_WIDTH / 2);
+        if (blueBeaconDistanceToCentre < blueBeaconClosestDistanceToCentre) {
+          blueBeaconClosestDistanceToCentre = blueBeaconDistanceToCentre;
+          blueBeaconAngle = yaw;
+        }
+      }
+#endif
 
       /* Swap from first half to second half */
 #if SPIN_LEFT == true
@@ -238,6 +280,12 @@ void taskSpin(void *pvParameters) {
 
         /* Make sure the robot was in the second half of the turn when it was completed (not necessary, just in case) */
         if (!firstHalf) {
+          
+          /* Send beacon angles back in a queue */ 
+          xQueueReset(beaconAngleQueue);
+          xQueueSend(beaconAngleQueue, &redBeaconAngle, 0);
+          xQueueSend(beaconAngleQueue, &yellowBeaconAngle, 0);
+          xQueueSend(beaconAngleQueue, &blueBeaconAngle, 0);
 
           /* Logic if there was a junction at the start of right and end of left */
           if (rightJunctionAtStart) {
