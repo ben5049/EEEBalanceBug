@@ -23,12 +23,12 @@ class FPGACam {
 public:
 
   /* Width of the camera output image in pixels */
-  const uint16_t maximumX = 640;
+  const int16_t maximumX = 640;
 
   /* 16 bit ingegers to store the average x coordinates of the coloured pixels on the screen */
-  uint16_t averageRedX;
-  uint16_t averageYellowX;
-  uint16_t averageBlueX;
+  int16_t averageRedX;
+  int16_t averageYellowX;
+  int16_t averageBlueX;
 
   /* Initialise class */
   bool begin(uint8_t i2c_addr = FPGA_CAM_I2C_ADDR, TwoWire &wirePort = Wire, bool debug = false);
@@ -38,8 +38,8 @@ public:
 
   /* Get data */
   bool getR();
-  bool getY(); // UNIMPLEMENTED
-  bool getB(); // UNIMPLEMENTED
+  bool getY();
+  bool getB();
   bool getRYB();
 
 private:

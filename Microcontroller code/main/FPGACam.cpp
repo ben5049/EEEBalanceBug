@@ -60,15 +60,13 @@ bool FPGACam::getR() {
   uint32_t countR = 0;
   uint32_t sumR = 0;
 
+  /* Begin the transmission and request 6 bytes starting from register FPGA_CAM_R_ADDR */
   _i2c->beginTransmission(_addr);
   _i2c->write(FPGA_CAM_R_ADDR);
   _i2c->endTransmission();
-
   _i2c->requestFrom(FPGA_CAM_I2C_ADDR, 6);
 
-  // TODO: Add more error handling
-
-  if (_i2c->available()) {
+  if (_i2c->available() == 6) {
 
     /* Format countR from register values */
     countR |= _i2c->read() << 11;
@@ -89,15 +87,84 @@ bool FPGACam::getR() {
   if (countR >= thresholdR) {
     averageRedX = sumR / countR;
   } else {
-    averageRedX = 0xffff;
+    averageRedX = 0x7fff;
   }
 
   return true;
 }
 
 bool FPGACam::getY() {
+  uint32_t countY = 0;
+  uint32_t sumY = 0;
+
+  /* Begin the transmission and request 6 bytes starting from register FPGA_CAM_Y_ADDR */
+  _i2c->beginTransmission(_addr);
+  _i2c->write(FPGA_CAM_Y_ADDR);
+  _i2c->endTransmission();
+  _i2c->requestFrom(FPGA_CAM_I2C_ADDR, 6);
+
+  if (_i2c->available() == 6) {
+
+    /* Format countY from register values */
+    countY |= _i2c->read() << 11;
+    countY |= _i2c->read() << 3;
+    countY |= (_i2c->peek() & 0xE0) >> 5;
+
+    /* Format sumY from register values */
+    sumY |= (_i2c->read() & 0x03) << 24;
+    sumY |= _i2c->read() << 16;
+    sumY |= _i2c->read() << 8;
+    sumY |= _i2c->read();
+
+  } else {
+    return false;
+  }
+
+  /* Detect if beacon is present, if it is calculate its x coordinate */
+  if (countY >= thresholdY) {
+    averageYellowX = sumY / countY;
+  } else {
+    averageYellowX = 0x7fff;
+  }
+
+  return true;
 }
+
 bool FPGACam::getB() {
+  uint32_t countB = 0;
+  uint32_t sumB = 0;
+
+  /* Begin the transmission and request 6 bytes starting from register FPGA_CAM_B_ADDR */
+  _i2c->beginTransmission(_addr);
+  _i2c->write(FPGA_CAM_B_ADDR);
+  _i2c->endTransmission();
+  _i2c->requestFrom(FPGA_CAM_I2C_ADDR, 6);
+
+  if (_i2c->available() == 6) {
+
+    /* Format countR from register values */
+    countB |= _i2c->read() << 11;
+    countB |= _i2c->read() << 3;
+    countB |= (_i2c->peek() & 0xE0) >> 5;
+
+    /* Format sumR from register values */
+    sumB |= (_i2c->read() & 0x03) << 24;
+    sumB |= _i2c->read() << 16;
+    sumB |= _i2c->read() << 8;
+    sumB |= _i2c->read();
+
+  } else {
+    return false;
+  }
+
+  /* Detect if beacon is present, if it is calculate its x coordinate */
+  if (countB >= thresholdB) {
+    averageBlueX = sumB / countB;
+  } else {
+    averageBlueX = 0x7fff;
+  }
+
+  return true;
 }
 
 bool FPGACam::getRYB() {
@@ -164,7 +231,7 @@ bool FPGACam::getRYB() {
   if (countR >= thresholdR) {
     averageRedX = sumR / countR;
   } else {
-    averageRedX = 0xffff;
+    averageRedX = 0x7fff;
   }
 
   Serial.print("count: ");
@@ -176,7 +243,7 @@ bool FPGACam::getRYB() {
   if (countY >= thresholdY) {
     averageYellowX = sumY / countY;
   } else {
-    averageYellowX = 0xffff;
+    averageYellowX = 0x7fff;
   }
 
   Serial.print("count: ");
@@ -188,7 +255,7 @@ bool FPGACam::getRYB() {
   if (countB >= thresholdB) {
     averageBlueX = sumB / countB;
   } else {
-    averageBlueX = 0xffff;
+    averageBlueX = 0x7fff;
   }
 
   return true;
