@@ -87,15 +87,15 @@ def formatPredecessor(P):
 
 # Some tester code, if needed for debugging
 
-graph = {
-    (0,0):[(100,0),(50,50)],
-    (50,50):[(0,0)],
-    (100,0): [(0,0),(100,100)],
-    (100,100):[(100,0)],
-}
+# graph = {
+#     (0,0):[(100,0),(50,50)],
+#     (50,50):[(0,0)],
+#     (100,0): [(0,0),(100,100)],
+#     (100,100):[(100,0)],
+# }
 
-graph = assertValid(graph)
-P = dijkstra(graph, (3,0))
-print(P)
-P = formatPredecessor(P)
-print(P)
+# graph = assertValid(graph)
+# P = dijkstra(graph, (3,0))
+# print(P)
+# P = formatPredecessor(P)
+# print(P)
