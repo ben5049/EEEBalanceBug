@@ -1,3 +1,5 @@
+/* Integrated into front end */
+
 function drawLine(ctx, begin, end, stroke = 'black', width = 1) {
     if (stroke) {
         ctx.strokeStyle = stroke;
