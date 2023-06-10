@@ -37,10 +37,10 @@ public:
   void setThresholds(uint32_t newThresholdR = 50, uint32_t newThresholdY = 50, uint32_t newThresholdB = 50);
 
   /* Get data */
-  bool getR();
-  bool getY();
-  bool getB();
-  bool getRYB();
+  bool getR(bool debug = false);
+  bool getY(bool debug = false);
+  bool getB(bool debug = false);
+  bool getRYB(bool debug = false);
 
 private:
 

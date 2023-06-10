@@ -56,7 +56,7 @@ void FPGACam::setThresholds(uint32_t newThresholdR, uint32_t newThresholdY, uint
 }
 
 /* Get data */
-bool FPGACam::getR() {
+bool FPGACam::getR(bool debug) {
   uint32_t countR = 0;
   uint32_t sumR = 0;
 
@@ -93,7 +93,7 @@ bool FPGACam::getR() {
   return true;
 }
 
-bool FPGACam::getY() {
+bool FPGACam::getY(bool debug) {
   uint32_t countY = 0;
   uint32_t sumY = 0;
 
@@ -130,7 +130,7 @@ bool FPGACam::getY() {
   return true;
 }
 
-bool FPGACam::getB() {
+bool FPGACam::getB(bool debug) {
   uint32_t countB = 0;
   uint32_t sumB = 0;
 
@@ -167,7 +167,7 @@ bool FPGACam::getB() {
   return true;
 }
 
-bool FPGACam::getRYB() {
+bool FPGACam::getRYB(bool debug) {
   uint32_t countR = 0;
   uint32_t countY = 0;
   uint32_t countB = 0;
@@ -222,41 +222,44 @@ bool FPGACam::getRYB() {
   sumB |= _i2c->read();
 
   /* Detect if beacon is present, if it is calculate its x coordinate */
-  Serial.print("count: ");
-  Serial.print(countR);
-  Serial.print(",threshold: ");
-  Serial.print(thresholdR);
-  Serial.print(",sum: ");
-  Serial.println(sumR);
+
   if (countR >= thresholdR) {
     averageRedX = sumR / countR;
   } else {
     averageRedX = 0x7fff;
   }
 
-  Serial.print("count: ");
-  Serial.print(countY);
-  Serial.print(",threshold: ");
-  Serial.print(thresholdY);
-  Serial.print(",sum: ");
-  Serial.println(sumY);
   if (countY >= thresholdY) {
     averageYellowX = sumY / countY;
   } else {
     averageYellowX = 0x7fff;
   }
 
-  Serial.print("count: ");
-  Serial.print(countB);
-  Serial.print(",threshold: ");
-  Serial.print(thresholdB);
-  Serial.print(",sum: ");
-  Serial.println(sumB);
   if (countB >= thresholdB) {
     averageBlueX = sumB / countB;
   } else {
     averageBlueX = 0x7fff;
   }
 
+  if (debug) {
+    Serial.print("count: ");
+    Serial.print(countR);
+    Serial.print(",threshold: ");
+    Serial.print(thresholdR);
+    Serial.print(",sum: ");
+    Serial.println(sumR);
+    Serial.print("count: ");
+    Serial.print(countY);
+    Serial.print(",threshold: ");
+    Serial.print(thresholdY);
+    Serial.print(",sum: ");
+    Serial.println(sumY);
+    Serial.print("count: ");
+    Serial.print(countB);
+    Serial.print(",threshold: ");
+    Serial.print(thresholdB);
+    Serial.print(",sum: ");
+    Serial.println(sumB);
+  }
   return true;
 }
