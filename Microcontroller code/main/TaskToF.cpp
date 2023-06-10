@@ -1,5 +1,3 @@
-#include "freertos/projdefs.h"
-#include "HardwareSerial.h"
 /*
 Authors: Ben Smith
 Date created: 30/05/23
