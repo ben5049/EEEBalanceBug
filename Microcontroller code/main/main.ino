@@ -19,8 +19,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 #include "Wire.h"
 #include "math.h"
 
-
-#include "FPGACam.h"
+// #include "FPGACam.h"
 // FPGACam fpga1;
 
 //-------------------------------- Global Variables -------------------------------------
@@ -212,10 +211,10 @@ void loop() {
   // SERIAL_PORT.print(pitch);
   // SERIAL_PORT.print(", Yaw:");
   // SERIAL_PORT.println(yaw);
-  // SERIAL_PORT.println("Sending start command");
-  // robotCommand command = FIND_BEACONS;
-  // xQueueSend(commandQueue, &command, 0);
-  // vTaskDelay(25000);
+  SERIAL_PORT.println("Sending start command");
+  robotCommand command = SPIN;
+  xQueueSend(commandQueue, &command, 0);
+  vTaskDelay(25000);
 
 
   // fpga1.getRYB();

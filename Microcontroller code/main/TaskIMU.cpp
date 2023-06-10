@@ -249,15 +249,15 @@ void taskIMU(void *pvParameters) {
           float q2sqr = q2 * q2;
 
           /* roll (x-axis rotation) don't need to calculate since rover cannot move in this axis */
-          // double t0 = +2.0 * (q0 * q1 + q2 * q3);
-          // double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
-          // roll = atan2(t0, t1) * 180.0 / PI;
+          double t0 = +2.0 * (q0 * q1 + q2 * q3);
+          double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
+          pitch = atan2(t0, t1) * 180.0 / PI;
 
           /* pitch (y-axis rotation) */
-          float t2 = +2.0 * (q0 * q2 - q3 * q1);
-          t2 = t2 > 1.0 ? 1.0 : t2;
-          t2 = t2 < -1.0 ? -1.0 : t2;
-          pitch = asin(t2) * 180.0 / PI;
+          // float t2 = +2.0 * (q0 * q2 - q3 * q1);
+          // t2 = t2 > 1.0 ? 1.0 : t2;
+          // t2 = t2 < -1.0 ? -1.0 : t2;
+          // roll = asin(t2) * 180.0 / PI;
 
           /* yaw (z-axis rotation) */
           float t3 = +2.0 * (q0 * q3 + q1 * q2);

@@ -170,6 +170,10 @@ void taskSpin(void *pvParameters) {
           blueBeaconClosestDistanceToCentre = blueBeaconDistanceToCentre;
           blueBeaconAngle = yaw;
         }
+        SERIAL_PORT.print("Yaw: ");
+        SERIAL_PORT.print(yaw);
+        SERIAL_PORT.print(", Blue Yaw: ");
+        SERIAL_PORT.println(blueBeaconAngle);
       }
 #endif
 
