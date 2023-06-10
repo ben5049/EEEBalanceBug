@@ -93,5 +93,6 @@ extern SemaphoreHandle_t mutexI2C;
 /* Queue handles */
 extern QueueHandle_t commandQueue;
 extern QueueHandle_t junctionAngleQueue;
+extern QueueHandle_t beaconAngleQueue;
 
 #endif

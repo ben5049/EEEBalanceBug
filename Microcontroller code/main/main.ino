@@ -21,7 +21,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 
 #include "FPGACam.h"
-FPGACam fpga1;
+// FPGACam fpga1;
 
 //-------------------------------- Global Variables -------------------------------------
 
@@ -32,6 +32,7 @@ SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C per
 /* Queues */
 QueueHandle_t commandQueue;
 QueueHandle_t junctionAngleQueue;
+QueueHandle_t beaconAngleQueue;
 
 //--------------------------------- Setup -----------------------------------------------
 
@@ -83,17 +84,13 @@ void setup() {
   pinMode(IMU_INT, INPUT_PULLUP);
   pinMode(TOF_R_INT, INPUT_PULLUP);
   pinMode(TOF_L_INT, INPUT_PULLUP);
-  pinMode(IR_R_INT, INPUT);
-  pinMode(IR_L_INT, INPUT);
+  pinMode(IR_R_INT, INPUT_PULLUP);
+  pinMode(IR_L_INT, INPUT_PULLUP);
   pinMode(STEPPER_STEP, OUTPUT);
   pinMode(STEPPER_L_DIR, OUTPUT);
   pinMode(STEPPER_R_DIR, OUTPUT);
-  
-  /* Set microstepping */
-#if USE_PCB_PINS == false
-  pinMode(STEPPER_MS2, OUTPUT);
-  digitalWrite(STEPPER_MS2, HIGH);
-#endif
+  pinMode(VBUS, INPUT);
+  pinMode(VBAT, INPUT);
 
   /* Create SPI mutex */
   if (mutexSPI == NULL) {
@@ -112,8 +109,9 @@ void setup() {
   }
 
   /* Create queues */
-  commandQueue = xQueueCreate(10, sizeof(robotCommand));
+  commandQueue = xQueueCreate(COMMAND_QUEUE_LENGTH, sizeof(robotCommand));
   junctionAngleQueue = xQueueCreate(MAX_NUMBER_OF_JUNCTIONS, sizeof(float));
+  beaconAngleQueue = xQueueCreate(NUMBER_OF_BEACONS, sizeof(float));
 
   /* Create Tasks */
 
@@ -195,16 +193,15 @@ void setup() {
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
 
-  if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
-    fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
-    SERIAL_PORT.println("FPGA camera initialised");
-  } else {
-    while (true) {
-      SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
-      delay(1000);
-    }
-  }
-
+  // if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
+  //   fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
+  //   SERIAL_PORT.println("FPGA camera initialised");
+  // } else {
+  //   while (true) {
+  //     SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
+  //     delay(1000);
+  //   }
+  // }
 }
 
 //--------------------------------- Loop -----------------------------------------------
@@ -219,14 +216,13 @@ void loop() {
   // robotCommand command = FIND_BEACONS;
   // xQueueSend(commandQueue, &command, 0);
   // vTaskDelay(25000);
-  
 
-  fpga1.getRYB();
-  Serial.print("RED: ");
-  Serial.print(fpga1.averageRedX);
-  Serial.print(",Yellow: ");
-  Serial.print(fpga1.averageYellowX);
-  Serial.print(", Blue :");
-  Serial.println(fpga1.averageBlueX);
 
+  // fpga1.getRYB();
+  // Serial.print("RED: ");
+  // Serial.print(fpga1.averageRedX);
+  // Serial.print(",Yellow: ");
+  // Serial.print(fpga1.averageYellowX);
+  // Serial.print(", Blue :");
+  // Serial.println(fpga1.averageBlueX);
 }
