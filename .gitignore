@@ -1,10 +1,10 @@
 /venv
 *.pyc
 /FPGA/*/software/.metadata
-/FPGA/*/db
-/FPGA/*/incremental_db
-/FPGA/*/Qsys/synthesis
+/FPGA/*/db/
+/FPGA/*/incremental_db/
+/FPGA/*/Qsys/synthesis/
 /PCB/DE10-lite_shield/DE10-lite_shield-backups/*
-/PCB/DE10-lite_shield/fp-info-cache
-/FPGA/R_DETECT/db
-/FPGA/R_DETECT/incremental_db
+/PCB/DE10-lite_shield/fp-info-cache/
+/FPGA/R_DETECT/db/
+/FPGA/R_DETECT/incremental_db/

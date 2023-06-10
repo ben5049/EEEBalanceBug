@@ -1,0 +1,79 @@
+.DisplayNickname_AddRover {
+    grid-column: col 7 / span 5;
+    grid-row: row 3 / span 2;
+    text-align: center;
+    line-height: 100px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-weight: bold;
+    user-select: none
+}
+
+.NicknameInput_AddRover {
+    grid-column: col 11 / span 4;
+    grid-row: row 3 / span 2;
+    text-align: center;
+    line-height: 100px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-weight: bold;
+    user-select: none;
+    text-align: center;
+}
+
+.DisplayMAC_AddRover {
+    grid-column: col 7 / span 5;
+    grid-row: row 6 / span 2;
+    text-align: center;
+    line-height: 110px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-weight: bold;
+    user-select: none
+}
+
+.MACInput_AddRover {
+    grid-column: col 11 / span 4;
+    grid-row: row 6 / span 2;
+    text-align: center;
+    line-height: 100px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-weight: bold;
+    user-select: none;
+    text-align: center;
+}
+
+.Submit_AddRover {
+    grid-column: col 7 / span 8;
+    grid-row: row 9 / span 2;
+    text-align: center;
+    line-height: 5px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-weight: bold;
+    user-select: none
+}
+
+.box-green_AddRover {
+    background-color: #23C552;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 0;
+    font-size: 2vh;
+  }
+
+.buttons_AddRover {
+    display: flex;
+    font-size: 2vh;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    color: #ffffff;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    position: relative; /* Add position relative */
+    text-align: center;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-weight: bold;
+    user-select: none;
+    line-height: 130px;
+}

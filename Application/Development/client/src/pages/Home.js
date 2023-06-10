@@ -6,6 +6,7 @@ Date created: 03/05/23
 //-------------------------------- Imports ----------------------------------------------
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import ReactPolling from "react-polling/lib/ReactPolling";
 import RoverCarousel from '../components/Home/RoverCarousel';
 import ReplayCarousel from '../components/Home/ReplayCarousel';
@@ -119,20 +120,22 @@ const Home = () => {
 				</div>
 				{/* Add new rover button */}
 				<div className="box-nopadding AddButton_Home">
-					<button onClick={handleAddRover} className='buttons_Home'>
-						<img
-							src={AddIcon}
-							alt={"New Rover"}
-							style={{
-								width: '100px', // Set the desired width
-								height: '100px', // Set the desired height
-								objectFit: 'cover', // Adjust how the image fits within the container
-							}}
-						/>
-						<div className="overlay-Add_Home">
-							<p>New Rover</p>
-						</div>
-					</button>
+					<Link to='/addrover' className="page-link" draggable={false}>
+						<button onClick={handleAddRover} className='buttons_Home'>
+							<img
+								src={AddIcon}
+								alt={"New Rover"}
+								style={{
+									width: '100px', // Set the desired width
+									height: '100px', // Set the desired height
+									objectFit: 'cover', // Adjust how the image fits within the container
+								}}
+							/>
+							<div className="overlay-Add_Home">
+								<p>New Rover</p>
+							</div>
+						</button>
+					</Link>
 				</div>
 				{/* Display text */}
 				<div className="box ReplaysText_Home">

@@ -9,7 +9,7 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
 
-hostip = '34.205.64.125'
+hostip = '54.208.81.89'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -340,4 +340,17 @@ def led_driver_yellow():
     else:
         isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
+    
 
+#---------------------ERROR HANDLING------------------------#
+@app.errorhandler(400)
+def bad_request(e):
+    return make_response(jsonify({"error":str(e)}), 400)
+
+@app.errorhandler(404)
+def not_found(e):
+    return make_response(jsonify({"error":str(e)}), 404)
+
+@app.errorhandler(500)
+def bad_request(e):
+    return make_response(jsonify({"error":str(e)}), 500)

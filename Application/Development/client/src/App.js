@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Home from './pages/Home';
 import Replay from './pages/Replay';
 import Connected from './pages/Connected';
+import AddRover from './pages/AddRover';
 
 //-------------------------------- Main -------------------------------------------------
 
@@ -19,7 +20,7 @@ Top Level File - Contains intra-page navigation system
 
 function App() {
 	/* Set IPv4 for AWS then rebuild (AWS Learner account only active for 4h) */
-	localStorage.setItem('ServerIP', '54.175.40.130');
+	localStorage.setItem('ServerIP', '54.208.81.89');
 
 	/* Connect pages to URL endpoints */
 	return (
@@ -28,7 +29,8 @@ function App() {
 				<Route exact path="/" element={<Home />} />
 				<Route path="/connected" element={<Connected />} />
 				<Route path="/replay" element={<Replay />} />
-				<Route path="/" element={<Navigate replace to="/home" />} /> {/* TODO: add error alert*/}
+				<Route path="/addrover" element={<AddRover />} />
+				<Route path="/" element={<Navigate replace to="/home" />} />
 			</Routes>
 		</Router>
 	);
