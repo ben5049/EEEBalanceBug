@@ -74,7 +74,8 @@ def rover():
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     resp = {"next_actions" : resp}
     resp["clear_queue"] = r.estop 
-    if "spin" in resp["next_actions"]:
+    if 1 in resp["next_actions"]:
+        global isSpinning, spinTime
         isSpinning = True
         spinTime = time()
     
@@ -83,7 +84,7 @@ def rover():
     try:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
-        if "DONE" in resp["next_actions"]:
+        if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
                 for neighbour in r.tree[node]:
@@ -97,9 +98,9 @@ def rover():
     # cur.execute("SELECT * FROM Diagnostics")
     # for mac, timestamp, battery, connection in cur:
     #     print(mac, timestamp, battery, connection)
-    cur.execute("SELECT * FROM ReplayInfo")
-    for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-        print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+    # cur.execute("SELECT * FROM ReplayInfo")
+    # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
+    #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
     # cur.execute("SELECT * FROM Sessions")
     # for mac, sessionId, SessionNickname in cur:
     #     print(mac, sessionId, sessionNickname)
@@ -271,7 +272,7 @@ def findShortestPath():
         start_x = data["start_x"]
         start_y = data["start_y"]
     except:
-        return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC or start"}), 400)
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing sessionid or start"}), 400)
     tree = {}
     print(start_x, start_y, "shortestPath")
     try:
@@ -279,7 +280,7 @@ def findShortestPath():
     except:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     if cur is None:
-        return make_response(jsonify({"error":"Incorrectly formatted request: missing SessionID or nickname"}), 400)
+        return make_response(jsonify({"error":"Incorrectly formatted request: invalid sessionid"}), 400)
 
     for sid, node_x, node_y, children in cur:
         tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
@@ -315,6 +316,7 @@ def estop():
 
 @app.route("/led_driver/red", methods=["POST"])
 def led_driver_red():
+    global isSpinning, spinTime
     data = request.get_json()
     print(data, "red")
     if isSpinning and time()-spinTime < TIMEOUT/3:
@@ -325,6 +327,7 @@ def led_driver_red():
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
+    global isSpinning, spinTime
     data = request.get_json()
     print(data, "blue")
     if isSpinning and time()-spinTime < TIMEOUT/3:
@@ -335,6 +338,7 @@ def led_driver_blue():
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
+    global isSpinning, spinTime
     data = request.get_json()
     print(data, "yellow")
     if isSpinning and time()-spinTime < TIMEOUT/3:
