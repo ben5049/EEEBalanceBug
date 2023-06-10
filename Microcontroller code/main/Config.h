@@ -72,12 +72,13 @@ Pin assignments for Group 1's EEEBalanceBug
 /* Controller */
 #define CONTROL_DEBUG true /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 
-#define KP_Position 0.10
-#define KD_Position 0.45
+#define KP_POS 0.01
+#define KI_POS 0.00
+#define KD_POS 0.00
 
 #define KP_SPEED 0.15
-#define KD_SPEED 0.3
-#define KI_SPEED 0.001
+#define KD_SPEED 0.4
+#define KI_SPEED 0.002
 
 #define KP_ANGLE 26.00
 #define KI_ANGLE 0.00
