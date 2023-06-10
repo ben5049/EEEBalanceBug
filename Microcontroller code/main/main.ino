@@ -211,10 +211,10 @@ void loop() {
   // SERIAL_PORT.print(pitch);
   // SERIAL_PORT.print(", Yaw:");
   // SERIAL_PORT.println(yaw);
-  SERIAL_PORT.println("Sending start command");
-  robotCommand command = SPIN;
-  xQueueSend(commandQueue, &command, 0);
-  vTaskDelay(25000);
+  // SERIAL_PORT.println("Sending start command");
+  // robotCommand command = SPIN;
+  // xQueueSend(commandQueue, &command, 0);
+  // vTaskDelay(25000);
 
 
   // fpga1.getRYB();

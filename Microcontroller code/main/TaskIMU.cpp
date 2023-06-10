@@ -263,6 +263,7 @@ void taskIMU(void *pvParameters) {
           float t3 = +2.0 * (q0 * q3 + q1 * q2);
           float t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
           yaw = atan2(t3, t4) * 180.0 / PI;
+          angularVelocity = myICM.gyrX();
         }
       }
 
@@ -290,7 +291,7 @@ void taskIMU(void *pvParameters) {
 
       yaw = euler.angle.yaw;
       pitch = euler.angle.pitch;
-      angularVelocity = myICM.gyrY();
+      angularVelocity = myICM.gyrX();
 #endif
     }
   }
