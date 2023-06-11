@@ -10,9 +10,11 @@ Pin assignments for Group 1's EEEBalanceBug
 #define CONFIG_H
 
 /* General robot information */
-#define STEPS 1600        /* Steps per revolution */
+#define MAX_ACCEL 15 /* Maximum Acceleration */
+#define FLT_MAX 4294967040.0 /* Max float */
+#define STEPS 6400        /* Steps per revolution */
 #define ROVER_WIDTH 159   /* Wheel-to-wheel width in mm*/
-#define WHEEL_DIAMETER 40 /* Wheel diameter in mm*/
+#define WHEEL_DIAMETER 91 /* Wheel diameter in mm*/
 #define MIN_RPM 10
 #define MAX_RPM 1000
 #define MAX_MAZE_DIMENSION 3000 /* Largest dimension of the maze in mm, used for rejecting anomalous ToF sensor data */
@@ -70,18 +72,18 @@ Pin assignments for Group 1's EEEBalanceBug
 /* Controller */
 #define CONTROL_DEBUG true /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 
-#define KP_Position 0.06
+#define KP_Position 0.10
 #define KD_Position 0.45
 
-#define KP_SPEED 23.00
-#define KD_SPEED 0.00
-#define KI_SPEED 0.00
+#define KP_SPEED 0.15
+#define KD_SPEED 0.3
+#define KI_SPEED 0.001
 
-#define KP_ANGLE 0.32
+#define KP_ANGLE 26.00
 #define KI_ANGLE 0.00
-#define KD_ANGLE 0.05
-
-#define MAX_ANGLE 14
+#define KD_ANGLE 1.00
+#define ANGLE_OFFSET -4
+#define MAX_ANGLE 5
 #define MAX_DPS 360
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000

@@ -180,5 +180,3 @@ class Rover():
             self.toreturn.append(5)
 
         return self.toreturn
-
-r = Rover([0,0], 0, 0)
