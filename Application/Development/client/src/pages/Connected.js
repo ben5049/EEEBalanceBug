@@ -24,9 +24,11 @@ const Connected = () => {
 
 	const ServerIP = localStorage.getItem('ServerIP')
 	const MAC = localStorage.getItem('MAC');
-	console.log('CONNECTED MAC = ' + MAC)
+	console.log('CONNECTED MAC = ' + MAC);
 	const nickname = localStorage.getItem('nickname');
-	console.log('CONNECTED nickname = ' + nickname)
+	console.log('CONNECTED nickname = ' + nickname);
+	const SessionID = localStorage.getItem('SessionID');
+	console.log('CONNECTED SessionID = ' + SessionID);
 	
 	//---------------------------- Polling: Diagnostics ---------------------------------
 
@@ -54,7 +56,7 @@ const Connected = () => {
 	/* On GOOD POST response */
 	const DiagnosticPollingSuccess = (jsonResponse) => {
 		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
-		UpdateDiagnosticData(jsonResponse);
+		UpdateDiagnosticData(jsonResponse[0]); /* Displays most recent value */
 		if (jsonResponse.response.isfinished) {// TODO: Change isfinished once added to response on server side
 			setConnectedState("Finish");
 		}
@@ -86,7 +88,7 @@ const Connected = () => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "MAC": MAC })
+			body: JSON.stringify({ "sessionid": SessionID })
 		});
 	};
 
@@ -102,6 +104,19 @@ const Connected = () => {
 		console.log("MAPPING POLLING FAIL");
 		return true;
 	}
+
+	/* Get max magnitude in MapData when changed */
+	const [MapDataMax, setMapDataMax] = useState(1);/* Number of Replay values (in MapData) */
+	useEffect(() => {
+		Object.entries(MapData).forEach(([key, value]) => {
+			const firstTwoElements = value.slice(0, 2);
+			const CoordinateMax = Math.max(...firstTwoElements);
+			if (CoordinateMax > MapDataMax) {
+				setMapDataMax(CoordinateMax);
+				console.log("MapDataMax = " + MapDataMax);
+			}
+		})
+	}, [MapData]);
 
 	//---------------------------- Button Functions: onClick ----------------------------
 
@@ -235,8 +250,16 @@ const Connected = () => {
 
 	/* Draws lane boundaries given data from rover */
 	const renderBoundaries = () => {
-		for (let i = 0; i < 700; i++) { //replace 700 with Object.keys(MapData).length
-			draw([i,i], 135, 30, 30); // TODO: Connect to fetched MapData
+		const entries = Object.entries(MapData);
+		for (let i = 0; i < entries.length; i++) {
+			const [, entry] = entries[i];
+			const pos_x = entry[0];
+			const pos_y = entry[1];
+			const orientation = entry[3];
+			const TOF_left = entry[4];
+			const TOF_right = entry[5];
+			draw(pos_x, pos_y, orientation, TOF_left, TOF_right);
+			console.log(entry[0] + " " + entry[1] + " " + entry[3] + " " + entry[4] + " " + entry[5]);
 		}
 	};
 
@@ -262,15 +285,18 @@ const Connected = () => {
 	}
 
 	/* draws small line in correct direction with correct distances using TOF sensors */
-	function draw(position, orientation, tofleft, tofright) {
+	function draw(position_x, position_y, orientation, tofleft, tofright) {
 		const canvas = document.querySelector('#canvas');
 		if (canvas.getContext) {
 			const ctx = canvas.getContext('2d');
 			let l = 5; /* Change to alter length of each line */
 			let theta = orientation*Math.PI/180
+			/* Scale to canvas */
+			position_x  = ( position_x / MapDataMax ) * 700 + 30 /* WARNING: if edit, also change in postStart */
+			position_y  = ( position_y / MapDataMax ) * 700 + 30
 			/* Draw */
-			drawLine(ctx, [position[0] + tofleft * Math.cos(theta), position[1] + tofleft * Math.sin(theta)], [position[0] + tofleft * Math.cos(theta) + l * Math.sin(theta), position[1] + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
-			drawLine(ctx, [position[0] - tofright * Math.cos(theta), position[1] - tofright * Math.sin(theta)], [position[0] - tofright * Math.cos(theta) + l * Math.sin(theta), position[1] - tofright * Math.sin(theta) - l * Math.cos(theta)]);
+			drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
+			drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
 		}
 	}
 

@@ -1,3 +1,4 @@
+#!/bin/bash
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 import tremaux, dijkstra
@@ -9,7 +10,7 @@ app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
 
-hostip = '100.27.18.94'
+hostip = '3.89.219.113'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -59,7 +60,6 @@ def rover():
                     flag = False
             if flag:
                 return make_response(jsonify({"error":"Specified MAC does not exist"}), 400)                
-
         try:
             cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], startup+int(data["timestamp"])))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
@@ -182,12 +182,13 @@ def sessions():
 def diagnostics():
     data = request.get_json()
     try:
-        cur.execute("SELECT * FROM Diagnostics WHERE MAC=? ORDER BY timestamp DESC LIMIT 1;", (data["MAC"],))
+        cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
     except:
-        return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid MAC address"}), 400)
-    d = {}
-    for mac, timestamp, battery, connection in cur:
-        d = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid sessionid"}), 400)
+    d = []
+    for mac, timestamp, battery, connection, sessionid in cur:
+        t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+        d.append(t)
     return make_response(jsonify(d), 200)
 
 # works
