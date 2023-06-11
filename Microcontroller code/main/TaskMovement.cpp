@@ -40,6 +40,12 @@ static float speedCumError = 0;
 static float speedPrevError = 0;
 static float speedLastTime = millis();
 
+/* Position Control Variables */
+volatile float posSetpoint = 0;
+static float posCumError = 0;
+static float posPrevError = 0;
+static float posLastTime = millis();
+
 
 /* Controller frequency in Hz */
 volatile float loopFreq = 50;
@@ -156,7 +162,7 @@ void debug(){
   Serial.print(-10);
   Serial.println(",");
   Serial.print("speedError:");
-  Serial.print(0-robotFilteredLinearDPS);
+  Serial.print(speedSetpoint-robotFilteredLinearDPS);
   Serial.println(",");
 
   /* Battery Voltage */
@@ -164,7 +170,15 @@ void debug(){
   Serial.print(analogRead(VBAT)*4*3.3*1.1/4096);
   Serial.println(",");
 
-
+  /* Position Debugging */
+  Serial.print("Position:");
+  Serial.print(stepperRightSteps);
+  Serial.println(",");
+  Serial.print("SpeedSetpoint:");
+  Serial.print(speedSetpoint);
+  Serial.println(",");
+  Serial.print("posError:");
+  Serial.print(0-stepperRightSteps);
   Serial.println("*/");
 }
 
@@ -226,6 +240,11 @@ void IRAM_ATTR onTimer() {
   }
 }
 
+/* Move Function */
+void move(float distance){
+  posSetpoint += distance*WHEEL_DIAMETER*2*PI/STEPS;
+}
+
 //-------------------------------- Task Functions ---------------------------------------
 
 /* Task to control the balance, speed and direction */
@@ -259,10 +278,13 @@ void taskMovement(void* pvParameters) {
 
     /* Speed Loop */
 
-    angleSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, KP_SPEED, KI_SPEED, KD_SPEED);
+    angleSetpoint = PID(-speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, KP_SPEED, KI_SPEED, KD_SPEED);
     speedLastTime = millis();
     angleSetpoint = constrain(angleSetpoint, angleOffset-MAX_ANGLE, angleOffset+MAX_ANGLE);
 
+    /* Position Controller */
+    speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
+    posLastTime = millis();    
     if(CONTROL_DEBUG){
       debug();
     }

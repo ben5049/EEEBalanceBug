@@ -54,6 +54,7 @@ void IRAM_ATTR IRRightISR();
 void IRAM_ATTR IRLeftISR();
 
 /* Functions */
+void move(float distance);
 void configureIMU();
 void configureToF();
 void configureWiFi();
