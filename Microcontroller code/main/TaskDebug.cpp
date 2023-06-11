@@ -10,9 +10,6 @@
 TaskHandle_t taskDebugHandle = nullptr;
 #if ENABLE_DEBUG_TASK == true
 
-/* Arduino headers */
-#include "map"
-
 //-------------------------------- Global Variables -------------------------------------
 
 //-------------------------------- Functions --------------------------------------------

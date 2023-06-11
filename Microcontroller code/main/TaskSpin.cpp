@@ -135,9 +135,9 @@ void taskSpin(void *pvParameters) {
       rightJunctionCounter = 0;
       leftJunctionCounter = 0;
 
-      redBeaconClosestDistanceToCentre = 0x7fff;
-      yellowBeaconClosestDistanceToCentre = 0x7fff;
-      blueBeaconClosestDistanceToCentre = 0x7fff;
+      redBeaconClosestDistanceToCentre = INT_MAX;
+      yellowBeaconClosestDistanceToCentre = INT_MAX;
+      blueBeaconClosestDistanceToCentre = INT_MAX;
     }
 
     /* If task is incomplete, execute the task at its set frequency */
