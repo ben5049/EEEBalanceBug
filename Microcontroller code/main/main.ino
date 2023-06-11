@@ -61,8 +61,10 @@ void setup() {
   /* Create hw timers */
   motorTimer = timerBegin(0, 80, true);
 
+#if ENABLE_IMU_TASK == true
   /* Configure the IMU & DMP */
   configureIMU();
+#endif
 
 #if ENABLE_TOF_TASK == true
   /* Start the ToF sensors */
@@ -114,6 +116,7 @@ void setup() {
 
   /* Create Tasks */
 
+#if ENABLE_IMU_TASK == true
   xTaskCreatePinnedToCore(
     taskIMU,        /* Function that implements the task */
     "IMU",          /* Text name for the task */
@@ -122,6 +125,7 @@ void setup() {
     10,             /* Task priority */
     &taskIMUHandle, /* Pointer to store the task handle */
     tskNO_AFFINITY);
+#endif
 
   xTaskCreatePinnedToCore(
     taskMovement,        /* Function that implements the task */

@@ -94,25 +94,25 @@ void configureToF() {
   /* Begin the multiplexer */
   I2CMux.begin(I2C_PORT);
 
-  SERIAL_PORT.print("1: ");
-  checkI2CBusMembers();
-
   /* Close all channels to ensure state is know */
   I2CMux.closeAll();
 
-  SERIAL_PORT.print("2: ");
-  checkI2CBusMembers();
-
-  /* Begin the first sensor if it isn't already connected */
+  /* Open the channel to the right ToF sensor */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
-  SERIAL_PORT.print("3: ");
-  checkI2CBusMembers();
 
+  /* Reset any ToF sensors on the bus with address VL53L0X_I2C_ADDR (0x29)*/
+  if (findI2CDevice(VL53L0X_I2C_ADDR)) {
+    SERIAL_PORT.println("Resetting sensors");
+    tofRight.stop(VL53L0X_I2C_ADDR);
+  }
+
+  /* Reset any ToF sensors on the bus with address TOF_RIGHT_ADDRESS (0x30) */
   if (findI2CDevice(TOF_RIGHT_ADDRESS)) {
     SERIAL_PORT.println("Right ToF sensor already connected");
     tofRight.stop(TOF_RIGHT_ADDRESS);
   }
 
+  /* Begin the right ToF sensor */
   if (!tofRight.begin(TOF_RIGHT_ADDRESS)) {
     while (true) {
       SERIAL_PORT.println(F("Failed to boot right ToF sensor"));
@@ -125,27 +125,25 @@ void configureToF() {
     SERIAL_PORT.println("Right ToF sensor connected");
   }
 
-  SERIAL_PORT.print("4: ");
-  checkI2CBusMembers();
-
-  /* Close the first sensor's channel */
+  /* Close the right ToF sensor's channel */
   I2CMux.closeChannel(TOF_RIGHT_CHANNEL);
 
-  SERIAL_PORT.print("5: ");
-  checkI2CBusMembers();
-
-  /* Begin the second sensor if it isn't already connected */
+  /* Open the channel to the left ToF sensor */
   I2CMux.openChannel(TOF_LEFT_CHANNEL);
 
-  SERIAL_PORT.print("6: ");
-  checkI2CBusMembers();
+  /* Reset any ToF sensors on the bus with address VL53L0X_I2C_ADDR (0x29)*/
+  if (findI2CDevice(VL53L0X_I2C_ADDR)) {
+    SERIAL_PORT.println("Resetting sensors");
+    tofRight.stop(VL53L0X_I2C_ADDR);
+  }
 
-
-
+  /* Reset any ToF sensors on the bus with address TOF_LEFT_ADDRESS (0x31) */
   if (findI2CDevice(TOF_LEFT_ADDRESS)) {
     SERIAL_PORT.println("Left ToF sensor already connected");
-    tofLeft.stop(TOF_LEFT_ADDRESS);
+    tofRight.stop(TOF_LEFT_ADDRESS);
   }
+
+  /* Begin the left ToF sensor */
   if (!tofLeft.begin(TOF_LEFT_ADDRESS)) {
     while (true) {
       SERIAL_PORT.println(F("Failed to boot left ToF sensor"));
@@ -158,17 +156,10 @@ void configureToF() {
     SERIAL_PORT.println("Left ToF sensor connected");
   }
 
-  SERIAL_PORT.print("7: ");
-  checkI2CBusMembers();
-
-  /* Open all channels */
-  // I2CMux.openAll();
+  /* Open sensor channels */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
-  // I2CMux.openChannel(TOF_LEFT_CHANNEL);
 
-  SERIAL_PORT.print("8: ");
-  checkI2CBusMembers();
-
+  /* Begin FIR filters */
   FIRFilterInit(&rightFIR);
   FIRFilterInit(&leftFIR);
 }
