@@ -1,3 +1,4 @@
+#!/bin/bash
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 import tremaux, dijkstra
