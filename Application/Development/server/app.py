@@ -28,7 +28,7 @@ cur = conn.cursor()
 rovers = []
 
 isSpinning = False
-spinTime = time()
+spinTime, startup = time(), int(time())
 
 @app.route("/")
 def hello():
@@ -37,7 +37,7 @@ def hello():
 # rover communication - works
 @app.route("/rover", methods=["POST"])
 def rover():
-    data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", ""timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
+    data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     print(data)
     r = 0
     flag = True
@@ -61,7 +61,7 @@ def rover():
                 return make_response(jsonify({"error":"Specified MAC does not exist"}), 400)                
 
         try:
-            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], data["timestamp"]))
+            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], startup+int(data["timestamp"])))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
             return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
@@ -82,8 +82,8 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done
     try:
-        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (data["timestamp"], data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], data["timestamp"], data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
+        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (startup+int(data["timestamp"]), data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
+        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], startup+int(data["timestamp"]), data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
         if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
@@ -196,7 +196,7 @@ def pause():
     print("PAUSED")
     data = request.get_json()
     try:
-        mac = int(data["MAC"])
+        mac = str(data["MAC"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
@@ -216,7 +216,7 @@ def play():
     print("PLAYED")
     data = request.get_json()
     try:
-        mac = int(data["MAC"])
+        mac = str(data["MAC"])
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing MAC"}), 400)
     flag = True
