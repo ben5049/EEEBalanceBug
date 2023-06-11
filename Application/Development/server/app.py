@@ -182,12 +182,13 @@ def sessions():
 def diagnostics():
     data = request.get_json()
     try:
-        cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC LIMIT 1;", (data["sessionid"],))
+        cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid sessionid"}), 400)
-    d = {}
+    d = []
     for mac, timestamp, battery, connection, sessionid in cur:
-        d = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+        t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+        d.append(t)
     return make_response(jsonify(d), 200)
 
 # works
