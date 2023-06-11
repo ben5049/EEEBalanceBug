@@ -60,7 +60,7 @@ def rover():
                     flag = False
             if flag:
                 return make_response(jsonify({"error":"Specified MAC does not exist"}), 400)                
-
+        global startup
         try:
             cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], startup+int(data["timestamp"])))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
@@ -82,6 +82,7 @@ def rover():
     
     # store positions and timestamp in database
     # also store tree in database if rover is done
+    global startup
     try:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (startup+int(data["timestamp"]), data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], startup+int(data["timestamp"]), data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
