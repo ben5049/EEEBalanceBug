@@ -258,14 +258,16 @@ void taskToF(void *pvParameters) {
       if ((measureRight.RangeStatus != 4) && (measureRight.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceRight = measureRight.RangeMilliMeter;
       } else {
-        // What to do if the range is invalid
+        /* If the range is invalid return -1 */
+        distanceLeft = -1;
       }
 
       /* Check if the left data is valid (phase failures have incorrect data) */
       if ((measureLeft.RangeStatus != 4) && (measureLeft.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceLeft = measureLeft.RangeMilliMeter;
       } else {
-        // What to do if the range is invalid
+        /* If the range is invalid return -1 */
+        distanceLeft = -1;
       }
 
 #if TASK_TOF_DEBUG == true

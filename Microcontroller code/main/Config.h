@@ -33,11 +33,12 @@ Pin assignments for Group 1's EEEBalanceBug
 /* IMU */
 #define ENABLE_IMU_TASK false             /* Setting "true" enables the IMU sampling task */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
+#define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
 #define IMU_SAMPLING_FREQUENCY_DMP 57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
-#define ENABLE_TOF_TASK true   /* Setting "true" enables the ToF sampling task */
+#define ENABLE_TOF_TASK true    /* Setting "true" enables the ToF sampling task */
 #define TASK_TOF_DEBUG true     /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
 #define TOF_RIGHT_ADDRESS 0x30  /* I2C address for the right ToF sensor */
 #define TOF_LEFT_ADDRESS 0x31   /* I2C address for the left ToF sensor */
