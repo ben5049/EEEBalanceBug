@@ -3,11 +3,11 @@ DEBUG=false
 sudo git pull https://aranyagupta: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@github.com/ben5049/EEEBalanceBug
 cd client
 npm run build
-sudo cp -rf build /var/www/react/html
-sudo cp -rf public /var/www/react/html
-sudo cp -rf src /var/www/react/html
-sudo cp -rf package-lock.json /var/www/react/html
-sudo cp -rf package.json /var/www/react/html
+sudo cp -rf build /var/www/html/react
+sudo cp -rf public /var/www/html/react
+sudo cp -rf src /var/www/html/react
+sudo cp -rf package-lock.json /var/www/html/react
+sudo cp -rf package.json /var/www/html/react
 cd ..
 sudo systemctl daemon-reload
 sudo systemctl start flask
