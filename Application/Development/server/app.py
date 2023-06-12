@@ -56,6 +56,7 @@ def rover():
             cur.execute("SELECT * FROM Rovers WHERE MAC=?", (str(data["MAC"]),))
             flag = True
             for mac, nick in cur:
+                print(mac, nick)
                 if mac == data["MAC"]:
                     r.nickname = nick
                     flag = False
