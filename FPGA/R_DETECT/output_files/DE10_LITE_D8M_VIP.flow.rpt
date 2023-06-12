@@ -1,6 +1,6 @@
 Flow report for DE10_LITE_D8M_VIP
-Mon Jun 12 12:45:34 2023
-Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
+Mon Jun 12 18:45:32 2023
+Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
 
 
 ---------------------
@@ -37,28 +37,28 @@ refer to the applicable agreement for further details.
 
 
 
-+----------------------------------------------------------------------------------+
-; Flow Summary                                                                     ;
-+------------------------------------+---------------------------------------------+
-; Flow Status                        ; Successful - Mon Jun 12 12:45:21 2023       ;
-; Quartus Prime Version              ; 18.1.0 Build 625 09/12/2018 SJ Lite Edition ;
-; Revision Name                      ; DE10_LITE_D8M_VIP                           ;
-; Top-level Entity Name              ; DE10_LITE_D8M_VIP                           ;
-; Family                             ; MAX 10                                      ;
-; Device                             ; 10M50DAF484C7G                              ;
-; Timing Models                      ; Final                                       ;
-; Total logic elements               ; 11,577 / 49,760 ( 23 % )                    ;
-;     Total combinational functions  ; 9,837 / 49,760 ( 20 % )                     ;
-;     Dedicated logic registers      ; 7,121 / 49,760 ( 14 % )                     ;
-; Total registers                    ; 7188                                        ;
-; Total pins                         ; 171 / 360 ( 48 % )                          ;
-; Total virtual pins                 ; 0                                           ;
-; Total memory bits                  ; 1,341,624 / 1,677,312 ( 80 % )              ;
-; Embedded Multiplier 9-bit elements ; 6 / 288 ( 2 % )                             ;
-; Total PLLs                         ; 1 / 4 ( 25 % )                              ;
-; UFM blocks                         ; 0 / 1 ( 0 % )                               ;
-; ADC blocks                         ; 0 / 2 ( 0 % )                               ;
-+------------------------------------+---------------------------------------------+
++--------------------------------------------------------------------------------------+
+; Flow Summary                                                                         ;
++------------------------------------+-------------------------------------------------+
+; Flow Status                        ; Successful - Mon Jun 12 18:45:21 2023           ;
+; Quartus Prime Version              ; 18.1.0 Build 625 09/12/2018 SJ Standard Edition ;
+; Revision Name                      ; DE10_LITE_D8M_VIP                               ;
+; Top-level Entity Name              ; DE10_LITE_D8M_VIP                               ;
+; Family                             ; MAX 10                                          ;
+; Device                             ; 10M50DAF484C7G                                  ;
+; Timing Models                      ; Final                                           ;
+; Total logic elements               ; 11,426 / 49,760 ( 23 % )                        ;
+;     Total combinational functions  ; 9,697 / 49,760 ( 19 % )                         ;
+;     Dedicated logic registers      ; 7,040 / 49,760 ( 14 % )                         ;
+; Total registers                    ; 7107                                            ;
+; Total pins                         ; 171 / 360 ( 48 % )                              ;
+; Total virtual pins                 ; 0                                               ;
+; Total memory bits                  ; 1,341,624 / 1,677,312 ( 80 % )                  ;
+; Embedded Multiplier 9-bit elements ; 6 / 288 ( 2 % )                                 ;
+; Total PLLs                         ; 1 / 4 ( 25 % )                                  ;
+; UFM blocks                         ; 0 / 1 ( 0 % )                                   ;
+; ADC blocks                         ; 0 / 2 ( 0 % )                                   ;
++------------------------------------+-------------------------------------------------+
 
 
 +-----------------------------------------+
@@ -66,7 +66,7 @@ refer to the applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 06/12/2023 12:40:32 ;
+; Start date & time ; 06/12/2023 18:42:01 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; DE10_LITE_D8M_VIP   ;
 +-------------------+---------------------+
@@ -77,7 +77,7 @@ refer to the applicable agreement for further details.
 +-------------------------------------+----------------------------------------+---------------+-------------+------------+
 ; Assignment Name                     ; Value                                  ; Default Value ; Entity Name ; Section Id ;
 +-------------------------------------+----------------------------------------+---------------+-------------+------------+
-; COMPILER_SIGNATURE_ID               ; 10995770589199.168657003120116         ; --            ; --          ; --         ;
+; COMPILER_SIGNATURE_ID               ; 22095314655753.168659172124526         ; --            ; --          ; --         ;
 ; ENABLE_SIGNALTAP                    ; Off                                    ; --            ; --          ; --         ;
 ; FITTER_EFFORT                       ; Standard Fit                           ; Auto Fit      ; --          ; --         ;
 ; MAX_CORE_JUNCTION_TEMP              ; 85                                     ; --            ; --          ; --         ;
@@ -103,24 +103,24 @@ refer to the applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:03:01     ; 1.0                     ; 5184 MB             ; 00:04:13                           ;
-; Fitter               ; 00:01:26     ; 1.9                     ; 6878 MB             ; 00:03:49                           ;
-; Assembler            ; 00:00:05     ; 1.0                     ; 4736 MB             ; 00:00:05                           ;
-; Timing Analyzer      ; 00:00:11     ; 3.6                     ; 5128 MB             ; 00:00:30                           ;
-; Total                ; 00:04:43     ; --                      ; --                  ; 00:08:37                           ;
+; Analysis & Synthesis ; 00:01:46     ; 1.0                     ; 1542 MB             ; 00:03:27                           ;
+; Fitter               ; 00:01:20     ; 1.8                     ; 2950 MB             ; 00:03:36                           ;
+; Assembler            ; 00:00:05     ; 1.0                     ; 1006 MB             ; 00:00:05                           ;
+; Timing Analyzer      ; 00:00:09     ; 3.1                     ; 1314 MB             ; 00:00:26                           ;
+; Total                ; 00:03:20     ; --                      ; --                  ; 00:07:34                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
-+------------------------------------------------------------------------------------+
-; Flow OS Summary                                                                    ;
-+----------------------+------------------+------------+------------+----------------+
-; Module Name          ; Machine Hostname ; OS Name    ; OS Version ; Processor type ;
-+----------------------+------------------+------------+------------+----------------+
-; Analysis & Synthesis ; LAPTOP-LDJN5HNM  ; Windows 10 ; 10.0       ; x86_64         ;
-; Fitter               ; LAPTOP-LDJN5HNM  ; Windows 10 ; 10.0       ; x86_64         ;
-; Assembler            ; LAPTOP-LDJN5HNM  ; Windows 10 ; 10.0       ; x86_64         ;
-; Timing Analyzer      ; LAPTOP-LDJN5HNM  ; Windows 10 ; 10.0       ; x86_64         ;
-+----------------------+------------------+------------+------------+----------------+
++-------------------------------------------------------------------------------------+
+; Flow OS Summary                                                                     ;
++----------------------+----------------------+---------+------------+----------------+
+; Module Name          ; Machine Hostname     ; OS Name ; OS Version ; Processor type ;
++----------------------+----------------------+---------+------------+----------------+
+; Analysis & Synthesis ; ee-mill2.ee.ic.ac.uk ; Red Hat ; Red Hat    ; x86_64         ;
+; Fitter               ; ee-mill2.ee.ic.ac.uk ; Red Hat ; Red Hat    ; x86_64         ;
+; Assembler            ; ee-mill2.ee.ic.ac.uk ; Red Hat ; Red Hat    ; x86_64         ;
+; Timing Analyzer      ; ee-mill2.ee.ic.ac.uk ; Red Hat ; Red Hat    ; x86_64         ;
++----------------------+----------------------+---------+------------+----------------+
 
 
 ------------
