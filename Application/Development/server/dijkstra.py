@@ -1,6 +1,5 @@
 # Aranya Gupta 
 # 21/5/2023
-from tremaux import Node    
 
 # makes sure graph is bidirectional - if B is a neighbour of A, 
 # A must be a neighbour of B 
@@ -18,22 +17,19 @@ def findDist(node1, node2):
 
 THRESHOLD = 10
 
-# graph is hash table of Node as defined in tremaux 
-# each Node has its position, Dijkstra will calculate 
-# distances based on position
+# graph is hash table of x-y positions as defined in tremaux 
+# Dijkstra will calculate distances based on position
 # returns predecessor graph showing shortest path from startNode to every point
 
-def thresholding(pos1, pos2):
-        if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
-            return True
-        else:
-            return False
-
 def dijkstra(graph, startPos):
+    minDist = 1e9
+    startNode = 0
     for node in graph:
-        if thresholding(startPos, node):
+        dist = findDist(startPos, node)
+        if  dist < minDist:
+            minDist = dist
             startNode = node
-            break
+
     try:
         G = {startNode: 0} # distance from startNode to given node
         P = {startNode: None} # predecessor graph - shortest path from given node to start node
@@ -63,8 +59,6 @@ def formatPredecessor(P):
     for key in P:
         d[i] = {"mapsto":-1, "xcoord":key[0], "ycoord":key[1]}
         i+=1
-    print("\n")
-    print(d)
     for key in P:
         pred = P[key] #pred is (0,0), (100,0)
         prednode = -1

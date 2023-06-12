@@ -74,18 +74,19 @@ Pin assignments for Group 1's EEEBalanceBug
 /* Controller */
 #define CONTROL_DEBUG false /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 
-#define KP_POS 0.01
+#define KP_POS 0.00
 #define KI_POS 0.00
 #define KD_POS 0.00
 
-#define KP_SPEED 0.15
-#define KD_SPEED 0.4
-#define KI_SPEED 0.002
+#define KP_SPEED 4.00
+#define KD_SPEED 0.00
+#define KI_SPEED 0.00
 
-#define KP_ANGLE 26.00
+#define KP_ANGLE 4.0
 #define KI_ANGLE 0.00
-#define KD_ANGLE 1.00
+#define KD_ANGLE 240.00
 #define ANGLE_OFFSET -4
+#define MAX_VACCEL 0.1
 #define MAX_ANGLE 5
 #define MAX_DPS 360
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
@@ -93,7 +94,7 @@ Pin assignments for Group 1's EEEBalanceBug
 
 
 /* Debug task*/
-#define ENABLE_DEBUG_TASK false
+#define ENABLE_DEBUG_TASK true
 
 #if ENABLE_DEBUG_TASK == false
 #define CONFIG_FREERTOS_USE_TRACE_FACILITY

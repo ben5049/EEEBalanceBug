@@ -11,6 +11,9 @@
 
 //-------------------------------- Global Variables -------------------------------------
 
+/* Controller Speed */
+static int controlCycle = 0;
+
 /* Motor variables */
 volatile static bool stepperLeftDirection = true;
 volatile static bool stepperRightDirection = true;
@@ -26,6 +29,9 @@ volatile static float robotFilteredLinearDPS = 0;
 volatile float angleKp = KP_ANGLE;
 volatile float angleKi = KI_ANGLE;
 volatile float angleKd = KD_ANGLE;
+static float speedKp = KP_SPEED;
+static float speedKi = KI_SPEED;
+static float speedKd = KD_SPEED;
 static float angleOffset = ANGLE_OFFSET;
 static float angleSetpoint = 0;
 static float motorSetpoint = 0;
@@ -35,7 +41,7 @@ static float anglePrevError = 0;
 static float angleLastTime = millis();
 
 /* Speed Control Variables */
-static float speedSetpoint = 0;
+volatile float speedSetpoint = 0;
 static float speedCumError = 0;
 static float speedPrevError = 0;
 static float speedLastTime = millis();
@@ -58,6 +64,7 @@ hw_timer_t* motorTimer = NULL;
 
 /* Autotuning Variables */
 bool angleTuned = true;
+bool speedTuned = true;
 
 
 
@@ -65,48 +72,6 @@ bool angleTuned = true;
 
 //-------------------------------- Functions --------------------------------------------
 
-/* PID Autotuning */
-void autoTuneAngle(){
-    double loopInterval = 20000;
-    PIDAutotuner tuner = PIDAutotuner();
-    tuner.setTargetInputValue(angleOffset);
-    tuner.setLoopInterval(loopInterval);
-    tuner.setOutputRange(-MAX_DPS, MAX_DPS);
-    tuner.setZNMode(PIDAutotuner::ZNModeBasicPID);
-    tuner.startTuningLoop(micros());
-    long microseconds;
-    if(CONTROL_DEBUG){
-      Serial.println("Starting Autotuning!");
-    }
-    while (!tuner.isFinished()) {
-
-        long prevMicroseconds = microseconds;
-        microseconds = micros();
-
-        double input = pitch;
-
-        double output = tuner.tunePID(input, microseconds);
-
-        motorSetDPS(output);
-
-        while (micros() - microseconds < loopInterval) delayMicroseconds(1);
-    }
-
-    motorSetDPS(0);
-    angleKp = tuner.getKp();
-    angleKi = tuner.getKi();
-    angleKd = tuner.getKd();
-    if(CONTROL_DEBUG){
-    Serial.println("Autotuning finished with values:");
-    Serial.print("Kp: ");
-    Serial.println(angleKp);
-    Serial.print("Ki: ");
-    Serial.println(angleKi);
-    Serial.print("Kd: ");
-    Serial.println(angleKd);
-    }
-    angleTuned = true;
-}
 
 /* Main PID function */
 float PID(float setpoint, float input, float& cumError, float& prevError, float lastTime, float Kp, float Ki, float Kd) {
@@ -152,7 +117,7 @@ void debug(){
   Serial.print((robotFilteredLinearDPS/360)*3.14*0.091);
   Serial.println(",");
   Serial.print("angleSetpoint:");
-  Serial.print(angleSetpoint-MAX_ANGLE);
+  Serial.print(angleSetpoint);
   Serial.println(",");
   Serial.println(",");
   Serial.print("Max2:");
@@ -185,13 +150,6 @@ void debug(){
 /* Update the timer to step the motors at the specified RPM */
 void motorSetDPS(float DPS) {
   float microsBetweenSteps;
-  if((DPS - motorSpeed)>maxAccel){
-    // Serial.println("ACCEL TOO FAST");
-    DPS = motorSpeed + maxAccel;
-  }else if ((DPS - motorSpeed) < (-maxAccel)){
-    // Serial.println("ACCEL TOO FAST");
-    DPS = motorSpeed - maxAccel;;
-  }
 
   if(DPS==0){
     microsBetweenSteps = FLT_MAX; 
@@ -216,6 +174,104 @@ void motorSetDPS(float DPS) {
   timerAlarmWrite(motorTimer, microsBetweenSteps, true);
   timerAlarmEnable(motorTimer);
 }
+
+/* PID Autotuning */
+void autoTuneAngle(){
+    double loopInterval = 20000;
+    PIDAutotuner tuner = PIDAutotuner();
+    tuner.setTargetInputValue(angleOffset);
+    tuner.setLoopInterval(loopInterval);
+    tuner.setOutputRange(-40, 40);
+    tuner.setZNMode(PIDAutotuner::ZNModeBasicPID);
+    tuner.startTuningLoop(micros());
+    long microseconds;
+    if(CONTROL_DEBUG){
+      Serial.println("Starting Autotuning!");
+    }
+    while (!tuner.isFinished()) {
+
+        long prevMicroseconds = microseconds;
+        microseconds = micros();
+
+        double input = pitch;
+
+        double output = tuner.tunePID(input, microseconds);
+        motorSetpoint += output;
+        motorSetpoint = constrain(motorSetpoint, -200, 200);
+        motorSetDPS(motorSetpoint);
+
+        while (micros() - microseconds < loopInterval) delayMicroseconds(1);
+    }
+
+    motorSetDPS(0);
+    angleKp = tuner.getKp();
+    angleKi = tuner.getKi();
+    angleKd = tuner.getKd();
+    if(CONTROL_DEBUG){
+    Serial.println("Autotuning finished with values:");
+    Serial.print("Kp: ");
+    Serial.println(angleKp);
+    Serial.print("Ki: ");
+    Serial.println(angleKi);
+    Serial.print("Kd: ");
+    Serial.println(angleKd);
+    }
+    angleTuned = true;
+}
+
+void autoTuneSpeed(){
+    double loopInterval = 20000;
+    PIDAutotuner tuner = PIDAutotuner();
+    tuner.setTargetInputValue(angleOffset);
+    tuner.setLoopInterval(loopInterval);
+    tuner.setOutputRange(angleOffset-1, angleOffset+1);
+    tuner.setZNMode(PIDAutotuner::ZNModeBasicPID);
+    tuner.startTuningLoop(micros());
+    long microseconds;
+    if(CONTROL_DEBUG){
+      Serial.println("Starting Speed Autotuning!");
+    }
+    while (!tuner.isFinished()) {
+
+        long prevMicroseconds = microseconds;
+        microseconds = micros();
+
+        double input = robotFilteredLinearDPS;
+
+         /* Calculate Robot Actual Speed */
+        robotLinearDPS = -motorSpeed + angularVelocity;
+        robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
+
+        /* Angle Loop */
+        
+        motorSetpoint = PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+        angleLastTime = millis();
+        motorSetpoint = constrain(motorSetpoint, -200, 200);
+        motorSetDPS(motorSetpoint);
+
+        double output = tuner.tunePID(input, microseconds);
+
+        speedSetpoint=output;
+
+        while (micros() - microseconds < loopInterval) delayMicroseconds(1);
+    }
+
+    speedSetpoint = 0;
+    speedKp = tuner.getKp();
+    speedKi = tuner.getKi();
+    speedKd = tuner.getKd();
+    if(CONTROL_DEBUG){
+    Serial.println("Autotuning finished with values:");
+    Serial.print("Kp: ");
+    Serial.println(speedKp);
+    Serial.print("Ki: ");
+    Serial.println(speedKi);
+    Serial.print("Kd: ");
+    Serial.println(speedKd);
+    }
+    speedTuned = true;
+}
+
 
 //-------------------------------- Interrupt Servce Routines ----------------------------
 
@@ -264,6 +320,9 @@ void taskMovement(void* pvParameters) {
     while(!angleTuned){
       autoTuneAngle();
     }
+    while(!speedTuned){
+      autoTuneSpeed();
+    }
 
     /* Calculate Robot Actual Speed */
     robotLinearDPS = -motorSpeed + angularVelocity;
@@ -271,20 +330,24 @@ void taskMovement(void* pvParameters) {
 
     /* Angle Loop */
     
-    motorSetpoint = PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+    motorSetpoint += PID(ANGLE_OFFSET, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
     angleLastTime = millis();
     motorSetpoint = constrain(motorSetpoint, -200, 200);
     motorSetDPS(motorSetpoint);
 
     /* Speed Loop */
-
-    angleSetpoint = PID(-speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, KP_SPEED, KI_SPEED, KD_SPEED);
-    speedLastTime = millis();
-    angleSetpoint = constrain(angleSetpoint, angleOffset-MAX_ANGLE, angleOffset+MAX_ANGLE);
+    if(controlCycle%3==0){
+      angleSetpoint = PID(-speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
+      speedLastTime = millis();
+      angleSetpoint = constrain(angleSetpoint, angleOffset-MAX_ANGLE, angleOffset+MAX_ANGLE);
+    }
 
     /* Position Controller */
-    speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
-    posLastTime = millis();    
+    // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
+    posLastTime = millis();
+
+    /* Control Cycle */
+    controlCycle = controlCycle%3;   
     if(CONTROL_DEBUG){
       debug();
     }
