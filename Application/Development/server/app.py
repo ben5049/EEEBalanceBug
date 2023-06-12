@@ -12,7 +12,7 @@ TIMEOUT = 30
 rovers = []
 isSpinning = False
 spinTime = time()
-DEBUG = True
+DEBUG = False
 hostip = '54.209.183.94'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
@@ -51,12 +51,12 @@ def rover():
         r.nickname = data["nickname"]
         
         try:
-            cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", (data["MAC"], data["nickname"]))
+            cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", (str(data["MAC"]), data["nickname"]))
         except mariadb.Error as e:
-            cur.execute("SELECT * FROM Rovers WHERE MAC=?", (data["MAC"],))
+            cur.execute("SELECT * FROM Rovers WHERE MAC=?", (str(data["MAC"]),))
             flag = True
             for mac, nick in cur:
-                if mac == data["MAC"]:
+                if str(mac) == str(data["MAC"]):
                     r.nickname = nick
                     flag = False
             if flag:
@@ -98,9 +98,9 @@ def rover():
         # cur.execute("SELECT * FROM Rovers")
         # for mac, nickname in cur:
         #     print(mac, nickname)
-        cur.execute("SELECT * FROM Diagnostics")
-        for mac, timestamp, battery, connection, sessionid in cur:
-            print(mac, timestamp, battery, connection, sessionid, "THIS IS IN Diagnostics Table")
+        # cur.execute("SELECT * FROM Diagnostics")
+        # for mac, timestamp, battery, connection, sessionid in cur:
+        #     print(mac, timestamp, battery, connection, sessionid, "THIS IS IN Diagnostics Table")
         # cur.execute("SELECT * FROM ReplayInfo")
         # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
         #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
@@ -312,9 +312,8 @@ def findShortestPath():
     P = dijkstra.formatPredecessor(P)
 
     if DEBUG:
-        print(data)
-        print(tree)
-        print(P)
+        print(tree, "shortestPath tree")
+        print(P, "shortestPath predecessor")
     return make_response(jsonify(P), 200) # for testing
 
 
@@ -333,15 +332,14 @@ def estop():
     
     if flag:
         return make_response(jsonify({"error":"Invalid MAC address"}))
-    if DEBUG:
-        print(data)
     return make_response(jsonify({"success":"estopped"}))
 
 @app.route("/led_driver/red", methods=["POST"])
 def led_driver_red():
     global isSpinning, spinTime
     data = request.get_json()
-    print(data, "red")
+    if DEBUG:
+        print(isSpinning, time()-spinTime)
     if isSpinning and time()-spinTime < TIMEOUT/3:
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
@@ -352,7 +350,8 @@ def led_driver_red():
 def led_driver_blue():
     global isSpinning, spinTime
     data = request.get_json()
-    print(data, "blue")
+    if DEBUG:
+        print(isSpinning, time()-spinTime)
     if isSpinning and time()-spinTime < TIMEOUT/3:
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
@@ -363,7 +362,8 @@ def led_driver_blue():
 def led_driver_yellow():
     global isSpinning, spinTime
     data = request.get_json()
-    print(data, "yellow")
+    if DEBUG:
+        print(isSpinning, time()-spinTime)
     if isSpinning and time()-spinTime < TIMEOUT/3:
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
