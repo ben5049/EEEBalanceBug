@@ -90,6 +90,7 @@ void setup() {
   pinMode(STEPPER_R_DIR, OUTPUT);
   pinMode(VBUS, INPUT);
   pinMode(VBAT, INPUT);
+  pinMode(SERVO_PIN,INPUT);
 
   /* Create SPI mutex */
   if (mutexSPI == NULL) {
@@ -206,7 +207,6 @@ void setup() {
 //--------------------------------- Loop -----------------------------------------------
 
 void loop() {
-  vTaskDelay(100);
   // SERIAL_PORT.print("Pitch:");
   // SERIAL_PORT.print(pitch);
   // SERIAL_PORT.print(", Yaw:");
