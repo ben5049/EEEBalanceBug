@@ -59,8 +59,6 @@ def formatPredecessor(P):
     for key in P:
         d[i] = {"mapsto":-1, "xcoord":key[0], "ycoord":key[1]}
         i+=1
-    print("\n")
-    print(d)
     for key in P:
         pred = P[key] #pred is (0,0), (100,0)
         prednode = -1
