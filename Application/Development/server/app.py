@@ -73,8 +73,7 @@ def rover():
     
     r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
-    resp = {"next_actions" : resp}
-    resp["clear_queue"] = r.estop 
+    resp = {"next_actions" : resp, "clear_queue":r.estop}
     if 1 in resp["next_actions"]:
         global isSpinning, spinTime
         isSpinning = True
