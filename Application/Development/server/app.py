@@ -9,8 +9,11 @@ from json import loads
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
-
-hostip = '3.89.219.113'
+rovers = []
+isSpinning = False
+spinTime, startup = time(), int(time())
+DEBUG = False
+hostip = '54.175.107.58'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
@@ -26,11 +29,6 @@ except mariadb.Error as e:
 
 cur = conn.cursor()
 
-rovers = []
-
-isSpinning = False
-spinTime, startup = time(), int(time())
-
 @app.route("/")
 def hello():
     return jsonify({"hello":"world"})
@@ -39,7 +37,7 @@ def hello():
 @app.route("/rover", methods=["POST"])
 def rover():
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
-    print(data)
+    
     r = 0
     flag = True
     for rover in rovers:
@@ -50,6 +48,8 @@ def rover():
     if flag:
         r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
         r.pause = True
+        r.nickname = data["nickname"]
+        
         try:
             cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", (data["MAC"], data["nickname"]))
         except mariadb.Error as e:
@@ -57,6 +57,7 @@ def rover():
             flag = True
             for mac, nick in cur:
                 if mac == data["MAC"]:
+                    r.nickname = nick
                     flag = False
             if flag:
                 return make_response(jsonify({"error":"Specified MAC does not exist"}), 400)                
@@ -69,11 +70,11 @@ def rover():
             r.sessionId = x[0]
         
         rovers.append(r)
-    r.nickname = data["nickname"]
+    
     r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     resp = {"next_actions" : resp}
-    resp["clear_queue"] = r.estop 
+    r.estop = bool(resp["clear_queue"]) 
     if 1 in resp["next_actions"]:
         global isSpinning, spinTime
         isSpinning = True
@@ -92,18 +93,23 @@ def rover():
                 cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (r.sessionId, node.position[0], node.position[1], str(neighbours)))
     except mariadb.Error as e:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
-    # cur.execute("SELECT * FROM Rovers")
-    # for mac, nickname in cur:
-    #     print(mac, nickname)
-    # cur.execute("SELECT * FROM Diagnostics")
-    # for mac, timestamp, battery, connection in cur:
-    #     print(mac, timestamp, battery, connection)
-    # cur.execute("SELECT * FROM ReplayInfo")
-    # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-    #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
-    # cur.execute("SELECT * FROM Sessions")
-    # for mac, sessionId, SessionNickname in cur:
-    #     print(mac, sessionId, sessionNickname)
+    
+    if DEBUG:
+        print(data)
+        # cur.execute("SELECT * FROM Rovers")
+        # for mac, nickname in cur:
+        #     print(mac, nickname)
+        # cur.execute("SELECT * FROM Diagnostics")
+        # for mac, timestamp, battery, connection in cur:
+        #     print(mac, timestamp, battery, connection)
+        # cur.execute("SELECT * FROM ReplayInfo")
+        # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
+        #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+        # cur.execute("SELECT * FROM Sessions")
+        # for mac, sessionId, SessionNickname in cur:
+        #     print(mac, sessionId, SessionNickname)
+        print(r.actions, "ACTIONS")
+        print(resp)
     return make_response(jsonify(resp), 200)
 
 # works
@@ -141,6 +147,10 @@ def allrovers():
         temp["nickname"] = rover[1]
         temp["connected"] = False
         d.append(temp)
+    if DEBUG:
+        print(command)
+        print(d)
+        print(disallowedMacs)
     return make_response(jsonify(d), 200)
 
 # works
@@ -161,6 +171,9 @@ def replay():
     resp = {}
     for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, sessionid in cur:
         resp[timestamp] = [xpos, ypos, whereat, orientation, tofleft, tofright]
+    if DEBUG:
+        print(data)
+        print(resp)
     return make_response(jsonify(resp))
 
 # works
@@ -174,7 +187,8 @@ def sessions():
         temp["MAC"] = mac
         temp["nickname"] = nickname
         d.append(temp)
-
+    if DEBUG:
+        print(d)
     return make_response(jsonify(d), 200)
 
 # works
@@ -189,12 +203,14 @@ def diagnostics():
     for mac, timestamp, battery, connection, sessionid in cur:
         t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
         d.append(t)
+    if DEBUG:
+        print(data)
+        print(d)
     return make_response(jsonify(d), 200)
 
 # works
 @app.route("/client/pause", methods=["POST"])
 def pause():
-    print("PAUSED")
     data = request.get_json()
     try:
         mac = str(data["MAC"])
@@ -208,13 +224,14 @@ def pause():
 
     if flag:
         return make_response(jsonify({"error":"Selected rover does not exist, or is not currently connected"}), 400)
-    
+    if DEBUG:
+        print("PAUSED")
+        print(data)
     return make_response(jsonify({"success":"successfully paused rover"}), 200)
 
 # works
 @app.route("/client/play", methods=["POST"])
 def play():
-    print("PLAYED")
     data = request.get_json()
     try:
         mac = str(data["MAC"])
@@ -227,7 +244,9 @@ def play():
             flag = False
     if flag:
         return make_response(jsonify({"error":"Selected rover does not exist on play, or is not currently connected"}), 400)
-    
+    if DEBUG:
+        print("PLAYED")
+        print(data)
     return make_response(jsonify({"success":"successfully played rover"}), 200)
 
 # works
@@ -275,7 +294,6 @@ def findShortestPath():
     except:
         return make_response(jsonify({"error":"Incorrectly formatted request: missing sessionid or start"}), 400)
     tree = {}
-    print(start_x, start_y, "shortestPath")
     try:
         cur.execute("SELECT * FROM Trees WHERE SessionID=? ", (sessionid,))
     except:
@@ -287,14 +305,17 @@ def findShortestPath():
         tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
     
     tree = dijkstra.assertValid(tree)
-    print(tree, "tree")
 
     P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
 
     if P is None:
-        return make_response(jsonify({"error":"start point too far away from any given node"}), 400)
-    print(P, "P")
+        return make_response(jsonify({"error":"Invalid starting point"}), 400)
     P = dijkstra.formatPredecessor(P)
+
+    if DEBUG:
+        print(data)
+        print(tree)
+        print(P)
     return make_response(jsonify(P), 200) # for testing
 
 
@@ -313,6 +334,8 @@ def estop():
     
     if flag:
         return make_response(jsonify({"error":"Invalid MAC address"}))
+    if DEBUG:
+        print(data)
     return make_response(jsonify({"success":"estopped"}))
 
 @app.route("/led_driver/red", methods=["POST"])
@@ -359,5 +382,5 @@ def not_found(e):
     return make_response(jsonify({"error":str(e)}), 404)
 
 @app.errorhandler(500)
-def bad_request(e):
+def internal_error(e):
     return make_response(jsonify({"error":str(e)}), 500)

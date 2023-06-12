@@ -23,15 +23,16 @@ THRESHOLD = 10
 # distances based on position
 # returns predecessor graph showing shortest path from startNode to every point
 
-def thresholding(pos1, pos2):
-        if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
-            return True
-        else:
-            return False
+def findDist(pos1, pos2):
+        return (pos1[0]-pos2[0])**2 + (pos1[0]-pos1[1])**2
 
 def dijkstra(graph, startPos):
+    minDist = 1e9
+    startNode = 0
     for node in graph:
-        if thresholding(startPos, node):
+        dist = findDist(startPos, node)
+        if  dist < minDist:
+            minDist = dist
             startNode = node
             break
     try:
