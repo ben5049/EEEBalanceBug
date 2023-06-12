@@ -58,8 +58,4 @@ void taskDebug(void *pvParameters) {
   }
 }
 
-extern volatile float angleKp;
-extern volatile float angleKi;
-extern volatile float angleKd;
-
 #endif

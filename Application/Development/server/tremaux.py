@@ -1,7 +1,7 @@
 # Aranya Gupta
 # 31/5/2023
 from triangulate import triangulate
-# TODO: general testing & work on threshold checking
+from time import time
 THRESHOLD = 2
 class Node:
     # state is either 1 or 2 - 1 being visited once, 2 being visited twice
@@ -44,7 +44,7 @@ class Rover():
     sessionId = -1
     lastSeen = 0
     estop = False 
-
+    startup = 0
     pause = False
 
     def __init__(self, position, whereat, name):
@@ -52,7 +52,7 @@ class Rover():
         n = Node(position)
         self.tree[n] = []
         self.priornode = n
-        
+        self.startup = int(time())
         if whereat == 0:
             self.actions.append(1)
             self.priorwhereat = 1

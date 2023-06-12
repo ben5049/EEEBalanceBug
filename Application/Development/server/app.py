@@ -11,7 +11,7 @@ cors = CORS(app, resources={r"/*":{"origins":"*"}})
 TIMEOUT = 30
 rovers = []
 isSpinning = False
-spinTime, startup = time(), int(time())
+spinTime = time()
 DEBUG = False
 hostip = '54.209.183.94'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
@@ -62,7 +62,7 @@ def rover():
             if flag:
                 return make_response(jsonify({"error":"Specified MAC does not exist"}), 400)                
         try:
-            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], startup+int(data["timestamp"])))
+            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], r.startup+int(data["timestamp"])))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
             return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
@@ -73,8 +73,8 @@ def rover():
     
     r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
-    resp = {"next_actions" : resp}
-    r.estop = bool(resp["clear_queue"]) 
+    resp = {"next_actions" : resp, "clear_queue":r.estop}
+    print(resp["next_actions"])
     if 1 in resp["next_actions"]:
         global isSpinning, spinTime
         isSpinning = True
@@ -83,8 +83,8 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done
     try:
-        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (startup+int(data["timestamp"]), data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], startup+int(data["timestamp"]), data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
+        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+int(data["timestamp"]), data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
+        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection) VALUES (?, ?, ?, ?)", (data["MAC"], r.startup+int(data["timestamp"]), data["diagnostics"]["battery"], data["diagnostics"]["connection"]))
         if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
