@@ -1,6 +1,5 @@
 # Aranya Gupta 
 # 21/5/2023
-from tremaux import Node    
 
 # makes sure graph is bidirectional - if B is a neighbour of A, 
 # A must be a neighbour of B 
@@ -18,13 +17,9 @@ def findDist(node1, node2):
 
 THRESHOLD = 10
 
-# graph is hash table of Node as defined in tremaux 
-# each Node has its position, Dijkstra will calculate 
-# distances based on position
+# graph is hash table of x-y positions as defined in tremaux 
+# Dijkstra will calculate distances based on position
 # returns predecessor graph showing shortest path from startNode to every point
-
-def findDist(pos1, pos2):
-        return (pos1[0]-pos2[0])**2 + (pos1[0]-pos1[1])**2
 
 def dijkstra(graph, startPos):
     minDist = 1e9
