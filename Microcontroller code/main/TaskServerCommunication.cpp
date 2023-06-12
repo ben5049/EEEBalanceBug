@@ -20,7 +20,7 @@ TaskHandle_t taskServerCommunicationHandle = nullptr;
 const char* ssid = "OnePlus 8";
 const char* password = "abc123def";
 
-String serverName = "http://34.205.64.125:5000/";
+String serverName = "http://100.27.18.94:5000/";
 String hostname = "ESP32 Node";
 
 float ang;
@@ -38,7 +38,7 @@ void configureWiFi() {
   SERIAL_PORT.print("Connected to WiFi network with IP Address: ");
   SERIAL_PORT.println(WiFi.localIP());
 
-  delay(1000);
+  delay(500);
 }
 
 uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
@@ -54,7 +54,34 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     String tofright = String(distanceRight);
     String mac = String(WiFi.macAddress());
     String rssi = String(WiFi.RSSI());
-    String postData = "{\"diagnostics\": {\"battery\":100,\"connection\":"+rssi+"},\"MAC\":"+mac+",\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":0,\"orientation\":"+orientation+",\"branches\":[],\"beaconangles\":[],\"tofleft\":"+tofleft+",\"tofright\":"+tofright+"}";
+    String postData = "{\"diagnostics\": {\"battery\":100,\"connection\":"+rssi+"},\"MAC\":\""+mac+"\",\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":0,\"orientation\":"+orientation+",\"branches\":[";
+    
+    float junctionAngle;
+    float beaconAngle; 
+    bool flag = false;
+    while (uxQueueMessagesWaiting(junctionAngleQueue) > 0){
+      if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE){
+        postData = postData + String(junctionAngle) + ",";
+        flag = true;
+      }
+    }
+    if (flag){
+      postData = postData.substring(0, postData.length()-1);
+    }
+    postData = postData + "],\"beaconangles\":[";
+    flag = false;
+  
+    while (uxQueueMessagesWaiting(beaconAngleQueue) > 0){
+      if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE){
+        postData = postData + String(beaconAngle) + ",";
+        flag = true;
+      }
+    }
+    if (flag){
+      postData = postData.substring(0, postData.length()-1);
+    }
+    postData = postData + "],\"tofleft\":"+tofleft+",\"tofright\":"+tofright+"}";
+    SERIAL_PORT.println(postData);
     return http.POST(postData);
   }
 }
@@ -118,10 +145,8 @@ robotCommand* parsePayload(String payload, uint8_t& numCommands) {
           commands[i] = IDLE;
           break;
         case 4:{
-          float newx = actions[i+1];
-          float newy = actions[i+2];
-          xPosition = newx;
-          yPosition = newy;
+          xPosition = actions[i+1];
+          yPosition = actions[i+2];
           break;
         }
         case 5:{

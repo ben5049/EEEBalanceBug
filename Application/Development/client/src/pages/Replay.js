@@ -76,11 +76,11 @@ const Replay = () => {
 	//---------------------------- Shortest Path ----------------------------------------
 
 	/* Create updating variables */
-	const [ShortestPath, UpdateShortestPath] = useState([]); /* Initially no shortest path selected */
+	const [ShortestPath, UpdateShortestPath] = useState({0:{mapsto: -1, xcoord: 1, ycoord: 1}, 1:{mapsto: -1, xcoord: 10, ycoord: 10}}); /* Initially no shortest path selected */
 	const [ShowShortestPath, UpdateShowShortestPath] = useState(false); /* Initially no shortest path displayed */
 
 	/* Calculate shortest path */
-	const handleShortestPath = () => {
+	const handleShortestPath = async () => {
 		console.log('Shortest Path');
 		UpdateShowShortestPath(true);
 		/* Input Validation: Check if start and end coordinates are digits */
@@ -89,38 +89,46 @@ const Replay = () => {
 			alert('Invalid coordinates. Please enter digits.');
 			return;
 		}
-		postStart(startCoordinates_X, startCoordinates_Y);
-		/* Visualise shortest path */
-		renderShortestPath();
+		await postStart(startCoordinates_X, startCoordinates_Y);
 	};
+
+	/* Visualise shortest path when shortest path changes */
+	useEffect(() => {
+		renderShortestPath();
+	}, [ShortestPath]);
 
 	/* Sends request to server for shortest path to every node from a given point (arguments: MAC, Start coordinates) */
 	const postStart = async (StartX, StartY) => {
-		/* Sends POST request to server */
-		const ShortestPathURL = "http://" + ServerIP + ":5000/client/shortestpath"; /* Pause endpoint */
+		const ShortestPathURL = "http://" + ServerIP + ":5000/client/shortestpath";
 		console.log("URL = " + ShortestPathURL);
-		fetch(ShortestPathURL, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ "sessionid": replayID, "start_x": StartX, "start_y": StartY }) /* Gives sessionID, start coordinate to server */
-		})
-		.then(response => response.json())  /* Parse response as JSON */
-		.then(data => {
-			console.log("Response from server:", data);  /* Log response data */
+
+		try {
+			/* Sends POST request to server */
+			const response = await fetch(ShortestPathURL, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ "sessionid": replayID, "start_x": StartX, "start_y": StartY }) /* Gives sessionID, start coordinate to server */
+			});
+
+			const data = await response.json(); /* Parse response as JSON */
+			console.log("Response from server:", data); /* Log response data */
 			UpdateShortestPath(data);
-		})
-		/* Error handling */
-		.catch(error => {
-			console.log("Error:", error);
-		});
-	};
+		} catch (error) {
+			/* Error handling */
+		  	console.log("Error:", error);
+		}
+	  };
 
 	/* Draws a circle at coordinates */
 	const renderPoints = (ctx, x, y, color) => {
 		ctx.strokeStyle = color;
 		ctx.lineWidth = 2;
+
+		/* Scale to canvas */
+		x  = ScaleToCanvas(x)
+		y  = ScaleToCanvas(y)
 	  
 		/* Draw a circle */
 		ctx.beginPath();
@@ -130,11 +138,49 @@ const Replay = () => {
 
 	const renderShortestPath = () => {
 		// TODO: add for all nodes in ShortestPath
+		
+		Object.entries(ShortestPath).forEach((node) => {
+			console.log("Shortest Path: " + node);
+		});
+		console.log("HERE");
+		
+		/* Find nearest node to end coordinate */
+		let ClosestNode = 0;
+		let minDistance = Infinity;
+		Object.entries(ShortestPath).forEach((node) => {
+			const distance = CalcDistance(node[1].xcoord, node[1].ycoord, endCoordinates_X, endCoordinates_Y);
+			console.log(distance);
+			if (distance < minDistance){
+				ClosestNode = node[0];
+				minDistance = distance;
+			}
+		});
+		const ClosestNodeObject = ShortestPath[ClosestNode]
+		console.log(ClosestNodeObject);
+		console.log("Closest Node: " + ClosestNode);
+		console.log("minDistance: " + minDistance);
 		/* Snap end coordinate to nearest node */
+		setEndCoordinates_X(ClosestNodeObject.xcoord);
+		setEndCoordinates_Y(ClosestNodeObject.ycoord);
 
-		/* Draw path to node in predecessor graph
-		   Follow till [0,0] or length of graph */
-		renderShortestPathSegment(startCoordinates_X, startCoordinates_Y, endCoordinates_X, endCoordinates_Y);
+		/* Draw path to next node in predecessor graph.
+		   Follow till -1 or length of graph */
+		let CurrentNode = ClosestNodeObject;
+		let NextNode = ShortestPath[CurrentNode.mapsto] /* Only maps to single value as only 1 closest path */
+		while (CurrentNode.mapsto != -1) {
+			/* Draw */
+			console.log("While Looped")
+			renderShortestPathSegment(CurrentNode.xcoord, CurrentNode.ycoord, NextNode.xcoord, NextNode.ycoord);
+			/* Move to next node pair */
+			CurrentNode = NextNode;
+			NextNode = ShortestPath[CurrentNode.mapsto];
+		}
+		
+		let start_x = CurrentNode.xcoord;
+		let start_y = CurrentNode.ycoord;
+		/* Snap start coordinate to last */
+		setStartCoordinates_X(start_x);
+		setStartCoordinates_Y(start_y);
 	}
 
 	/* Draw straight line between two nodes */
@@ -142,6 +188,11 @@ const Replay = () => {
 		const canvas = canvasRef.current;
 		const ctx = canvas.getContext('2d');
 		ctx.beginPath();
+		/* Scale */
+		x1  = ScaleToCanvas(x1)
+		y1  = ScaleToCanvas(y1)
+		x2  = ScaleToCanvas(x2)
+		y2  = ScaleToCanvas(y2)
 		ctx.moveTo(x1, y1);
 		ctx.lineTo(x2, y2);
 		ctx.strokeStyle = "yellow"; // Set the line color
@@ -149,6 +200,12 @@ const Replay = () => {
 		ctx.stroke();
 		ctx.setLineDash([])
 	}
+
+	const CalcDistance = (x1, y1, x2, y2) => {
+		// Pythagoras' theorem to find the distance between two points
+		console.log(x1, y1, x2, y2)
+		return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+	};
 
 	//---------------------------- Button Functions: onClick ----------------------------
 	
@@ -417,13 +474,23 @@ const Replay = () => {
 			const ctx = canvas.getContext('2d');
 			let l = 5; /* Change to alter length of each line */
 			let theta = orientation*Math.PI/180
-			/* Scale to canvas */
-			position_x  = ( position_x / MapDataMax ) * 700 + 30 /* WARNING: if edit, also change in postStart */
-			position_y  = ( position_y / MapDataMax ) * 700 + 30
+			/* Scale */
+			position_x  = ScaleToCanvas(position_x)
+			position_y  = ScaleToCanvas(position_y)
 			/* Draw */
 			drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
 			drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
 		}
+	}
+
+	/* Scale to canvas as coordinate system for rover different to canvas */
+	const ScaleToCanvas = (coordinate) => {
+		return ( coordinate / MapDataMax ) * 700 + 30 /* add offset so not touching border */
+	}
+
+	/* Scale to canvas as coordinate system for rover different to canvas */
+	const DescaleToCanvas = (coordinate) => {
+		return (( coordinate - 30 ) / 700 ) * MapDataMax /* add offset so not touching border */
 	}
 
 	//---------------------------- Mouse click coordinate select ------------------------
@@ -447,8 +514,8 @@ const Replay = () => {
 		const y = event.clientY - rect.top;
 	  
 		/* Update the start coordinates with the mouse position */
-		setStartCoordinates_X(String(Math.round(x)));
-		setStartCoordinates_Y(String(Math.round(y)));
+		setStartCoordinates_X(String(Math.round(DescaleToCanvas(x))));
+		setStartCoordinates_Y(String(Math.round(DescaleToCanvas(y))));
 	  
 		/* Remove the event listener after selecting the start point */
 		canvas.removeEventListener('click', handleCanvasClickStart);
@@ -473,8 +540,8 @@ const Replay = () => {
 		const y = event.clientY - rect.top;
 	  
 		/* Update the end coordinates with the mouse position */
-		setEndCoordinates_X(String(Math.round(x)));
-		setEndCoordinates_Y(String(Math.round(y)));
+		setEndCoordinates_X(String(Math.round(DescaleToCanvas(x))));
+		setEndCoordinates_Y(String(Math.round(DescaleToCanvas(y))));
 	  
 		/* Remove the event listener after selecting the end point */
 		canvas.removeEventListener('click', handleCanvasClickEnd);

@@ -36,11 +36,12 @@ const RoverCarousel = ({ rovers }) => {
 	//---------------------------- Button Functions: onClick ----------------------------
 
 	/* Select rover button (store seelcted rover's data) */
-	const handleRoverClick = (RoverMAC, RoverNickname) => {
+	const handleRoverClick = (RoverMAC, RoverNickname, SessionID) => {
 		console.log("SELECTED " + RoverMAC)
 		localStorage.setItem('MAC', RoverMAC);
 		localStorage.setItem('nickname', RoverNickname);
 		localStorage.setItem('ConnectedState', 'Start');
+		localStorage.setItem('SessionID', SessionID);
 	};
 
 	//---------------------------- Get Connected/Offline style --------------------------
@@ -89,7 +90,7 @@ const RoverCarousel = ({ rovers }) => {
 					<Link to={image.connected ? "/connected" : '#' } className="page-link" draggable={false}>
 							<button
 							className="carousel-button_RoverCarousel"
-							onClick={() => handleRoverClick(image.MAC, image.nickname)}
+							onClick={() => handleRoverClick(image.MAC, image.nickname, image.sessionid)}
 							>
 							<img
 								src={getImage(image.connected)}

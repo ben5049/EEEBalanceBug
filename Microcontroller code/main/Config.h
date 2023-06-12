@@ -10,11 +10,11 @@ Pin assignments for Group 1's EEEBalanceBug
 #define CONFIG_H
 
 /* General robot information */
-#define MAX_ACCEL 15 /* Maximum Acceleration */
+#define MAX_ACCEL 15         /* Maximum Acceleration */
 #define FLT_MAX 4294967040.0 /* Max float */
-#define STEPS 6400        /* Steps per revolution */
-#define ROVER_WIDTH 159   /* Wheel-to-wheel width in mm*/
-#define WHEEL_DIAMETER 91 /* Wheel diameter in mm*/
+#define STEPS 6400           /* Steps per revolution */
+#define ROVER_WIDTH 159      /* Wheel-to-wheel width in mm*/
+#define WHEEL_DIAMETER 91    /* Wheel diameter in mm*/
 #define MIN_RPM 10
 #define MAX_RPM 1000
 #define MAX_MAZE_DIMENSION 3000 /* Largest dimension of the maze in mm, used for rejecting anomalous ToF sensor data */
@@ -31,12 +31,14 @@ Pin assignments for Group 1's EEEBalanceBug
 #define I2C_FREQ 400000 /* I2C frequency (fast mode) */
 
 /* IMU */
+#define ENABLE_IMU_TASK false             /* Setting "true" enables the IMU sampling task */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
+#define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
 #define IMU_SAMPLING_FREQUENCY_DMP 57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
-#define ENABLE_TOF_TASK false   /* Setting "true" enables the ToF sampling task */
+#define ENABLE_TOF_TASK true    /* Setting "true" enables the ToF sampling task */
 #define TASK_TOF_DEBUG true     /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
 #define TOF_RIGHT_ADDRESS 0x30  /* I2C address for the right ToF sensor */
 #define TOF_LEFT_ADDRESS 0x31   /* I2C address for the left ToF sensor */
@@ -49,11 +51,11 @@ Pin assignments for Group 1's EEEBalanceBug
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
-#define FPGA_ADDR 0x55          /* I2C address for the FPGA */
-#define FPGA_IMAGE_WIDTH 640    /* How wide the image is in pixels */
-#define FPGA_R_THRESHOLD 30     /* Threshold number of red pixels to count red beacon as having been detected */
-#define FPGA_Y_THRESHOLD 20     /* Threshold number of yellow pixels to count yellow beacon as having been detected */
-#define FPGA_B_THRESHOLD 50     /* Threshold number of blue pixels to count blue beacon as having been detected */
+#define FPGA_ADDR 0x55           /* I2C address for the FPGA */
+#define FPGA_IMAGE_WIDTH 640     /* How wide the image is in pixels */
+#define FPGA_R_THRESHOLD 30      /* Threshold number of red pixels to count red beacon as having been detected */
+#define FPGA_Y_THRESHOLD 20      /* Threshold number of yellow pixels to count yellow beacon as having been detected */
+#define FPGA_B_THRESHOLD 50      /* Threshold number of blue pixels to count blue beacon as having been detected */
 
 /* Spin task */
 #define TASK_SPIN_FREQUENCY 10           /* Frequency to run the spin task at in Hz (default = 10Hz) */
@@ -70,7 +72,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
 
 /* Controller */
-#define CONTROL_DEBUG true /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
+#define CONTROL_DEBUG false /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 
 #define KP_POS 0.00
 #define KI_POS 0.00
@@ -94,7 +96,7 @@ Pin assignments for Group 1's EEEBalanceBug
 /* Debug task*/
 #define ENABLE_DEBUG_TASK true
 
-#if ENABLE_DEBUG_TASK == true
+#if ENABLE_DEBUG_TASK == false
 #define CONFIG_FREERTOS_USE_TRACE_FACILITY
 #endif
 
