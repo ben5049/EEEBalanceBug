@@ -1,3 +1,9 @@
+/*
+Authors: Aranya Gupta
+Date created: 05/06/23
+
+Task to do dead reckoning while rover is moving
+*/
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
@@ -40,18 +46,18 @@ void taskDeadReckoning(void *pvParameters) {
   while (true) {
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-    /*
-    PUT DEAD RECKONING CODE HERE TO RUN IN A LOOP
-    */
+    /* Use dead reckoning only when moving forwards */
     if (currentCommand == FORWARD){
+      /* Find the number of steps since the previous time dead reckoning was used - NOTE: Check if priorStepperLeft/RightSteps resets */
       int32_t leftSteps = stepperLeftSteps-priorStepperLeftSteps;
       int32_t rightSteps = stepperRightSteps-priorStepperRightSteps;
+
+      /* Logic for if the rover has gone straight (# left wheel step ~= # right wheel steps)*/
       if (leftSteps-rightSteps < stepDifferenceThreshold && leftSteps-rightSteps>-stepDifferenceThreshold){
         xPosition = xPosition + leftSteps/STEPS*cos(yaw*PI/180)*rotationsToDistance;
         yPosition = yPosition - leftSteps/STEPS*sin(yaw*PI/180)*rotationsToDistance;
-        priorStepperLeftSteps = stepperLeftSteps;
-        priorStepperRightSteps = stepperRightSteps;
       }
+      /* Logic for if the rover has turned right (# left wheel step > # right wheel steps)*/
       else if (leftSteps-rightSteps>stepDifferenceThreshold){
         float theta = (leftSteps-rightSteps)/ROVER_WIDTH;
         float r = leftSteps/STEPS*rotationsToDistance/theta;
@@ -60,6 +66,7 @@ void taskDeadReckoning(void *pvParameters) {
         xPosition = xPosition + a*sin(theta);
         yPosition = yPosition - a*cos(theta); 
       }
+      /* Logic for if the rover has turned left (# left wheel step < # right wheel steps)*/
       else if (leftSteps-rightSteps<-stepDifferenceThreshold){
         float theta = (rightSteps-leftSteps)/ROVER_WIDTH;
         float r = rightSteps/STEPS*rotationsToDistance/theta;
@@ -68,6 +75,8 @@ void taskDeadReckoning(void *pvParameters) {
         xPosition = xPosition - a*sin(theta);
         yPosition = yPosition + a*cos(theta); 
       }
+      priorStepperLeftSteps = stepperLeftSteps;
+      priorStepperRightSteps = stepperRightSteps;
     }
   }
 }
