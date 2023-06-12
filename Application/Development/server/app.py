@@ -98,9 +98,9 @@ def rover():
         # cur.execute("SELECT * FROM Rovers")
         # for mac, nickname in cur:
         #     print(mac, nickname)
-        # cur.execute("SELECT * FROM Diagnostics")
-        # for mac, timestamp, battery, connection in cur:
-        #     print(mac, timestamp, battery, connection)
+        cur.execute("SELECT * FROM Diagnostics")
+        for mac, timestamp, battery, connection in cur:
+            print(mac, timestamp, battery, connection, "THIS IS IN Diagnostics Table")
         # cur.execute("SELECT * FROM ReplayInfo")
         # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
         #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
