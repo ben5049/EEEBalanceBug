@@ -34,7 +34,7 @@ def dijkstra(graph, startPos):
         if  dist < minDist:
             minDist = dist
             startNode = node
-            break
+
     try:
         G = {startNode: 0} # distance from startNode to given node
         P = {startNode: None} # predecessor graph - shortest path from given node to start node
