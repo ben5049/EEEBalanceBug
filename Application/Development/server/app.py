@@ -12,7 +12,7 @@ TIMEOUT = 30
 rovers = []
 isSpinning = False
 spinTime = time()
-DEBUG = False
+DEBUG = True
 hostip = '54.209.183.94'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
@@ -74,7 +74,6 @@ def rover():
     r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     resp = {"next_actions" : resp, "clear_queue":r.estop}
-    print(resp["next_actions"])
     if 1 in resp["next_actions"]:
         global isSpinning, spinTime
         isSpinning = True
