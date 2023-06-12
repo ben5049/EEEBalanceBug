@@ -51,9 +51,9 @@ def rover():
         r.nickname = data["nickname"]
         
         try:
-            cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", (data["MAC"], data["nickname"]))
+            cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", (str(data["MAC"]), data["nickname"]))
         except mariadb.Error as e:
-            cur.execute("SELECT * FROM Rovers WHERE MAC=?", (data["MAC"],))
+            cur.execute("SELECT * FROM Rovers WHERE MAC=?", (str(data["MAC"]),))
             flag = True
             for mac, nick in cur:
                 if mac == data["MAC"]:
