@@ -26,9 +26,9 @@ module EEE_IMGPROC(
 	source_eop,
 	
 	// hsv
-	hsv_h,
-	hsv_s,
-	hsv_v,
+//	hsv_h,
+//	hsv_s,
+//	hsv_v,
 	
 	// conduit
 	mode,
@@ -66,9 +66,9 @@ output								source_sop;
 output								source_eop;
 
 //HSV
-output reg[8:0] hsv_h; //0-360
-output reg[7:0] hsv_s; //0-255
-output reg[7:0] hsv_v; //0-255
+reg[8:0] hsv_h; //0-360
+reg[7:0] hsv_s; //0-255
+reg[7:0] hsv_v; //0-255
 
 // conduit export
 input                         mode;
@@ -97,13 +97,13 @@ wire         sop, eop, in_valid, out_ready;
 ////////////////////////////////////////////////////////////////////////
 
 //hsv, red
-assign red_detect_h = ((9'd0< hsv_h && hsv_h < 9'd10 )|| (9'd350 < hsv_h && hsv_h < 9'd360)) ? 1'b1 : 1'b0;
+assign red_detect_h = ((9'd0< hsv_h && hsv_h < 9'd20 )|| (9'd340 < hsv_h && hsv_h < 9'd360)) ? 1'b1 : 1'b0;
 assign red_detect_s = (8'd180 < hsv_s) ? 1'b1 : 1'b0;
 assign red_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
 
 //hsv, yellow
-assign yellow_detect_h = (9'd30 < hsv_h && hsv_h < 9'd40) ? 1'b1 : 1'b0;
-assign yellow_detect_s = (8'd150 < hsv_s) ? 1'b1 : 1'b0;
+assign yellow_detect_h = (9'd30 < hsv_h && hsv_h < 9'd50) ? 1'b1 : 1'b0;
+assign yellow_detect_s = (8'd170 < hsv_s) ? 1'b1 : 1'b0;
 assign yellow_detect_v = (8'd230 < hsv_v) ? 1'b1 : 1'b0;
 
 //hsv, blue
@@ -147,7 +147,7 @@ wire rbb_active, ybb_active, bbb_active, mid_line;
 assign rbb_active = (x == r_left) | (x == r_right) | (y == r_top) | (y == r_bottom);
 assign ybb_active = (x == y_left) | (x == y_right) | (y == y_top) | (y == y_bottom);
 assign bbb_active = (x == b_left) | (x == b_right) | (y == b_top) | (y == b_bottom);
-assign mid_line = (x == r_x_avg) | (x == y_x_avg) | (x == b_x_avg); // middle line across the mid point
+//assign mid_line = (x == r_x_avg) | (x == y_x_avg) | (x == b_x_avg); // middle line across the mid point
 
 assign new_image = rbb_active ? {8'hff, 8'h0, 8'h0} :
 						 ybb_active ? {8'hff, 8'hff, 8'h0} :
@@ -181,46 +181,64 @@ always@(posedge clk) begin
 end
 
 // Average x-coordinates for each colour
-reg [10:0] sum_red;
-reg [10:0] sum_yellow;
-reg [10:0] sum_blue;
-reg [10:0] count_red;
-reg [10:0] count_yellow;
-reg [10:0] count_blue;
-reg [15:0] r_x_avg;
-reg [15:0] y_x_avg;
-reg [15:0] b_x_avg;
+reg [31:0] r_sum;
+reg [31:0] y_sum;
+reg [31:0] b_sum;
+reg [23:0] r_count;
+reg [23:0] y_count;
+reg [23:0] b_count;
+
+reg [31:0] sum_red;
+reg [31:0] sum_yellow;
+reg [31:0] sum_blue;
+reg [23:0] count_red;
+reg [23:0] count_yellow;
+reg [23:0] count_blue;
+
+//reg [15:0] r_x_avg;
+//reg [15:0] y_x_avg;
+//reg [15:0] b_x_avg;
 
 always @(posedge clk) begin
-    if (in_valid) begin
-        if (red_detect) begin
-            sum_red <= sum_red + x;
-            count_red <= count_red + 1;
-        end
-        if (yellow_detect) begin
-            sum_yellow <= sum_yellow + x;
-            count_yellow <= count_yellow + 1;
-        end
-        if (blue_detect) begin
-            sum_blue <= sum_blue + x;
-            count_blue <= count_blue + 1;
-        end
-    end
-end
-
-always @(posedge clk) begin
-    if (in_valid) begin
-        if (count_red != 0 && count_red > count_yellow && count_red > count_blue)
-            r_x_avg <= {5'b0, sum_red[10:0]} / count_red;
-        if (count_yellow != 0 && count_yellow > count_red && count_yellow > count_blue)
-            y_x_avg <= {5'b0, sum_yellow[10:0]} / count_yellow;
-        if (count_blue != 0 && count_blue > count_red && count_blue > count_yellow)
-            b_x_avg <= {5'b0, sum_blue[10:0]} / count_blue;
-    end
-end
 	
+	// If we are on the first pixel of the frame, reset all counters and sums
+	if (x == 11'b0 & y == 11'b0) begin
+		r_sum <= 32'b0;
+		y_sum <= 32'b0;
+		b_sum <= 32'b0;
+		r_count <= 24'b0;
+		y_count <= 24'b0;
+		b_count <= 24'b0;
+	end
+	
+	// If we are on the last pixel of the frame, send the data to the I2C registers
+	else if ((x == IMAGE_W-1) & (y == IMAGE_H-1)) begin
+		sum_red <= r_sum;
+		sum_yellow <= y_sum;
+		sum_blue <= b_sum;
+		count_red <= r_count;
+		count_yellow <= y_count;
+		count_blue <= b_count;
+	end
+	
+	// Otherwise count coloured pixels and their x coordinates
+	else if (in_valid) begin
+		if (red_detect) begin
+			r_sum <= r_sum + x;
+			r_count <= r_count + 1;
+		end
+     if (yellow_detect) begin
+			y_sum <= y_sum + x;
+			y_count <= y_count + 1;
+		end
+     if (blue_detect) begin
+			b_sum <= b_sum + x;
+			b_count <= b_count + 1;
+		end
+   end	 
+end
 
- 
+
 // Find first and last pixels for each colour detected
 reg [10:0] r_x_min, r_y_min, r_x_max, r_y_max;
 reg [10:0] y_x_min, y_y_min, y_x_max, y_y_max;
@@ -478,7 +496,14 @@ i2c i2c_slave(
 	.RST(1'b0),
 	.LEDG(LEDG),
 	.LEDR(LEDR),
-	.SW_1(1'b1));
+	.SW_1(1'b1),
+	.sum_red(sum_red),
+	.sum_yellow(sum_yellow),
+	.sum_blue(sum_blue),
+	.count_red(count_red),
+	.count_yellow(count_yellow),
+	.count_blue(count_blue)
+	);
 
 endmodule
 

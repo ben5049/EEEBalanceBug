@@ -3332,6 +3332,7 @@ int main()
    21860:	00802004 	movi	r2,128
    21864:	e0bffc0d 	sth	r2,-16(fp)
 
+    	// STUPID ERROR :(
 //        OV8865SetExposure(exposureTime);
 //        OV8865SetGain(gain);
         Focus_Init();
