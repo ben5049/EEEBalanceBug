@@ -1,6 +1,9 @@
 #!/bin/sh
-DEBUG=false 
+DEBUG=false
+SERVER="18.234.100.102"
+
 sudo git pull https://aranyagupta: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@github.com/ben5049/EEEBalanceBug
+sudo sed -i 's/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/${SERVER}/ /etc/nginx/conf.d/react.conf'
 cd client
 npm run build
 sudo cp -rf build /var/www/html/react
