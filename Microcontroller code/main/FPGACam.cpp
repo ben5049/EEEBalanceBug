@@ -87,7 +87,7 @@ bool FPGACam::getR(bool debug) {
   if (countR >= thresholdR) {
     averageRedX = sumR / countR;
   } else {
-    averageRedX = INT_MAX;
+    averageRedX = 0x7fff;
   }
 
   return true;
@@ -124,7 +124,7 @@ bool FPGACam::getY(bool debug) {
   if (countY >= thresholdY) {
     averageYellowX = sumY / countY;
   } else {
-    averageYellowX = INT_MAX;
+    averageYellowX = 0x7fff;
   }
 
   return true;
@@ -161,7 +161,7 @@ bool FPGACam::getB(bool debug) {
   if (countB >= thresholdB) {
     averageBlueX = sumB / countB;
   } else {
-    averageBlueX = INT_MAX;
+    averageBlueX = 0x7fff;
   }
 
   return true;
@@ -226,19 +226,19 @@ bool FPGACam::getRYB(bool debug) {
   if (countR >= thresholdR) {
     averageRedX = sumR / countR;
   } else {
-    averageRedX = INT_MAX;
+    averageRedX = 0x7fff;
   }
 
   if (countY >= thresholdY) {
     averageYellowX = sumY / countY;
   } else {
-    averageYellowX = INT_MAX;
+    averageYellowX = 0x7fff;
   }
 
   if (countB >= thresholdB) {
     averageBlueX = sumB / countB;
   } else {
-    averageBlueX = INT_MAX;
+    averageBlueX = 0x7fff;
   }
 
   if (debug) {
