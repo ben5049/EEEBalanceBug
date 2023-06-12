@@ -38,25 +38,25 @@ const Connected = () => {
 	*/
 
 	/* Create updating variables */
-	const [DiagnosticData, UpdateDiagnosticData] = useState([]);
+	const [DiagnosticData, UpdateDiagnosticData] = useState([{"MAC":1234567,"nickname":"MiWhip","connected":true, "sessionid":12, "CPU":10}]);
 
 	/* Send POST request to get Diagnostics data */
 	const DiagnosticURL = "http://" + ServerIP + ":5000/client/diagnostics";
 	const fetchDiagnosticData = () => {
-		console.log("URL = " + DiagnosticURL);
+		console.log("URL = " + DiagnosticURL + " used: " + SessionID);
 		return fetch(DiagnosticURL, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "MAC": MAC })
+			body: JSON.stringify({ "sessionid": SessionID })
 		});
 	};
 
 	/* On GOOD POST response */
 	const DiagnosticPollingSuccess = (jsonResponse) => {
 		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
-		UpdateDiagnosticData(jsonResponse[0]); /* Displays most recent value */
+		UpdateDiagnosticData(jsonResponse); /* Displays most recent value */
 		if (jsonResponse.response.isfinished) {// TODO: Change isfinished once added to response on server side
 			setConnectedState("Finish");
 		}
@@ -68,6 +68,26 @@ const Connected = () => {
 		console.log("DIAGNOSTIC POLLING FAIL");
 		return true;
 	}
+
+	/* Updating Diagnostic variables */
+	const [Timestamp, updateTimestamp] = useState("N/A");/* Number of Replay values (in MapData) */
+	const [Battery, updateBattery] = useState("N/A");/* Number of Replay values (in MapData) */
+	const [Connection, updateConnection] = useState("N/A");/* Number of Replay values (in MapData) */
+	useEffect(() => {
+		if (DiagnosticData === "[]"){
+			updateTimestamp("N/A");
+			updateBattery("N/A");
+			updateConnection("N/A");
+		}
+		else{
+			let Diagnostic_recent = DiagnosticData[0];
+			console.log("DIAGNOSTICS HERE !!! ")
+			console.log(Diagnostic_recent);
+			updateTimestamp(Diagnostic_recent.timestamp);
+			updateBattery(Diagnostic_recent.battery);
+			updateConnection(Diagnostic_recent.connected);
+		}
+	}, [DiagnosticData]);
 
 	//---------------------------- Polling: Mapping data --------------------------------
 
@@ -136,7 +156,6 @@ const Connected = () => {
 		.then(response => response.json())  /* Parse response as JSON */
 		.then(data => {
 			console.log("Response from server:", data);  /* Log response data */
-			ChangeState();
 		})
 		.catch(error => {
 			console.log("Error:", error);
@@ -183,7 +202,6 @@ const Connected = () => {
 		.then(response => response.json()) /* Parse response as JSON */
 		.then(data => {
 			console.log("Response from server:", data); /* Log response data */
-			ChangeState();
 		})
 		.catch(error => {
 			console.log("Error:", error);
@@ -218,12 +236,15 @@ const Connected = () => {
 	const ChangeState = () => {
 		if (ConnectedState === "Start") {
 			setConnectedState("Mapping");
+			handlePlay();
 		}
 		else if (ConnectedState === "Mapping") {
 			setConnectedState("Pause");
+			handlePause();
 		}
 		else if (ConnectedState === "Pause") {
 			setConnectedState("Mapping");
+			handlePlay();
 		}
 	};
 
@@ -320,17 +341,17 @@ const Connected = () => {
 													</div>
 												  
 													<div className='box-green SmallLeftButton_Connected'>
-														<button onClick={handlePlay()} className='box-green buttons_Connected'>
+														<button onClick={ChangeState} className='box-green buttons_Connected'>
 															Start Mapping
 														</button>
 													</div>
 												  </div>
 												) : (<></>)}
 				{ConnectedState === 'Mapping' ? ( <div className="wrapper_Connected">
-												  	<button onClick={handlePause()} className='box-green PauseButton_Connected'>
+												  	<button onClick={ChangeState} className='box-green PauseButton_Connected'>
 														Pause
 													</button>
-													<button onClick={handleEmergencyStop()} className='box-red EmergencyStopButton_Connected'>
+													<button onClick={handleEmergencyStop} className='box-red EmergencyStopButton_Connected'>
 														Emergency Stop
 													</button>
 												  </div>
@@ -345,7 +366,7 @@ const Connected = () => {
 													</div>
 												  
 													<div className='box-green SmallLeftButton_Connected'>
-														<button onClick={handlePlay()} className='box-green buttons_Connected'>
+														<button onClick={ChangeState} className='box-green buttons_Connected'>
 															Resume
 														</button>
 													</div>
@@ -394,7 +415,7 @@ const Connected = () => {
 						promise={fetchDiagnosticData} // custom api calling function that should return a promise
 						render={({ startPolling, stopPolling, isPolling }) => {
 							// TODO: select which diagnostics to display
-							return <p>CPU: {DiagnosticData.CPU}, MAC: {DiagnosticData.MAC}, Battery: {DiagnosticData.battery}, Connection: {DiagnosticData.connection}, Timestamp: {DiagnosticData.timestamp}</p>;
+							return <p>MAC: {MAC}, Battery: {Battery}, Connection: {Connection}, Timestamp: {Timestamp}</p>;
 						}}
 					/>
 				</div>

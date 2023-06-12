@@ -39,7 +39,8 @@ const Replay = () => {
 	//---------------------------- Get Mapping Data -------------------------------------
 
 	/* 
-	Mapping - Gets from server: map data 
+	Mapping - Gives to server: session id
+			  Gets from server: map data 
 	*/
 
 	/* Create updating variables */
@@ -546,7 +547,38 @@ const Replay = () => {
 		/* Remove the event listener after selecting the end point */
 		canvas.removeEventListener('click', handleCanvasClickEnd);
 	};
-	  
+
+	//---------------------------- Get Diagnostic Data ----------------------------------
+
+	/* 
+	Diagnostic - Gives to server: session id
+			  	 Gets from server: diagnostic data 
+	*/
+
+	/* Create updating variables */
+	const [DiagnosticData, UpdateDiagnosticData] = useState([]);
+
+	/* Send POST request to get Map Data */
+	const DiagnosticURL = "http://" + ServerIP + ":5000/client/diagnostics";
+	useEffect(() => {
+		fetch(DiagnosticURL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ "sessionid": replayID })
+		})
+		.then(response => response.json()) /* Parse the response as JSON */
+		.then(data => UpdateDiagnosticData(data)) /* Update the state with the data */
+		.catch(error => console.log(error)); /* Error Handling */
+	}, []);
+
+	/* Update diagnostic data whenever slider value changes */
+	const [DiagnosticData_Current, UpdateDiagnosticData_Current] = useState([]);
+	useEffect(() => {
+		const DiagnosticData_Current = DiagnosticData[SliderValue];
+	}, [SliderValue]);
+
 	//---------------------------- Display ----------------------------------------------
 
 	return (
@@ -726,8 +758,7 @@ const Replay = () => {
 				</div>
 				{/* Display Data */}
 				<div className="box Data_Replay">
-					<p>Data</p>
-					<p>Data</p>
+					CPU: {DiagnosticData_Current.CPU}, MAC: {DiagnosticData_Current.MAC}, Battery: {DiagnosticData_Current.battery}, Connection: {DiagnosticData_Current.connection}, Timestamp: {DiagnosticData_Current.timestamp}
 				</div>
 				{/* Slider */}
 				<div className="box-nobackground Slider_Replay">
