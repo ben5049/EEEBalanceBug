@@ -31,15 +31,15 @@ Pin assignments for Group 1's EEEBalanceBug
 #define I2C_FREQ 400000 /* I2C frequency (fast mode) */
 
 /* IMU */
-#define ENABLE_IMU_TASK false             /* Setting "true" enables the IMU sampling task */
+#define ENABLE_IMU_TASK true             /* Setting "true" enables the IMU sampling task */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
 #define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
 #define IMU_SAMPLING_FREQUENCY_DMP 57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
-#define ENABLE_TOF_TASK true    /* Setting "true" enables the ToF sampling task */
-#define TASK_TOF_DEBUG true     /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
+#define ENABLE_TOF_TASK false    /* Setting "true" enables the ToF sampling task */
+#define TASK_TOF_DEBUG false     /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
 #define TOF_RIGHT_ADDRESS 0x30  /* I2C address for the right ToF sensor */
 #define TOF_LEFT_ADDRESS 0x31   /* I2C address for the left ToF sensor */
 #define TOF_RIGHT_CHANNEL 0     /* I2C mux channel for the right ToF sensor */
@@ -72,22 +72,21 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
 
 /* Controller */
-#define CONTROL_DEBUG false /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
+#define CONTROL_DEBUG true /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 
 #define KP_POS 0.00
 #define KI_POS 0.00
 #define KD_POS 0.00
 
-#define KP_SPEED 4.00
+#define KP_SPEED 0.00
 #define KD_SPEED 0.00
 #define KI_SPEED 0.00
 
-#define KP_ANGLE 4.0
+#define KP_ANGLE 7.0
 #define KI_ANGLE 0.00
-#define KD_ANGLE 240.00
-#define ANGLE_OFFSET -4
-#define MAX_VACCEL 0.1
-#define MAX_ANGLE 5
+#define KD_ANGLE 5.00
+#define ANGLE_OFFSET -3.5
+#define MAX_ANGLE 7.5
 #define MAX_DPS 360
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000

@@ -23,7 +23,11 @@ void taskDebug(void *pvParameters) {
 
   /* Start the loop */
   while (true) {
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    // vTaskDelay(pdMS_TO_TICKS(1000));
+    // speedSetpoint = -100;
+    // vTaskDelay(5000);
+    // speedSetpoint = 0;
+    // vTaskDelay(5000);
   }
 }
 #endif
