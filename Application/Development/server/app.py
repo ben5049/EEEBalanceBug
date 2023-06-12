@@ -8,7 +8,7 @@ from json import loads
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-TIMEOUT = 30
+TIMEOUT = 10
 rovers = []
 isSpinning = False
 spinTime = time()
