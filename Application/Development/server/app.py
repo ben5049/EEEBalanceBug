@@ -57,7 +57,7 @@ def rover():
             flag = True
             for mac, nick in cur:
                 print(mac, nick)
-                if mac == data["MAC"]:
+                if str(mac) == str(data["MAC"]):
                     r.nickname = nick
                     flag = False
             if flag:
