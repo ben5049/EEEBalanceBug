@@ -13,7 +13,7 @@ rovers = []
 isSpinning = False
 spinTime, startup = time(), int(time())
 DEBUG = False
-hostip = '54.175.107.58'
+hostip = '54.209.183.94'
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
     conn = mariadb.connect(
