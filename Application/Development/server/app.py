@@ -204,7 +204,7 @@ def diagnostics():
         d.append(t)
     if DEBUG:
         print(data)
-        print(d)
+        print(d, "diagnostics")
     return make_response(jsonify(d), 200)
 
 # works
