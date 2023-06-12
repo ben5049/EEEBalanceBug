@@ -1,4 +1,4 @@
-SERVER="18.234.100.102"
+SERVER = $1
 SEDTEXT="s/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/"
 SEDTEXT2="/ ./server/app.py"
 sudo sed -i ${SEDTEXT}${SERVER}${SEDTEXT2}
