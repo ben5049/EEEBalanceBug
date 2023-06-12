@@ -1,9 +1,10 @@
 #!/bin/sh
 DEBUG=false
 SERVER="18.234.100.102"
-
+SEDTEXT="s/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/"
+SEDTEXT2="/ /etc/nginx/conf.d/react.conf"
 sudo git pull https://aranyagupta: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@github.com/ben5049/EEEBalanceBug
-sudo sed -i 's/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/${SERVER}/ /etc/nginx/conf.d/react.conf'
+sudo sed -i ${SEDTEXT}${SERVER}${SEDTEXT2}
 cd client
 npm run build
 sudo cp -rf build /var/www/html/react
