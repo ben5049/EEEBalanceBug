@@ -1,6 +1,6 @@
 #!/bin/bash
 # Aranya Gupta
-# Wtarted 29/5/23
+# Started 29/5/23
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 import tremaux, dijkstra
@@ -18,7 +18,7 @@ DEBUG = False
 rovers = []
 isSpinning = False
 spinTime = time()
-hostip = '18.234.100.102'
+hostip = '54.211.123.218'
 
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
