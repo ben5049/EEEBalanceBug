@@ -25,6 +25,7 @@ volatile float spinStartingAngle;
 
 /* Create state */
 volatile robotCommand currentCommand = IDLE;
+volatile whereAt currentWhereAt = PASSAGE;
 
 //-------------------------------- Functions --------------------------------------------
 

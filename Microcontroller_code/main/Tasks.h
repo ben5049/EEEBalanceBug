@@ -26,6 +26,12 @@ typedef enum {
   SPIN = 0x03
 } robotCommand;
 
+typedef enum {
+  PASSAGE = 0x00,
+  JUNCTION = 0x01,
+  DEAD_END = 0x02
+} whereAt;
+
 /* Variables */
 extern volatile float angleSetpoint;
 extern volatile float speedKp;
