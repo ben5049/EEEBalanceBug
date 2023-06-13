@@ -48,12 +48,24 @@ void taskDebug(void *pvParameters) {
 
     serialData = SERIAL_PORT.read();
 
+    // if (serialData == 'p') {
+    //   angleKp = SERIAL_PORT.parseFloat();
+    // } else if (serialData == 'i') {
+    //   angleKi = SERIAL_PORT.parseFloat();
+    // } else if (serialData == 'd') {
+    //   angleKd = SERIAL_PORT.parseFloat();
+    // } else if (serialData == 'a') {
+    //   angleSetpoint = SERIAL_PORT.parseFloat();
+    // }
+
     if (serialData == 'p') {
-      angleKp = SERIAL_PORT.parseFloat();
+      speedKp = SERIAL_PORT.parseFloat();
     } else if (serialData == 'i') {
-      angleKi = SERIAL_PORT.parseFloat();
+      speedKi = SERIAL_PORT.parseFloat();
     } else if (serialData == 'd') {
-      angleKd = SERIAL_PORT.parseFloat();
+      speedKd = SERIAL_PORT.parseFloat();
+    } else if (serialData == 's') {
+      speedSetpoint = SERIAL_PORT.parseFloat();
     }
   }
 }
