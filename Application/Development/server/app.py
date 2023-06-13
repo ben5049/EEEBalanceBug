@@ -18,7 +18,7 @@ DEBUG = False
 rovers = []
 isSpinning = False
 spinTime = time()
-hostip = '54.165.203.172'
+hostip = '107.23.177.217'
 
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
