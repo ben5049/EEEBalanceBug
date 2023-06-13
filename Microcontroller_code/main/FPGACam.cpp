@@ -242,24 +242,30 @@ bool FPGACam::getRYB(bool debug) {
   }
 
   if (debug) {
-    Serial.print("count: ");
+    Serial.print("countR: ");
     Serial.print(countR);
-    Serial.print(",threshold: ");
+    Serial.print(", thresholdR: ");
     Serial.print(thresholdR);
-    Serial.print(",sum: ");
-    Serial.println(sumR);
-    Serial.print("count: ");
+    Serial.print(", sumR: ");
+    Serial.print(sumR);
+    Serial.print(", AverageR: ");
+    Serial.print(averageRedX);
+    Serial.print(" countY: ");
     Serial.print(countY);
-    Serial.print(",threshold: ");
+    Serial.print(", thresholdY: ");
     Serial.print(thresholdY);
-    Serial.print(",sum: ");
-    Serial.println(sumY);
-    Serial.print("count: ");
+    Serial.print(", sumY: ");
+    Serial.print(sumY);
+    Serial.print(", AverageY: ");
+    Serial.print(averageYellowX);
+    Serial.print(", countB: ");
     Serial.print(countB);
-    Serial.print(",threshold: ");
+    Serial.print(", thresholdB: ");
     Serial.print(thresholdB);
-    Serial.print(",sum: ");
-    Serial.println(sumB);
+    Serial.print(", sumB: ");
+    Serial.print(sumB);
+    Serial.print(", AverageB :");
+    Serial.println(averageBlueX);
   }
   return true;
 }

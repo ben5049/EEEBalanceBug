@@ -231,11 +231,11 @@ void loop() {
   // xQueueSend(commandQueue, &command, 0);
   // vTaskDelay(25000);
 
-  fpga1.getRYB();
-  Serial.print("RED: ");
-  Serial.print(fpga1.averageRedX);
-  Serial.print(",Yellow: ");
-  Serial.print(fpga1.averageYellowX);
-  Serial.print(", Blue :");
-  Serial.println(fpga1.averageBlueX);
+  fpga1.getRYB(true);
+  // Serial.print("RED: ");
+  // Serial.print(fpga1.averageRedX);
+  // Serial.print(",Yellow: ");
+  // Serial.print(fpga1.averageYellowX);
+  // Serial.print(", Blue :");
+  // Serial.println(fpga1.averageBlueX);
 }
