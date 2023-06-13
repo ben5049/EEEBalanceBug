@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import ReactPolling from "react-polling/lib/ReactPolling";
 import '../components/Connected/grid_Connected.css';
 import '../components/grid.css';
+import RoverImg from '../components/Connected/location.png';
 
 //-------------------------------- Main -------------------------------------------------
 
@@ -272,17 +273,34 @@ const Connected = () => {
 	/* Draws lane boundaries given data from rover */
 	const renderBoundaries = () => {
 		const entries = Object.entries(MapData);
+		let pos_x;
+		let pos_y
 		for (let i = 0; i < entries.length; i++) {
 			const [, entry] = entries[i];
-			const pos_x = entry[0];
-			const pos_y = entry[1];
+			pos_x = entry[0];
+			pos_y = entry[1];
 			const orientation = entry[3];
 			const TOF_left = entry[4];
 			const TOF_right = entry[5];
 			draw(pos_x, pos_y, orientation, TOF_left, TOF_right);
 			console.log(entry[0] + " " + entry[1] + " " + entry[3] + " " + entry[4] + " " + entry[5]);
 		}
+		/* Draws rover's last known position */
+		renderRover(pos_x,pos_y);
 	};
+
+	/* Draws rover at last known position */
+	function renderRover(x, y) {
+		const canvas = canvasRef.current;
+		const context = canvas.getContext('2d');
+
+		// Add image to the canvas
+		const image = new Image();
+		image.src = RoverImg;
+		image.onload = () => {
+			context.drawImage(image, ScaleToCanvas(x), ScaleToCanvas(y), 21, 32);
+    	};
+	}
 
 	/* Redraw canvas when new data from server */
 	useEffect(() => {
@@ -312,13 +330,18 @@ const Connected = () => {
 			const ctx = canvas.getContext('2d');
 			let l = 5; /* Change to alter length of each line */
 			let theta = orientation*Math.PI/180
-			/* Scale to canvas */
-			position_x  = ( position_x / MapDataMax ) * 700 + 30 /* WARNING: if edit, also change in postStart */
-			position_y  = ( position_y / MapDataMax ) * 700 + 30
+			/* Scale */
+			position_x  = ScaleToCanvas(position_x)
+			position_y  = ScaleToCanvas(position_y)
 			/* Draw */
 			drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
 			drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
 		}
+	}
+
+	/* Scale to canvas as coordinate system for rover different to canvas */
+	const ScaleToCanvas = (coordinate) => {
+		return ( coordinate / MapDataMax ) * 700 + 30 /* add offset so not touching border */
 	}
 
 	//---------------------------- Display ----------------------------------------------
