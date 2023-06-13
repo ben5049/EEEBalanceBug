@@ -80,7 +80,7 @@ def overlay_data(data1, data2, label1, data3, data4, label2):
 
 # Inputs
 coefficients = [0.02509274331174643,0.12664894963152423,0.26587759991367516,0.33589861675220817,0.26587759991367516,0.12664894963152423,0.02509274331174643,]
-filename = "passage 2.2.txt"  # Replace with the actual file name
+filename = "putNameHere"  # Replace with the actual file name
 
 
 
