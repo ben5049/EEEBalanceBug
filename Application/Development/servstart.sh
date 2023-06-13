@@ -7,11 +7,11 @@ sudo git pull https://aranyagupta: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@githu
 sudo sed -i ${SEDTEXT}${SERVER}${SEDTEXT2}
 cd client
 npm run build
-sudo cp -rf build /var/www/html/react
-sudo cp -rf public /var/www/html/react
-sudo cp -rf src /var/www/html/react
-sudo cp -rf package-lock.json /var/www/html/react
-sudo cp -rf package.json /var/www/html/react
+sudo cp -rf build/ /var/www/html/react
+sudo cp -rf public/ /var/www/html/react
+sudo cp -rf src/ /var/www/html/react
+sudo cp -rf package-lock.json/ /var/www/html/react
+sudo cp -rf package.json/ /var/www/html/react
 cd ..
 sudo systemctl daemon-reload
 sudo systemctl start flask
