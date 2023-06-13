@@ -31,7 +31,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define I2C_FREQ 400000 /* I2C frequency (fast mode) */
 
 /* IMU */
-#define ENABLE_IMU_TASK true              /* Setting "true" enables the IMU sampling task */
+#define ENABLE_IMU_TASK false              /* Setting "true" enables the IMU sampling task */
 #define TASK_IMU_PRIORITY 10              /* Task priority from 0 to 31 (larger means higher priority) */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
 #define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
@@ -54,7 +54,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define THRESHOLD_DISTANCE 150      /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
 
 /* FPGA */
-#define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
+#define ENABLE_FPGA_CAMERA true /* Whether or not to enable the FPGA camera */
 #define FPGA_ADDR 0x55           /* I2C address for the FPGA */
 #define FPGA_IMAGE_WIDTH 640     /* How wide the image is in pixels */
 #define FPGA_R_THRESHOLD 30      /* Threshold number of red pixels to count red beacon as having been detected */
