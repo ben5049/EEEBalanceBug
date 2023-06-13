@@ -43,6 +43,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_TOF_PRIORITY 9         /* Task priority from 0 to 31 (larger means higher priority) */
 #define TASK_TOF_DEBUG false        /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
 #define ENABLE_TOF_INTERRUPTS false /* Setting true enables data ready interrupts from the ToF sensors. Default = false */
+#define ENABLE_IR_INTERRUPTS false  /* Setting true enables interrupts from the IR sensors. Default = true */
 #define TOF_RIGHT_ADDRESS 0x30      /* I2C address for the right ToF sensor */
 #define TOF_LEFT_ADDRESS 0x31       /* I2C address for the left ToF sensor */
 #define TOF_RIGHT_CHANNEL 0         /* I2C mux channel for the right ToF sensor */
@@ -53,12 +54,12 @@ Pin assignments for Group 1's EEEBalanceBug
 #define THRESHOLD_DISTANCE 150      /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
 
 /* FPGA */
-#define ENABLE_FPGA_CAMERA true /* Whether or not to enable the FPGA camera */
-#define FPGA_ADDR 0x55          /* I2C address for the FPGA */
-#define FPGA_IMAGE_WIDTH 640    /* How wide the image is in pixels */
-#define FPGA_R_THRESHOLD 30     /* Threshold number of red pixels to count red beacon as having been detected */
-#define FPGA_Y_THRESHOLD 20     /* Threshold number of yellow pixels to count yellow beacon as having been detected */
-#define FPGA_B_THRESHOLD 50     /* Threshold number of blue pixels to count blue beacon as having been detected */
+#define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
+#define FPGA_ADDR 0x55           /* I2C address for the FPGA */
+#define FPGA_IMAGE_WIDTH 640     /* How wide the image is in pixels */
+#define FPGA_R_THRESHOLD 30      /* Threshold number of red pixels to count red beacon as having been detected */
+#define FPGA_Y_THRESHOLD 20      /* Threshold number of yellow pixels to count yellow beacon as having been detected */
+#define FPGA_B_THRESHOLD 50      /* Threshold number of blue pixels to count blue beacon as having been detected */
 
 /* Spin task */
 #define TASK_SPIN_FREQUENCY 10           /* Frequency to run the spin task at in Hz (default = 10Hz) */

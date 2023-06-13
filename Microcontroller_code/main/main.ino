@@ -190,24 +190,26 @@ void setup() {
 
   /* Attach ISRs to interrupts */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
-  #if ENABLE_TOF_INTERRUPTS == true
+#if ENABLE_TOF_INTERRUPTS == true
   attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
-  #endif
-  // attachInterrupt(digitalPinToInterrupt(IR_R_INT), IRRightISR, CHANGE);
-  // attachInterrupt(digitalPinToInterrupt(IR_L_INT), IRLeftISR, CHANGE);
+#endif
+#if ENABLE_IR_INTERRUPTS == true
+  attachInterrupt(digitalPinToInterrupt(IR_R_INT), IRRightISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(IR_L_INT), IRLeftISR, CHANGE);
+#endif
   timerAttachInterrupt(motorTimer, &onTimer, true);
 
 
-  if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
-    fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
-    SERIAL_PORT.println("FPGA camera initialised");
-  } else {
-    while (true) {
-      SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
-      delay(1000);
-    }
-  }
+  // if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
+  //   fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
+  //   SERIAL_PORT.println("FPGA camera initialised");
+  // } else {
+  //   while (true) {
+  //     SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
+  //     delay(1000);
+  //   }
+  // }
 }
 
 //--------------------------------- Loop -----------------------------------------------
@@ -224,11 +226,11 @@ void loop() {
   // xQueueSend(commandQueue, &command, 0);
   // vTaskDelay(25000);
 
-  fpga1.getRYB();
-  Serial.print("RED: ");
-  Serial.print(fpga1.averageRedX);
-  Serial.print(",Yellow: ");
-  Serial.print(fpga1.averageYellowX);
-  Serial.print(", Blue :");
-  Serial.println(fpga1.averageBlueX);
+  // fpga1.getRYB();
+  // Serial.print("RED: ");
+  // Serial.print(fpga1.averageRedX);
+  // Serial.print(",Yellow: ");
+  // Serial.print(fpga1.averageYellowX);
+  // Serial.print(", Blue :");
+  // Serial.println(fpga1.averageBlueX);
 }

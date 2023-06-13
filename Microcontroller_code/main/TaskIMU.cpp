@@ -222,7 +222,7 @@ void taskIMU(void *pvParameters) {
   static unsigned long timestamp;         /* Timestamp of samples taken in microseconds */
   static unsigned long previousTimestamp; /* Time since last sample in microseconds */
   static float deltaTime;                 /* Time between samples in seconds */
-
+  static uint8_t counter = 0;
   /* Start the loop */
   while (true) {
 
@@ -267,7 +267,7 @@ void taskIMU(void *pvParameters) {
         }
       }
 
-#else
+      //#else
 
       /* Acquire latest sensor data */
       FusionVector gyroscope = { myICM.gyrX(), myICM.gyrY(), myICM.gyrZ() };
@@ -289,9 +289,22 @@ void taskIMU(void *pvParameters) {
       const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
       // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
 
-      yaw = euler.angle.yaw;
-      pitch = euler.angle.pitch;
-      angularVelocity = myICM.gyrX();
+      if (counter == 10) {
+        counter = 0;
+        Serial.print("DMP yaw: ");
+        Serial.print(yaw);
+        Serial.print(", DMP pitch: ");
+        Serial.print(pitch);
+
+        Serial.print(", Madgwick yaw: ");
+        Serial.print(euler.angle.yaw);
+        Serial.print(", Madgwick pitch: ");
+        Serial.println(euler.angle.pitch);
+      }
+      counter++;
+      // yaw = euler.angle.yaw;
+      // pitch = euler.angle.pitch;
+      // angularVelocity = myICM.gyrX();
 #endif
     }
   }
