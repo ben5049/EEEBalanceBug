@@ -27,6 +27,10 @@ typedef enum {
 } robotCommand;
 
 /* Variables */
+extern volatile float angleSetpoint;
+extern volatile float speedKp;
+extern volatile float speedKi;
+extern volatile float speedKd;
 extern volatile float speedSetpoint;
 extern volatile float pitch;                 /* Pitch in degrees between -180 and 180 */
 extern volatile float yaw;                   /* Yaw in degrees between -180 and 180 */

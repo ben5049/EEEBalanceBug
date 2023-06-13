@@ -29,11 +29,11 @@ volatile static float robotFilteredLinearDPS = 0;
 volatile float angleKp = KP_ANGLE;
 volatile float angleKi = KI_ANGLE;
 volatile float angleKd = KD_ANGLE;
-static float speedKp = KP_SPEED;
-static float speedKi = KI_SPEED;
-static float speedKd = KD_SPEED;
+volatile float speedKp = KP_SPEED;
+volatile float speedKi = KI_SPEED;
+volatile float speedKd = KD_SPEED;
 static float angleOffset = ANGLE_OFFSET;
-static float angleSetpoint = 0;
+volatile float angleSetpoint = 0;
 static float motorSetpoint = 0;
 static float motorSpeed = 0;
 static float angleCumError = 0;
@@ -81,7 +81,9 @@ float PID(float setpoint, float input, float& cumError, float& prevError, float 
   error = setpoint - input;
   cumError += constrain(error, -MAX_ERROR_CHANGE, MAX_ERROR_CHANGE);
   cumError = constrain(cumError, -MAX_CUM_ERROR, MAX_CUM_ERROR);
-
+  if(Ki==0){
+    cumError = 0;
+  }
 
 
   output = Kp * error + Ki * cumError + Kd * (error - prevError) / DT;
@@ -144,6 +146,28 @@ void debug(){
   Serial.println(",");
   Serial.print("posError:");
   Serial.print(0-stepperRightSteps);
+
+  /* PID Values */
+  Serial.println(",");
+  Serial.print("AngleKp:");
+  Serial.print(angleKp);
+  Serial.println(",");
+  Serial.print("AngleK:");
+  Serial.print(angleKi);
+  Serial.println(",");
+  Serial.print("AngleKd:");
+  Serial.print(angleKd);
+
+  Serial.println(",");
+  Serial.print("SpeedKp:");
+  Serial.print(speedKp,7);
+  Serial.println(",");
+  Serial.print("SpeedK:");
+  Serial.print(speedKi,7);
+  Serial.println(",");
+  Serial.print("SpeedKd:");
+  Serial.print(speedKd,7);
+
   Serial.println("*/");
 }
 
@@ -330,14 +354,14 @@ void taskMovement(void* pvParameters) {
 
     /* Angle Loop */
     
-    motorSetpoint += PID(ANGLE_OFFSET, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+    motorSetpoint += PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
     angleLastTime = millis();
     motorSetpoint = constrain(motorSetpoint, -200, 200);
     motorSetDPS(motorSetpoint);
 
     /* Speed Loop */
     if(controlCycle%3==0){
-      angleSetpoint = PID(-speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
+      angleSetpoint += PID(-speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
       speedLastTime = millis();
       angleSetpoint = constrain(angleSetpoint, angleOffset-MAX_ANGLE, angleOffset+MAX_ANGLE);
     }
@@ -347,7 +371,7 @@ void taskMovement(void* pvParameters) {
     posLastTime = millis();
 
     /* Control Cycle */
-    controlCycle = controlCycle%3;   
+    controlCycle = controlCycle%100;   
     if(CONTROL_DEBUG){
       debug();
     }
