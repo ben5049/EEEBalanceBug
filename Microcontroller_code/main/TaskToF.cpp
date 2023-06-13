@@ -247,12 +247,31 @@ void taskToF(void *pvParameters) {
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
+/* Begin priority ceiling protocol */
+#if MAX_I2C_PRIORITY > TASK_TOF_PRIORITY
+    vTaskPrioritySet(NULL, MAX_I2C_PRIORITY);
+#endif
+
     /* Read data from the ToF sensors */
     if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
       timestamp = millis();
       tofRight.getRangingMeasurement(&measureRight, false);
       tofLeft.getRangingMeasurement(&measureLeft, false);
+
+#if ENABLE_TOF_INTERRUPTS == true
+      /* Reset the interrupt flags */
+      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
+        tofRight.clearInterruptMask(false);
+        tofLeft.clearInterruptMask(false);
+        xSemaphoreGive(mutexI2C);
+      }
+#endif
       xSemaphoreGive(mutexI2C);
+
+/* End priority ceiling protocol */
+#if MAX_I2C_PRIORITY > TASK_TOF_PRIORITY
+      vTaskPrioritySet(NULL, TASK_TOF_PRIORITY);
+#endif
 
       /* Check if the right data is valid (phase failures have incorrect data) */
       if ((measureRight.RangeStatus != 4) && (measureRight.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
@@ -313,11 +332,5 @@ void taskToF(void *pvParameters) {
         overThresholdCounter = 0;
       }
     }
-
-    // if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-    //   tofRight.clearInterruptMask(false);
-    //   tofLeft.clearInterruptMask(false);
-    //   xSemaphoreGive(mutexI2C);
-    // }
   }
 }

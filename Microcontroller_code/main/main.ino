@@ -92,7 +92,7 @@ void setup() {
   pinMode(STEPPER_R_DIR, OUTPUT);
   pinMode(VBUS, INPUT);
   pinMode(VBAT, INPUT);
-  pinMode(SERVO_PIN,INPUT);
+  pinMode(SERVO_PIN, INPUT);
 
   /* Create SPI mutex */
   if (mutexSPI == NULL) {
@@ -119,79 +119,81 @@ void setup() {
 
 #if ENABLE_IMU_TASK == true
   xTaskCreatePinnedToCore(
-    taskIMU,        /* Function that implements the task */
-    "IMU",          /* Text name for the task */
-    10000,          /* Stack size in words, not bytes */
-    nullptr,        /* Parameter passed into the task */
-    10,             /* Task priority */
-    &taskIMUHandle, /* Pointer to store the task handle */
+    taskIMU,           /* Function that implements the task */
+    "IMU",             /* Text name for the task */
+    10000,             /* Stack size in words, not bytes */
+    nullptr,           /* Parameter passed into the task */
+    TASK_IMU_PRIORITY, /* Task priority */
+    &taskIMUHandle,    /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
 
   xTaskCreatePinnedToCore(
-    taskMovement,        /* Function that implements the task */
-    "MOVEMENT",          /* Text name for the task */
-    5000,                /* Stack size in words, not bytes */
-    nullptr,             /* Parameter passed into the task */
-    8,                   /* Task priority */
-    &taskMovementHandle, /* Pointer to store the task handle */
+    taskMovement,           /* Function that implements the task */
+    "MOVEMENT",             /* Text name for the task */
+    5000,                   /* Stack size in words, not bytes */
+    nullptr,                /* Parameter passed into the task */
+    TASK_MOVEMENT_PRIORITY, /* Task priority */
+    &taskMovementHandle,    /* Pointer to store the task handle */
     tskNO_AFFINITY);
 
 #if ENABLE_TOF_TASK == true
   xTaskCreatePinnedToCore(
-    taskToF,        /* Function that implements the task */
-    "TOF",          /* Text name for the task */
-    10000,          /* Stack size in words, not bytes */
-    nullptr,        /* Parameter passed into the task */
-    9,              /* Task priority */
-    &taskToFHandle, /* Pointer to store the task handle */
+    taskToF,           /* Function that implements the task */
+    "TOF",             /* Text name for the task */
+    10000,             /* Stack size in words, not bytes */
+    nullptr,           /* Parameter passed into the task */
+    TASK_TOF_PRIORITY, /* Task priority */
+    &taskToFHandle,    /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
 
   xTaskCreatePinnedToCore(
-    taskExecuteCommand,        /* Function that implements the task */
-    "COMMAND",                 /* Text name for the task */
-    2000,                      /* Stack size in words, not bytes */
-    nullptr,                   /* Parameter passed into the task */
-    10,                        /* Task priority */
-    &taskExecuteCommandHandle, /* Pointer to store the task handle */
+    taskExecuteCommand,            /* Function that implements the task */
+    "COMMAND",                     /* Text name for the task */
+    2000,                          /* Stack size in words, not bytes */
+    nullptr,                       /* Parameter passed into the task */
+    TASK_EXECUTE_COMMAND_PRIORITY, /* Task priority */
+    &taskExecuteCommandHandle,     /* Pointer to store the task handle */
     tskNO_AFFINITY);
 
   xTaskCreatePinnedToCore(
-    taskSpin,        /* Function that implements the task */
-    "SPIN",          /* Text name for the task */
-    5000,            /* Stack size in words, not bytes */
-    nullptr,         /* Parameter passed into the task */
-    10,              /* Task priority */
-    &taskSpinHandle, /* Pointer to store the task handle */
+    taskSpin,           /* Function that implements the task */
+    "SPIN",             /* Text name for the task */
+    5000,               /* Stack size in words, not bytes */
+    nullptr,            /* Parameter passed into the task */
+    TASK_SPIN_PRIORITY, /* Task priority */
+    &taskSpinHandle,    /* Pointer to store the task handle */
     tskNO_AFFINITY);
 
 #if ENABLE_SERVER_COMMUNICATION_TASK == true
   xTaskCreatePinnedToCore(
-    taskServerCommunication,        /* Function that implements the task */
-    "SERVER_COMMS",                 /* Text name for the task */
-    10000,                          /* Stack size in words, not bytes */
-    nullptr,                        /* Parameter passed into the task */
-    4,                              /* Task priority */
-    &taskServerCommunicationHandle, /* Pointer to store the task handle */
+    taskServerCommunication,            /* Function that implements the task */
+    "SERVER_COMMS",                     /* Text name for the task */
+    10000,                              /* Stack size in words, not bytes */
+    nullptr,                            /* Parameter passed into the task */
+    TASK_SERVER_COMMUNICATION_PRIORITY, /* Task priority */
+    &taskServerCommunicationHandle,     /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
 
 #if ENABLE_DEBUG_TASK == true
   xTaskCreatePinnedToCore(
-    taskDebug,        /* Function that implements the task */
-    "DEBUG",          /* Text name for the task */
-    1000,             /* Stack size in words, not bytes */
-    nullptr,          /* Parameter passed into the task */
-    4,                /* Task priority */
-    &taskDebugHandle, /* Pointer to store the task handle */
+    taskDebug,           /* Function that implements the task */
+    "DEBUG",             /* Text name for the task */
+    1000,                /* Stack size in words, not bytes */
+    nullptr,             /* Parameter passed into the task */
+    TASK_DEBUG_PRIORITY, /* Task priority */
+    &taskDebugHandle,    /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
 
-  /* Create ISRs */
+  /* Attach ISRs to interrupts */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
-  // attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
-  // attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
+  #if ENABLE_TOF_INTERRUPTS == true
+  attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
+  #endif
   // attachInterrupt(digitalPinToInterrupt(IR_R_INT), IRRightISR, CHANGE);
   // attachInterrupt(digitalPinToInterrupt(IR_L_INT), IRLeftISR, CHANGE);
   timerAttachInterrupt(motorTimer, &onTimer, true);

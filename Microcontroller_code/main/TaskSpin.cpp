@@ -144,11 +144,22 @@ void taskSpin(void *pvParameters) {
     else {
       vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
+/* Poll FPGA to get x coordinate of each colour from the frame */
 #if ENABLE_FPGA_CAMERA == true
-      /* Poll FPGA to get x coordinate of each colour from the frame */
+
+/* Begin priority ceiling protocol */
+#if MAX_I2C_PRIORITY > TASK_SPIN_PRIORITY
+      vTaskPrioritySet(NULL, MAX_I2C_PRIORITY);
+#endif
+
       if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
         fpga.getRYB();
         xSemaphoreGive(mutexI2C);
+
+/* End priority ceiling protocol */
+#if MAX_I2C_PRIORITY > TASK_SPIN_PRIORITY
+        vTaskPrioritySet(NULL, TASK_SPIN_PRIORITY);
+#endif
 
         /* If the current position of the red beacon is closer to the centre of the frame than any previous position of the red beacon, record the distance from the centre and the yaw */
         redBeaconDistanceToCentre = abs(fpga.averageRedX - FPGA_IMAGE_WIDTH / 2);
@@ -177,7 +188,7 @@ void taskSpin(void *pvParameters) {
       }
 #endif
 
-      /* Swap from first half to second half */
+/* Swap from first half to second half */
 #if SPIN_LEFT == true
       if (firstHalf && (previousYaw < halfWayAngle) && (yaw > halfWayAngle)) {
 #else
@@ -284,8 +295,8 @@ void taskSpin(void *pvParameters) {
 
         /* Make sure the robot was in the second half of the turn when it was completed (not necessary, just in case) */
         if (!firstHalf) {
-          
-          /* Send beacon angles back in a queue */ 
+
+          /* Send beacon angles back in a queue */
           xQueueReset(beaconAngleQueue);
           xQueueSend(beaconAngleQueue, &redBeaconAngle, 0);
           xQueueSend(beaconAngleQueue, &yellowBeaconAngle, 0);
