@@ -16,6 +16,7 @@ cd ..
 sudo systemctl daemon-reload
 sudo systemctl start flask
 sudo systemctl enable flask
+sudo systemctl restart nginx
 if ($DEBUG)
 then
     sudo systemctl status flask.service
