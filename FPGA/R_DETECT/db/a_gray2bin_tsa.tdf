@@ -1,5 +1,5 @@
 --a_gray2bin carry_chain="MANUAL" carry_chain_length=48 device_family="MAX 10" ignore_carry_buffers="OFF" WIDTH=11 bin gray
---VERSION_BEGIN 18.1 cbx_a_gray2bin 2018:09:12:13:04:24:SJ cbx_mgl 2018:09:12:13:10:36:SJ  VERSION_END
+--VERSION_BEGIN 18.1 cbx_a_gray2bin 2018:09:12:13:04:09:SJ cbx_mgl 2018:09:12:14:15:07:SJ  VERSION_END
 
 
 -- Copyright (C) 2018  Intel Corporation. All rights reserved.

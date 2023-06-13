@@ -1,5 +1,5 @@
 --lpm_mux DEVICE_FAMILY="MAX 10" LPM_SIZE=2 LPM_WIDTH=1 LPM_WIDTHS=1 data result sel
---VERSION_BEGIN 18.1 cbx_lpm_mux 2018:09:12:13:04:24:SJ cbx_mgl 2018:09:12:13:10:36:SJ  VERSION_END
+--VERSION_BEGIN 18.1 cbx_lpm_mux 2018:09:12:13:04:09:SJ cbx_mgl 2018:09:12:14:15:07:SJ  VERSION_END
 
 
 -- Copyright (C) 2018  Intel Corporation. All rights reserved.

@@ -1,5 +1,5 @@
 # Aranya Gupta 
-# 21/5/2023
+# Started 21/5/2023
 
 # makes sure graph is bidirectional - if B is a neighbour of A, 
 # A must be a neighbour of B 
@@ -15,13 +15,12 @@ def assertValid(graph):
 def findDist(node1, node2):
     return ((node1[0] - node2[0])**2 + (node1[1] - node2[1])**2)**0.5
 
-THRESHOLD = 10
 
-# graph is hash table of x-y positions as defined in tremaux 
+# graph is hash table of x-y positions
 # Dijkstra will calculate distances based on position
 # returns predecessor graph showing shortest path from startNode to every point
-
 def dijkstra(graph, startPos):
+    # finds node closest to start
     minDist = 1e9
     startNode = 0
     for node in graph:
@@ -29,23 +28,28 @@ def dijkstra(graph, startPos):
         if  dist < minDist:
             minDist = dist
             startNode = node
-
+    # attempts to initialise graphs - if it fails, returns none
     try:
         G = {startNode: 0} # distance from startNode to given node
         P = {startNode: None} # predecessor graph - shortest path from given node to start node
     except:
         return None
 
+    # sets up large distances and predecessor graph 
     for node in graph:
         if node not in G:
             G[node] = 1e7
             P[node] = []
     
+    # checks if all nodes have been visited
     while len(G)!=0:
+        # finds node with current shortest distance from start, and its neighbours
         current = min(G, key=G.get)
         neighbours = graph[current]
+        # finds the minimum distance from current point to neighbours
         for neighbour in neighbours:
             dist = findDist(current, neighbour)+G[current]
+            # updates values in G and P if shorter distance found
             if neighbour in G and dist < G[neighbour]:
                 G[neighbour] = dist
                 P[neighbour] = current
@@ -53,6 +57,7 @@ def dijkstra(graph, startPos):
     
     return P
 
+# puts predecessor graph found by dijkstra into json-friendly format
 def formatPredecessor(P):
     d = {}
     i=0
