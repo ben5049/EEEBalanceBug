@@ -74,7 +74,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_EXECUTE_COMMAND_PRIORITY 10 /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Server communication task */
-#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
 #define TASK_SERVER_COMMUNICATION_PRIORITY 4   /* Task priority from 0 to 31 (larger means higher priority) */
 
