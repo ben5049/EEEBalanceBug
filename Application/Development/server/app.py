@@ -23,7 +23,7 @@ TIMEOUT = 30
 rovers = []
 isSpinning = False
 spinTime = time()
-hostip = '54.243.9.247'
+hostip = '54.165.59.37'
 
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:

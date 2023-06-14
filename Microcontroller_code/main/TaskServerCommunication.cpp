@@ -20,7 +20,7 @@ TaskHandle_t taskServerCommunicationHandle = nullptr;
 const char* ssid = "OnePlus 8";
 const char* password = "abc123def";
 
-String serverName = "http://54.243.9.247:5000/";
+String serverName = "http://54.165.59.37:5000/";
 String hostname = "ESP32 Node";
 
 float ang;
@@ -99,7 +99,7 @@ String handleResponse(uint16_t httpResponseCode, HTTPClient& http) {
   } else {
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
-    return "{\"error\": \"Something really wrong54.243.9.247\"}";
+    return "{\"error\": \"Something really wrong54.165.59.37\"}";
   }
   return http.getString();
 }
