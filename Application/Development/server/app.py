@@ -39,8 +39,8 @@ except mariadb.Error as e:
     print(f"Error connecting to MariaDB platform: {e}")
 
 cur = conn.cursor()
-cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", ("34:29:29:29:29:29:29:29", "tester"))
-cur.commit()
+cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", ("34:29:29:28:29:29:29:29", "tester"))
+conn.commit()
 
 # default gateway to test if server is up
 @app.route("/")
