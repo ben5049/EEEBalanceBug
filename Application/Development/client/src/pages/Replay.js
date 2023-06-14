@@ -16,6 +16,7 @@ import ReplayIcon from '../components/Replay/ReplayIcon.png';
 import FastforwardIcon from '../components/Replay/FastforwardIcon.png';
 import RepeatIcon from '../components/Replay/RepeatIcon.png';
 import RepeatEnabledIcon from '../components/Replay/RepeatEnabledIcon.png';
+import RoverImg from '../components/Connected/location.png';
 
 //-------------------------------- Main -------------------------------------------------
 
@@ -435,17 +436,34 @@ const Replay = () => {
 	/* Draws lane boundaries given data from rover */
 	const renderBoundaries = () => {
 		const entries = Object.entries(MapData);
+		let pos_x;
+		let pos_y
 		for (let i = 0; i < SliderValue && i < entries.length; i++) {
 			const [, entry] = entries[i];
-			const pos_x = entry[0];
-			const pos_y = entry[1];
+			pos_x = entry[0];
+			pos_y = entry[1];
 			const orientation = entry[3];
 			const TOF_left = entry[4];
 			const TOF_right = entry[5];
 			draw(pos_x, pos_y, orientation, TOF_left, TOF_right);
 			console.log(entry[0] + " " + entry[1] + " " + entry[3] + " " + entry[4] + " " + entry[5]);
 		}
+		/* Draws rover's last known position */
+		renderRover(pos_x,pos_y);
 	};
+
+	/* Draws rover at last known position */
+	function renderRover(x, y) {
+		const canvas = canvasRef.current;
+		const context = canvas.getContext('2d');
+
+		// Add image to the canvas
+		const image = new Image();
+		image.src = RoverImg;
+		image.onload = () => {
+			context.drawImage(image, ScaleToCanvas(x), ScaleToCanvas(y), 21, 32);
+    	};
+	}
 
 	/* Redraw canvas when change in current replay position or coordinates */
 	useEffect(() => {
