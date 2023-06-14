@@ -48,6 +48,7 @@ def hello():
 # Communication with rover
 @app.route("/rover", methods=["POST"])
 def rover():
+    global conn, cur
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     
     r = 0
