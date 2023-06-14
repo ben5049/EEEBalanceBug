@@ -39,7 +39,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
-#define ENABLE_TOF_TASK true       /* Setting "true" enables the ToF sampling task */
+#define ENABLE_TOF_TASK false       /* Setting "true" enables the ToF sampling task */
 #define TASK_TOF_PRIORITY 9         /* Task priority from 0 to 31 (larger means higher priority) */
 #define TASK_TOF_DEBUG false        /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
 #define ENABLE_TOF_INTERRUPTS false /* Setting true enables data ready interrupts from the ToF sensors. Default = false */
@@ -74,13 +74,13 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_EXECUTE_COMMAND_PRIORITY 10 /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Server communication task */
-#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
 #define TASK_SERVER_COMMUNICATION_PRIORITY 4   /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Controller */
 #define TASK_MOVEMENT_PRIORITY 8 /* Task priority from 0 to 31 (larger means higher priority) */
-#define CONTROL_DEBUG false      /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
+#define CONTROL_DEBUG true      /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 
 #define KP_POS 0.00
 #define KI_POS 0.00
@@ -93,15 +93,21 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KP_ANGLE 7.0
 #define KI_ANGLE 0.01
 #define KD_ANGLE 400
+
+#define KP_ANGRATE 1
+#define KI_ANGRATE 0
+#define KD_ANGRATE 0
+
 #define ANGLE_OFFSET -3.5
 #define MAX_ANGLE 7.5
-#define MAX_DPS 360
+#define MAX_DPS 400
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
+#define MAX_DIFF 300
 
 
 /* Debug task*/
-#define ENABLE_DEBUG_TASK false
+#define ENABLE_DEBUG_TASK true
 #define TASK_DEBUG_PRIORITY 4 /* Task priority from 0 to 31 (larger means higher priority) */
 
 

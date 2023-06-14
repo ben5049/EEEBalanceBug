@@ -29,6 +29,7 @@ volatile float pitch;
 volatile float yaw;
 volatile float roll;
 volatile float angularVelocity;
+volatile float yawRate;
 static float frequencyIMU;
 
 /* Task handles */
@@ -264,6 +265,7 @@ void taskIMU(void *pvParameters) {
           float t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
           yaw = atan2(t3, t4) * 180.0 / PI;
           angularVelocity = myICM.gyrX();
+          yawRate = myICM.gyrZ();
         }
       }
 

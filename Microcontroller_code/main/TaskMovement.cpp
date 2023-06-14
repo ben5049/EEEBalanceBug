@@ -6,7 +6,6 @@
 /* Configuration headers */
 #include "Config.h"
 #include "PinAssignments.h"
-#include "src/pidautotuner.h"
 
 
 //-------------------------------- Global Variables -------------------------------------
@@ -32,10 +31,15 @@ volatile float angleKd = KD_ANGLE;
 volatile float speedKp = KP_SPEED;
 volatile float speedKi = KI_SPEED;
 volatile float speedKd = KD_SPEED;
+volatile float angRateKp = KP_ANGRATE;
+volatile float angRateKi = KI_ANGRATE;
+volatile float angRateKd = KD_ANGRATE;
 static float angleOffset = ANGLE_OFFSET;
 volatile float angleSetpoint = 0;
-static float motorSetpoint = 0;
-static float motorSpeed = 0;
+static float motorSetpointL = 0;
+static float motorSetpointR = 0;
+static float motorSpeedL = 0;
+static float motorSpeedR = 0;
 static float angleCumError = 0;
 static float anglePrevError = 0;
 static float angleLastTime = millis();
@@ -45,6 +49,13 @@ volatile float speedSetpoint = 0;
 static float speedCumError = 0;
 static float speedPrevError = 0;
 static float speedLastTime = millis();
+
+/* Angle Rate Variables */
+volatile float angRateSetpoint = 0;
+static float angRateCumError = 0;
+static float angRatePrevError = 0;
+static float angRateLastTime = millis();
+static float motorDiff = 0;
 
 /* Position Control Variables */
 volatile float posSetpoint = 0;
@@ -60,11 +71,8 @@ volatile float loopFreq = 50;
 TaskHandle_t taskMovementHandle = nullptr;
 
 /* Hardware timers */
-hw_timer_t* motorTimer = NULL;
-
-/* Autotuning Variables */
-bool angleTuned = true;
-bool speedTuned = true;
+hw_timer_t* motorTimerL = NULL;
+hw_timer_t* motorTimerR = NULL;
 
 
 
@@ -98,8 +106,8 @@ void debug(){
   Serial.print("Pitch:");
   Serial.print(pitch);
   Serial.println(",");
-  Serial.print("motorSetpoint:");
-  Serial.print(motorSetpoint);
+  Serial.print("motorSetpointL:");
+  Serial.print(motorSetpointL);
   Serial.println(",");
   Serial.print("robotFilteredLinearDPS:");
   Serial.print(robotFilteredLinearDPS);
@@ -120,7 +128,6 @@ void debug(){
   Serial.println(",");
   Serial.print("angleSetpoint:");
   Serial.print(angleSetpoint);
-  Serial.println(",");
   Serial.println(",");
   Serial.print("Max2:");
   Serial.print(10);
@@ -167,12 +174,39 @@ void debug(){
   Serial.println(",");
   Serial.print("SpeedKd:");
   Serial.print(speedKd,7);
+  Serial.println(",");
+
+  /* Yaw Rate Debugging */
+  Serial.print("Yaw:");
+  Serial.print(yawRate);
+  Serial.println(",");
+  Serial.print("yawRateSetpoint:");
+  Serial.print(angRateSetpoint);
+  Serial.println(",");
+  Serial.print("yawRateError:");
+  Serial.print(angRateSetpoint-yawRate);
+  Serial.println(",");
+  Serial.print("MotorDiff:");
+  Serial.print(motorDiff);
+  Serial.println(",");
+  Serial.print("AngRateKp:");
+  Serial.print(angRateKp,7);
+  Serial.println(",");
+  Serial.print("AngRateKi:");
+  Serial.print(angRateKi,7);
+  Serial.println(",");
+  Serial.print("AngRateKd:");
+  Serial.print(angRateKd,7);
+  Serial.println(",");
 
   Serial.println("*/");
 }
 
 /* Update the timer to step the motors at the specified RPM */
-void motorSetDPS(float DPS) {
+void motorSetDPS(float DPS, int motor) {
+  // motor L = 0
+  // motor R = 1
+  // motor both = 2
   float microsBetweenSteps;
 
   if(DPS==0){
@@ -180,140 +214,64 @@ void motorSetDPS(float DPS) {
   }else{
     microsBetweenSteps = 360 * 1000000 / (STEPS * abs(DPS));  // microseconds
   }
-
-  if (DPS > 0) {
-    digitalWrite(STEPPER_R_DIR, LOW);
-    digitalWrite(STEPPER_L_DIR, HIGH);
-    stepperRightDirection = true;
-    stepperLeftDirection = true;
-  } else if (DPS < 0) {
-    digitalWrite(STEPPER_R_DIR, HIGH);
-    digitalWrite(STEPPER_L_DIR, LOW);
-    stepperRightDirection = false;
-    stepperLeftDirection = false;
-  } else {
-    return;
+  if (motor == 0){
+    if (DPS > 0) {
+      digitalWrite(STEPPER_L_DIR, LOW);
+      stepperLeftDirection = true;
+    } else if (DPS < 0) {
+      digitalWrite(STEPPER_L_DIR, HIGH);
+      stepperLeftDirection = false;
+    } else {
+      return;
+    }
+  }else if(motor==1){
+    if (DPS > 0) {
+      digitalWrite(STEPPER_R_DIR, HIGH);
+      stepperRightDirection = true;
+    } else if (DPS < 0) {
+      digitalWrite(STEPPER_R_DIR, LOW);
+      stepperRightDirection = false;
+    } else {
+      return;
+    }
   }
-  motorSpeed = DPS;
-  timerAlarmWrite(motorTimer, microsBetweenSteps, true);
-  timerAlarmEnable(motorTimer);
-}
-
-/* PID Autotuning */
-void autoTuneAngle(){
-    double loopInterval = 20000;
-    PIDAutotuner tuner = PIDAutotuner();
-    tuner.setTargetInputValue(angleOffset);
-    tuner.setLoopInterval(loopInterval);
-    tuner.setOutputRange(-40, 40);
-    tuner.setZNMode(PIDAutotuner::ZNModeBasicPID);
-    tuner.startTuningLoop(micros());
-    long microseconds;
-    if(CONTROL_DEBUG){
-      Serial.println("Starting Autotuning!");
-    }
-    while (!tuner.isFinished()) {
-
-        long prevMicroseconds = microseconds;
-        microseconds = micros();
-
-        double input = pitch;
-
-        double output = tuner.tunePID(input, microseconds);
-        motorSetpoint += output;
-        motorSetpoint = constrain(motorSetpoint, -200, 200);
-        motorSetDPS(motorSetpoint);
-
-        while (micros() - microseconds < loopInterval) delayMicroseconds(1);
-    }
-
-    motorSetDPS(0);
-    angleKp = tuner.getKp();
-    angleKi = tuner.getKi();
-    angleKd = tuner.getKd();
-    if(CONTROL_DEBUG){
-    Serial.println("Autotuning finished with values:");
-    Serial.print("Kp: ");
-    Serial.println(angleKp);
-    Serial.print("Ki: ");
-    Serial.println(angleKi);
-    Serial.print("Kd: ");
-    Serial.println(angleKd);
-    }
-    angleTuned = true;
-}
-
-void autoTuneSpeed(){
-    double loopInterval = 20000;
-    PIDAutotuner tuner = PIDAutotuner();
-    tuner.setTargetInputValue(angleOffset);
-    tuner.setLoopInterval(loopInterval);
-    tuner.setOutputRange(angleOffset-1, angleOffset+1);
-    tuner.setZNMode(PIDAutotuner::ZNModeBasicPID);
-    tuner.startTuningLoop(micros());
-    long microseconds;
-    if(CONTROL_DEBUG){
-      Serial.println("Starting Speed Autotuning!");
-    }
-    while (!tuner.isFinished()) {
-
-        long prevMicroseconds = microseconds;
-        microseconds = micros();
-
-        double input = robotFilteredLinearDPS;
-
-         /* Calculate Robot Actual Speed */
-        robotLinearDPS = -motorSpeed + angularVelocity;
-        robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
-
-        /* Angle Loop */
-        
-        motorSetpoint = PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
-        angleLastTime = millis();
-        motorSetpoint = constrain(motorSetpoint, -200, 200);
-        motorSetDPS(motorSetpoint);
-
-        double output = tuner.tunePID(input, microseconds);
-
-        speedSetpoint=output;
-
-        while (micros() - microseconds < loopInterval) delayMicroseconds(1);
-    }
-
-    speedSetpoint = 0;
-    speedKp = tuner.getKp();
-    speedKi = tuner.getKi();
-    speedKd = tuner.getKd();
-    if(CONTROL_DEBUG){
-    Serial.println("Autotuning finished with values:");
-    Serial.print("Kp: ");
-    Serial.println(speedKp);
-    Serial.print("Ki: ");
-    Serial.println(speedKi);
-    Serial.print("Kd: ");
-    Serial.println(speedKd);
-    }
-    speedTuned = true;
+  if(motor==0){
+    motorSpeedL = DPS;
+    timerAlarmWrite(motorTimerL, microsBetweenSteps, true);
+    timerAlarmEnable(motorTimerL);
+  }else if(motor==1){
+    motorSpeedR = DPS;
+    timerAlarmWrite(motorTimerR, microsBetweenSteps, true);
+    timerAlarmEnable(motorTimerR);
+  }
 }
 
 
 //-------------------------------- Interrupt Servce Routines ----------------------------
 
 /* ISR that triggers on hw timer and causes the stepper motors to step */
-void IRAM_ATTR onTimer() {
+void IRAM_ATTR stepL() {
 
   /* Send pulse to the stepper motors to make them step once */
-  digitalWrite(STEPPER_STEP, HIGH);
-  digitalWrite(STEPPER_STEP, LOW);
+  digitalWrite(STEPPER_L_STEP, HIGH);
+  digitalWrite(STEPPER_L_STEP, LOW);
+
+  /* Increment or decrement step counter per wheel */
+  if (stepperLeftDirection) {
+    stepperLeftSteps += 1;
+  } else {
+    stepperLeftSteps -= 1;
+  }
+}
+
+void IRAM_ATTR stepR() {
+
+  /* Send pulse to the stepper motors to make them step once */
+  digitalWrite(STEPPER_R_STEP, HIGH);
+  digitalWrite(STEPPER_R_STEP, LOW);
 
   /* Increment or decrement step counter per wheel */
   if (stepperRightDirection) {
-    stepperRightSteps += 1;
-  } else {
-    stepperRightSteps -= 1;
-  }
-
-  if (stepperLeftDirection) {
     stepperLeftSteps += 1;
   } else {
     stepperLeftSteps -= 1;
@@ -340,30 +298,35 @@ void taskMovement(void* pvParameters) {
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
     
-    /*Autotuning*/
-    while(!angleTuned){
-      autoTuneAngle();
-    }
-    while(!speedTuned){
-      autoTuneSpeed();
-    }
 
     /* Calculate Robot Actual Speed */
-    robotLinearDPS = -motorSpeed + angularVelocity;
+    robotLinearDPS = -((motorSpeedL + motorSpeedR)/2) + angularVelocity;
     robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
 
     /* Angle Loop */
     
-    motorSetpoint += PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+    float PIDvalue = PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+    motorSetpointL += PIDvalue;
+    motorSetpointR += PIDvalue;
     angleLastTime = millis();
-    motorSetpoint = constrain(motorSetpoint, -200, 200);
-    motorSetDPS(motorSetpoint);
+    motorSetpointL = constrain(motorSetpointL, -200, 200);
+    motorSetpointR = constrain(motorSetpointR, -200, 200);
+
+    motorSetDPS(constrain(motorSetpointL+motorDiff/2,-MAX_DPS,MAX_DPS),0);
+    motorSetDPS(constrain(motorSetpointR-motorDiff/2,-MAX_DPS,MAX_DPS),1);
 
     /* Speed Loop */
     if(controlCycle%3==0){
       angleSetpoint += PID(-speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
       speedLastTime = millis();
       angleSetpoint = constrain(angleSetpoint, angleOffset-MAX_ANGLE, angleOffset+MAX_ANGLE);
+    }
+
+    /* Angle Rate Loop */
+    if(controlCycle%3==0){
+      motorDiff += PID(angRateSetpoint, yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
+      angRateLastTime = millis();
+      motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
     }
 
     /* Position Controller */

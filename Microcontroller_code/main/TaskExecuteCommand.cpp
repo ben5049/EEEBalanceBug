@@ -22,7 +22,6 @@ TaskHandle_t taskExecuteCommandHandle = nullptr;
 
 /* Variables */
 volatile float spinStartingAngle;
-volatile float speedSetpoint;
 
 /* Create state */
 volatile robotCommand currentCommand = IDLE;
