@@ -50,7 +50,7 @@ void taskExecuteCommand(void *pvParameters) {
       case IDLE:
 
         /* Define what to do in the IDLE state e.g. speed = 0 etc */
-
+        speedSetpoint = 0;
         /* Wait for the next command (timeout every second to prevent deadlock) */
         if (xQueueReceive(commandQueue, &newCommand, pdMS_TO_TICKS(1000)) == pdTRUE) {
           currentCommand = newCommand;
@@ -63,6 +63,7 @@ void taskExecuteCommand(void *pvParameters) {
       case FORWARD:
 
         /* Define what to do on the FORWARD command e.g. speed != 0 etc */
+        speedSetpoint = -100;
         
         /* Wait until a junction is detected by taskToF */
         ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);

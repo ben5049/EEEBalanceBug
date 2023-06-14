@@ -20,7 +20,7 @@ TaskHandle_t taskServerCommunicationHandle = nullptr;
 const char* ssid = "OnePlus 8";
 const char* password = "abc123def";
 
-String serverName = "http://44.212.13.73:5000/";
+String serverName = "http://54.165.59.37:5000/";
 String hostname = "ESP32 Node";
 
 float ang;
@@ -50,8 +50,8 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     String position_x = String(xPosition);
     String position_y = String(yPosition);
     String orientation = String(yaw);
-    String tofleft = String(distanceLeft);
-    String tofright = String(distanceRight);
+    String tofleft = String(distanceLeftFiltered);
+    String tofright = String(distanceRightFiltered);
     String mac = String(WiFi.macAddress());
     String rssi = String(WiFi.RSSI());
     String postData = "{\"diagnostics\": {\"battery\":100,\"connection\":"+rssi+"},\"MAC\":\""+mac+"\",\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":0,\"orientation\":"+orientation+",\"branches\":[";
@@ -99,7 +99,7 @@ String handleResponse(uint16_t httpResponseCode, HTTPClient& http) {
   } else {
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
-    return "{\"error\": \"Something really wrong44.212.13.73\"}";
+    return "{\"error\": \"Something really wrong54.165.59.37\"}";
   }
   return http.getString();
 }
@@ -209,10 +209,13 @@ void taskServerCommunication(void* pvParameters) {
 
       // parse payload string
       robotCommand* commands = parsePayload(payload, numCommands);
+      SERIAL_PORT.println("pog1");
       for (int i=0; i<numCommands; i++){
+        SERIAL_PORT.println(commands[i]);
         newCommand = commands[i];
         xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
       }
+      SERIAL_PORT.println("pog2");
     }
   }
 }

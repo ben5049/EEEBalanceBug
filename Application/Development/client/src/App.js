@@ -20,7 +20,7 @@ Top Level File - Contains intra-page navigation system
 
 function App() {
 	/* Set IPv4 for AWS then rebuild (AWS Learner account only active for 4h) */
-	localStorage.setItem('ServerIP', '44.212.13.73');
+	localStorage.setItem('ServerIP', '54.165.59.37');
 
 	/* Connect pages to URL endpoints */
 	return (

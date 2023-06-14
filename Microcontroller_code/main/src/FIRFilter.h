@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-#define FIRFilterLength 13
+#define FIRFilterLength 7
 
 struct FIRFilter{
   float buf[FIRFilterLength];

@@ -27,8 +27,10 @@ Code to initialise and sample the time of flight sensors
 /* Time of flight (ToF) sensors */
 static VL53L0X tofRight;
 static VL53L0X tofLeft;
-volatile uint16_t distanceRight;
-volatile uint16_t distanceLeft;
+volatile int16_t distanceRight;
+volatile int16_t distanceLeft;
+volatile float distanceRightFiltered;
+volatile float distanceLeftFiltered;
 static VL53L0X_RangingMeasurementData_t measureRight;
 static VL53L0X_RangingMeasurementData_t measureLeft;
 
@@ -278,7 +280,7 @@ void taskToF(void *pvParameters) {
         distanceRight = measureRight.RangeMilliMeter;
       } else {
         /* If the range is invalid return -1 */
-        distanceLeft = -1;
+        distanceRight = -1;
       }
 
       /* Check if the left data is valid (phase failures have incorrect data) */
@@ -298,14 +300,26 @@ void taskToF(void *pvParameters) {
     }
 
     /* Apply FIR filters */
-    FIRFilterUpdate(&rightFIR, distanceRight);
-    FIRFilterUpdate(&leftFIR, distanceLeft);
+    if (distanceRight != -1) {
+      FIRFilterUpdate(&rightFIR, distanceRight);
+      distanceRightFiltered = rightFIR.output;
+    }
+    else{
+      distanceRightFiltered = -1;
+    }
+    if (distanceLeft != -1) {
+      FIRFilterUpdate(&leftFIR, distanceLeft);
+      distanceLeftFiltered = leftFIR.output;
+    }
+    else{
+      distanceLeftFiltered = -1;
+    }
 
     /* Differentiate */
-    distanceRightDifferential = ((rightFIR.output - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-    distanceLeftDifferential = ((leftFIR.output - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-    distanceRightFilteredPrevious = rightFIR.output;
-    distanceLeftFilteredPrevious = leftFIR.output;
+    distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+    distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+    distanceRightFilteredPrevious = distanceRightFiltered;
+    distanceLeftFilteredPrevious = distanceLeftFiltered;
     timestampPrevious = timestamp;
 
     /* Junction detection */

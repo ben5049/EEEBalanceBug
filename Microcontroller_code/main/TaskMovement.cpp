@@ -17,8 +17,8 @@ static int controlCycle = 0;
 /* Motor variables */
 volatile static bool stepperLeftDirection = true;
 volatile static bool stepperRightDirection = true;
-volatile int32_t stepperLeftSteps = 0;
-volatile int32_t stepperRightSteps = 0;
+volatile unsigned long stepperLeftSteps = 0;
+volatile unsigned long stepperRightSteps = 0;
 float maxAccel = MAX_ACCEL;
 
 /* Robot Speed Variables */

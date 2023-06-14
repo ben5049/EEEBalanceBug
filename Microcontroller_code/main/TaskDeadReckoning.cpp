@@ -53,30 +53,20 @@ void taskDeadReckoning(void *pvParameters) {
       int32_t leftSteps = stepperLeftSteps - priorStepperLeftSteps;
       int32_t rightSteps = stepperRightSteps - priorStepperRightSteps;
 
-      /* Logic for if the rover has gone straight (# left wheel step ~= # right wheel steps)*/
-      if (leftSteps - rightSteps < stepDifferenceThreshold && leftSteps - rightSteps > -stepDifferenceThreshold) {
+      /* Logic for if the rover has gone straight (# left wheel step == # right wheel steps)*/
+      if (leftSteps == rightSteps) {
         xPosition = xPosition + leftSteps / STEPS * cos(yaw * PI / 180) * rotationsToDistance;
         yPosition = yPosition - leftSteps / STEPS * sin(yaw * PI / 180) * rotationsToDistance;
       }
 
-      /* Logic for if the rover has turned right (# left wheel step > # right wheel steps)*/
-      else if (leftSteps - rightSteps > stepDifferenceThreshold) {
-        float theta = (leftSteps - rightSteps) / ROVER_WIDTH;
+      /* Logic for if the rover has turned (# left wheel step != # right wheel steps)*/
+      else {
+        float theta = (leftSteps - rightSteps) * rotationsToDistance / (ROVER_WIDTH*STEPS);
         float r = leftSteps / STEPS * rotationsToDistance / theta;
         float triangle_sides = r - ROVER_WIDTH / 2;
         float a = sqrt(2 * triangle_sides * triangle_sides * (1 - cos(theta)));
-        xPosition = xPosition + a * sin(theta);
-        yPosition = yPosition - a * cos(theta);
-      }
-
-      /* Logic for if the rover has turned left (# left wheel step < # right wheel steps)*/
-      else if (leftSteps - rightSteps < -stepDifferenceThreshold) {
-        float theta = (rightSteps - leftSteps) / ROVER_WIDTH;
-        float r = rightSteps / STEPS * rotationsToDistance / theta;
-        float triangle_sides = r - ROVER_WIDTH / 2;
-        float a = sqrt(2 * triangle_sides * triangle_sides * (1 - cos(theta)));
-        xPosition = xPosition - a * sin(theta);
-        yPosition = yPosition + a * cos(theta);
+        xPosition = xPosition + a * sin(yaw*PI/180);
+        yPosition = yPosition - a * cos(yaw*PI/180);
       }
       priorStepperLeftSteps = stepperLeftSteps;
       priorStepperRightSteps = stepperRightSteps;
