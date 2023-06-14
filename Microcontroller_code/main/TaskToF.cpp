@@ -29,8 +29,8 @@ static VL53L0X tofRight;
 static VL53L0X tofLeft;
 volatile int16_t distanceRight;
 volatile int16_t distanceLeft;
-volatile int16_t distanceRightFiltered;
-volatile int16_t distanceLeftFiltered;
+volatile float distanceRightFiltered;
+volatile float distanceLeftFiltered;
 static VL53L0X_RangingMeasurementData_t measureRight;
 static VL53L0X_RangingMeasurementData_t measureLeft;
 

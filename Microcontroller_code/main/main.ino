@@ -215,16 +215,16 @@ void setup() {
 //--------------------------------- Loop -----------------------------------------------
 
 void loop() {
-  vTaskDelay(pdMS_TO_TICKS(50));
+  vTaskDelay(pdMS_TO_TICKS(1000));
   // SERIAL_PORT.print("Pitch:");
   // SERIAL_PORT.print(pitch);
 
-  SERIAL_PORT.print("Right:");
-  SERIAL_PORT.print(distanceRight);
-  SERIAL_PORT.print(", Left:");
-  SERIAL_PORT.print(distanceLeft);
-  SERIAL_PORT.print(", Yaw:");
-  SERIAL_PORT.println(roll);
+  // SERIAL_PORT.print("Right:");
+  // SERIAL_PORT.print(distanceRight);
+  // SERIAL_PORT.print(", Left:");
+  // SERIAL_PORT.print(distanceLeft);
+  // SERIAL_PORT.print(", Yaw:");
+  // SERIAL_PORT.println(yaw);
 
   // SERIAL_PORT.println("Sending start command");
   // robotCommand command = SPIN;

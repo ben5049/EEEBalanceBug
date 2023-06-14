@@ -38,20 +38,20 @@ extern volatile float speedKp;
 extern volatile float speedKi;
 extern volatile float speedKd;
 extern volatile float speedSetpoint;
-extern volatile float pitch;                   /* Pitch in degrees between -180 and 180 */
-extern volatile float yaw;                     /* Yaw in degrees between -180 and 180 */
-extern volatile float roll;                    /* Roll in degrees between -180 and 180 */
-extern volatile float angularVelocity;         /* Angular velocity in degrees per second around y axis (pitch axis) */
-extern volatile int32_t stepperRightSteps;     /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
-extern volatile int32_t stepperLeftSteps;      /* Total number of steps taken by the left stepper motor (forwards = +1, backwards = -1) */
-extern volatile int16_t distanceRight;         /* Distance in mm measured by the right time of flight sensor */
-extern volatile int16_t distanceLeft;          /* Distance in mm measured by the left time of flight sensor */
-extern volatile int16_t distanceRightFiltered; /* Distance in mm measured by the right time of flight sensor */
-extern volatile int16_t distanceLeftFiltered;  /* Distance in mm measured by the left time of flight sensor */
-extern volatile float spinStartingAngle;       /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
-extern volatile float xPosition;               /* The x position */
-extern volatile float yPosition;               /* The y position */
-extern volatile robotCommand currentCommand;   /* The current command being implemented by the rover */
+extern volatile float pitch;                     /* Pitch in degrees between -180 and 180 */
+extern volatile float yaw;                       /* Yaw in degrees between -180 and 180 */
+extern volatile float roll;                      /* Roll in degrees between -180 and 180 */
+extern volatile float angularVelocity;           /* Angular velocity in degrees per second around y axis (pitch axis) */
+extern volatile unsigned long stepperRightSteps; /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
+extern volatile unsigned long stepperLeftSteps;  /* Total number of steps taken by the left stepper motor (forwards = +1, backwards = -1) */
+extern volatile int16_t distanceRight;           /* Distance in mm measured by the right time of flight sensor */
+extern volatile int16_t distanceLeft;            /* Distance in mm measured by the left time of flight sensor */
+extern volatile float distanceRightFiltered;     /* Distance in mm measured by the right time of flight sensor */
+extern volatile float distanceLeftFiltered;      /* Distance in mm measured by the left time of flight sensor */
+extern volatile float spinStartingAngle;         /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
+extern volatile float xPosition;                 /* The x position */
+extern volatile float yPosition;                 /* The y position */
+extern volatile robotCommand currentCommand;     /* The current command being implemented by the rover */
 extern volatile float loopFreq;
 extern volatile float angleKp;
 extern volatile float angleKi;
