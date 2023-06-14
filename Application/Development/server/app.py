@@ -11,11 +11,8 @@ import logging
 DEBUG = True
 
 # Set up server
-if DEBUG:
-    logging.basicConfig(filename='record.log', level=logging.DEBUG)
+
 app = Flask(__name__)
-if DEBUG:
-    app.logger.debug("Starting debug logging: ")
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 
 # Server global variables
@@ -125,7 +122,6 @@ def rover():
         cur.execute("SELECT * FROM ReplayInfo")
         for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
             print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
-            app.logger.debug("TOFLEFT: "+str(tofleft)+" TOFRIGHT: "+str(tofright)+" YAW: "+str(orientation))
         # cur.execute("SELECT * FROM Sessions")
         # for mac, sessionId, SessionNickname in cur:
         #     print(mac, sessionId, SessionNickname)
