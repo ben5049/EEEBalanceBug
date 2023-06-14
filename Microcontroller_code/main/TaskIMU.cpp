@@ -254,10 +254,10 @@ void taskIMU(void *pvParameters) {
           pitch = atan2(t0, t1) * 180.0 / PI;
 
           /* pitch (y-axis rotation) */
-          // float t2 = +2.0 * (q0 * q2 - q3 * q1);
-          // t2 = t2 > 1.0 ? 1.0 : t2;
-          // t2 = t2 < -1.0 ? -1.0 : t2;
-          // roll = asin(t2) * 180.0 / PI;
+          float t2 = +2.0 * (q0 * q2 - q3 * q1);
+          t2 = t2 > 1.0 ? 1.0 : t2;
+          t2 = t2 < -1.0 ? -1.0 : t2;
+          roll = asin(t2) * 180.0 / PI;
 
           /* yaw (z-axis rotation) */
           float t3 = +2.0 * (q0 * q3 + q1 * q2);
