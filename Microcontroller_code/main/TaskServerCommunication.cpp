@@ -209,10 +209,13 @@ void taskServerCommunication(void* pvParameters) {
 
       // parse payload string
       robotCommand* commands = parsePayload(payload, numCommands);
+      SERIAL_PORT.println("pog1");
       for (int i=0; i<numCommands; i++){
+        SERIAL_PORT.println(commands[i]);
         newCommand = commands[i];
         xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
       }
+      SERIAL_PORT.println("pog2");
     }
   }
 }
