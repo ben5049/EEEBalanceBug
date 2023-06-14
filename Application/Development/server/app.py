@@ -11,11 +11,8 @@ import logging
 DEBUG = True
 
 # Set up server
-if DEBUG:
-    logging.basicConfig(filename='record.log', level=logging.DEBUG)
+
 app = Flask(__name__)
-if DEBUG:
-    app.logger.debug("Starting debug logging: ")
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 
 # Server global variables
@@ -48,6 +45,7 @@ def hello():
 # Communication with rover
 @app.route("/rover", methods=["POST"])
 def rover():
+    global conn, cur
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     
     r = 0
@@ -126,17 +124,18 @@ def rover():
         cur.execute("SELECT * FROM ReplayInfo")
         for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
             print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
-            app.logger.debug("TOFLEFT: "+str(tofleft)+" TOFRIGHT: "+str(tofright)+" YAW: "+str(orientation))
         # cur.execute("SELECT * FROM Sessions")
         # for mac, sessionId, SessionNickname in cur:
         #     print(mac, sessionId, SessionNickname)
         print(r.actions, "ACTIONS")
         print(resp)
+    conn.commit()
     return make_response(jsonify(resp), 200)
 
 # Give all rovers, active or inactive, to client
 @app.route("/client/allrovers", methods=["GET"])
 def allrovers():
+    global conn, cur
     d = []
     disallowedMacs = []
     # remove timed out rovers
@@ -182,6 +181,7 @@ def allrovers():
 # get a specific session replay
 @app.route("/client/replay", methods=["POST"])
 def replay():
+    global conn, cur
     data = request.get_json()
     
     # get requested session id
@@ -211,6 +211,7 @@ def replay():
 # Get all sessions
 @app.route("/client/sessions", methods=["GET"])
 def sessions():
+    global conn, cur
     cur.execute("SELECT * FROM Sessions ORDER BY SessionId DESC;")
     d = []
 
@@ -228,6 +229,7 @@ def sessions():
 # Get diagnostic data from given session
 @app.route("/client/diagnostics", methods=["POST"])
 def diagnostics():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -248,6 +250,7 @@ def diagnostics():
 # Pause a given rover
 @app.route("/client/pause", methods=["POST"])
 def pause():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -272,6 +275,7 @@ def pause():
 # Play a given rover
 @app.route("/client/play", methods=["POST"])
 def play():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -295,6 +299,7 @@ def play():
 # Set a nickname for a session
 @app.route("/client/sessionnickname", methods=["POST"])
 def sessionNickname():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -313,6 +318,7 @@ def sessionNickname():
 # Set rover nickname
 @app.route("/client/rovernickname", methods=["POST"])
 def addnickname():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -335,6 +341,7 @@ def addnickname():
 # Get shortest path predecessor graph from stored trees
 @app.route("/client/shortestpath", methods=["POST"])
 def findShortestPath():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -376,6 +383,7 @@ def findShortestPath():
 # emergency stops rover - must be disconnected and reconnected
 @app.route("/client/estop", methods=["POST"])
 def estop():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -396,6 +404,7 @@ def estop():
 # turns on or off red LED
 @app.route("/led_driver/red", methods=["POST"])
 def led_driver_red():
+    global conn, cur
     global isSpinning, spinTime
     data = request.get_json()
     
@@ -408,7 +417,7 @@ def led_driver_red():
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
@@ -420,7 +429,7 @@ def led_driver_blue():
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
@@ -432,7 +441,7 @@ def led_driver_yellow():
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#

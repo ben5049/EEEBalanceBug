@@ -300,12 +300,22 @@ void taskToF(void *pvParameters) {
     }
 
     /* Apply FIR filters */
-    FIRFilterUpdate(&rightFIR, distanceRight);
-    FIRFilterUpdate(&leftFIR, distanceLeft);
+    if (distanceRight != -1) {
+      FIRFilterUpdate(&rightFIR, distanceRight);
+      distanceRightFiltered = rightFIR.output;
+    }
+    else{
+      distanceRightFiltered = -1;
+    }
+    if (distanceLeft != -1) {
+      FIRFilterUpdate(&leftFIR, distanceLeft);
+      distanceLeftFiltered = leftFIR.output;
+    }
+    else{
+      distanceLeftFiltered = -1;
+    }
 
     /* Differentiate */
-    distanceRightFiltered = rightFIR.output;
-    distanceLeftFiltered = leftFIR.output;
     distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
     distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
     distanceRightFilteredPrevious = distanceRightFiltered;

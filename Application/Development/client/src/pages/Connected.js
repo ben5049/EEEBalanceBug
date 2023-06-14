@@ -231,7 +231,7 @@ const Connected = () => {
 	*/
 
 	/* Create updating variables */
-	const [ConnectedState, setConnectedState] = useState('Mapping'); /* Default State */ // TODO: Retreieve from server (check diagnostic data contains finish=true)
+	const [ConnectedState, setConnectedState] = useState('Start'); /* Default State */ // TODO: Retreieve from server (check diagnostic data contains finish=true)
 
 	/* Switch function (called on successful response from server pause/play POST) */
 	const ChangeState = () => {
@@ -333,9 +333,13 @@ const Connected = () => {
 			/* Scale */
 			position_x  = ScaleToCanvas(position_x)
 			position_y  = ScaleToCanvas(position_y)
-			/* Draw */
-			drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
-			drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
+			/* Draw and reject out of bounds */
+			if (tofleft < 800){
+				drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
+			} 
+			if (tofright < 800){
+				drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
+			}
 		}
 	}
 
