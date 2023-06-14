@@ -61,12 +61,12 @@ void taskDeadReckoning(void *pvParameters) {
 
       /* Logic for if the rover has turned (# left wheel step != # right wheel steps)*/
       else {
-        float theta = (leftSteps - rightSteps) / ROVER_WIDTH;
+        float theta = (leftSteps - rightSteps) * rotationsToDistance / (ROVER_WIDTH*STEPS);
         float r = leftSteps / STEPS * rotationsToDistance / theta;
         float triangle_sides = r - ROVER_WIDTH / 2;
         float a = sqrt(2 * triangle_sides * triangle_sides * (1 - cos(theta)));
-        xPosition = xPosition + a * sin(theta);
-        yPosition = yPosition - a * cos(theta);
+        xPosition = xPosition + a * sin(yaw*PI/180);
+        yPosition = yPosition - a * cos(yaw*PI/180);
       }
       priorStepperLeftSteps = stepperLeftSteps;
       priorStepperRightSteps = stepperRightSteps;

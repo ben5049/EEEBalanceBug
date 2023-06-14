@@ -7,18 +7,23 @@ import tremaux, dijkstra
 import mariadb
 from time import time
 from json import loads
+import logging
+DEBUG = True
 
 # Set up server
+if DEBUG:
+    logging.basicConfig(filename='record.log', level=logging.DEBUG)
 app = Flask(__name__)
+if DEBUG:
+    app.logger.debug("Starting debug logging: ")
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 
 # Server global variables
 TIMEOUT = 30
-DEBUG = False
 rovers = []
 isSpinning = False
 spinTime = time()
-hostip = '54.243.9.247'
+hostip = '54.165.59.37'
 
 # database set to run on port 3306, flask server set to run on port 5000 (when deploying, not developing)
 try:
@@ -118,9 +123,10 @@ def rover():
         # cur.execute("SELECT * FROM Diagnostics")
         # for mac, timestamp, battery, connection, sessionid in cur:
         #     print(mac, timestamp, battery, connection, sessionid, "THIS IS IN Diagnostics Table")
-        # cur.execute("SELECT * FROM ReplayInfo")
-        # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-        #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+        cur.execute("SELECT * FROM ReplayInfo")
+        for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
+            print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+            app.logger.debug("TOFLEFT: "+str(tofleft)+" TOFRIGHT: "+str(tofright)+" YAW: "+str(orientation))
         # cur.execute("SELECT * FROM Sessions")
         # for mac, sessionId, SessionNickname in cur:
         #     print(mac, sessionId, SessionNickname)
