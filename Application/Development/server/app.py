@@ -133,6 +133,7 @@ def rover():
 # Give all rovers, active or inactive, to client
 @app.route("/client/allrovers", methods=["GET"])
 def allrovers():
+    global conn, cur
     d = []
     disallowedMacs = []
     # remove timed out rovers
@@ -178,6 +179,7 @@ def allrovers():
 # get a specific session replay
 @app.route("/client/replay", methods=["POST"])
 def replay():
+    global conn, cur
     data = request.get_json()
     
     # get requested session id
@@ -207,6 +209,7 @@ def replay():
 # Get all sessions
 @app.route("/client/sessions", methods=["GET"])
 def sessions():
+    global conn, cur
     cur.execute("SELECT * FROM Sessions ORDER BY SessionId DESC;")
     d = []
 
@@ -224,6 +227,7 @@ def sessions():
 # Get diagnostic data from given session
 @app.route("/client/diagnostics", methods=["POST"])
 def diagnostics():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -244,6 +248,7 @@ def diagnostics():
 # Pause a given rover
 @app.route("/client/pause", methods=["POST"])
 def pause():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -268,6 +273,7 @@ def pause():
 # Play a given rover
 @app.route("/client/play", methods=["POST"])
 def play():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -291,6 +297,7 @@ def play():
 # Set a nickname for a session
 @app.route("/client/sessionnickname", methods=["POST"])
 def sessionNickname():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -309,6 +316,7 @@ def sessionNickname():
 # Set rover nickname
 @app.route("/client/rovernickname", methods=["POST"])
 def addnickname():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -331,6 +339,7 @@ def addnickname():
 # Get shortest path predecessor graph from stored trees
 @app.route("/client/shortestpath", methods=["POST"])
 def findShortestPath():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -372,6 +381,7 @@ def findShortestPath():
 # emergency stops rover - must be disconnected and reconnected
 @app.route("/client/estop", methods=["POST"])
 def estop():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -392,6 +402,7 @@ def estop():
 # turns on or off red LED
 @app.route("/led_driver/red", methods=["POST"])
 def led_driver_red():
+    global conn, cur
     global isSpinning, spinTime
     data = request.get_json()
     
