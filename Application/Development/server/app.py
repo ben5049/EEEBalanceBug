@@ -67,7 +67,6 @@ def rover():
         # Try to add rover into database, if its mac is new (ie never seen before rover)
         try:
             cur.execute("INSERT INTO Rovers (MAC, nickname) VALUES (? , ?)", (str(data["MAC"]), data["nickname"]))
-            conn.commit()
         except mariadb.Error as e:
             # Try to find rover if it already exists in database 
             cur.execute("SELECT * FROM Rovers WHERE MAC=?", (str(data["MAC"]),))
@@ -84,9 +83,7 @@ def rover():
         # Create a new session for the rover as it has just connected, and get and store its session id
         try:
             cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], r.startup+int(data["timestamp"])))
-            conn.commit()
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
-            conn.commit()
         except mariadb.Error as e:
             return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
         for x in cur:
@@ -108,16 +105,13 @@ def rover():
     # also store tree in database if rover is done traversing
     try:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+int(data["timestamp"]), data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        conn.commit()
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+int(data["timestamp"]), data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
-        conn.commit()
         if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
                 for neighbour in r.tree[node]:
                     neighbours.append(str(neighbour))
                 cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (r.sessionId, node.position[0], node.position[1], str(neighbours)))
-                conn.commit()
     except mariadb.Error as e:
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     
@@ -138,6 +132,7 @@ def rover():
         #     print(mac, sessionId, SessionNickname)
         print(r.actions, "ACTIONS")
         print(resp)
+    conn.commit()
     return make_response(jsonify(resp), 200)
 
 # Give all rovers, active or inactive, to client
