@@ -35,6 +35,8 @@ try:
 except mariadb.Error as e:
     print(f"Error connecting to MariaDB platform: {e}")
 
+cur = conn.cursor()
+
 # default gateway to test if server is up
 @app.route("/")
 def hello():
