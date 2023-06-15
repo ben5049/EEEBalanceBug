@@ -89,23 +89,19 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KI_POS 0.00
 #define KD_POS 0.00
 
-#define KP_SPEED 2.00
-#define KD_SPEED 0.00
-#define KI_SPEED 0.00
+#define KP_SPEED 0.000750
+#define KD_SPEED 0.5
+#define KI_SPEED 0.000
 
 #define KP_ANGLE 7.0
 #define KI_ANGLE 0.01
 #define KD_ANGLE 400
 
-#define KP_ANGRATE 0.5
+#define KP_ANGRATE 1
 #define KI_ANGRATE 0
 #define KD_ANGRATE 0
 
-#define KP_DIR 0
-#define KI_DIR 0
-#define KD_DIR 0
-
-#define ANGLE_OFFSET -3.0
+#define ANGLE_OFFSET -3.5
 #define MAX_ANGLE 7.5
 #define MAX_DPS 400
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
