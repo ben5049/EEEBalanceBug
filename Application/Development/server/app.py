@@ -80,7 +80,7 @@ def rover():
                            
         # Create a new session for the rover as it has just connected, and get and store its session id
         try:
-            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], r.startup+int(data["timestamp"])))
+            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
             return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
@@ -102,8 +102,8 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+int(data["timestamp"]), data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+int(data["timestamp"]), data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
+        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
+        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
         if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
@@ -140,11 +140,13 @@ def allrovers():
     disallowedMacs = []
     # remove timed out rovers
     for rover in rovers:
+        print(rover)
         if time()-rover.lastSeen > TIMEOUT:
             rovers.remove(rover)
 
     # add all active rovers
     for rover in rovers:
+        print(temp)
         temp = {}
         temp["MAC"] = rover.name
         disallowedMacs.append(rover.name)
@@ -158,12 +160,15 @@ def allrovers():
     for i in disallowedMacs:
         t+="MAC != "+str(i)+" AND "
     t = t[:-5]
+    
     command = "SELECT * FROM Rovers WHERE "+t
     if command == "SELECT * FROM Rovers WHERE ":
         command = "SELECT * FROM Rovers" 
     try:
+        print(command)
         cur.execute(command)
     except mariadb.Error as e:
+        print(str(e))
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     for rover in cur:
         temp = {}
@@ -447,6 +452,7 @@ def led_driver_yellow():
 #---------------------ERROR HANDLING------------------------#
 @app.errorhandler(400)
 def bad_request(e):
+    print(str(e))
     return make_response(jsonify({"error":str(e)}), 400)
 
 @app.errorhandler(404)
