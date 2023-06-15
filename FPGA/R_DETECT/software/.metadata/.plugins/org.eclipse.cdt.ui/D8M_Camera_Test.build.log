@@ -1,8 +1,32 @@
-12:38:06 **** Build of configuration Nios II for project D8M_Camera_Test ****
+12:35:02 **** Build of configuration Nios II for project D8M_Camera_Test ****
 make mem_init_generate 
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../D8M_Camera_Test_bsp//HAL/inc -I../D8M_Camera_Test_bsp/ -I../D8M_Camera_Test_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mhw-mul -mno-hw-mulx -mgpopt=local  -o obj/default/main.o main.c
+main.c: In function 'main':
+main.c:276:20: warning: format '%x' expects argument of type 'unsigned int', but argument 2 has type 'alt_u32 {aka long unsigned int}' [-Wformat=]
+             printf("\nExposure = %x ", exposureTime);
+                    ^
+main.c:276:20: warning: format '%x' expects argument of type 'unsigned int', but argument 2 has type 'alt_u32 {aka long unsigned int}' [-Wformat=]
+main.c:281:20: warning: format '%x' expects argument of type 'unsigned int', but argument 2 has type 'alt_u32 {aka long unsigned int}' [-Wformat=]
+             printf("\nExposure = %x ", exposureTime);
+                    ^
+main.c:281:20: warning: format '%x' expects argument of type 'unsigned int', but argument 2 has type 'alt_u32 {aka long unsigned int}' [-Wformat=]
 Info: Building ../D8M_Camera_Test_bsp/
 C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../D8M_Camera_Test_bsp/
-[BSP build complete]
+Makefile not up to date.
+../../Qsys.sopcinfo has been modified since the BSP was generated.
 
-12:38:07 Build Finished (took 1s.225ms)
+Generate the BSP to update the Makefile, and then build again.
+
+To generate from Eclipse:
+ 1. Right-click the BSP project.
+ 2. In the Nios II Menu, click Generate BSP.
+
+To generate from the command line:
+ nios2-bsp-generate-files --settings=<settings file> --bsp-dir=<target bsp files directory>
+
+make[1]: *** [public.mk] Error 1
+make: *** [../D8M_Camera_Test_bsp/-recurs-make-lib] Error 2
+
+12:35:09 Build Finished (took 6s.491ms)
 
