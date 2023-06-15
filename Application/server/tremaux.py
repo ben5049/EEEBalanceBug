@@ -56,6 +56,7 @@ class Rover():
         elif whereat == 1:
             self.actions.append(2)
         self.toreturn = [-1]
+        self.pause = True
         # return 200 ok response 
     
     def __str__(self):
@@ -100,12 +101,13 @@ class Rover():
             return [3]
         
         # special state when rover has just started - tell it to move forward
-        if self.toreturn[0] == -1:
-            self.step_forward()
-            self.toreturn.pop(0)
-            return self.toreturn
-        else:
-            self.toreturn = []
+        if len(self.toreturn)!=0:
+            if self.toreturn[0] == -1:
+                self.step_forward()
+                self.toreturn.pop(0)
+                return self.toreturn
+            else:
+                self.toreturn = []
         
         # State machine logic for what to do while the rover is running
         if len(self.actions)!=0:
@@ -122,12 +124,12 @@ class Rover():
                         n = Node(position)
                         self.tree[n] = []
                         self.tree[self.priornode].append(n)
-                        self.priornode = n
+                        if self.priorwhereat == 1:
+                            self.priornode = n
+                            self.step_forward()
                         self.priorwhereat = 0
                         self.actions = [1] + self.actions
                         # if previously at a junction, output to rover to go forward
-                        if self.priorwhereat == 1:
-                            self.step_forward()
                     # check if we have previously visited this node
                     else:
                         # find the node in the tree and visit it, then go to state 4[0]
@@ -181,7 +183,7 @@ class Rover():
                         self.updatePos(newx, newy)
                         
                         # create new node
-                        n = Node(newx, newy)
+                        n = Node((newx, newy))
                         self.tree[n] = []
                         self.tree[self.priornode].append(n)
                         
@@ -196,6 +198,7 @@ class Rover():
                         self.actions = [3] + self.actions
             # check if in state 3[0]; if true, go to state 6[0], then state 1
             elif currentAction[0] == 3:
+                self.idle()
                 self.actions = [[6,currentAction[1]], 1] + self.actions
             # check if in state 4[0]; if true, visit node and tell rover to go back to the previous node
             elif currentAction[0] == 4:
@@ -203,13 +206,18 @@ class Rover():
                 self.go_back(currentAction[1], orientation)
             # check if in state 6[0]; if true, tell rover to set its angle and step forward
             elif currentAction[0] == 6:
-                self.setAngle(currentAction[1], position)
+                self.setAngle(currentAction[1])
                 self.step_forward()
             # check if in state 7[0]
             elif currentAction[0] == 7:
                 # if the rover has not returned to its prior position, return to state 7[0]
+                print(position)
+                print(currentAction[1].position)
+                print(self.thresholding(position, currentAction[1].position))
                 if not self.thresholding(position, currentAction[1].position):
                     self.actions = [[7, currentAction[1]]] + self.actions
+                else:
+                    self.idle()
         # if no more actions left, rover is finished
         else:
             self.toreturn.append(5)

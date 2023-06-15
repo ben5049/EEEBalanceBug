@@ -74,6 +74,7 @@ Pin assignments for Group 1's EEEBalanceBug
 
 /* Execute command task */
 #define COMMAND_QUEUE_LENGTH 10          /* Maximum number of commands that can be in the queue */
+#define ANGLE_SETPOINT_QUEUE_LENGTH 10   /* Maximum number of angle setpoints in queue */
 #define TASK_EXECUTE_COMMAND_PRIORITY 10 /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Server communication task */

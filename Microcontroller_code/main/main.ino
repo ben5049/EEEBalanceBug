@@ -32,6 +32,7 @@ SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C per
 QueueHandle_t commandQueue;
 QueueHandle_t junctionAngleQueue;
 QueueHandle_t beaconAngleQueue;
+QueueHandle_t angleSetpointQueue;
 
 //--------------------------------- Setup -----------------------------------------------
 
@@ -118,6 +119,7 @@ void setup() {
   commandQueue = xQueueCreate(COMMAND_QUEUE_LENGTH, sizeof(robotCommand));
   junctionAngleQueue = xQueueCreate(MAX_NUMBER_OF_JUNCTIONS, sizeof(float));
   beaconAngleQueue = xQueueCreate(NUMBER_OF_BEACONS, sizeof(float));
+  angleSetpointQueue = xQueueCreate(ANGLE_SETPOINT_QUEUE_LENGTH, sizeof(int));
 
   /* Create Tasks */
 

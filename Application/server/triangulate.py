@@ -23,5 +23,5 @@ def triangulate(ang1, ang2, ang3):
     ang3 = 270-ang3
     x2 = 3.6*sin((90-ang3)*pi/180)*cos(theta1*pi/180)/sin((theta1+ang3)*pi/180)
     y2 = 3.6*sin((90-ang3)*pi/180)*sin(theta1*pi/180)/sin((theta1+ang3)*pi/180)
-    return (x1+x2)/2, (y1+y2)/2
+    return (x1+x2)*500, (y1+y2)*500 # convert to mm
 

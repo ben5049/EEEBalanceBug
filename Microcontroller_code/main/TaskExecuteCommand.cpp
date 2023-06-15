@@ -39,6 +39,7 @@ void taskExecuteCommand(void *pvParameters) {
   /* Variables */
   static robotCommand newCommand;
   static float junctionAngle;
+  static float angleSetpoint;
 
   /* Start the loop */
   while (true) {
@@ -80,7 +81,9 @@ void taskExecuteCommand(void *pvParameters) {
       case TURN:
 
         /* Define what to do in the TURN state */
-
+        xQueueReceive(angleSetpointQueue, &angleSetpoint, portMAX_DELAY);
+        dirSetpoint = angleSetpoint;
+        // TODO: figure out how to give this to controller when finished
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &newCommand, 0) == pdTRUE) {
           currentCommand = newCommand;
