@@ -142,8 +142,9 @@ void parsePayload(String payload, robotCommand rc[], int httpResponseCode) {
             commands[i] = SPIN;
             break;
           case 2:
-            ang = actions[i+1];
             commands[i] = TURN;
+            ang = actions[i+1]; // TODO: add this to angle setpoint queue
+            i++;
             break;
           case 3:
             doc["next_actions"][i] = IDLE;
@@ -151,6 +152,7 @@ void parsePayload(String payload, robotCommand rc[], int httpResponseCode) {
           case 4:{
             xPosition = actions[i+1];
             yPosition = actions[i+2];
+            i+=2;
             break;
           }
           case 5:{
