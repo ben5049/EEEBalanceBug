@@ -154,7 +154,8 @@ void parsePayload(String payload, robotCommand rc[], int httpResponseCode) {
             break;
           case 2:
             commands[i] = TURN;
-            ang = actions[i+1]; // TODO: add this to angle setpoint queue
+            ang = actions[i+1];
+            xQueueSend(angleSetpointQueue, &ang, portMAX_DELAY);
             i++;
             break;
           case 3:
