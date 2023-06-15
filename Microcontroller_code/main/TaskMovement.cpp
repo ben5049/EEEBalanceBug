@@ -96,10 +96,6 @@ TaskHandle_t taskMovementHandle = nullptr;
 hw_timer_t* motorTimerL = NULL;
 hw_timer_t* motorTimerR = NULL;
 
-
-
-
-
 //-------------------------------- Functions --------------------------------------------
 
 /**/
