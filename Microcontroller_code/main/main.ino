@@ -81,6 +81,8 @@ void setup() {
   configureFPGACam();
 #endif
 
+  configureEEPROM();
+
   /* Configure pins */
   pinMode(IMU_INT, INPUT_PULLUP);
   pinMode(TOF_R_INT, INPUT_PULLUP);
@@ -93,6 +95,7 @@ void setup() {
   pinMode(VBUS, INPUT);
   pinMode(VBAT, INPUT);
   pinMode(SERVO_PIN, INPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   /* Create SPI mutex */
   if (mutexSPI == NULL) {
@@ -227,8 +230,8 @@ void loop() {
   SERIAL_PORT.println(yaw);
 
   // SERIAL_PORT.println("Sending start command");
-  // robotCommand command = SPIN;
-  // xQueueSend(commandQueue, &command, 0);
+  robotCommand command = FORWARD;
+  xQueueSend(commandQueue, &command, 0);
   // vTaskDelay(25000);
 
   // fpga1.getRYB(true);

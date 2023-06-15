@@ -73,6 +73,7 @@ void configureIMU();
 void configureToF();
 void configureWiFi();
 void configureFPGACam();
+void configureEEPROM();
 void motorSetDPS(float DPS);
 void motor_start(double RPM);
 

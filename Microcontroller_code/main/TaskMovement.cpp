@@ -7,9 +7,19 @@
 #include "Config.h"
 #include "PinAssignments.h"
 #include "src/pidautotuner.h"
+#include "EEPROM.h"
 
+//-------------------------------- Types ------------------------------------------------
+
+union data{
+  float floatData;
+  unsigned uint8_t byteData[4];
+}floatToBytes;
 
 //-------------------------------- Global Variables -------------------------------------
+
+/* EEPROM variables */
+static uint8_t addr = 0;
 
 /* Controller Speed */
 static int controlCycle = 0;
@@ -72,6 +82,13 @@ bool speedTuned = true;
 
 //-------------------------------- Functions --------------------------------------------
 
+/**/
+void configureEEPROM(){
+  if (!EEPROM.begin(EEPROM_SIZE))
+  {
+    Serial.println("failed to initialise EEPROM"); delay(1000000);
+  }
+}
 
 /* Main PID function */
 float PID(float setpoint, float input, float& cumError, float& prevError, float lastTime, float Kp, float Ki, float Kd) {

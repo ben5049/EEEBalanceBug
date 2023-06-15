@@ -39,7 +39,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
-#define ENABLE_TOF_TASK true       /* Setting "true" enables the ToF sampling task */
+#define ENABLE_TOF_TASK true        /* Setting "true" enables the ToF sampling task */
 #define TASK_TOF_PRIORITY 9         /* Task priority from 0 to 31 (larger means higher priority) */
 #define TASK_TOF_DEBUG false        /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
 #define ENABLE_TOF_INTERRUPTS false /* Setting true enables data ready interrupts from the ToF sensors. Default = false */
@@ -51,7 +51,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TOF_SAMPLE_FREQUENCY 20     /* Max = 33Hz, default = 10Hz */
 #define THRESHOLD_GRADIENT 400      /* Gradient threshold for the ToF sensors to detect junctions */
 #define THRESHOLD_COUNTER_MAX 5     /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
-#define THRESHOLD_DISTANCE 150      /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
+#define THRESHOLD_DISTANCE 800      /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
@@ -81,6 +81,7 @@ Pin assignments for Group 1's EEEBalanceBug
 /* Controller */
 #define TASK_MOVEMENT_PRIORITY 8 /* Task priority from 0 to 31 (larger means higher priority) */
 #define CONTROL_DEBUG false      /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
+#define EEPROM_SIZE 64           /* EEPROM size in bytes for storing controller constants */
 
 #define KP_POS 0.00
 #define KI_POS 0.00
