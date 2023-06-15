@@ -98,7 +98,7 @@ def rover():
         newx, newy = triangulate(data["beaconangles"][0], data["beaconangles"][1], data["beaconangles"][2])
         resp.append(newx)
         resp.append(newy)
-    print(resp, "RESP")
+        print(resp, "RESP")
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
