@@ -93,6 +93,8 @@ def rover():
     r.lastSeen = time()
     print(r.actions, "ACTIONS")
     # resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
+    resp = []
+    print(data["beaconangles"])
     if len(data["beaconangles"]) == 3:
         resp.append(4)
         newx, newy = triangulate(data["beaconangles"][0], data["beaconangles"][1], data["beaconangles"][2])
