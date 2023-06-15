@@ -146,7 +146,6 @@ def allrovers():
 
     # add all active rovers
     for rover in rovers:
-        print(temp)
         temp = {}
         temp["MAC"] = rover.name
         disallowedMacs.append(rover.name)
@@ -154,6 +153,7 @@ def allrovers():
         temp["connected"] = True
         temp["sessionid"] = rover.sessionId
         d.append(temp)
+        print(temp)
     
     # add all inactive rovers from database
     t = ""
