@@ -91,6 +91,7 @@ def rover():
     
     # create response, to rover, and reset timeout
     r.lastSeen = time()
+    print(r.actions)
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     if len(data["beaconangles"]) == 3:
         resp.append(4)
