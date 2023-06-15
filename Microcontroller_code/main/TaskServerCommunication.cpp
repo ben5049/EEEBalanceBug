@@ -55,8 +55,8 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     String tofright = String(distanceRightFiltered);
     String mac = String(WiFi.macAddress());
     String rssi = String(WiFi.RSSI());
-    String cwa = String(currentwhereAt);
     String battery = String(analogRead(VBAT)*4*3.3*1.1/4096);
+    String cwa = String(currentwhereAt);
     String postData = "{\"diagnostics\": {\"battery\":"+battery+",\"connection\":"+rssi+"},\"MAC\":\""+mac+"\",\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":"+cwa+",\"orientation\":"+orientation+",\"branches\":[";
     
     float junctionAngle;
