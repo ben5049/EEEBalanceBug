@@ -106,18 +106,19 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Notify the spin task that the turn is complete*/
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
+        digitalWrite(LED_BUILTIN, LOW);
         SERIAL_PORT.println("Finished");
 
         /* Recieve acknowledge that the queue is ready and taskSpin is done */
         ulTaskNotifyTakeIndexed(0, pdTRUE, pdMS_TO_TICKS(50));
 
         /* Print the angles of the junctions */
-        while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
-          if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {
-            SERIAL_PORT.print("Junction at: ");
-            SERIAL_PORT.println(junctionAngle);
-          }
-        }
+        // while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
+        //   if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {
+        //     SERIAL_PORT.print("Junction at: ");
+        //     SERIAL_PORT.println(junctionAngle);
+        //   }
+        // }
 
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &newCommand, 0) == pdTRUE) {

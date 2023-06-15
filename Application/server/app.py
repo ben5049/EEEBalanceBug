@@ -7,8 +7,8 @@ import tremaux, dijkstra
 import mariadb
 from time import time
 from json import loads
-import logging
-DEBUG = True
+from triangulate import triangulate
+DEBUG = False
 
 # Set up server
 
@@ -80,7 +80,7 @@ def rover():
                            
         # Create a new session for the rover as it has just connected, and get and store its session id
         try:
-            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], r.startup+int(data["timestamp"])))
+            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
             return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
@@ -92,6 +92,15 @@ def rover():
     # create response, to rover, and reset timeout
     r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
+    print(r.actions, "ACTIONS")
+    # # resp = []
+    # print(data["beaconangles"], "beacon angles")
+    # if len(data["beaconangles"]) == 3:
+    #     resp.append(4)
+    #     newx, newy = triangulate(data["beaconangles"][0], data["beaconangles"][1], data["beaconangles"][2])
+    #     resp.append(newx)
+    #     resp.append(newy)
+    #     print(resp, "RESP")
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
@@ -102,8 +111,8 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+int(data["timestamp"]), data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+int(data["timestamp"]), data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
+        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
+        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
         if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
@@ -121,9 +130,9 @@ def rover():
         # cur.execute("SELECT * FROM Diagnostics")
         # for mac, timestamp, battery, connection, sessionid in cur:
         #     print(mac, timestamp, battery, connection, sessionid, "THIS IS IN Diagnostics Table")
-        cur.execute("SELECT * FROM ReplayInfo")
-        for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-            print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
+        # cur.execute("SELECT * FROM ReplayInfo")
+        # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
+        #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
         # cur.execute("SELECT * FROM Sessions")
         # for mac, sessionId, SessionNickname in cur:
         #     print(mac, sessionId, SessionNickname)
@@ -140,6 +149,7 @@ def allrovers():
     disallowedMacs = []
     # remove timed out rovers
     for rover in rovers:
+        print(rover)
         if time()-rover.lastSeen > TIMEOUT:
             rovers.remove(rover)
 
@@ -152,18 +162,22 @@ def allrovers():
         temp["connected"] = True
         temp["sessionid"] = rover.sessionId
         d.append(temp)
+        print(temp)
     
     # add all inactive rovers from database
     t = ""
     for i in disallowedMacs:
-        t+="MAC != "+str(i)+" AND "
+        t+="MAC != \""+str(i)+"\" AND "
     t = t[:-5]
+    
     command = "SELECT * FROM Rovers WHERE "+t
     if command == "SELECT * FROM Rovers WHERE ":
         command = "SELECT * FROM Rovers" 
     try:
+        print(command)
         cur.execute(command)
     except mariadb.Error as e:
+        print(str(e))
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     for rover in cur:
         temp = {}
@@ -417,7 +431,7 @@ def led_driver_red():
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
@@ -429,7 +443,7 @@ def led_driver_blue():
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
@@ -441,12 +455,13 @@ def led_driver_yellow():
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#
 @app.errorhandler(400)
 def bad_request(e):
+    print(str(e))
     return make_response(jsonify({"error":str(e)}), 400)
 
 @app.errorhandler(404)

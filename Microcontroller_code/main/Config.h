@@ -51,15 +51,15 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TOF_SAMPLE_FREQUENCY 20     /* Max = 33Hz, default = 10Hz */
 #define THRESHOLD_GRADIENT 400      /* Gradient threshold for the ToF sensors to detect junctions */
 #define THRESHOLD_COUNTER_MAX 5     /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
-#define THRESHOLD_DISTANCE 150      /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
+#define THRESHOLD_DISTANCE 800      /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
 
 /* FPGA */
-#define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
-#define FPGA_ADDR 0x55           /* I2C address for the FPGA */
-#define FPGA_IMAGE_WIDTH 640     /* How wide the image is in pixels */
-#define FPGA_R_THRESHOLD 30      /* Threshold number of red pixels to count red beacon as having been detected */
-#define FPGA_Y_THRESHOLD 20      /* Threshold number of yellow pixels to count yellow beacon as having been detected */
-#define FPGA_B_THRESHOLD 50      /* Threshold number of blue pixels to count blue beacon as having been detected */
+#define ENABLE_FPGA_CAMERA true /* Whether or not to enable the FPGA camera */
+#define FPGA_ADDR 0x55          /* I2C address for the FPGA */
+#define FPGA_IMAGE_WIDTH 640    /* How wide the image is in pixels */
+#define FPGA_R_THRESHOLD 30     /* Threshold number of red pixels to count red beacon as having been detected */
+#define FPGA_Y_THRESHOLD 20     /* Threshold number of yellow pixels to count yellow beacon as having been detected */
+#define FPGA_B_THRESHOLD 50     /* Threshold number of blue pixels to count blue beacon as having been detected */
 
 /* Spin task */
 #define TASK_SPIN_FREQUENCY 10           /* Frequency to run the spin task at in Hz (default = 10Hz) */
@@ -74,13 +74,15 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_EXECUTE_COMMAND_PRIORITY 10 /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Server communication task */
-#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK true  /* Setting "true" enables the server communication task */
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
 #define TASK_SERVER_COMMUNICATION_PRIORITY 4   /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Controller */
 #define TASK_MOVEMENT_PRIORITY 8 /* Task priority from 0 to 31 (larger means higher priority) */
-#define CONTROL_DEBUG true      /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
+#define ENABLE_MOVEMENT_TASK false
+#define CONTROL_DEBUG false      /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
+#define EEPROM_SIZE 64           /* EEPROM size in bytes for storing controller constants */
 
 #define KP_POS 0.00
 #define KI_POS 0.00
@@ -111,7 +113,7 @@ Pin assignments for Group 1's EEEBalanceBug
 
 
 /* Debug task*/
-#define ENABLE_DEBUG_TASK true
+#define ENABLE_DEBUG_TASK false
 #define TASK_DEBUG_PRIORITY 4 /* Task priority from 0 to 31 (larger means higher priority) */
 
 

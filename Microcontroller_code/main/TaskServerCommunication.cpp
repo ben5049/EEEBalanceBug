@@ -70,101 +70,126 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     }
     postData = postData + "],\"beaconangles\":[";
     flag = false;
-  
-    while (uxQueueMessagesWaiting(beaconAngleQueue) > 0){
-      if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE){
-        postData = postData + String(beaconAngle) + ",";
-        flag = true;
+    SERIAL_PORT.println("I'm outside");
+    SERIAL_PORT.println(uxQueueMessagesWaiting(beaconAngleQueue));
+    SERIAL_PORT.println(uxQueueSpacesAvailable(beaconAngleQueue));
+    
+    if (uxQueueMessagesWaiting(beaconAngleQueue)==3){
+      SERIAL_PORT.println("I'm inside");
+      while (uxQueueMessagesWaiting(beaconAngleQueue) > 0){
+        if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE){
+          postData = postData + String(beaconAngle) + ",";
+          flag = true;
+          SERIAL_PORT.println(beaconAngle);
+        }
       }
     }
+
     if (flag){
       postData = postData.substring(0, postData.length()-1);
     }
     postData = postData + "],\"tofleft\":"+tofleft+",\"tofright\":"+tofright+"}";
-    SERIAL_PORT.println(postData);
     return http.POST(postData);
   }
 }
 
 String handleResponse(uint16_t httpResponseCode, HTTPClient& http) {
   if (httpResponseCode >= 200 && httpResponseCode < 300) {
-    SERIAL_PORT.print("HTTP Response code: ");
     SERIAL_PORT.println(httpResponseCode);
   } else if (httpResponseCode >= 400 && httpResponseCode < 500) {
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
-  } else if (httpResponseCode >= 500) {
+  } else if (httpResponseCode >= 500 && httpResponseCode<600) {
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
   } else {
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
-    return "{\"error\": \"Something really wrong54.165.59.37\"}";
+    return "{\"error\": \"Server not up\"}";
   }
   return http.getString();
 }
-
+/* Get size of response sent */
 int findCommandLength(String payload){
   DynamicJsonDocument doc(1024);
   deserializeJson(doc, payload);
   return doc["next_actions"].size();
 }
 
-void parsePayload(String payload, robotCommand rc[]) {
-    SERIAL_PORT.println(payload);
-    DynamicJsonDocument doc(1024);
-    deserializeJson(doc, payload);
+/* Convert JSON to array of commands */
+void parsePayload(String payload, robotCommand rc[], int httpResponseCode) {
+    /* Check to ensure data has been received */
+    if (httpResponseCode >= 200 && httpResponseCode < 300){
+      /* Extract JSON information */
+      DynamicJsonDocument doc(1024);
+      deserializeJson(doc, payload);
+      
+      /*  Get number of commands and create array with that size */
+      const int length = doc["next_actions"].size();
+      int actions[length];
 
-    int clearqueue = doc["clear_queue"];
-    if (clearqueue==1){
-      xQueueReset(commandQueue);
+      /* 
+        Can't directly use next_actions array as it is a String& instead 
+        of an int[], but next_actions[i] is an int (???), so we iterate 
+      ' and store in a new array
+      */
+
+      for (int i=0; i<length; i++){
+        actions[i] = doc["next_actions"][i];
+      }
+      
+      /* Convert next actions to robot commands */
+      robotCommand commands[length];
+
+      for (int i=0; i<length; i++){
+        switch(actions[i]){
+          case 0:
+            commands[i] = FORWARD;
+            break;
+          case 1:
+            commands[i] = SPIN;
+            break;
+          case 2:
+            commands[i] = TURN;
+            ang = actions[i+1]; // TODO: add this to angle setpoint queue
+            i++;
+            break;
+          case 3:
+            doc["next_actions"][i] = IDLE;
+            break;
+          case 4:{
+            xPosition = actions[i+1];
+            yPosition = actions[i+2];
+            i+=2;
+            break;
+          }
+          case 5:{
+            commands[i] = IDLE;
+            break;
+          }
+          default:
+            break;
+        }
+      }
+      /* Clear queue and replace all commands with idle if necessary */
+      int clearqueue = doc["clear_queue"];
+      if (clearqueue==1){
+        xQueueReset(commandQueue);
+        for (int i=0; i<length; i++){
+          commands[i] = IDLE;
+        }
+      }
+
+      rc = commands;
+    
     }
-    SERIAL_PORT.println(clearqueue);
+    /* If data has not been received, simply idle */
+    else{
+      robotCommand commands[1] = {IDLE};
+      rc = commands;
+    }
 
     
-    const int length = doc["next_actions"].size();
-
-    int actions[length];
-    for (int i=0; i<length; i++){
-      actions[i] = doc["next_actions"][i];
-    }    
-
-    robotCommand commands[length];
-
-    for (int i=0; i<length; i++){
-      switch(actions[i]){
-        case 0:
-          SERIAL_PORT.println("FORWARD");
-          commands[i] = FORWARD;
-          break;
-        case 1:
-          SERIAL_PORT.println("SPIN");
-          commands[i] = SPIN;
-          break;
-        case 2:
-          ang = actions[i+1];
-          SERIAL_PORT.println(ang);
-          commands[i] = TURN;
-          break;
-        case 3:
-          SERIAL_PORT.println("idle");
-          doc["next_actions"][i] = IDLE;
-          break;
-        case 4:{
-          xPosition = actions[i+1];
-          yPosition = actions[i+2];
-          break;
-        }
-        case 5:{
-          SERIAL_PORT.println("DONE");
-          commands[i] = IDLE;
-          break;
-        }
-        default:
-          break;
-      }
-    }
-    rc = commands;
 }
 
 
@@ -199,29 +224,27 @@ void taskServerCommunication(void* pvParameters) {
     if (WiFi.status() == WL_CONNECTED) {
       HTTPClient http;
 
-      // Your Domain name with URL path or IP address with path
+      /* Your Domain name with URL path or IP address with path */
       http.begin(serverPath.c_str());
 
-      // Send HTTP request
+      /* Send HTTP request */
       httpResponseCode = makeRequest(requestType, http);
 
-      // Manage response
+      /* Manage response */
       String payload = handleResponse(httpResponseCode, http);
 
-      // Free resources
+      /* Free resources */
       http.end();
 
-      // parse payload string
+      /* Parse payload string, and convert it to commands */
       numCommands = findCommandLength(payload);
       robotCommand commands[numCommands];
-      parsePayload(payload, commands);
-      SERIAL_PORT.println("pog1");
+      parsePayload(payload, commands, httpResponseCode);
+      
       for (int i=0; i<numCommands; i++){
-        SERIAL_PORT.println(commands[i]);
         newCommand = commands[i];
         xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
       }
-      SERIAL_PORT.println("pog2");
     }
   }
 }

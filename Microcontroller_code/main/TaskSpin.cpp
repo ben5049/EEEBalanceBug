@@ -181,10 +181,10 @@ void taskSpin(void *pvParameters) {
           blueBeaconClosestDistanceToCentre = blueBeaconDistanceToCentre;
           blueBeaconAngle = yaw;
         }
-        SERIAL_PORT.print("Yaw: ");
-        SERIAL_PORT.print(yaw);
-        SERIAL_PORT.print(", Blue Yaw: ");
-        SERIAL_PORT.println(blueBeaconAngle);
+        // SERIAL_PORT.print("Yaw: ");
+        // SERIAL_PORT.print(yaw);
+        // SERIAL_PORT.print(", Blue Yaw: ");
+        // SERIAL_PORT.println(blueBeaconAngle);
       }
 #endif
 
@@ -200,10 +200,12 @@ void taskSpin(void *pvParameters) {
         // standardDeviation = sqrt(sq(((float)sumSquares) / ((float)counter)) - sq(mean));
 
         /* Calculate the threshold for a peak */
-        peakThreshold = mean;  // + (2.0 * standardDeviation);
+        // peakThreshold = mean;  // + (2.0 * standardDeviation);
+
+        peakThreshold = THRESHOLD_DISTANCE;
 
         /* Check if right sensor starts at a junction */
-        if (distanceRight > peakThreshold) {
+        if (distanceRightFiltered > peakThreshold) {
           rightJunctionAtStart = true;
           rightJunctionCounter++;
         } else {
@@ -211,7 +213,7 @@ void taskSpin(void *pvParameters) {
         }
 
         /* Check if left sensor starts at a junction */
-        if (distanceLeft > peakThreshold) {
+        if (distanceLeftFiltered > peakThreshold) {
           leftJunctionAtStart = true;
           leftJunctionCounter++;
         } else {
@@ -219,8 +221,8 @@ void taskSpin(void *pvParameters) {
         }
 
         /* Update variables */
-        rightPreviousDistance = distanceRight;
-        leftPreviousDistance = distanceLeft;
+        rightPreviousDistance = distanceRightFiltered;
+        leftPreviousDistance = distanceLeftFiltered;
 
         /* Update boolean to show we are in the second half of the 360 degree turn */
         firstHalf = false;
@@ -228,8 +230,8 @@ void taskSpin(void *pvParameters) {
 
       /* In the first half, gather information about the surroundings which is then used in the second half to define what counts as a peak */
       if (firstHalf) {
-        sum += distanceRight + distanceLeft;
-        // sumSquares += sq(distanceRight) + sq(distanceLeft);
+        sum += distanceRightFiltered + distanceLeftFiltered;
+        // sumSquares += sq(distanceRightFiltered) + sq(distanceLeftFiltered);
         counter += 2;
         previousYaw = yaw;
       }
@@ -240,13 +242,13 @@ void taskSpin(void *pvParameters) {
         // TODO: change detection method to average rising and falling edge angles
 
         /* Check for right rising edge */
-        if ((rightPreviousDistance < peakThreshold) && (distanceRight >= peakThreshold)) {
+        if ((rightPreviousDistance < peakThreshold) && (distanceRightFiltered >= peakThreshold)) {
           rightRisingEdgeAngle = yaw;
           rightJunctionCounter++;
         }
 
         /* Check for right falling edge */
-        else if ((rightPreviousDistance >= peakThreshold) && (distanceRight < peakThreshold)) {
+        else if ((rightPreviousDistance >= peakThreshold) && (distanceRightFiltered < peakThreshold)) {
 
           /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
           if (rightJunctionAtStart && (rightJunctionCounter == 1)) {
@@ -262,13 +264,13 @@ void taskSpin(void *pvParameters) {
         }
 
         /* Check for left rising edge */
-        if ((leftPreviousDistance < peakThreshold) && (distanceLeft >= peakThreshold)) {
+        if ((leftPreviousDistance < peakThreshold) && (distanceLeftFiltered >= peakThreshold)) {
           leftRisingEdgeAngle = yaw;
           leftJunctionCounter++;
         }
 
         /* Check for left falling edge */
-        else if ((leftPreviousDistance >= peakThreshold) && (distanceLeft < peakThreshold)) {
+        else if ((leftPreviousDistance >= peakThreshold) && (distanceLeftFiltered < peakThreshold)) {
 
           /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
           if (leftJunctionAtStart && (leftJunctionCounter == 1)) {
@@ -285,8 +287,8 @@ void taskSpin(void *pvParameters) {
 
 
         /* Keep track of previous values for next loop */
-        rightPreviousDistance = distanceRight;
-        leftPreviousDistance = distanceLeft;
+        rightPreviousDistance = distanceRightFiltered;
+        leftPreviousDistance = distanceLeftFiltered;
       }
 
       /* If turn complete notification received */
@@ -298,6 +300,9 @@ void taskSpin(void *pvParameters) {
 
           /* Send beacon angles back in a queue */
           xQueueReset(beaconAngleQueue);
+          // redBeaconAngle = -45.0;
+          // yellowBeaconAngle = 45.0;
+          // blueBeaconAngle = 225.0;
           xQueueSend(beaconAngleQueue, &redBeaconAngle, 0);
           xQueueSend(beaconAngleQueue, &yellowBeaconAngle, 0);
           xQueueSend(beaconAngleQueue, &blueBeaconAngle, 0);
