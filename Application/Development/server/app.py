@@ -8,7 +8,7 @@ import mariadb
 from time import time
 from json import loads
 import logging
-DEBUG = True
+DEBUG = False
 
 # Set up server
 
