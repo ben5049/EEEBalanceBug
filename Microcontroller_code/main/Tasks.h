@@ -73,6 +73,7 @@ void IRAM_ATTR ToFRightISR();
 void IRAM_ATTR ToFLeftISR();
 void IRAM_ATTR IRRightISR();
 void IRAM_ATTR IRLeftISR();
+void IRAM_ATTR ToFFrontISR();
 
 /* Functions */
 void move(float distance);

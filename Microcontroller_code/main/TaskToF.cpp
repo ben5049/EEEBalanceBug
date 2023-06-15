@@ -27,12 +27,15 @@ Code to initialise and sample the time of flight sensors
 /* Time of flight (ToF) sensors */
 static VL53L0X tofRight;
 static VL53L0X tofLeft;
+static VL53L0X tofFront;
 volatile int16_t distanceRight;
 volatile int16_t distanceLeft;
+volatile int16_t distanceFront;
 volatile float distanceRightFiltered;
 volatile float distanceLeftFiltered;
 static VL53L0X_RangingMeasurementData_t measureRight;
 static VL53L0X_RangingMeasurementData_t measureLeft;
+static VL53L0X_RangingMeasurementData_t measureFront;
 
 /* I2C multiplexer */
 static TCA9548A I2CMux;
@@ -44,6 +47,7 @@ static FIRFilter leftFIR;
 /* Variables */
 static volatile bool rightToFDataReady = false;
 static volatile bool leftToFDataReady = false;
+static volatile bool imminentCollision = false;
 volatile bool IRRightCollision = false;
 volatile bool IRLeftCollision = false;
 
@@ -158,8 +162,44 @@ void configureToF() {
     SERIAL_PORT.println("Left ToF sensor connected");
   }
 
+  /* Close the left ToF sensor's channel */
+  I2CMux.closeChannel(TOF_LEFT_CHANNEL);
+
+  /* Open the channel to the front ToF sensor */
+  I2CMux.openChannel(TOF_FRONT_CHANNEL);
+
+  /* Reset any ToF sensors on the bus with address VL53L0X_I2C_ADDR (0x29)*/
+  if (findI2CDevice(VL53L0X_I2C_ADDR)) {
+    SERIAL_PORT.println("Resetting sensors");
+    tofFront.stop(VL53L0X_I2C_ADDR);
+  }
+
+  /* Reset any ToF sensors on the bus with address TOF_FRONT_ADDRESS (0x32) */
+  if (findI2CDevice(TOF_FRONT_ADDRESS)) {
+    SERIAL_PORT.println("Front ToF sensor already connected");
+    tofFront.stop(TOF_FRONT_ADDRESS);
+  }
+
+  /* Begin the front ToF sensor */
+  if (!tofFront.begin(TOF_FRONT_ADDRESS)) {
+    while (true) {
+      SERIAL_PORT.println(F("Failed to boot front ToF sensor"));
+      delay(1000);
+    }
+  } else {
+
+    tofFront.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_THRESHOLD_CROSSED_LOW, VL53L0X_INTERRUPTPOLARITY_LOW);
+    FixPoint1616_t LowThreashHold = (80 * 65536.0);
+    FixPoint1616_t HighThreashHold = (1000 * 65536.0);
+    tofFront.setInterruptThresholds(LowThreashHold, HighThreashHold, false);
+    tofFront.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
+    tofFront.startMeasurement();
+    SERIAL_PORT.println("Front ToF sensor connected");
+  }
+
   /* Open sensor channels */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
+  I2CMux.openChannel(TOF_LEFT_CHANNEL);
 
   /* Begin FIR filters */
   FIRFilterInit(&rightFIR);
@@ -203,6 +243,11 @@ void IRAM_ATTR ToFRightISR() {
 /* ISR that triggers on left ToF sensor interrupt */
 void IRAM_ATTR ToFLeftISR() {
   leftToFDataReady = true;
+}
+
+/* ISR that triggers on left ToF sensor interrupt */
+void IRAM_ATTR ToFFrontISR() {
+  imminentCollision = true;
 }
 
 /* ISR that triggers when right forward IR sensor level changes */
@@ -260,13 +305,10 @@ void taskToF(void *pvParameters) {
       tofRight.getRangingMeasurement(&measureRight, false);
       tofLeft.getRangingMeasurement(&measureLeft, false);
 
-#if ENABLE_TOF_INTERRUPTS == true
+#if ENABLE_SIDE_TOF_INTERRUPTS == true
       /* Reset the interrupt flags */
-      if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-        tofRight.clearInterruptMask(false);
-        tofLeft.clearInterruptMask(false);
-        xSemaphoreGive(mutexI2C);
-      }
+      tofRight.clearInterruptMask(false);
+      tofLeft.clearInterruptMask(false);
 #endif
       xSemaphoreGive(mutexI2C);
 
@@ -316,10 +358,28 @@ void taskToF(void *pvParameters) {
     if (currentCommand == FORWARD) {
 
       /* IF we hit a wall while going forwards alert taskExecuteCommand */
-      if (IRLeftCollision || IRLeftCollision) {
+      if (IRLeftCollision || IRLeftCollision || imminentCollision) {
 
         /* Notify taskExecuteCommand that we have hit a wall */
         xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+
+        /* Begin priority ceiling protocol */
+#if MAX_I2C_PRIORITY > TASK_TOF_PRIORITY
+        vTaskPrioritySet(NULL, MAX_I2C_PRIORITY);
+#endif
+
+        /* Clear interrupt flag */
+        if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
+          tofFront.clearInterruptMask(false);
+          xSemaphoreGive(mutexI2C);
+        }
+
+        /* End priority ceiling protocol */
+#if MAX_I2C_PRIORITY > TASK_TOF_PRIORITY
+        vTaskPrioritySet(NULL, TASK_TOF_PRIORITY);
+#endif
+        /* Reset variables */
+        imminentCollision = false;
       }
 
       /* If we are at a junction while going forwards alert taskExecuteCommand */
@@ -329,14 +389,13 @@ void taskToF(void *pvParameters) {
         /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
         // if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 
-          /* Notify taskExecuteCommand that a junction has been found */
-          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-          digitalWrite(LED_BUILTIN, HIGH);
-        // }
-      }
-       else {
+        /* Notify taskExecuteCommand that a junction has been found */
+        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+
+
+
+      } else {
         // overThresholdCounter = 0;
-        digitalWrite(LED_BUILTIN, LOW);
       }
     }
   }

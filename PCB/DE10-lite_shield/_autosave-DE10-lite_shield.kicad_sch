@@ -1,0 +1,82 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid 42dcd1c6-b27b-471e-adaa-a184b6e8160d)
+
+  (paper "A4")
+
+  (lib_symbols
+  )
+
+
+  (sheet (at 160 40) (size 40 40) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 255 1.0000))
+    (uuid 1ab5e218-ce3a-4931-a2dd-493389749da6)
+    (property "Sheetname" "Microcontroller & USB" (at 160 39.2884 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "microcontroller_usb.kicad_sch" (at 160 80.5846 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "DE10-lite_shield"
+        (path "/42dcd1c6-b27b-471e-adaa-a184b6e8160d" (page "4"))
+      )
+    )
+  )
+
+  (sheet (at 100 40) (size 40 40) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 255 0 0 1.0000))
+    (uuid 64f5d376-489c-4d66-8151-16917461492d)
+    (property "Sheetname" "Power" (at 100 39.2884 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "power.kicad_sch" (at 100 80.5846 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "DE10-lite_shield"
+        (path "/42dcd1c6-b27b-471e-adaa-a184b6e8160d" (page "2"))
+      )
+    )
+  )
+
+  (sheet (at 160 100) (size 40 40) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 255 255 0 1.0000))
+    (uuid 9206a842-7f2b-4e44-bea3-de1c4f39f118)
+    (property "Sheetname" "Other" (at 160 99.2884 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "other.kicad_sch" (at 160 140.5846 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "DE10-lite_shield"
+        (path "/42dcd1c6-b27b-471e-adaa-a184b6e8160d" (page "5"))
+      )
+    )
+  )
+
+  (sheet (at 100 100) (size 40 40) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 255 0 1.0000))
+    (uuid 93c598a6-836d-4390-b2c9-7307c0c28ef3)
+    (property "Sheetname" "Sensors" (at 100 99.2884 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "sensors.kicad_sch" (at 100 140.5846 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "DE10-lite_shield"
+        (path "/42dcd1c6-b27b-471e-adaa-a184b6e8160d" (page "3"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
