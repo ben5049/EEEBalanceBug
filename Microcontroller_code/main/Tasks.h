@@ -16,7 +16,8 @@ Header file for tasks
 //-------------------------------- Exported ---------------------------------------
 
 /* Hardware timers */
-extern hw_timer_t *motorTimer;
+extern hw_timer_t *motorTimerR;
+extern hw_timer_t *motorTimerL;
 
 /* Types */
 typedef enum {
@@ -40,6 +41,7 @@ extern volatile float speedKd;
 extern volatile float speedSetpoint;
 extern volatile float pitch;                     /* Pitch in degrees between -180 and 180 */
 extern volatile float yaw;                       /* Yaw in degrees between -180 and 180 */
+extern volatile float yawRate;                   /* Yaw rate in degrees/s */
 extern volatile float roll;                      /* Roll in degrees between -180 and 180 */
 extern volatile float angularVelocity;           /* Angular velocity in degrees per second around y axis (pitch axis) */
 extern volatile unsigned long stepperRightSteps; /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
@@ -56,12 +58,17 @@ extern volatile float loopFreq;
 extern volatile float angleKp;
 extern volatile float angleKi;
 extern volatile float angleKd;
+extern volatile float angRateKp;
+extern volatile float angRateKi;
+extern volatile float angRateKd;
+extern volatile float angRateSetpoint;
 extern volatile bool IRRightCollision;
 extern volatile bool IRLeftCollision;
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
-void IRAM_ATTR onTimer();
+void IRAM_ATTR stepL();
+void IRAM_ATTR stepR();
 void IRAM_ATTR ToFRightISR();
 void IRAM_ATTR ToFLeftISR();
 void IRAM_ATTR IRRightISR();

@@ -94,15 +94,21 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KP_ANGLE 7.0
 #define KI_ANGLE 0.01
 #define KD_ANGLE 400
+
+#define KP_ANGRATE 1
+#define KI_ANGRATE 0
+#define KD_ANGRATE 0
+
 #define ANGLE_OFFSET -3.5
 #define MAX_ANGLE 7.5
-#define MAX_DPS 360
+#define MAX_DPS 400
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
+#define MAX_DIFF 300
 
 
 /* Debug task*/
-#define ENABLE_DEBUG_TASK false
+#define ENABLE_DEBUG_TASK true
 #define TASK_DEBUG_PRIORITY 4 /* Task priority from 0 to 31 (larger means higher priority) */
 
 

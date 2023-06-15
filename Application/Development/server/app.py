@@ -11,11 +11,8 @@ import logging
 DEBUG = True
 
 # Set up server
-if DEBUG:
-    logging.basicConfig(filename='record.log', level=logging.DEBUG)
+
 app = Flask(__name__)
-if DEBUG:
-    app.logger.debug("Starting debug logging: ")
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
 
 # Server global variables
@@ -48,6 +45,7 @@ def hello():
 # Communication with rover
 @app.route("/rover", methods=["POST"])
 def rover():
+    global conn, cur
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     
     r = 0
@@ -82,7 +80,7 @@ def rover():
                            
         # Create a new session for the rover as it has just connected, and get and store its session id
         try:
-            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], r.startup+int(data["timestamp"])))
+            cur.execute("INSERT INTO Sessions (MAC,  SessionNickname) VALUES (?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000))
             cur.execute("SELECT MAX(SessionID) FROM Sessions WHERE MAC=?", (data["MAC"],))
         except mariadb.Error as e:
             return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
@@ -104,8 +102,8 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+int(data["timestamp"]), data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+int(data["timestamp"]), data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
+        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
+        cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
         if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
@@ -126,26 +124,29 @@ def rover():
         cur.execute("SELECT * FROM ReplayInfo")
         for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
             print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
-            app.logger.debug("TOFLEFT: "+str(tofleft)+" TOFRIGHT: "+str(tofright)+" YAW: "+str(orientation))
         # cur.execute("SELECT * FROM Sessions")
         # for mac, sessionId, SessionNickname in cur:
         #     print(mac, sessionId, SessionNickname)
         print(r.actions, "ACTIONS")
         print(resp)
+    conn.commit()
     return make_response(jsonify(resp), 200)
 
 # Give all rovers, active or inactive, to client
 @app.route("/client/allrovers", methods=["GET"])
 def allrovers():
+    global conn, cur
     d = []
     disallowedMacs = []
     # remove timed out rovers
     for rover in rovers:
+        print(rover)
         if time()-rover.lastSeen > TIMEOUT:
             rovers.remove(rover)
 
     # add all active rovers
     for rover in rovers:
+        print(temp)
         temp = {}
         temp["MAC"] = rover.name
         disallowedMacs.append(rover.name)
@@ -159,12 +160,15 @@ def allrovers():
     for i in disallowedMacs:
         t+="MAC != "+str(i)+" AND "
     t = t[:-5]
+    
     command = "SELECT * FROM Rovers WHERE "+t
     if command == "SELECT * FROM Rovers WHERE ":
         command = "SELECT * FROM Rovers" 
     try:
+        print(command)
         cur.execute(command)
     except mariadb.Error as e:
+        print(str(e))
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     for rover in cur:
         temp = {}
@@ -182,6 +186,7 @@ def allrovers():
 # get a specific session replay
 @app.route("/client/replay", methods=["POST"])
 def replay():
+    global conn, cur
     data = request.get_json()
     
     # get requested session id
@@ -211,6 +216,7 @@ def replay():
 # Get all sessions
 @app.route("/client/sessions", methods=["GET"])
 def sessions():
+    global conn, cur
     cur.execute("SELECT * FROM Sessions ORDER BY SessionId DESC;")
     d = []
 
@@ -228,6 +234,7 @@ def sessions():
 # Get diagnostic data from given session
 @app.route("/client/diagnostics", methods=["POST"])
 def diagnostics():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -248,6 +255,7 @@ def diagnostics():
 # Pause a given rover
 @app.route("/client/pause", methods=["POST"])
 def pause():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -272,6 +280,7 @@ def pause():
 # Play a given rover
 @app.route("/client/play", methods=["POST"])
 def play():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -295,6 +304,7 @@ def play():
 # Set a nickname for a session
 @app.route("/client/sessionnickname", methods=["POST"])
 def sessionNickname():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -313,6 +323,7 @@ def sessionNickname():
 # Set rover nickname
 @app.route("/client/rovernickname", methods=["POST"])
 def addnickname():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -335,6 +346,7 @@ def addnickname():
 # Get shortest path predecessor graph from stored trees
 @app.route("/client/shortestpath", methods=["POST"])
 def findShortestPath():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -376,6 +388,7 @@ def findShortestPath():
 # emergency stops rover - must be disconnected and reconnected
 @app.route("/client/estop", methods=["POST"])
 def estop():
+    global conn, cur
     data = request.get_json()
     
     try:
@@ -396,6 +409,7 @@ def estop():
 # turns on or off red LED
 @app.route("/led_driver/red", methods=["POST"])
 def led_driver_red():
+    global conn, cur
     global isSpinning, spinTime
     data = request.get_json()
     
@@ -438,6 +452,7 @@ def led_driver_yellow():
 #---------------------ERROR HANDLING------------------------#
 @app.errorhandler(400)
 def bad_request(e):
+    print(str(e))
     return make_response(jsonify({"error":str(e)}), 400)
 
 @app.errorhandler(404)

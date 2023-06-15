@@ -13,7 +13,7 @@ TaskHandle_t taskServerCommunicationHandle = nullptr;
 /* Arduino headers */
 #include "WiFi.h"
 #include "HTTPClient.h"
-#include "Arduino_JSON.h"
+#include <ArduinoJson.h>
 
 //-------------------------------- Global Variables -------------------------------------
 
@@ -81,88 +81,107 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
       postData = postData.substring(0, postData.length()-1);
     }
     postData = postData + "],\"tofleft\":"+tofleft+",\"tofright\":"+tofright+"}";
-    SERIAL_PORT.println(postData);
     return http.POST(postData);
   }
 }
 
 String handleResponse(uint16_t httpResponseCode, HTTPClient& http) {
   if (httpResponseCode >= 200 && httpResponseCode < 300) {
-    SERIAL_PORT.print("HTTP Response code: ");
     SERIAL_PORT.println(httpResponseCode);
   } else if (httpResponseCode >= 400 && httpResponseCode < 500) {
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
-  } else if (httpResponseCode >= 500) {
+  } else if (httpResponseCode >= 500 && httpResponseCode<600) {
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
   } else {
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
-    return "{\"error\": \"Something really wrong54.165.59.37\"}";
+    return "{\"error\": \"Server not up\"}";
   }
   return http.getString();
 }
-
-robotCommand* parsePayload(String payload, uint8_t& numCommands) {
-  JSONVar data = JSON.parse(payload);
-  robotCommand commands[10];
-  numCommands = 0;
-
-  // JSON.typeof(jsonVar) can be used to get the type of the var
-  if (JSON.typeof(data) == "undefined") {
-    SERIAL_PORT.println("Parsing input failed!");
-    return commands;
-  }
-
-  SERIAL_PORT.print("JSON object = ");
-  SERIAL_PORT.println(data);
-  const int length = data["next_actions"].length();
-  int actions[length] = {data["next_actions"]};
-  int clear = data["clear_queue"];
-  if (clear==1){
-    xQueueReset(commandQueue);
-    numCommands = 0;
-  }
-  else{
-    for (int i=0; i<length; i++){
-      switch (actions[i]){
-        case 0:
-          SERIAL_PORT.println("FORWARD");
-          commands[i] = FORWARD;
-          break;
-        case 1:
-          SERIAL_PORT.println("SPIN");
-          commands[i] = SPIN;
-          break;
-        case 2:
-          ang = actions[i+1];
-          SERIAL_PORT.println(ang);
-          commands[i] = TURN;
-          break;
-        case 3:
-          SERIAL_PORT.println("idle");
-          commands[i] = IDLE;
-          break;
-        case 4:{
-          xPosition = actions[i+1];
-          yPosition = actions[i+2];
-          break;
-        }
-        case 5:{
-          SERIAL_PORT.println("DONE");
-          commands[i] = IDLE;
-          break;
-        }
-        default:
-          break;
-      }
-      numCommands = length;
-    }
-  
-  return commands;
-  }
+/* Get size of response sent */
+int findCommandLength(String payload){
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, payload);
+  return doc["next_actions"].size();
 }
+
+/* Convert JSON to array of commands */
+void parsePayload(String payload, robotCommand rc[], int httpResponseCode) {
+    /* Check to ensure data has been received */
+    if (httpResponseCode >= 200 && httpResponseCode < 300){
+      /* Extract JSON information */
+      DynamicJsonDocument doc(1024);
+      deserializeJson(doc, payload);
+      
+      /*  Get number of commands and create array with that size */
+      const int length = doc["next_actions"].size();
+      int actions[length];
+
+      /* 
+        Can't directly use next_actions array as it is a String& instead 
+        of an int[], but next_actions[i] is an int (???), so we iterate 
+      ' and store in a new array
+      */
+
+      for (int i=0; i<length; i++){
+        actions[i] = doc["next_actions"][i];
+      }    
+      
+      /* Convert next actions to robot commands */
+      robotCommand commands[length];
+
+      for (int i=0; i<length; i++){
+        switch(actions[i]){
+          case 0:
+            commands[i] = FORWARD;
+            break;
+          case 1:
+            commands[i] = SPIN;
+            break;
+          case 2:
+            ang = actions[i+1];
+            commands[i] = TURN;
+            break;
+          case 3:
+            doc["next_actions"][i] = IDLE;
+            break;
+          case 4:{
+            xPosition = actions[i+1];
+            yPosition = actions[i+2];
+            break;
+          }
+          case 5:{
+            commands[i] = IDLE;
+            break;
+          }
+          default:
+            break;
+        }
+      }
+      /* Clear queue and replace all commands with idle if necessary */
+      int clearqueue = doc["clear_queue"];
+      if (clearqueue==1){
+        xQueueReset(commandQueue);
+        for (int i=0; i<length; i++){
+          commands[i] = IDLE;
+        }
+      }
+
+      rc = commands;
+    
+    }
+    /* If data has not been received, simply idle */
+    else{
+      robotCommand commands[1] = {IDLE};
+      rc = commands;
+    }
+
+    
+}
+
 
 //-------------------------------- Task Functions ---------------------------------------
 
@@ -195,27 +214,27 @@ void taskServerCommunication(void* pvParameters) {
     if (WiFi.status() == WL_CONNECTED) {
       HTTPClient http;
 
-      // Your Domain name with URL path or IP address with path
+      /* Your Domain name with URL path or IP address with path */
       http.begin(serverPath.c_str());
 
-      // Send HTTP request
+      /* Send HTTP request */
       httpResponseCode = makeRequest(requestType, http);
 
-      // Manage response
+      /* Manage response */
       String payload = handleResponse(httpResponseCode, http);
 
-      // Free resources
+      /* Free resources */
       http.end();
 
-      // parse payload string
-      robotCommand* commands = parsePayload(payload, numCommands);
-      SERIAL_PORT.println("pog1");
+      /* Parse payload string, and convert it to commands */
+      numCommands = findCommandLength(payload);
+      robotCommand commands[numCommands];
+      parsePayload(payload, commands, httpResponseCode);
+      
       for (int i=0; i<numCommands; i++){
-        SERIAL_PORT.println(commands[i]);
         newCommand = commands[i];
         xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
       }
-      SERIAL_PORT.println("pog2");
     }
   }
 }

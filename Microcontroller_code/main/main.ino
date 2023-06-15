@@ -59,7 +59,8 @@ void setup() {
   SERIAL_PORT.println("I2C Initialised");
 
   /* Create hw timers */
-  motorTimer = timerBegin(0, 80, true);
+  motorTimerL = timerBegin(0, 80, true);
+  motorTimerR = timerBegin(2, 80, true);
 
 #if ENABLE_IMU_TASK == true
   /* Configure the IMU & DMP */
@@ -89,7 +90,8 @@ void setup() {
   pinMode(TOF_L_INT, INPUT_PULLUP);
   pinMode(IR_R_INT, INPUT_PULLUP);
   pinMode(IR_L_INT, INPUT_PULLUP);
-  pinMode(STEPPER_STEP, OUTPUT);
+  pinMode(STEPPER_L_STEP, OUTPUT);
+  pinMode(STEPPER_R_STEP, OUTPUT);
   pinMode(STEPPER_L_DIR, OUTPUT);
   pinMode(STEPPER_R_DIR, OUTPUT);
   pinMode(VBUS, INPUT);
@@ -201,7 +203,8 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(IR_R_INT), IRRightISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(IR_L_INT), IRLeftISR, CHANGE);
 #endif
-  timerAttachInterrupt(motorTimer, &onTimer, true);
+  timerAttachInterrupt(motorTimerL, &stepL, true);
+  timerAttachInterrupt(motorTimerR, &stepR, true);
 
 
   // if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {

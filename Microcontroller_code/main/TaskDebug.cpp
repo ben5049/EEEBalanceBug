@@ -12,24 +12,6 @@ TaskHandle_t taskDebugHandle = nullptr;
 
 //-------------------------------- Global Variables -------------------------------------
 
-//-------------------------------- Functions --------------------------------------------
-
-/* Wait for incoming serial data until the buffer has at least the specified number of bytes */
-bool waitForSerialData(uint8_t bufferSize = 1) {
-
-  /* Setup function variables */
-  bool dataAvailable = false;
-
-  /* Wait until the specified amount of data is in the buffer */
-  while (!dataAvailable) {
-    vTaskDelay(pdMS_TO_TICKS(5));
-
-    /* Update the availability status */
-    dataAvailable = (SERIAL_PORT.available() >= bufferSize);
-  }
-
-  return dataAvailable;
-}
 
 //-------------------------------- Task Functions ---------------------------------------
 
@@ -43,9 +25,6 @@ void taskDebug(void *pvParameters) {
   /* Start the loop */
   while (true) {
 
-    /* Wait for data */
-    waitForSerialData();
-
     serialData = SERIAL_PORT.read();
 
     // if (serialData == 'p') {
@@ -58,15 +37,32 @@ void taskDebug(void *pvParameters) {
     //   angleSetpoint = SERIAL_PORT.parseFloat();
     // }
 
-    if (serialData == 'p') {
-      speedKp = SERIAL_PORT.parseFloat();
-    } else if (serialData == 'i') {
-      speedKi = SERIAL_PORT.parseFloat();
-    } else if (serialData == 'd') {
-      speedKd = SERIAL_PORT.parseFloat();
-    } else if (serialData == 's') {
-      speedSetpoint = SERIAL_PORT.parseFloat();
+    // if (serialData == 'p') {
+    //   speedKp = SERIAL_PORT.parseFloat();
+    // } else if (serialData == 'i') {
+    //   speedKi = SERIAL_PORT.parseFloat();
+    // } else if (serialData == 'd') {
+    //   speedKd = SERIAL_PORT.parseFloat();
+    // } else if (serialData == 's') {
+    //   speedSetpoint = SERIAL_PORT.parseFloat();
+    // }
+    if(SERIAL_PORT.available()>=1){
+      if (serialData == 'p') {
+        angRateKp = SERIAL_PORT.parseFloat();
+      } else if (serialData == 'i') {
+        angRateKi = SERIAL_PORT.parseFloat();
+      } else if (serialData == 'd') {
+        angRateKd = SERIAL_PORT.parseFloat();
+      } else if (serialData == 'r') {
+        angRateSetpoint = SERIAL_PORT.parseFloat();
+      }
     }
+    angRateSetpoint = 0;
+    vTaskDelay(2000);
+    angRateSetpoint = 180;
+    vTaskDelay(2000);
+    
+    
   }
 }
 
