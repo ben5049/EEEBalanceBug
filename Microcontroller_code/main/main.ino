@@ -133,6 +133,7 @@ void setup() {
     tskNO_AFFINITY);
 #endif
 
+#if ENABLE_MOVEMENT_TASK == true
   xTaskCreatePinnedToCore(
     taskMovement,           /* Function that implements the task */
     "MOVEMENT",             /* Text name for the task */
@@ -141,6 +142,7 @@ void setup() {
     TASK_MOVEMENT_PRIORITY, /* Task priority */
     &taskMovementHandle,    /* Pointer to store the task handle */
     tskNO_AFFINITY);
+#endif
 
 #if ENABLE_TOF_TASK == true
   xTaskCreatePinnedToCore(
@@ -225,17 +227,18 @@ void loop() {
   // SERIAL_PORT.print("Pitch:");
   // SERIAL_PORT.print(pitch);
 
-  SERIAL_PORT.print("Right:");
-  SERIAL_PORT.print(distanceRightFiltered);
-  SERIAL_PORT.print(", Left:");
-  SERIAL_PORT.print(distanceLeftFiltered);
-  SERIAL_PORT.print(", Yaw:");
-  SERIAL_PORT.println(yaw);
+  // SERIAL_PORT.print("Right:");
+  // SERIAL_PORT.print(distanceRightFiltered);
+  // SERIAL_PORT.print(", Left:");
+  // SERIAL_PORT.print(distanceLeftFiltered);
+  // SERIAL_PORT.print(", Yaw:");
+  // SERIAL_PORT.println(yaw);
 
   // SERIAL_PORT.println("Sending start command");
-  robotCommand command = FORWARD;
+  robotCommand command = SPIN;
+  digitalWrite(LED_BUILTIN, HIGH);
   xQueueSend(commandQueue, &command, 0);
-  // vTaskDelay(25000);
+  vTaskDelay(25000);
 
   // fpga1.getRYB(true);
   // Serial.print("RED: ");

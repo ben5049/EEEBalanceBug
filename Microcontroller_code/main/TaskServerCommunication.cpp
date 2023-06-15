@@ -128,7 +128,7 @@ void parsePayload(String payload, robotCommand rc[], int httpResponseCode) {
 
       for (int i=0; i<length; i++){
         actions[i] = doc["next_actions"][i];
-      }    
+      }
       
       /* Convert next actions to robot commands */
       robotCommand commands[length];
