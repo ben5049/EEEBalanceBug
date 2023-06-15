@@ -175,22 +175,25 @@ class Rover():
                     self.actions = [[4, self.priornode]] + self.actions
                 # check if position not previously visited
                 else:
-                    # triangulate position
-                    newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
-                    self.updatePos(newx, newy)
-                    
-                    # create new node
-                    n = Node(newx, newy)
-                    self.tree[n] = []
-                    self.tree[self.priornode].append(n)
-                    
-                    # tell rover to eventually go to state 4[0]
-                    self.actions = [[4, self.priornode]] + self.actions
-                    self.priornode = n
-                    self.priorwhereat = 1
-                    # tell rover to visit each branch and then return to the junction. done by adding state 3[0] and 4[0] to state machine 
-                    for i in potentialbranches:
-                        self.actions = [[3, i], [4, self.priornode]] + self.actions 
+                    if len(beaconangles)==3 and len(potentialbranches)!=0:
+                        # triangulate position
+                        newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
+                        self.updatePos(newx, newy)
+                        
+                        # create new node
+                        n = Node(newx, newy)
+                        self.tree[n] = []
+                        self.tree[self.priornode].append(n)
+                        
+                        # tell rover to eventually go to state 4[0]
+                        self.actions = [[4, self.priornode]] + self.actions
+                        self.priornode = n
+                        self.priorwhereat = 1
+                        # tell rover to visit each branch and then return to the junction. done by adding state 3[0] and 4[0] to state machine 
+                        for i in potentialbranches:
+                            self.actions = [[3, i], [4, self.priornode]] + self.actions 
+                    else:
+                        self.actions = [3] + self.actions
             # check if in state 3[0]; if true, go to state 6[0], then state 1
             elif currentAction[0] == 3:
                 self.actions = [[6,currentAction[1]], 1] + self.actions
