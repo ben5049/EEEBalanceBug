@@ -70,13 +70,16 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     }
     postData = postData + "],\"beaconangles\":[";
     flag = false;
-  
-    while (uxQueueMessagesWaiting(beaconAngleQueue) > 0){
-      if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE){
-        postData = postData + String(beaconAngle) + ",";
-        flag = true;
+    
+    if (uxQueueMessagesWaiting(beaconAngleQueue)==3){
+      while (uxQueueMessagesWaiting(beaconAngleQueue) > 0){
+        if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE){
+          postData = postData + String(beaconAngle) + ",";
+          flag = true;
+        }
       }
     }
+
     if (flag){
       postData = postData.substring(0, postData.length()-1);
     }
