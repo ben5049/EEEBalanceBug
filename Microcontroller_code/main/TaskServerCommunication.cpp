@@ -24,6 +24,7 @@ String serverName = "http://54.165.59.37:5000/";
 String hostname = "ESP32 Node";
 
 float ang;
+volatile whereAt currentwhereAt = PASSAGE;
 //-------------------------------- Functions --------------------------------------------
 
 void configureWiFi() {
@@ -54,7 +55,7 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     String tofright = String(distanceRightFiltered);
     String mac = String(WiFi.macAddress());
     String rssi = String(WiFi.RSSI());
-    String postData = "{\"diagnostics\": {\"battery\":100,\"connection\":"+rssi+"},\"MAC\":\""+mac+"\",\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":0,\"orientation\":"+orientation+",\"branches\":[";
+    String postData = "{\"diagnostics\": {\"battery\":100,\"connection\":"+rssi+"},\"MAC\":\""+mac+"\",\"nickname\":\"MiWhip\",\"timestamp\":"+timestamp+",\"position\":["+position_x+","+position_y+"],\"whereat\":"+cwa+",\"orientation\":"+orientation+",\"branches\":[";
     
     float junctionAngle;
     float beaconAngle; 
@@ -70,9 +71,9 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     }
     postData = postData + "],\"beaconangles\":[";
     flag = false;
-    SERIAL_PORT.println("I'm outside");
-    SERIAL_PORT.println(uxQueueMessagesWaiting(beaconAngleQueue));
-    SERIAL_PORT.println(uxQueueSpacesAvailable(beaconAngleQueue));
+    // SERIAL_PORT.println("I'm outside");
+    // SERIAL_PORT.println(uxQueueMessagesWaiting(beaconAngleQueue));
+    // SERIAL_PORT.println(uxQueueSpacesAvailable(beaconAngleQueue));
     
     if (uxQueueMessagesWaiting(beaconAngleQueue)==3){
       SERIAL_PORT.println("I'm inside");

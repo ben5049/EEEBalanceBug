@@ -54,6 +54,7 @@ extern volatile float spinStartingAngle;         /* The yaw angle in degrees at 
 extern volatile float xPosition;                 /* The x position */
 extern volatile float yPosition;                 /* The y position */
 extern volatile robotCommand currentCommand;     /* The current command being implemented by the rover */
+extern volatile whereAt currentwhereAt;          /* The current general location of the rover */
 extern volatile float loopFreq;
 extern volatile float angleKp;
 extern volatile float angleKi;
