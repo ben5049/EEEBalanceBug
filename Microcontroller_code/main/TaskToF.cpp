@@ -280,7 +280,7 @@ void taskToF(void *pvParameters) {
         distanceRight = measureRight.RangeMilliMeter;
       } else {
         /* If the range is invalid return -1 */
-        distanceRight = -1;
+        distanceRight = 1000;
       }
 
       /* Check if the left data is valid (phase failures have incorrect data) */
@@ -288,7 +288,7 @@ void taskToF(void *pvParameters) {
         distanceLeft = measureLeft.RangeMilliMeter;
       } else {
         /* If the range is invalid return -1 */
-        distanceLeft = -1;
+        distanceLeft = 1000;
       }
 
 #if TASK_TOF_DEBUG == true
@@ -300,27 +300,17 @@ void taskToF(void *pvParameters) {
     }
 
     /* Apply FIR filters */
-    if (distanceRight != -1) {
-      FIRFilterUpdate(&rightFIR, distanceRight);
-      distanceRightFiltered = rightFIR.output;
-    }
-    else{
-      distanceRightFiltered = -1;
-    }
-    if (distanceLeft != -1) {
-      FIRFilterUpdate(&leftFIR, distanceLeft);
-      distanceLeftFiltered = leftFIR.output;
-    }
-    else{
-      distanceLeftFiltered = -1;
-    }
+    FIRFilterUpdate(&rightFIR, distanceRight);
+    FIRFilterUpdate(&leftFIR, distanceLeft);
 
     /* Differentiate */
-    distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-    distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-    distanceRightFilteredPrevious = distanceRightFiltered;
-    distanceLeftFilteredPrevious = distanceLeftFiltered;
-    timestampPrevious = timestamp;
+    distanceRightFiltered = rightFIR.output;
+    distanceLeftFiltered = leftFIR.output;
+    // distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+    // distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+    // distanceRightFilteredPrevious = distanceRightFiltered;
+    // distanceLeftFilteredPrevious = distanceLeftFiltered;
+    // timestampPrevious = timestamp;
 
     /* Junction detection */
     if (currentCommand == FORWARD) {
@@ -333,17 +323,20 @@ void taskToF(void *pvParameters) {
       }
 
       /* If we are at a junction while going forwards alert taskExecuteCommand */
-      else if ((distanceRightDifferential >= THRESHOLD_GRADIENT) || (distanceLeftDifferential >= THRESHOLD_GRADIENT)) {
-        overThresholdCounter += 1;
+      else if ((distanceRightFiltered >= THRESHOLD_DISTANCE) || (distanceLeftFiltered >= THRESHOLD_DISTANCE)) {
+        // overThresholdCounter += 1;
 
         /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
-        if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
+        // if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 
           /* Notify taskExecuteCommand that a junction has been found */
           xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-        }
-      } else {
-        overThresholdCounter = 0;
+          digitalWrite(LED_BUILTIN, HIGH);
+        // }
+      }
+       else {
+        // overThresholdCounter = 0;
+        digitalWrite(LED_BUILTIN, LOW);
       }
     }
   }
