@@ -181,10 +181,10 @@ void taskSpin(void *pvParameters) {
           blueBeaconClosestDistanceToCentre = blueBeaconDistanceToCentre;
           blueBeaconAngle = yaw;
         }
-        SERIAL_PORT.print("Yaw: ");
-        SERIAL_PORT.print(yaw);
-        SERIAL_PORT.print(", Blue Yaw: ");
-        SERIAL_PORT.println(blueBeaconAngle);
+        // SERIAL_PORT.print("Yaw: ");
+        // SERIAL_PORT.print(yaw);
+        // SERIAL_PORT.print(", Blue Yaw: ");
+        // SERIAL_PORT.println(blueBeaconAngle);
       }
 #endif
 
@@ -300,6 +300,9 @@ void taskSpin(void *pvParameters) {
 
           /* Send beacon angles back in a queue */
           xQueueReset(beaconAngleQueue);
+          // redBeaconAngle = -45.0;
+          // yellowBeaconAngle = 45.0;
+          // blueBeaconAngle = 225.0;
           xQueueSend(beaconAngleQueue, &redBeaconAngle, 0);
           xQueueSend(beaconAngleQueue, &yellowBeaconAngle, 0);
           xQueueSend(beaconAngleQueue, &blueBeaconAngle, 0);

@@ -11,10 +11,10 @@
 
 //-------------------------------- Types ------------------------------------------------
 
-union data{
-  float floatData;
-  unsigned uint8_t byteData[4];
-}floatToBytes;
+// union data{
+//   float floatData;
+//   unsigned uint8_t byteData[4];
+// }floatToBytes;
 
 //-------------------------------- Global Variables -------------------------------------
 

@@ -70,12 +70,17 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     }
     postData = postData + "],\"beaconangles\":[";
     flag = false;
+    SERIAL_PORT.println("I'm outside");
+    SERIAL_PORT.println(uxQueueMessagesWaiting(beaconAngleQueue));
+    SERIAL_PORT.println(uxQueueSpacesAvailable(beaconAngleQueue));
     
     if (uxQueueMessagesWaiting(beaconAngleQueue)==3){
+      SERIAL_PORT.println("I'm inside");
       while (uxQueueMessagesWaiting(beaconAngleQueue) > 0){
         if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE){
           postData = postData + String(beaconAngle) + ",";
           flag = true;
+          SERIAL_PORT.println(beaconAngle);
         }
       }
     }
