@@ -431,7 +431,7 @@ def led_driver_red():
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
@@ -443,7 +443,7 @@ def led_driver_blue():
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
@@ -455,7 +455,7 @@ def led_driver_yellow():
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#
