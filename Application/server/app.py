@@ -110,7 +110,7 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        print(data["diagnostics"]["connection"])
+        print("ANGLE_SET: ", data["diagnostics"]["connection"])
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
         if 5 in resp["next_actions"]:
