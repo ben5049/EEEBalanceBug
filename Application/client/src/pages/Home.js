@@ -119,6 +119,7 @@ const Home = () => {
 					/>
 				</div>
 				{/* Add new rover button */}
+				{/* 				
 				<div className="box-nopadding AddButton_Home">
 					<Link to='/addrover' className="page-link" draggable={false}>
 						<button onClick={handleAddRover} className='buttons_Home'>
@@ -136,7 +137,7 @@ const Home = () => {
 							</div>
 						</button>
 					</Link>
-				</div>
+				</div> */}
 				{/* Display text */}
 				<div className="box ReplaysText_Home">
 					Replays
