@@ -89,9 +89,9 @@ def rover():
     
     # create response, to rover, and reset timeout
     r.lastSeen = time()
-    # resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
+    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     print(r.actions, "ACTIONS")
-    # # resp = []
+    # resp = []
     # print(data["beaconangles"], "beacon angles")
     # if len(data["beaconangles"]) == 3:
     #     resp.append(4)
@@ -99,6 +99,7 @@ def rover():
     #     resp.append(newx)
     #     resp.append(newy)
     #     print(resp, "RESP")
+    # print("YAW: ", data["diagnostics"]["connection"])
     resp = [1]
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
@@ -106,16 +107,15 @@ def rover():
         global isSpinning, spinTime
         isSpinning = True
         spinTime = time()
-    print("YAW: ", data["diagnostics"]["connection"])
     if(len(data["beaconangles"])!=0):
         print(data["beaconangles"], "BEACONANGLES")
     
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        # print("ANGLE_SET: ", data["diagnostics"]["connection"])
-        # print("SPEED_SET: ", data["diagnostics"]["connection"])
-        # print("PITCH: ", data["diagnostics"]["pitch"])
+        print("ANGLE_SET: ", data["diagnostics"]["connection"])
+        print("SPEED_SET: ", data["diagnostics"]["connection"])
+        print("PITCH: ", data["diagnostics"]["pitch"])
 
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
