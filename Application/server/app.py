@@ -89,9 +89,8 @@ def rover():
     
     # create response, to rover, and reset timeout
     r.lastSeen = time()
-    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
+    # resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     print(r.actions, "ACTIONS")
-    # resp = []
     # print(data["beaconangles"], "beacon angles")
     # if len(data["beaconangles"]) == 3:
     #     resp.append(4)
@@ -100,7 +99,7 @@ def rover():
     #     resp.append(newy)
     #     print(resp, "RESP")
     # print("YAW: ", data["diagnostics"]["connection"])
-    resp = [1]
+    resp = []
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
