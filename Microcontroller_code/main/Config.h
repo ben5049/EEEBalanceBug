@@ -92,12 +92,12 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KI_POS 0.00
 #define KD_POS 0.00
 
-#define KP_ACCEL 0.0010
-#define KD_ACCEL 0.01
+#define KP_ACCEL 0.001
+#define KD_ACCEL 0.025
 #define KI_ACCEL 0.00
 
-#define KP_SPEED 0.01
-#define KD_SPEED 0.0
+#define KP_SPEED 1
+#define KD_SPEED 0.1
 #define KI_SPEED 0.0
 
 #define KP_ANGLE 7.0
@@ -110,6 +110,10 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KP_ANGRATE 0.5
 #define KI_ANGRATE 0
 #define KD_ANGRATE 0
+
+#define KP_DIR 2.0
+#define KI_DIR 0.00
+#define KD_DIR 2.0
 
 #define ANGLE_OFFSET -1.50
 #define MAX_ANGLE 7.5

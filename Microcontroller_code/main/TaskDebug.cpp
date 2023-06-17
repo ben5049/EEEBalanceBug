@@ -53,18 +53,18 @@ void taskDebug(void *pvParameters) {
         angRateKi = SERIAL_PORT.parseFloat();
       } else if (serialData == 'd') {
         angRateKd = SERIAL_PORT.parseFloat();
-      } else if (serialData == 'r') {
-        angRateSetpoint = SERIAL_PORT.parseFloat();
+      } else if (serialData == 's') {
+        speedSetpoint = SERIAL_PORT.parseFloat();
       }
     }
-    // accelSetpoint = 0;
-    // digitalWrite(LED_BUILTIN, HIGH);
-    // vTaskDelay(10000);
-    // accelSetpoint = 10;
-    // digitalWrite(LED_BUILTIN, LOW);
-    // vTaskDelay();
-    // accelSetpoint = -10;
-    // vTaskDelay(2500);
+    speedSetpoint = 0;
+    digitalWrite(LED_BUILTIN, HIGH);
+    vTaskDelay(3000);
+    dirSetpoint = dirSetpoint + 90;
+    vTaskDelay(2000);
+    speedSetpoint = 100;
+    digitalWrite(LED_BUILTIN, LOW);
+    vTaskDelay(5000);
     
     
   }

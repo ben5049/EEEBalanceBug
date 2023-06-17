@@ -83,13 +83,23 @@ static float angRatePrevError = 0;
 static float angRateLastTime = millis();
 static float motorDiff = 0;
 
+/* Direction Variables */
+volatile float dirSetpoint = 0;
+static float dirCumError = 0;
+static float dirPrevError = 0;
+static float dirLastTime = millis();
+static float lastYaw = 0;
+static uint16_t turns = 0;
+static float localYaw = 0;
+volatile float dirKp = KP_DIR;
+volatile float dirKi = KI_DIR;
+volatile float dirKd = KD_DIR;
+
 /* Position Control Variables */
 volatile float posSetpoint = 0;
 static float posCumError = 0;
 static float posPrevError = 0;
 static float posLastTime = millis();
-
-volatile float dirSetpoint = 0;
 
 
 /* Controller frequency in Hz */
@@ -102,6 +112,8 @@ TaskHandle_t taskMovementHandle = nullptr;
 hw_timer_t* motorTimerL = NULL;
 hw_timer_t* motorTimerR = NULL;
 
+/* FIR Filter */
+static FIRFilter50 accelFilter;
 /* Init */
 bool initialised = false;
 //-------------------------------- Functions --------------------------------------------
@@ -109,6 +121,7 @@ bool initialised = false;
 /**/
 
 void initMovement(){
+  FIRFilterInit50(&accelFilter);
   initialised=true;
 }
 
@@ -274,12 +287,20 @@ void taskMovement(void* pvParameters) {
   while (true) {
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
-    
+    /* Calculate Local Yaw*/
+    if((lastYaw<-90)&&(yaw>90)){
+      turns-=1;
+    }else if((lastYaw>90)&&(yaw<-90)){
+      turns+=1;
+    }
+    lastYaw = yaw;
+    localYaw = yaw+(turns*360);
 
     /* Calculate Robot Actual Speed */
     robotLinearDPS = -((motorSpeedL + motorSpeedR)/2) + angularVelocity;
     robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
     linearAccel = (robotFilteredLinearDPS-lastSpeed)*1000/(millis()-endTime);
+    linearAccel =FIRFilterUpdate50(&accelFilter, linearAccel);
     lastSpeed = robotFilteredLinearDPS;
     endTime = millis();
     
@@ -306,26 +327,28 @@ void taskMovement(void* pvParameters) {
 
     /* Speed Loop */
     if(controlCycle%5==0){
-      accelSetpoint = -PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
-      if(abs(accelSetpoint)>MAX_ACCEL){
-        digitalWrite(LED_BUILTIN,HIGH);
-      }else{
-        digitalWrite(LED_BUILTIN,LOW);
-      }
+      accelSetpoint =  PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
       speedLastTime = millis();
       accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
     }
 
-    /* Angle Rate Loop */
-    // if(controlCycle%3==0){
-    //   motorDiff += PID(angRateSetpoint, yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
-    //   angRateLastTime = millis();
-    //   motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
-    // }
-
+    
     /* Position Controller */
     // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
     // posLastTime = millis();
+
+    /* Angle Rate Loop */
+    if(controlCycle%3==0){
+      motorDiff += PID(angRateSetpoint, yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
+      angRateLastTime = millis();
+      motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
+    }
+
+    if(controlCycle%5==0){
+      angRateSetpoint = PID(dirSetpoint, localYaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
+      angRateLastTime = millis();
+      motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
+    }
 
     /* Control Cycle */
     controlCycle = controlCycle%100;
