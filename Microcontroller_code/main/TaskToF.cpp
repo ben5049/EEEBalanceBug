@@ -41,8 +41,8 @@ static VL53L0X_RangingMeasurementData_t measureFront;
 static TCA9548A I2CMux;
 
 /* FIR Filters */
-static FIRFilter rightFIR;
-static FIRFilter leftFIR;
+static FIRFilter20 rightFIR;
+static FIRFilter20 leftFIR;
 
 /* Variables */
 static volatile bool rightToFDataReady = false;
@@ -202,8 +202,8 @@ void configureToF() {
   I2CMux.openChannel(TOF_LEFT_CHANNEL);
 
   /* Begin FIR filters */
-  FIRFilterInit(&rightFIR);
-  FIRFilterInit(&leftFIR);
+  FIRFilterInit20(&rightFIR);
+  FIRFilterInit20(&leftFIR);
 }
 
 /* Reads data from two ToF sensors. Used for debugging  */
@@ -342,8 +342,8 @@ void taskToF(void *pvParameters) {
     }
 
     /* Apply FIR filters */
-    FIRFilterUpdate(&rightFIR, distanceRight);
-    FIRFilterUpdate(&leftFIR, distanceLeft);
+    FIRFilterUpdate20(&rightFIR, distanceRight);
+    FIRFilterUpdate20(&leftFIR, distanceLeft);
 
     /* Differentiate */
     distanceRightFiltered = rightFIR.output;
