@@ -237,10 +237,10 @@ void loop() {
   // SERIAL_PORT.println(yaw);
 
   // SERIAL_PORT.println("Sending start command");
-  robotCommand command = SPIN;
-  digitalWrite(LED_BUILTIN, HIGH);
-  xQueueSend(commandQueue, &command, 0);
-  vTaskDelay(25000);
+  // robotCommand command = SPIN;
+  // digitalWrite(LED_BUILTIN, HIGH);
+  // xQueueSend(commandQueue, &command, 0);
+  // vTaskDelay(25000);
 
   // fpga1.getRYB(true);
   // Serial.print("RED: ");

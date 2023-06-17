@@ -57,10 +57,14 @@ void taskDebug(void *pvParameters) {
         angRateSetpoint = SERIAL_PORT.parseFloat();
       }
     }
-    angRateSetpoint = 0;
-    vTaskDelay(2000);
-    angRateSetpoint = 180;
-    vTaskDelay(2000);
+    // accelSetpoint = 0;
+    // digitalWrite(LED_BUILTIN, HIGH);
+    // vTaskDelay(10000);
+    // accelSetpoint = 10;
+    // digitalWrite(LED_BUILTIN, LOW);
+    // vTaskDelay();
+    // accelSetpoint = -10;
+    // vTaskDelay(2500);
     
     
   }
