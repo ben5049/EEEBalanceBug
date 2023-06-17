@@ -89,8 +89,7 @@ void setup() {
   pinMode(IMU_INT, INPUT_PULLUP);
   pinMode(TOF_R_INT, INPUT_PULLUP);
   pinMode(TOF_L_INT, INPUT_PULLUP);
-  pinMode(IR_R_INT, INPUT_PULLUP);
-  pinMode(IR_L_INT, INPUT_PULLUP);
+  pinMode(TOF_F_INT, INPUT_PULLUP);
   pinMode(STEPPER_L_STEP, OUTPUT);
   pinMode(STEPPER_R_STEP, OUTPUT);
   pinMode(STEPPER_L_DIR, OUTPUT);
@@ -199,9 +198,12 @@ void setup() {
 
   /* Attach ISRs to interrupts */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
-#if ENABLE_TOF_INTERRUPTS == true
+#if ENABLE_SIDE_TOF_INTERRUPTS == true
   attachInterrupt(digitalPinToInterrupt(TOF_R_INT), ToFRightISR, FALLING);
   attachInterrupt(digitalPinToInterrupt(TOF_L_INT), ToFLeftISR, FALLING);
+#endif
+#if ENABLE_FRONT_TOF_INTERRUPT == true
+  attachInterrupt(digitalPinToInterrupt(TOF_F_INT), ToFFrontISR, FALLING);
 #endif
 #if ENABLE_IR_INTERRUPTS == true
   attachInterrupt(digitalPinToInterrupt(IR_R_INT), IRRightISR, CHANGE);

@@ -39,19 +39,22 @@ Pin assignments for Group 1's EEEBalanceBug
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
-#define ENABLE_TOF_TASK false       /* Setting "true" enables the ToF sampling task */
-#define TASK_TOF_PRIORITY 9         /* Task priority from 0 to 31 (larger means higher priority) */
-#define TASK_TOF_DEBUG false        /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
-#define ENABLE_TOF_INTERRUPTS false /* Setting true enables data ready interrupts from the ToF sensors. Default = false */
-#define ENABLE_IR_INTERRUPTS false  /* Setting true enables interrupts from the IR sensors. Default = true */
-#define TOF_RIGHT_ADDRESS 0x30      /* I2C address for the right ToF sensor */
-#define TOF_LEFT_ADDRESS 0x31       /* I2C address for the left ToF sensor */
-#define TOF_RIGHT_CHANNEL 0         /* I2C mux channel for the right ToF sensor */
-#define TOF_LEFT_CHANNEL 3          /* I2C mux channel for the left ToF sensor */
-#define TOF_SAMPLE_FREQUENCY 20     /* Max = 33Hz, default = 10Hz */
-#define THRESHOLD_GRADIENT 400      /* Gradient threshold for the ToF sensors to detect junctions */
-#define THRESHOLD_COUNTER_MAX 5     /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
-#define THRESHOLD_DISTANCE 800      /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
+#define ENABLE_TOF_TASK false            /* Setting "true" enables the ToF sampling task */
+#define TASK_TOF_PRIORITY 9              /* Task priority from 0 to 31 (larger means higher priority) */
+#define TASK_TOF_DEBUG false             /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
+#define ENABLE_SIDE_TOF_INTERRUPTS false /* Setting true enables data ready interrupts from the ToF sensors. Default = false */
+#define ENABLE_FRONT_TOF_INTERRUPT true  /* Setting true enables data ready interrupts from the front ToF sensor. Default = true */
+#define ENABLE_IR_INTERRUPTS false       /* Setting true enables interrupts from the IR sensors. Default = true */
+#define TOF_RIGHT_ADDRESS 0x30           /* I2C address for the right ToF sensor */
+#define TOF_LEFT_ADDRESS 0x31            /* I2C address for the left ToF sensor */
+#define TOF_FRONT_ADDRESS 0x32           /* I2C address for the front ToF sensor */
+#define TOF_RIGHT_CHANNEL 0              /* I2C mux channel for the right ToF sensor */
+#define TOF_LEFT_CHANNEL 3               /* I2C mux channel for the left ToF sensor */
+#define TOF_FRONT_CHANNEL 1              /* I2C mux channel for the front ToF sensor */
+#define TOF_SAMPLE_FREQUENCY 20          /* Max = 33Hz, default = 10Hz */
+#define THRESHOLD_GRADIENT 400           /* Gradient threshold for the ToF sensors to detect junctions */
+#define THRESHOLD_COUNTER_MAX 5          /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
+#define THRESHOLD_DISTANCE 800           /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */

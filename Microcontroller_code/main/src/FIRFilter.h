@@ -3,16 +3,26 @@
 
 #include "Arduino.h"
 
-#define FIRFilterLength 7
+#define FIRFilterLength20 7
+#define FIRFilterLength50 10
 
-struct FIRFilter{
-  float buf[FIRFilterLength];
+struct FIRFilter20{
+  float buf[FIRFilterLength20];
   uint8_t bufIndex;
 
   float output;
 };
 
-void FIRFilterInit(FIRFilter *fir);
-float FIRFilterUpdate(FIRFilter *fir, float input);
+struct FIRFilter50{
+  float buf[FIRFilterLength50];
+  uint8_t bufIndex;
+
+  float output;
+};
+
+void FIRFilterInit20(FIRFilter20 *fir);
+void FIRFilterInit50(FIRFilter50 *fir);
+float FIRFilterUpdate20(FIRFilter20 *fir, float input);
+float FIRFilterUpdate50(FIRFilter50 *fir, float input);
 
 #endif
