@@ -89,7 +89,7 @@ static float dirCumError = 0;
 static float dirPrevError = 0;
 static float dirLastTime = millis();
 static float lastYaw = 0;
-static uint16_t turns = 0;
+static int16_t turns = 0;
 static float localYaw = 0;
 volatile float dirKp = KP_DIR;
 volatile float dirKi = KI_DIR;
@@ -344,6 +344,7 @@ void taskMovement(void* pvParameters) {
       motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
     }
 
+    /* Direction Control Loop */
     if(controlCycle%5==0){
       angRateSetpoint = PID(dirSetpoint, localYaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
       angRateLastTime = millis();
