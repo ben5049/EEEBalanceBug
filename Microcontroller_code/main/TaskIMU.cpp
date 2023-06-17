@@ -71,9 +71,16 @@ void configureIMU() {
   frequencyIMU = IMU_SAMPLING_FREQUENCY_DMP;
 
   static bool success = true;
+
   success &= (myICM.initializeDMP() == ICM_20948_Stat_Ok);
+
+#if ENABLE_DMP_MAGNETOMETER == true
+  success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_ORIENTATION) == ICM_20948_Stat_Ok);
+  success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat9, 0) == ICM_20948_Stat_Ok);  // Set to the maximum
+#else
   success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_GAME_ROTATION_VECTOR) == ICM_20948_Stat_Ok);
-  success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat6, 0) == ICM_20948_Stat_Ok);  // Set to the maximum
+  success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat6, 0) == ICM_20948_Stat_Ok);                          // Set to the maximum
+#endif
   success &= (myICM.enableFIFO() == ICM_20948_Stat_Ok);
   success &= (myICM.enableDMP() == ICM_20948_Stat_Ok);
   success &= (myICM.resetDMP() == ICM_20948_Stat_Ok);
@@ -241,14 +248,22 @@ void taskIMU(void *pvParameters) {
 
 #if ENABLE_DMP == true
       /* Process the quaternion data from the DMP into Euler angles */
+
+#if ENABLE_DMP_MAGNETOMETER == true
+      if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) {  // Was valid data available?
+        if ((angle_data.header & DMP_header_bitmap_Quat9) > 0) {
+          float q1 = ((float)angle_data.Quat9.Data.Q1) / 1073741824.0;  // Convert to double. Divide by 2^30
+          float q2 = ((float)angle_data.Quat9.Data.Q2) / 1073741824.0;  // Convert to double. Divide by 2^30
+          float q3 = ((float)angle_data.Quat9.Data.Q3) / 1073741824.0;  // Convert to double. Divide by 2^30
+#else
       if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) {  // Was valid data available?
         if ((angle_data.header & DMP_header_bitmap_Quat6) > 0) {
           float q1 = ((float)angle_data.Quat6.Data.Q1) / 1073741824.0;  // Convert to double. Divide by 2^30
           float q2 = ((float)angle_data.Quat6.Data.Q2) / 1073741824.0;  // Convert to double. Divide by 2^30
           float q3 = ((float)angle_data.Quat6.Data.Q3) / 1073741824.0;  // Convert to double. Divide by 2^30
+#endif
           float q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
           float q2sqr = q2 * q2;
-
           /* pitch (x-axis rotation) */
           double t0 = +2.0 * (q0 * q1 + q2 * q3);
           double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
@@ -268,8 +283,15 @@ void taskIMU(void *pvParameters) {
           yawRate = myICM.gyrZ();
         }
       }
-
-      #else
+      if (counter == 10) {
+        counter = 0;
+        Serial.print("Yaw: ");
+        Serial.print(yaw);
+        Serial.print(", Pitch: ");
+        Serial.println(pitch);
+      }
+      counter++;
+#else
 
       /* Acquire latest sensor data */
       FusionVector gyroscope = { myICM.gyrX(), myICM.gyrY(), myICM.gyrZ() };
@@ -291,19 +313,19 @@ void taskIMU(void *pvParameters) {
       const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
       // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
 
-      // if (counter == 10) {
-      //   counter = 0;
-      //   Serial.print("DMP yaw: ");
-      //   Serial.print(yaw);
-      //   Serial.print(", DMP pitch: ");
-      //   Serial.print(pitch);
+      if (counter == 10) {
+        counter = 0;
+        Serial.print("DMP yaw: ");
+        Serial.print(yaw);
+        Serial.print(", DMP pitch: ");
+        Serial.print(pitch);
 
-      //   Serial.print(", Madgwick yaw: ");
-      //   Serial.print(euler.angle.yaw);
-      //   Serial.print(", Madgwick pitch: ");
-      //   Serial.println(euler.angle.pitch);
-      // }
-      // counter++;
+        Serial.print(", Madgwick yaw: ");
+        Serial.print(euler.angle.yaw);
+        Serial.print(", Madgwick pitch: ");
+        Serial.println(euler.angle.pitch);
+      }
+      counter++;
       // yaw = euler.angle.yaw;
       // pitch = euler.angle.pitch;
       // angularVelocity = myICM.gyrX();

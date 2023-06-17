@@ -10,7 +10,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define CONFIG_H
 
 /* General robot information */
-#define MAX_ACCEL 200         /* Maximum Acceleration */
+#define MAX_ACCEL 200        /* Maximum Acceleration */
 #define FLT_MAX 4294967040.0 /* Max float */
 #define STEPS 6400           /* Steps per revolution */
 #define ROVER_WIDTH 159      /* Wheel-to-wheel width in mm*/
@@ -34,6 +34,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define ENABLE_IMU_TASK true              /* Setting "true" enables the IMU sampling task */
 #define TASK_IMU_PRIORITY 10              /* Task priority from 0 to 31 (larger means higher priority) */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
+#define ENABLE_DMP_MAGNETOMETER false     /* Setting "true" enables the magnetometer for the DMP */
 #define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
 #define IMU_SAMPLING_FREQUENCY_DMP 57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
@@ -58,11 +59,11 @@ Pin assignments for Group 1's EEEBalanceBug
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
-#define FPGA_ADDR 0x55          /* I2C address for the FPGA */
-#define FPGA_IMAGE_WIDTH 640    /* How wide the image is in pixels */
-#define FPGA_R_THRESHOLD 30     /* Threshold number of red pixels to count red beacon as having been detected */
-#define FPGA_Y_THRESHOLD 20     /* Threshold number of yellow pixels to count yellow beacon as having been detected */
-#define FPGA_B_THRESHOLD 50     /* Threshold number of blue pixels to count blue beacon as having been detected */
+#define FPGA_ADDR 0x55           /* I2C address for the FPGA */
+#define FPGA_IMAGE_WIDTH 640     /* How wide the image is in pixels */
+#define FPGA_R_THRESHOLD 30      /* Threshold number of red pixels to count red beacon as having been detected */
+#define FPGA_Y_THRESHOLD 20      /* Threshold number of yellow pixels to count yellow beacon as having been detected */
+#define FPGA_B_THRESHOLD 50      /* Threshold number of blue pixels to count blue beacon as having been detected */
 
 /* Spin task */
 #define TASK_SPIN_FREQUENCY 10           /* Frequency to run the spin task at in Hz (default = 10Hz) */
@@ -78,15 +79,15 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_EXECUTE_COMMAND_PRIORITY 10 /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Server communication task */
-#define ENABLE_SERVER_COMMUNICATION_TASK false  /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
 #define TASK_SERVER_COMMUNICATION_PRIORITY 4   /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Controller */
 #define TASK_MOVEMENT_PRIORITY 8 /* Task priority from 0 to 31 (larger means higher priority) */
 #define ENABLE_MOVEMENT_TASK true
-#define CONTROL_DEBUG true      /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
-#define EEPROM_SIZE 64           /* EEPROM size in bytes for storing controller constants */
+#define CONTROL_DEBUG false /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
+#define EEPROM_SIZE 64     /* EEPROM size in bytes for storing controller constants */
 
 #define KP_POS 0.00
 #define KI_POS 0.00
