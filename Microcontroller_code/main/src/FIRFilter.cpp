@@ -26,7 +26,7 @@ static float FIRImpulseResponse50[FIRFilterLength50] = {
 };
 
 // Initialise filter
-void FIRFilterInit20(FIRFilter *fir) {
+void FIRFilterInit20(FIRFilter20 *fir) {
 
   // Clear filter buffer
   for (uint8_t i = 0; i < FIRFilterLength20; i++) {
@@ -40,7 +40,7 @@ void FIRFilterInit20(FIRFilter *fir) {
   fir->output = (float)0.0;
 }
 
-void FIRFilterInit50(FIRFilter *fir) {
+void FIRFilterInit50(FIRFilter50 *fir) {
 
   // Clear filter buffer
   for (uint8_t i = 0; i < FIRFilterLength50; i++) {
@@ -55,7 +55,7 @@ void FIRFilterInit50(FIRFilter *fir) {
 }
 
 /* 20 Hz Sampling low pass filter */
-float FIRFilterUpdate20(FIRFilter *fir, float input) {
+float FIRFilterUpdate20(FIRFilter20 *fir, float input) {
 
   // Input the new value into the buffer
   fir->buf[fir->bufIndex] = input;
@@ -88,7 +88,7 @@ float FIRFilterUpdate20(FIRFilter *fir, float input) {
 }
 
 /* 50 Hz Sampling low pass filter */
-float FIRFilterUpdate50(FIRFilter *fir, float input) {
+float FIRFilterUpdate50(FIRFilter50 *fir, float input) {
 
   // Input the new value into the buffer
   fir->buf[fir->bufIndex] = input;
