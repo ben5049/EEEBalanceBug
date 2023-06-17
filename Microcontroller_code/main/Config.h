@@ -10,7 +10,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define CONFIG_H
 
 /* General robot information */
-#define MAX_ACCEL 15         /* Maximum Acceleration */
+#define MAX_ACCEL 200         /* Maximum Acceleration */
 #define FLT_MAX 4294967040.0 /* Max float */
 #define STEPS 6400           /* Steps per revolution */
 #define ROVER_WIDTH 159      /* Wheel-to-wheel width in mm*/
@@ -57,7 +57,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define THRESHOLD_DISTANCE 800           /* [UNUSED] Threshold distance for ToF sensors for what counts as a junction (in mm) */
 
 /* FPGA */
-#define ENABLE_FPGA_CAMERA true /* Whether or not to enable the FPGA camera */
+#define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
 #define FPGA_ADDR 0x55          /* I2C address for the FPGA */
 #define FPGA_IMAGE_WIDTH 640    /* How wide the image is in pixels */
 #define FPGA_R_THRESHOLD 30     /* Threshold number of red pixels to count red beacon as having been detected */
@@ -78,37 +78,40 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_EXECUTE_COMMAND_PRIORITY 10 /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Server communication task */
-#define ENABLE_SERVER_COMMUNICATION_TASK true  /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK false  /* Setting "true" enables the server communication task */
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
 #define TASK_SERVER_COMMUNICATION_PRIORITY 4   /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* Controller */
 #define TASK_MOVEMENT_PRIORITY 8 /* Task priority from 0 to 31 (larger means higher priority) */
-#define ENABLE_MOVEMENT_TASK false
-#define CONTROL_DEBUG false /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
-#define EEPROM_SIZE 64      /* EEPROM size in bytes for storing controller constants */
+#define ENABLE_MOVEMENT_TASK true
+#define CONTROL_DEBUG true      /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
+#define EEPROM_SIZE 64           /* EEPROM size in bytes for storing controller constants */
 
 #define KP_POS 0.00
 #define KI_POS 0.00
 #define KD_POS 0.00
 
-#define KP_SPEED 2.00
-#define KD_SPEED 0.00
-#define KI_SPEED 0.00
+#define KP_ACCEL 0.0010
+#define KD_ACCEL 0.01
+#define KI_ACCEL 0.00
+
+#define KP_SPEED 0.01
+#define KD_SPEED 0.0
+#define KI_SPEED 0.0
 
 #define KP_ANGLE 7.0
-#define KI_ANGLE 0.01
+#define KI_ANGLE 0.1
 #define KD_ANGLE 400
+
+#define COM_H 0.08
+#define GRAV 9.81
 
 #define KP_ANGRATE 0.5
 #define KI_ANGRATE 0
 #define KD_ANGRATE 0
 
-#define KP_DIR 0
-#define KI_DIR 0
-#define KD_DIR 0
-
-#define ANGLE_OFFSET -3.0
+#define ANGLE_OFFSET -1.50
 #define MAX_ANGLE 7.5
 #define MAX_DPS 400
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
@@ -117,7 +120,7 @@ Pin assignments for Group 1's EEEBalanceBug
 
 
 /* Debug task*/
-#define ENABLE_DEBUG_TASK false
+#define ENABLE_DEBUG_TASK true
 #define TASK_DEBUG_PRIORITY 4 /* Task priority from 0 to 31 (larger means higher priority) */
 
 

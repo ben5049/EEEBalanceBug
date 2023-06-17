@@ -35,6 +35,8 @@ typedef enum {
 
 /* Variables */
 extern volatile float angleSetpoint;
+extern volatile float speedContribution;
+extern volatile float accelSetpoint;
 extern volatile float speedKp;
 extern volatile float speedKi;
 extern volatile float speedKd;

@@ -8,6 +8,7 @@
 #include "PinAssignments.h"
 #include "src/pidautotuner.h"
 #include "EEPROM.h"
+#include "src/FIRFilter.h"
 
 //-------------------------------- Types ------------------------------------------------
 
@@ -34,8 +35,9 @@ float maxAccel = MAX_ACCEL;
 /* Robot Speed Variables */
 static float robotLinearDPS = 0;
 volatile static float robotFilteredLinearDPS = 0;
+static float linearAccel = 0;
 
-/* Control Variables*/
+/* Angle Control Variables*/
 volatile float angleKp = KP_ANGLE;
 volatile float angleKi = KI_ANGLE;
 volatile float angleKd = KD_ANGLE;
@@ -45,8 +47,11 @@ volatile float speedKd = KD_SPEED;
 volatile float angRateKp = KP_ANGRATE;
 volatile float angRateKi = KI_ANGRATE;
 volatile float angRateKd = KD_ANGRATE;
+volatile float accelKp = KP_ACCEL;
+volatile float accelKi = KI_ACCEL;
+volatile float accelKd = KD_ACCEL;
 static float angleOffset = ANGLE_OFFSET;
-volatile float angleSetpoint = ANGLE_OFFSET;
+volatile float angleSetpoint = angleOffset;
 static float motorSetpointL = 0;
 static float motorSetpointR = 0;
 static float motorSpeedL = 0;
@@ -55,12 +60,21 @@ static float angleCumError = 0;
 static float anglePrevError = 0;
 static float angleLastTime = millis();
 
+/* Accel Control Variables*/
+volatile float accelSetpoint = 0;
+static float accelCumError = 0;
+static float accelPrevError = 0;
+static float accelLastTime = millis();
+
+
 /* Speed Control Variables */
+volatile float speedContribution;
 volatile float speedSetpoint = 0;
 static float speedCumError = 0;
 static float speedPrevError = 0;
 static float speedLastTime = millis();
-static float speedComponent = 0;
+static float lastSpeed = 0;
+static float endTime = millis();
 
 /* Angle Rate Variables */
 volatile float angRateSetpoint = 0;
@@ -69,21 +83,13 @@ static float angRatePrevError = 0;
 static float angRateLastTime = millis();
 static float motorDiff = 0;
 
-/* Direction Variables */
-volatile float dirKp = KP_DIR;
-volatile float dirKi = KI_DIR;
-volatile float dirKd = KD_DIR;
-volatile float dirSetpoint = 0;
-static float dirCumError = 0;
-static float dirPrevError = 0;
-static float dirLastTime = millis();
-
-
 /* Position Control Variables */
 volatile float posSetpoint = 0;
 static float posCumError = 0;
 static float posPrevError = 0;
 static float posLastTime = millis();
+
+volatile float dirSetpoint = 0;
 
 
 /* Controller frequency in Hz */
@@ -96,9 +102,22 @@ TaskHandle_t taskMovementHandle = nullptr;
 hw_timer_t* motorTimerL = NULL;
 hw_timer_t* motorTimerR = NULL;
 
+/* Init */
+bool initialised = false;
 //-------------------------------- Functions --------------------------------------------
 
 /**/
+
+void initMovement(){
+  initialised=true;
+}
+
+void debugPrint(char name[], float data){
+  Serial.print(name);
+  Serial.print(": ");
+  Serial.print(data,7);
+  Serial.print(",");
+}
 void configureEEPROM(){
   if (!EEPROM.begin(EEPROM_SIZE))
   {
@@ -128,102 +147,22 @@ float PID(float setpoint, float input, float& cumError, float& prevError, float 
 void debug(){
   Serial.println("/*");
   /* Angle Control Messages */
-  Serial.print("Pitch:");
-  Serial.print(pitch);
-  Serial.println(",");
-  Serial.print("motorSetpointL:");
-  Serial.print(motorSetpointL);
-  Serial.println(",");
-  Serial.print("robotFilteredLinearDPS:");
-  Serial.print(robotFilteredLinearDPS);
-  Serial.println(",");
-  Serial.print("Max1:");
-  Serial.print(300);
-  Serial.println(",");
-  Serial.print("Min1:");
-  Serial.print(-300);
-  Serial.println(",");
-  Serial.print("PitchError:");
-  Serial.print(angleSetpoint-pitch);
-  Serial.println(",");
-
+  debugPrint("Pitch",pitch); //1
+  debugPrint("MotorSetpoint",motorSetpointL);//2
+  debugPrint("PitchError", angleSetpoint-pitch);//3
+  debugPrint("PitchSetpoint", angleSetpoint);//4
+  /* Accel Control Messages */
+  debugPrint("LinearAccel",linearAccel); //5
+  debugPrint("AccelSetpoint",accelSetpoint);//6
+  debugPrint("AccelError", accelSetpoint-linearAccel);//7
   /* Speed Control Messages */
-  Serial.print("Speed:");
-  Serial.print((robotFilteredLinearDPS/360)*3.14*0.091);
-  Serial.println(",");
-  Serial.print("angleSetpoint:");
-  Serial.print(angleSetpoint);
-  Serial.println(",");
-  Serial.print("Max2:");
-  Serial.print(10);
-  Serial.println(",");
-  Serial.print("Min2:");
-  Serial.print(-10);
-  Serial.println(",");
-  Serial.print("speedError:");
-  Serial.print(speedSetpoint-robotFilteredLinearDPS);
-  Serial.println(",");
-
+  debugPrint("LinearSpeed",robotFilteredLinearDPS); //8
+  debugPrint("speedSetpoint",speedSetpoint);//9
+  debugPrint("SpeedError", speedSetpoint-robotFilteredLinearDPS);//10
   /* Battery Voltage */
-  Serial.print("VBat:");
-  Serial.print(analogRead(VBAT)*4*3.3*1.1/4096);
-  Serial.println(",");
-
   /* Position Debugging */
-  Serial.print("Position:");
-  Serial.print(stepperRightSteps);
-  Serial.println(",");
-  Serial.print("SpeedSetpoint:");
-  Serial.print(speedSetpoint);
-  Serial.println(",");
-  Serial.print("posError:");
-  Serial.print(0-stepperRightSteps);
-
   /* PID Values */
-  Serial.println(",");
-  Serial.print("AngleKp:");
-  Serial.print(angleKp);
-  Serial.println(",");
-  Serial.print("AngleK:");
-  Serial.print(angleKi);
-  Serial.println(",");
-  Serial.print("AngleKd:");
-  Serial.print(angleKd);
-
-  Serial.println(",");
-  Serial.print("SpeedKp:");
-  Serial.print(speedKp,7);
-  Serial.println(",");
-  Serial.print("SpeedK:");
-  Serial.print(speedKi,7);
-  Serial.println(",");
-  Serial.print("SpeedKd:");
-  Serial.print(speedKd,7);
-  Serial.println(",");
-
   /* Yaw Rate Debugging */
-  Serial.print("Yaw:");
-  Serial.print(yawRate);
-  Serial.println(",");
-  Serial.print("yawRateSetpoint:");
-  Serial.print(angRateSetpoint);
-  Serial.println(",");
-  Serial.print("yawRateError:");
-  Serial.print(angRateSetpoint-yawRate);
-  Serial.println(",");
-  Serial.print("MotorDiff:");
-  Serial.print(motorDiff);
-  Serial.println(",");
-  Serial.print("AngRateKp:");
-  Serial.print(angRateKp,7);
-  Serial.println(",");
-  Serial.print("AngRateKi:");
-  Serial.print(angRateKi,7);
-  Serial.println(",");
-  Serial.print("AngRateKd:");
-  Serial.print(angRateKd,7);
-  Serial.println(",");
-
   Serial.println("*/");
 }
 
@@ -308,10 +247,23 @@ void move(float distance){
   posSetpoint += distance*WHEEL_DIAMETER*2*PI/STEPS;
 }
 
+float v2a(float v){
+  float angout = 0;
+  if(v>0){
+    angout = acos(1-((v*v)/(2*GRAV*COM_H)))*180/PI;
+  }else if(v>=0){
+    angout = -acos(1-((v*v)/(2*GRAV*COM_H)))*180/PI;
+  }
+  return angout;
+}
+
 //-------------------------------- Task Functions ---------------------------------------
 
 /* Task to control the balance, speed and direction */
 void taskMovement(void* pvParameters) {
+  while(!initialised){
+    initMovement();
+  }
 
   (void)pvParameters;
   /* Make the task execute at a specified frequency */
@@ -327,6 +279,10 @@ void taskMovement(void* pvParameters) {
     /* Calculate Robot Actual Speed */
     robotLinearDPS = -((motorSpeedL + motorSpeedR)/2) + angularVelocity;
     robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
+    linearAccel = (robotFilteredLinearDPS-lastSpeed)*1000/(millis()-endTime);
+    lastSpeed = robotFilteredLinearDPS;
+    endTime = millis();
+    
 
     /* Angle Loop */
     
@@ -334,40 +290,46 @@ void taskMovement(void* pvParameters) {
     motorSetpointL += PIDvalue;
     motorSetpointR += PIDvalue;
     angleLastTime = millis();
-    motorSetpointL = constrain(motorSetpointL, -360, 360);
-    motorSetpointR = constrain(motorSetpointR, -360, 360);
+    motorSetpointL = constrain(motorSetpointL, -300, 300);
+    motorSetpointR = constrain(motorSetpointR, -300, 300);
 
-    motorSetDPS(constrain(motorSetpointL+motorDiff/2+speedComponent,-MAX_DPS,MAX_DPS),0);
-    motorSetDPS(constrain(motorSetpointR-motorDiff/2+speedComponent,-MAX_DPS,MAX_DPS),1);
+    motorSetDPS(constrain(motorSetpointL+motorDiff/2+speedContribution,-MAX_DPS,MAX_DPS),0);
+    motorSetDPS(constrain(motorSetpointR-motorDiff/2+speedContribution,-MAX_DPS,MAX_DPS),1);
+
+    /* Accel Loop */
+    if(controlCycle%3==0){
+      angleSetpoint += PID(accelSetpoint, linearAccel, accelCumError, accelPrevError, accelLastTime, accelKp, accelKi, accelKd);
+      accelLastTime = millis();
+      angleSetpoint = constrain(angleSetpoint, angleOffset-MAX_ANGLE, angleOffset+MAX_ANGLE);
+    }
+
 
     /* Speed Loop */
-    if(controlCycle%10==0){
-      speedComponent += PID(-speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
+    if(controlCycle%5==0){
+      accelSetpoint = -PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
+      if(abs(accelSetpoint)>MAX_ACCEL){
+        digitalWrite(LED_BUILTIN,HIGH);
+      }else{
+        digitalWrite(LED_BUILTIN,LOW);
+      }
       speedLastTime = millis();
-      speedComponent = constrain(speedComponent, -100, 100);
+      accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
     }
 
     /* Angle Rate Loop */
-    if(controlCycle%3==0){
-      motorDiff += PID(angRateSetpoint, yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
-      angRateLastTime = millis();
-      motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
-    }
-
-    if(controlCycle%3==0){
-      angRateSetpoint += PID(dirSetpoint, yaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
-      angRateLastTime = millis();
-      motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
-    }
-
-
+    // if(controlCycle%3==0){
+    //   motorDiff += PID(angRateSetpoint, yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
+    //   angRateLastTime = millis();
+    //   motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
+    // }
 
     /* Position Controller */
     // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
-    posLastTime = millis();
+    // posLastTime = millis();
 
     /* Control Cycle */
-    controlCycle = controlCycle%100;   
+    controlCycle = controlCycle%100;
+    controlCycle++;   
     if(CONTROL_DEBUG){
       debug();
     }
