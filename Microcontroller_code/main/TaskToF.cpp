@@ -17,9 +17,9 @@ Code to initialise and sample the time of flight sensors
 
 /* Third party libraries */
 #include "TCA9548A.h"
-#include "VL53L0X.h"
 
 /* Personal libraries */
+#include "src/VL53L0X.h"
 #include "src/FIRFilter.h"
 
 //-------------------------------- Global Variables -------------------------------------
@@ -33,6 +33,9 @@ volatile int16_t distanceLeft;
 volatile int16_t distanceFront;
 volatile float distanceRightFiltered;
 volatile float distanceLeftFiltered;
+// volatile float distanceRightDifferential;
+// volatile float distanceLeftDifferential;
+
 static VL53L0X_RangingMeasurementData_t measureRight;
 static VL53L0X_RangingMeasurementData_t measureLeft;
 static VL53L0X_RangingMeasurementData_t measureFront;
@@ -48,8 +51,8 @@ static FIRFilter20 leftFIR;
 static volatile bool rightToFDataReady = false;
 static volatile bool leftToFDataReady = false;
 static volatile bool imminentCollision = false;
-volatile bool IRRightCollision = false;
-volatile bool IRLeftCollision = false;
+static volatile bool IRRightCollision = false;
+static volatile bool IRLeftCollision = false;
 
 /* Task handles */
 TaskHandle_t taskToFHandle = nullptr;
@@ -102,6 +105,8 @@ void configureToF() {
 
   /* Close all channels to ensure state is know */
   I2CMux.closeAll();
+
+#if ENABLE_SIDE_TOF == true
 
   /* Open the channel to the right ToF sensor */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
@@ -168,6 +173,10 @@ void configureToF() {
   /* Open the channel to the front ToF sensor */
   I2CMux.openChannel(TOF_FRONT_CHANNEL);
 
+#endif
+
+#if ENABLE_FRONT_TOF == true
+
   /* Reset any ToF sensors on the bus with address VL53L0X_I2C_ADDR (0x29)*/
   if (findI2CDevice(VL53L0X_I2C_ADDR)) {
     SERIAL_PORT.println("Resetting sensors");
@@ -189,7 +198,7 @@ void configureToF() {
   } else {
 
     tofFront.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_THRESHOLD_CROSSED_LOW, VL53L0X_INTERRUPTPOLARITY_LOW);
-    FixPoint1616_t LowThreashHold = (80 * 65536.0);
+    FixPoint1616_t LowThreashHold = (70 * 65536.0);
     FixPoint1616_t HighThreashHold = (1000 * 65536.0);
     tofFront.setInterruptThresholds(LowThreashHold, HighThreashHold, false);
     tofFront.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
@@ -197,16 +206,22 @@ void configureToF() {
     SERIAL_PORT.println("Front ToF sensor connected");
   }
 
+#endif
+
+#if ENABLE_SIDE_TOF == true
+
   /* Open sensor channels */
   I2CMux.openChannel(TOF_RIGHT_CHANNEL);
   I2CMux.openChannel(TOF_LEFT_CHANNEL);
+
+#endif
 
   /* Begin FIR filters */
   FIRFilterInit20(&rightFIR);
   FIRFilterInit20(&leftFIR);
 }
 
-/* Reads data from two ToF sensors. Used for debugging  */
+/* Reads data from the two side ToF sensors. Used for debugging  */
 void read_dual_sensors() {
 
   tofRight.rangingTest(&measureRight, false);  // pass in 'true' to get debug data printout!
@@ -245,7 +260,7 @@ void IRAM_ATTR ToFLeftISR() {
   leftToFDataReady = true;
 }
 
-/* ISR that triggers on left ToF sensor interrupt */
+/* ISR that triggers on front ToF sensor interrupt */
 void IRAM_ATTR ToFFrontISR() {
   imminentCollision = true;
 }
@@ -277,12 +292,10 @@ void taskToF(void *pvParameters) {
 
   /* Task local variables */
   static uint8_t overThresholdCounter = 0;
-  static uint16_t distanceRightFilteredPrevious;
-  static uint16_t distanceLeftFilteredPrevious;
-  static uint16_t timestamp = millis();
-  static uint16_t timestampPrevious = 0;
-  static uint16_t distanceRightDifferential;
-  static uint16_t distanceLeftDifferential;
+  // static uint16_t distanceRightFilteredPrevious;
+  // static uint16_t distanceLeftFilteredPrevious;
+  // static uint16_t timestamp = millis();
+  // static uint16_t timestampPrevious = 0;
 
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
@@ -299,9 +312,11 @@ void taskToF(void *pvParameters) {
     vTaskPrioritySet(NULL, MAX_I2C_PRIORITY);
 #endif
 
+#if ENABLE_SIDE_TOF == true
+
     /* Read data from the ToF sensors */
     if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-      timestamp = millis();
+      // timestamp = millis();
       tofRight.getRangingMeasurement(&measureRight, false);
       tofLeft.getRangingMeasurement(&measureLeft, false);
 
@@ -321,7 +336,7 @@ void taskToF(void *pvParameters) {
       if ((measureRight.RangeStatus != 4) && (measureRight.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceRight = measureRight.RangeMilliMeter;
       } else {
-        /* If the range is invalid return -1 */
+        /* If the range is invalid return 1000 */
         distanceRight = 1000;
       }
 
@@ -329,7 +344,7 @@ void taskToF(void *pvParameters) {
       if ((measureLeft.RangeStatus != 4) && (measureLeft.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceLeft = measureLeft.RangeMilliMeter;
       } else {
-        /* If the range is invalid return -1 */
+        /* If the range is invalid return 1000 */
         distanceLeft = 1000;
       }
 
@@ -340,6 +355,7 @@ void taskToF(void *pvParameters) {
       Serial.println(distanceLeft);
 #endif
     }
+#endif
 
     /* Apply FIR filters */
     FIRFilterUpdate20(&rightFIR, distanceRight);
@@ -384,18 +400,19 @@ void taskToF(void *pvParameters) {
 
       /* If we are at a junction while going forwards alert taskExecuteCommand */
       else if ((distanceRightFiltered >= THRESHOLD_DISTANCE) || (distanceLeftFiltered >= THRESHOLD_DISTANCE)) {
-        // overThresholdCounter += 1;
+        overThresholdCounter += 1;
 
         /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
-        // if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
+        if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 
-        /* Notify taskExecuteCommand that a junction has been found */
-        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+          /* Notify taskExecuteCommand that a junction has been found */
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
 
 
 
-      } else {
-        // overThresholdCounter = 0;
+        } else {
+          overThresholdCounter = 0;
+        }
       }
     }
   }

@@ -26,10 +26,10 @@ static ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
 
 /* IMU DMP */
 volatile float pitch;
+volatile float pitchRate;
 volatile float yaw;
-volatile float roll;
-volatile float angularVelocity;
 volatile float yawRate;
+
 static float frequencyIMU;
 
 /* Task handles */
@@ -230,7 +230,7 @@ void taskIMU(void *pvParameters) {
   static unsigned long timestamp;         /* Timestamp of samples taken in microseconds */
   static unsigned long previousTimestamp; /* Time since last sample in microseconds */
   static float deltaTime;                 /* Time between samples in seconds */
-  static uint8_t counter = 0;
+  
   /* Start the loop */
   while (true) {
 
@@ -279,18 +279,11 @@ void taskIMU(void *pvParameters) {
           float t3 = +2.0 * (q0 * q3 + q1 * q2);
           float t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
           yaw = atan2(t3, t4) * 180.0 / PI;
-          angularVelocity = myICM.gyrX();
+          pitchRate = myICM.gyrX();
           yawRate = myICM.gyrZ();
         }
       }
-      // if (counter == 10) {
-      //   counter = 0;
-      //   Serial.print("Yaw: ");
-      //   Serial.print(yaw);
-      //   Serial.print(", Pitch: ");
-      //   Serial.println(pitch);
-      // }
-      // counter++;
+
 #else
 
       /* Acquire latest sensor data */
@@ -313,22 +306,6 @@ void taskIMU(void *pvParameters) {
       const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
       // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
 
-      if (counter == 10) {
-        counter = 0;
-        Serial.print("DMP yaw: ");
-        Serial.print(yaw);
-        Serial.print(", DMP pitch: ");
-        Serial.print(pitch);
-
-        Serial.print(", Madgwick yaw: ");
-        Serial.print(euler.angle.yaw);
-        Serial.print(", Madgwick pitch: ");
-        Serial.println(euler.angle.pitch);
-      }
-      counter++;
-      // yaw = euler.angle.yaw;
-      // pitch = euler.angle.pitch;
-      // angularVelocity = myICM.gyrX();
 #endif
     }
   }

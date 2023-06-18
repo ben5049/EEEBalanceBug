@@ -1,3 +1,5 @@
+#include "freertos/projdefs.h"
+#include "freertos/portmacro.h"
 /*
 Authors: Ben Smith
 Date created: 28/05/23
@@ -23,11 +25,9 @@ TaskHandle_t taskExecuteCommandHandle = nullptr;
 /* Variables */
 volatile float spinStartingAngle;
 
-/* Create state */
+/* Create states */
 volatile robotCommand currentCommand = IDLE;
 volatile whereAt currentWhereAt = PASSAGE;
-
-//-------------------------------- Functions --------------------------------------------
 
 //-------------------------------- Task Functions ---------------------------------------
 
@@ -50,10 +50,12 @@ void taskExecuteCommand(void *pvParameters) {
       /* Do nothing and wait for commands */
       case IDLE:
 
-        /* Define what to do in the IDLE state e.g. speed = 0 etc */
-        // speedSetpoint = 0;
-        /* Wait for the next command (timeout every second to prevent deadlock) */
-        if (xQueueReceive(commandQueue, &newCommand, pdMS_TO_TICKS(1000)) == pdTRUE) {
+        /* Set the speed to 0 */
+        speedSetpoint = 0;
+        dirSetpoint = yaw;
+
+        /* Wait for the next command */
+        if (xQueueReceive(commandQueue, &newCommand, portMAX_DELAY) == pdTRUE) {
           currentCommand = newCommand;
         } else {
           currentCommand = IDLE;
@@ -64,8 +66,13 @@ void taskExecuteCommand(void *pvParameters) {
       case FORWARD:
 
         /* Define what to do on the FORWARD command e.g. speed != 0 etc */
-        speedSetpoint = -100;
-        
+        speedSetpoint = 80;
+
+        /* Wait 2 seconds to enter a passage before enabling path control */
+        vTaskDelay(pdMS_TO_TICKS(2000));
+        ulTaskNotifyValueClearIndexed(NULL, 0, UINT_MAX);
+        enablePathControl = true;
+
         /* Wait until a junction is detected by taskToF */
         ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 
@@ -75,15 +82,25 @@ void taskExecuteCommand(void *pvParameters) {
         } else {
           currentCommand = IDLE;
         }
+
+        /* Disable path control when no longer going forwards */
+        enablePathControl = false;
+
         break;
 
       /* Turn to the specified angle */
       case TURN:
 
-        /* Define what to do in the TURN state */
+        /* Set the speed to 0 */
+        speedSetpoint = 0;
+
+        /* Recieve the angle to turn to and pass it to the direction controller */
         xQueueReceive(angleSetpointQueue, &angleSetpoint, portMAX_DELAY);
-        dirSetpoint = angleSetpoint;
-        // TODO: figure out how to give this to controller when finished
+        dirSetpoint = (turns * 360.0) + angleSetpoint;
+
+        /* Wait for the turn to complete */
+        vTaskDelay(pdMS_TO_TICKS(2000));
+
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &newCommand, 0) == pdTRUE) {
           currentCommand = newCommand;
@@ -95,25 +112,29 @@ void taskExecuteCommand(void *pvParameters) {
       /* Turn 360 degrees and find the angles of the beacons */
       case SPIN:
 
-        /* Define what to do in the SPIN state */
+        /* Set the speed to 0 */
+        speedSetpoint = 0;
 
-        SERIAL_PORT.print("Starting yaw: ");
+        /* Disable the direction controller and set the angular rate */
         spinStartingAngle = yaw;
-        SERIAL_PORT.println(spinStartingAngle);
+        enableDirectionControl = false;
+        turns--;
+        angRateSetpoint = SPIN_SPEED;
 
-        /* Unblock TaskSpin which will then count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
+        /* Unblock TaskSpin which will count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
-        /* Wait for the turn to complete (TODO: replace later with notification from yaw controller) */
-        vTaskDelay(8000);
+        /* Wait for the turn to complete */
+        vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000 + 500));
 
         /* Notify the spin task that the turn is complete*/
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
-        digitalWrite(LED_BUILTIN, LOW);
-        SERIAL_PORT.println("Finished");
 
         /* Recieve acknowledge that the queue is ready and taskSpin is done */
         ulTaskNotifyTakeIndexed(0, pdTRUE, pdMS_TO_TICKS(50));
+
+        /* Re-enable the direction controller */
+        enableDirectionControl = true;
 
         /* Print the angles of the junctions */
         // while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {

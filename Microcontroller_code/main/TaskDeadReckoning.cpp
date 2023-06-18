@@ -23,8 +23,6 @@ TaskHandle_t taskDeadReckoningHandle = nullptr;
 volatile float xPosition;
 volatile float yPosition;
 
-//-------------------------------- Functions --------------------------------------------
-
 //-------------------------------- Task Functions ---------------------------------------
 
 /* Task to get rover position */

@@ -19,7 +19,7 @@ Task to detect junctions and beacons while robot is spinning
 #include "Wire.h"
 
 /* Personal libraries */
-#include "FPGACam.h"
+#include "src/FPGACam.h"
 
 //-------------------------------- Global Variables -------------------------------------
 
@@ -300,9 +300,6 @@ void taskSpin(void *pvParameters) {
 
           /* Send beacon angles back in a queue */
           xQueueReset(beaconAngleQueue);
-          // redBeaconAngle = -45.0;
-          // yellowBeaconAngle = 45.0;
-          // blueBeaconAngle = 225.0;
           xQueueSend(beaconAngleQueue, &redBeaconAngle, 0);
           xQueueSend(beaconAngleQueue, &yellowBeaconAngle, 0);
           xQueueSend(beaconAngleQueue, &blueBeaconAngle, 0);

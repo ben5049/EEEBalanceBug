@@ -34,41 +34,35 @@ typedef enum {
 } whereAt;
 
 /* Variables */
-extern volatile float angleSetpoint;
-extern volatile float speedContribution;
-extern volatile float dirSetpoint;
-extern volatile float accelSetpoint;
-extern volatile float speedKp;
-extern volatile float speedKi;
-extern volatile float speedKd;
-extern volatile float speedSetpoint;
-extern volatile float pitch;                     /* Pitch in degrees between -180 and 180 */
-extern volatile float yaw;                       /* Yaw in degrees between -180 and 180 */
-extern volatile float yawRate;                   /* Yaw rate in degrees/s */
-extern volatile float roll;                      /* Roll in degrees between -180 and 180 */
-extern volatile float angularVelocity;           /* Angular velocity in degrees per second around y axis (pitch axis) */
+
+extern volatile float pitch;     /* Pitch in degrees between -180 and 180 */
+extern volatile float pitchRate; /* pitch rate in degrees per second around y axis (pitch axis) */
+extern volatile float yaw;       /* Yaw in degrees between -180 and 180 */
+extern volatile float yawRate;   /* Yaw rate in degrees/s */
+
 extern volatile unsigned long stepperRightSteps; /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
 extern volatile unsigned long stepperLeftSteps;  /* Total number of steps taken by the left stepper motor (forwards = +1, backwards = -1) */
 extern volatile int16_t distanceRight;           /* Distance in mm measured by the right time of flight sensor */
 extern volatile int16_t distanceLeft;            /* Distance in mm measured by the left time of flight sensor */
-extern volatile float distanceRightFiltered;     /* Distance in mm measured by the right time of flight sensor */
-extern volatile float distanceLeftFiltered;      /* Distance in mm measured by the left time of flight sensor */
+extern volatile float distanceRightFiltered;     /* Filtered Distance in mm measured by the right time of flight sensor */
+extern volatile float distanceLeftFiltered;      /* Filtered distance in mm measured by the left time of flight sensor */
+// extern volatile float distanceRightDifferential; /* Filtered distance differentiated for the right time of flight sensor */
+// extern volatile float distanceLeftDifferential;  /* Filtered distance differentiated for the left time of flight sensor */
 extern volatile float spinStartingAngle;         /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
 extern volatile float xPosition;                 /* The x position */
 extern volatile float yPosition;                 /* The y position */
-extern volatile robotCommand currentCommand;     /* The current command being implemented by the rover */
-extern volatile whereAt currentwhereAt;          /* The current general location of the rover */
+
+extern volatile robotCommand currentCommand; /* The current command being implemented by the rover */
+extern volatile whereAt currentwhereAt;      /* The current general location of the rover */
+
+extern volatile float angleSetpoint;
 extern volatile float dirSetpoint;
-extern volatile float loopFreq;
-extern volatile float angleKp;
-extern volatile float angleKi;
-extern volatile float angleKd;
-extern volatile float angRateKp;
-extern volatile float angRateKi;
-extern volatile float angRateKd;
+extern volatile float accelSetpoint;
+extern volatile float speedSetpoint;
 extern volatile float angRateSetpoint;
-extern volatile bool IRRightCollision;
-extern volatile bool IRLeftCollision;
+extern volatile bool enablePathControl;
+extern volatile bool enableDirectionControl;
+extern volatile int16_t turns;
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
@@ -76,9 +70,9 @@ void IRAM_ATTR stepL();
 void IRAM_ATTR stepR();
 void IRAM_ATTR ToFRightISR();
 void IRAM_ATTR ToFLeftISR();
+void IRAM_ATTR ToFFrontISR();
 void IRAM_ATTR IRRightISR();
 void IRAM_ATTR IRLeftISR();
-void IRAM_ATTR ToFFrontISR();
 
 /* Functions */
 void move(float distance);
@@ -88,7 +82,6 @@ void configureWiFi();
 void configureFPGACam();
 void configureEEPROM();
 void motorSetDPS(float DPS);
-void motor_start(double RPM);
 
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;
@@ -111,9 +104,6 @@ void taskServerCommunication(void *pvParameters);
 void taskDebug(void *pvParameters);
 
 //-------------------------------- Imported ---------------------------------------
-
-/* Functions */
-void taskStatusUpdate();
 
 /* Mutexes */
 extern SemaphoreHandle_t mutexSPI;

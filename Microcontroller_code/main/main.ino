@@ -19,9 +19,6 @@ Main ESP32 program for Group 1's EEEBalanceBug
 #include "Wire.h"
 #include "math.h"
 
-#include "FPGACam.h"
-FPGACam fpga1;
-
 //-------------------------------- Global Variables -------------------------------------
 
 /* Semaphores */
@@ -63,27 +60,26 @@ void setup() {
   motorTimerL = timerBegin(0, 80, true);
   motorTimerR = timerBegin(2, 80, true);
 
-#if ENABLE_IMU_TASK == true
   /* Configure the IMU & DMP */
+#if ENABLE_IMU_TASK == true
   configureIMU();
 #endif
 
-#if ENABLE_TOF_TASK == true
   /* Start the ToF sensors */
+#if ENABLE_TOF_TASK == true
   configureToF();
 #endif
 
-#if ENABLE_SERVER_COMMUNICATION_TASK == true
   /* Begin WiFi */
+#if ENABLE_SERVER_COMMUNICATION_TASK == true
   configureWiFi();
 #endif
 
-#if ENABLE_FPGA_CAMERA == true
   /* Configure the FPGA camera over I2C */
+#if ENABLE_FPGA_CAMERA == true
   configureFPGACam();
 #endif
 
-  configureEEPROM();
 
   /* Configure pins */
   pinMode(IMU_INT, INPUT_PULLUP);
@@ -185,6 +181,17 @@ void setup() {
     tskNO_AFFINITY);
 #endif
 
+#if ENABLE_DEAD_RECKONING_TASK == true
+  xTaskCreatePinnedToCore(
+    taskDeadReckoning,            /* Function that implements the task */
+    "DEAD_RECKONING",             /* Text name for the task */
+    10000,                        /* Stack size in words, not bytes */
+    nullptr,                      /* Parameter passed into the task */
+    TASK_DEAD_RECKONING_PRIORITY, /* Task priority */
+    &taskDeadReckoningHandle,     /* Pointer to store the task handle */
+    tskNO_AFFINITY);
+#endif
+
 #if ENABLE_DEBUG_TASK == true
   xTaskCreatePinnedToCore(
     taskDebug,           /* Function that implements the task */
@@ -212,43 +219,12 @@ void setup() {
   timerAttachInterrupt(motorTimerL, &stepL, true);
   timerAttachInterrupt(motorTimerR, &stepR, true);
 
-
-  // if (fpga1.begin(FPGA_ADDR, I2C_PORT, false)) {
-  //   fpga1.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
-  //   SERIAL_PORT.println("FPGA camera initialised");
-  // } else {
-  //   while (true) {
-  //     SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
-  //     delay(1000);
-  //   }
-  // }
+  /* Set the starting direction as whichever way the robot is facing when it finishes booting */
+  dirSetpoint = yaw;
 }
 
 //--------------------------------- Loop -----------------------------------------------
 
 void loop() {
-  vTaskDelay(pdMS_TO_TICKS(50));
-  // SERIAL_PORT.print("Pitch:");
-  // SERIAL_PORT.print(pitch);
-
-  // SERIAL_PORT.print("Right:");
-  // SERIAL_PORT.print(distanceRightFiltered);
-  // SERIAL_PORT.print(", Left:");
-  // SERIAL_PORT.print(distanceLeftFiltered);
-  // SERIAL_PORT.print(", Yaw:");
-  // SERIAL_PORT.println(yaw);
-
-  // SERIAL_PORT.println("Sending start command");
-  // robotCommand command = SPIN;
-  // digitalWrite(LED_BUILTIN, HIGH);
-  // xQueueSend(commandQueue, &command, 0);
-  // vTaskDelay(25000);
-
-  // fpga1.getRYB(true);
-  // Serial.print("RED: ");
-  // Serial.print(fpga1.averageRedX);
-  // Serial.print(",Yellow: ");
-  // Serial.print(fpga1.averageYellowX);
-  // Serial.print(", Blue :");
-  // Serial.println(fpga1.averageBlueX);
+  vTaskDelay(pdMS_TO_TICKS(1000));
 }

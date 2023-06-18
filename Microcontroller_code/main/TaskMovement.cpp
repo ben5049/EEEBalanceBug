@@ -7,7 +7,6 @@
 #include "Config.h"
 #include "PinAssignments.h"
 #include "src/pidautotuner.h"
-#include "EEPROM.h"
 #include "src/FIRFilter.h"
 
 //-------------------------------- Types ------------------------------------------------
@@ -18,9 +17,6 @@
 // }floatToBytes;
 
 //-------------------------------- Global Variables -------------------------------------
-
-/* EEPROM variables */
-static uint8_t addr = 0;
 
 /* Controller Speed */
 static int controlCycle = 0;
@@ -68,7 +64,6 @@ static float accelLastTime = millis();
 
 
 /* Speed Control Variables */
-volatile float speedContribution;
 volatile float speedSetpoint = 0;
 static float speedCumError = 0;
 static float speedPrevError = 0;
@@ -84,23 +79,34 @@ static float angRateLastTime = millis();
 static float motorDiff = 0;
 
 /* Direction Variables */
+volatile bool enableDirectionControl = true;
 volatile float dirSetpoint = 0;
 static float dirCumError = 0;
 static float dirPrevError = 0;
 static float dirLastTime = millis();
 static float lastYaw = 0;
-static int16_t turns = 0;
+volatile int16_t turns = 0;
 static float localYaw = 0;
-volatile float dirKp = KP_DIR;
-volatile float dirKi = KI_DIR;
-volatile float dirKd = KD_DIR;
+static float dirKp = KP_DIR;
+static float dirKi = KI_DIR;
+static float dirKd = KD_DIR;
+
+/* Path Variables */
+static float distanceRightDifferential;
+static float distanceLeftDifferential;
+volatile bool enablePathControl = false;
+static float pathCumError = 0;
+static float pathPrevError = 0;
+static float pathLastTime = 0;
+static float pathKp = KP_PATH;
+static float pathKi = KI_PATH;
+static float pathKd = KD_PATH;
 
 /* Position Control Variables */
 volatile float posSetpoint = 0;
 static float posCumError = 0;
 static float posPrevError = 0;
 static float posLastTime = millis();
-
 
 /* Controller frequency in Hz */
 volatile float loopFreq = 50;
@@ -114,12 +120,13 @@ hw_timer_t* motorTimerR = NULL;
 
 /* FIR Filter */
 static FIRFilter50 accelFilter;
+
 /* Init */
 bool initialised = false;
+
 //-------------------------------- Functions --------------------------------------------
 
-/**/
-
+/* Initialise movement */
 void initMovement() {
   FIRFilterInit50(&accelFilter);
   initialised = true;
@@ -130,12 +137,6 @@ void debugPrint(char name[], float data) {
   Serial.print(": ");
   Serial.print(data, 7);
   Serial.print(",");
-}
-void configureEEPROM() {
-  if (!EEPROM.begin(EEPROM_SIZE)) {
-    Serial.println("failed to initialise EEPROM");
-    delay(1000000);
-  }
 }
 
 /* Main PID function */
@@ -274,11 +275,18 @@ float v2a(float v) {
 
 /* Task to control the balance, speed and direction */
 void taskMovement(void* pvParameters) {
+
+  (void)pvParameters;
+
   while (!initialised) {
     initMovement();
   }
 
-  (void)pvParameters;
+  static uint16_t distanceRightFilteredPrevious;
+  static uint16_t distanceLeftFilteredPrevious;
+  static uint16_t timestamp = millis();
+  static uint16_t timestampPrevious = 0;
+
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / loopFreq;
   TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -297,7 +305,7 @@ void taskMovement(void* pvParameters) {
     localYaw = yaw + (turns * 360);
 
     /* Calculate Robot Actual Speed */
-    robotLinearDPS = -((motorSpeedL + motorSpeedR) / 2) + angularVelocity;
+    robotLinearDPS = -((motorSpeedL + motorSpeedR) / 2) + pitchRate;
     robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
     linearAccel = (robotFilteredLinearDPS - lastSpeed) * 1000 / (millis() - endTime);
     linearAccel = FIRFilterUpdate50(&accelFilter, linearAccel);
@@ -314,8 +322,8 @@ void taskMovement(void* pvParameters) {
     motorSetpointL = constrain(motorSetpointL, -300, 300);
     motorSetpointR = constrain(motorSetpointR, -300, 300);
 
-    motorSetDPS(constrain(motorSetpointL + motorDiff / 2 + speedContribution, -MAX_DPS, MAX_DPS), 0);
-    motorSetDPS(constrain(motorSetpointR - motorDiff / 2 + speedContribution, -MAX_DPS, MAX_DPS), 1);
+    motorSetDPS(constrain(motorSetpointL + motorDiff / 2, -MAX_DPS, MAX_DPS), 0);
+    motorSetDPS(constrain(motorSetpointR - motorDiff / 2, -MAX_DPS, MAX_DPS), 1);
 
     /* Accel Loop */
     if (controlCycle % 3 == 0) {
@@ -324,14 +332,12 @@ void taskMovement(void* pvParameters) {
       angleSetpoint = constrain(angleSetpoint, angleOffset - MAX_ANGLE, angleOffset + MAX_ANGLE);
     }
 
-
     /* Speed Loop */
     if (controlCycle % 5 == 0) {
       accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
       speedLastTime = millis();
       accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
     }
-
 
     /* Position Controller */
     // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
@@ -345,22 +351,33 @@ void taskMovement(void* pvParameters) {
     }
 
     /* Direction Control Loop */
-    if (controlCycle % 5 == 0) {
+    if (enableDirectionControl && (controlCycle % 5 == 0)) {
       angRateSetpoint = PID(dirSetpoint, localYaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
       angRateLastTime = millis();
-      motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
+      angRateSetpoint = constrain(angRateSetpoint, -MAX_ANG_RATE, MAX_ANG_RATE);
+    }
+
+    /* Path control only when going FORWARD */
+    if (enablePathControl && (controlCycle % 8 == 0)) {
+      // dirSetpoint = PID(0.0, distanceLeftFiltered - distanceRightFiltered, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
+      // pathLastTime = millis();
+
+      distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      distanceRightFilteredPrevious = distanceRightFiltered;
+      distanceLeftFilteredPrevious = distanceLeftFiltered;
+      timestampPrevious = timestamp;
+
+      if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
+        dirSetpoint -= 3;
+      } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
+        dirSetpoint += 3;
+      }
     }
 
     /* Control Cycle */
     controlCycle = controlCycle % 100;
     controlCycle++;
-    if ((controlCycle % 10) == 0) {
-      Serial.print("Yaw: ");
-      Serial.print(yaw);
-      Serial.print(", Local Yaw: ");
-      Serial.println(localYaw);
-    }
-
     if (CONTROL_DEBUG) {
       debug();
     }
