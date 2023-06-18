@@ -283,14 +283,14 @@ void taskIMU(void *pvParameters) {
           yawRate = myICM.gyrZ();
         }
       }
-      if (counter == 10) {
-        counter = 0;
-        Serial.print("Yaw: ");
-        Serial.print(yaw);
-        Serial.print(", Pitch: ");
-        Serial.println(pitch);
-      }
-      counter++;
+      // if (counter == 10) {
+      //   counter = 0;
+      //   Serial.print("Yaw: ");
+      //   Serial.print(yaw);
+      //   Serial.print(", Pitch: ");
+      //   Serial.println(pitch);
+      // }
+      // counter++;
 #else
 
       /* Acquire latest sensor data */

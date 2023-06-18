@@ -120,21 +120,21 @@ bool initialised = false;
 
 /**/
 
-void initMovement(){
+void initMovement() {
   FIRFilterInit50(&accelFilter);
-  initialised=true;
+  initialised = true;
 }
 
-void debugPrint(char name[], float data){
+void debugPrint(char name[], float data) {
   Serial.print(name);
   Serial.print(": ");
-  Serial.print(data,7);
+  Serial.print(data, 7);
   Serial.print(",");
 }
-void configureEEPROM(){
-  if (!EEPROM.begin(EEPROM_SIZE))
-  {
-    Serial.println("failed to initialise EEPROM"); delay(1000000);
+void configureEEPROM() {
+  if (!EEPROM.begin(EEPROM_SIZE)) {
+    Serial.println("failed to initialise EEPROM");
+    delay(1000000);
   }
 }
 
@@ -146,7 +146,7 @@ float PID(float setpoint, float input, float& cumError, float& prevError, float 
   error = setpoint - input;
   cumError += constrain(error, -MAX_ERROR_CHANGE, MAX_ERROR_CHANGE);
   cumError = constrain(cumError, -MAX_CUM_ERROR, MAX_CUM_ERROR);
-  if(Ki==0){
+  if (Ki == 0) {
     cumError = 0;
   }
 
@@ -157,21 +157,21 @@ float PID(float setpoint, float input, float& cumError, float& prevError, float 
 }
 
 /* Sent Debug Messages */
-void debug(){
+void debug() {
   Serial.println("/*");
   /* Angle Control Messages */
-  debugPrint("Pitch",pitch); //1
-  debugPrint("MotorSetpoint",motorSetpointL);//2
-  debugPrint("PitchError", angleSetpoint-pitch);//3
-  debugPrint("PitchSetpoint", angleSetpoint);//4
+  debugPrint("Pitch", pitch);                       //1
+  debugPrint("MotorSetpoint", motorSetpointL);      //2
+  debugPrint("PitchError", angleSetpoint - pitch);  //3
+  debugPrint("PitchSetpoint", angleSetpoint);       //4
   /* Accel Control Messages */
-  debugPrint("LinearAccel",linearAccel); //5
-  debugPrint("AccelSetpoint",accelSetpoint);//6
-  debugPrint("AccelError", accelSetpoint-linearAccel);//7
+  debugPrint("LinearAccel", linearAccel);                 //5
+  debugPrint("AccelSetpoint", accelSetpoint);             //6
+  debugPrint("AccelError", accelSetpoint - linearAccel);  //7
   /* Speed Control Messages */
-  debugPrint("LinearSpeed",robotFilteredLinearDPS); //8
-  debugPrint("speedSetpoint",speedSetpoint);//9
-  debugPrint("SpeedError", speedSetpoint-robotFilteredLinearDPS);//10
+  debugPrint("LinearSpeed", robotFilteredLinearDPS);                 //8
+  debugPrint("speedSetpoint", speedSetpoint);                        //9
+  debugPrint("SpeedError", speedSetpoint - robotFilteredLinearDPS);  //10
   /* Battery Voltage */
   /* Position Debugging */
   /* PID Values */
@@ -186,12 +186,12 @@ void motorSetDPS(float DPS, int motor) {
   // motor both = 2
   float microsBetweenSteps;
 
-  if(DPS==0){
-    microsBetweenSteps = FLT_MAX; 
-  }else{
+  if (DPS == 0) {
+    microsBetweenSteps = FLT_MAX;
+  } else {
     microsBetweenSteps = 360 * 1000000 / (STEPS * abs(DPS));  // microseconds
   }
-  if (motor == 0){
+  if (motor == 0) {
     if (DPS > 0) {
       digitalWrite(STEPPER_L_DIR, LOW);
       stepperLeftDirection = true;
@@ -201,7 +201,7 @@ void motorSetDPS(float DPS, int motor) {
     } else {
       return;
     }
-  }else if(motor==1){
+  } else if (motor == 1) {
     if (DPS > 0) {
       digitalWrite(STEPPER_R_DIR, HIGH);
       stepperRightDirection = true;
@@ -212,11 +212,11 @@ void motorSetDPS(float DPS, int motor) {
       return;
     }
   }
-  if(motor==0){
+  if (motor == 0) {
     motorSpeedL = DPS;
     timerAlarmWrite(motorTimerL, microsBetweenSteps, true);
     timerAlarmEnable(motorTimerL);
-  }else if(motor==1){
+  } else if (motor == 1) {
     motorSpeedR = DPS;
     timerAlarmWrite(motorTimerR, microsBetweenSteps, true);
     timerAlarmEnable(motorTimerR);
@@ -256,16 +256,16 @@ void IRAM_ATTR stepR() {
 }
 
 /* Move Function */
-void move(float distance){
-  posSetpoint += distance*WHEEL_DIAMETER*2*PI/STEPS;
+void move(float distance) {
+  posSetpoint += distance * WHEEL_DIAMETER * 2 * PI / STEPS;
 }
 
-float v2a(float v){
+float v2a(float v) {
   float angout = 0;
-  if(v>0){
-    angout = acos(1-((v*v)/(2*GRAV*COM_H)))*180/PI;
-  }else if(v>=0){
-    angout = -acos(1-((v*v)/(2*GRAV*COM_H)))*180/PI;
+  if (v > 0) {
+    angout = acos(1 - ((v * v) / (2 * GRAV * COM_H))) * 180 / PI;
+  } else if (v >= 0) {
+    angout = -acos(1 - ((v * v) / (2 * GRAV * COM_H))) * 180 / PI;
   }
   return angout;
 }
@@ -274,7 +274,7 @@ float v2a(float v){
 
 /* Task to control the balance, speed and direction */
 void taskMovement(void* pvParameters) {
-  while(!initialised){
+  while (!initialised) {
     initMovement();
   }
 
@@ -288,25 +288,25 @@ void taskMovement(void* pvParameters) {
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
     /* Calculate Local Yaw*/
-    if((lastYaw<-90)&&(yaw>90)){
-      turns-=1;
-    }else if((lastYaw>90)&&(yaw<-90)){
-      turns+=1;
+    if ((lastYaw < -90) && (yaw > 90)) {
+      turns -= 1;
+    } else if ((lastYaw > 90) && (yaw < -90)) {
+      turns += 1;
     }
     lastYaw = yaw;
-    localYaw = yaw+(turns*360);
+    localYaw = yaw + (turns * 360);
 
     /* Calculate Robot Actual Speed */
-    robotLinearDPS = -((motorSpeedL + motorSpeedR)/2) + angularVelocity;
+    robotLinearDPS = -((motorSpeedL + motorSpeedR) / 2) + angularVelocity;
     robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
-    linearAccel = (robotFilteredLinearDPS-lastSpeed)*1000/(millis()-endTime);
-    linearAccel =FIRFilterUpdate50(&accelFilter, linearAccel);
+    linearAccel = (robotFilteredLinearDPS - lastSpeed) * 1000 / (millis() - endTime);
+    linearAccel = FIRFilterUpdate50(&accelFilter, linearAccel);
     lastSpeed = robotFilteredLinearDPS;
     endTime = millis();
-    
+
 
     /* Angle Loop */
-    
+
     float PIDvalue = PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
     motorSetpointL += PIDvalue;
     motorSetpointR += PIDvalue;
@@ -314,46 +314,53 @@ void taskMovement(void* pvParameters) {
     motorSetpointL = constrain(motorSetpointL, -300, 300);
     motorSetpointR = constrain(motorSetpointR, -300, 300);
 
-    motorSetDPS(constrain(motorSetpointL+motorDiff/2+speedContribution,-MAX_DPS,MAX_DPS),0);
-    motorSetDPS(constrain(motorSetpointR-motorDiff/2+speedContribution,-MAX_DPS,MAX_DPS),1);
+    motorSetDPS(constrain(motorSetpointL + motorDiff / 2 + speedContribution, -MAX_DPS, MAX_DPS), 0);
+    motorSetDPS(constrain(motorSetpointR - motorDiff / 2 + speedContribution, -MAX_DPS, MAX_DPS), 1);
 
     /* Accel Loop */
-    if(controlCycle%3==0){
+    if (controlCycle % 3 == 0) {
       angleSetpoint += PID(accelSetpoint, linearAccel, accelCumError, accelPrevError, accelLastTime, accelKp, accelKi, accelKd);
       accelLastTime = millis();
-      angleSetpoint = constrain(angleSetpoint, angleOffset-MAX_ANGLE, angleOffset+MAX_ANGLE);
+      angleSetpoint = constrain(angleSetpoint, angleOffset - MAX_ANGLE, angleOffset + MAX_ANGLE);
     }
 
 
     /* Speed Loop */
-    if(controlCycle%5==0){
-      accelSetpoint =  PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
+    if (controlCycle % 5 == 0) {
+      accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
       speedLastTime = millis();
       accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
     }
 
-    
+
     /* Position Controller */
     // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
     // posLastTime = millis();
 
     /* Angle Rate Loop */
-    if(controlCycle%3==0){
+    if (controlCycle % 3 == 0) {
       motorDiff += PID(angRateSetpoint, yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
       angRateLastTime = millis();
       motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
     }
 
-    if(controlCycle%5==0){
+    if (controlCycle % 5 == 0) {
       angRateSetpoint = PID(dirSetpoint, localYaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
       angRateLastTime = millis();
       motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
     }
 
     /* Control Cycle */
-    controlCycle = controlCycle%100;
-    controlCycle++;   
-    if(CONTROL_DEBUG){
+    controlCycle = controlCycle % 100;
+    controlCycle++;
+    if ((controlCycle % 10) == 0) {
+      Serial.print("Yaw: ");
+      Serial.print(yaw);
+      Serial.print(", Local Yaw: ");
+      Serial.println(localYaw);
+    }
+
+    if (CONTROL_DEBUG) {
       debug();
     }
   }

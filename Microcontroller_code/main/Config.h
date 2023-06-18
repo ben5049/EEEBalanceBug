@@ -34,7 +34,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define ENABLE_IMU_TASK true              /* Setting "true" enables the IMU sampling task */
 #define TASK_IMU_PRIORITY 10              /* Task priority from 0 to 31 (larger means higher priority) */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
-#define ENABLE_DMP_MAGNETOMETER false     /* Setting "true" enables the magnetometer for the DMP */
+#define ENABLE_DMP_MAGNETOMETER false      /* Setting "true" enables the magnetometer for the DMP */
 #define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
 #define IMU_SAMPLING_FREQUENCY_DMP 57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
@@ -87,7 +87,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_MOVEMENT_PRIORITY 8 /* Task priority from 0 to 31 (larger means higher priority) */
 #define ENABLE_MOVEMENT_TASK true
 #define CONTROL_DEBUG false /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
-#define EEPROM_SIZE 64     /* EEPROM size in bytes for storing controller constants */
+#define EEPROM_SIZE 64      /* EEPROM size in bytes for storing controller constants */
 
 #define KP_POS 0.00
 #define KI_POS 0.00
