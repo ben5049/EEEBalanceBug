@@ -60,7 +60,7 @@ void taskDebug(void *pvParameters) {
     speedSetpoint = 0;
     digitalWrite(LED_BUILTIN, HIGH);
     vTaskDelay(3000);
-    dirSetpoint = dirSetpoint + 90;
+    dirSetpoint = dirSetpoint - 90;
     vTaskDelay(2000);
     speedSetpoint = 100;
     digitalWrite(LED_BUILTIN, LOW);

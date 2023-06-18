@@ -34,7 +34,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define ENABLE_IMU_TASK true              /* Setting "true" enables the IMU sampling task */
 #define TASK_IMU_PRIORITY 10              /* Task priority from 0 to 31 (larger means higher priority) */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
-#define ENABLE_DMP_MAGNETOMETER false      /* Setting "true" enables the magnetometer for the DMP */
+#define ENABLE_DMP_MAGNETOMETER true     /* Setting "true" enables the magnetometer for the DMP */
 #define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
 #define IMU_SAMPLING_FREQUENCY_DMP 57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
