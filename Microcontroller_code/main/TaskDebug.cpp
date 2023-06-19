@@ -22,6 +22,9 @@ void taskDebug(void *pvParameters) {
 
   static char serialData;
 
+  static robotCommand newCommand;
+  static float newAngleSetpoint;
+
   /* Start the loop */
   while (true) {
     // serialData = SERIAL_PORT.read();
@@ -60,7 +63,19 @@ void taskDebug(void *pvParameters) {
     // motorSetDPS(100,1);
     vTaskDelay(500);
 
-    SERIAL_PORT.println(currentCommand);
+    // newCommand = FORWARD;
+    // xQueueSend(commandQueue, &newCommand, 0);
+
+    // newCommand = SPIN;
+    // xQueueSend(commandQueue, &newCommand, 0);
+
+    // newCommand = TURN;
+    // newAngleSetpoint = 90.0;
+    
+    // xQueueSend(angleSetpointQueue, &newCommand, 0);
+    // xQueueSend(commandQueue, &newCommand, 0);
+
+    // SERIAL_PORT.println(currentCommand);
     // motorSetDPS(-100,0);
     // motorSetDPS(-100,1);
     // vTaskDelay(100);

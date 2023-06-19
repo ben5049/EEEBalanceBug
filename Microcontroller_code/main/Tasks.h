@@ -33,7 +33,7 @@ typedef enum {
   DEAD_END = 0x02
 } whereAt;
 
-struct angleData{
+struct angleData {
   float pitch;
   float pitchRate;
   float yaw;
@@ -55,9 +55,9 @@ extern volatile float distanceRightFiltered;     /* Filtered Distance in mm meas
 extern volatile float distanceLeftFiltered;      /* Filtered distance in mm measured by the left time of flight sensor */
 // extern volatile float distanceRightDifferential; /* Filtered distance differentiated for the right time of flight sensor */
 // extern volatile float distanceLeftDifferential;  /* Filtered distance differentiated for the left time of flight sensor */
-extern volatile float spinStartingAngle;         /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
-extern volatile float xPosition;                 /* The x position */
-extern volatile float yPosition;                 /* The y position */
+extern volatile float spinStartingAngle; /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
+extern volatile float xPosition;         /* The x position */
+extern volatile float yPosition;         /* The y position */
 
 extern volatile robotCommand currentCommand; /* The current command being implemented by the rover */
 extern volatile whereAt currentwhereAt;      /* The current general location of the rover */
@@ -67,8 +67,11 @@ extern volatile float dirSetpoint;
 extern volatile float accelSetpoint;
 extern volatile float speedSetpoint;
 extern volatile float angRateSetpoint;
+
 extern volatile bool enablePathControl;
+extern volatile bool enableAngRateControl;
 extern volatile bool enableDirectionControl;
+extern volatile float motorDiff;
 extern volatile int16_t turns;
 
 extern volatile bool wifiInitialised;

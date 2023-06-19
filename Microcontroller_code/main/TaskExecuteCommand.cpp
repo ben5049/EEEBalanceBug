@@ -39,8 +39,9 @@ void taskExecuteCommand(void *pvParameters) {
 
   /* Variables */
   static robotCommand newCommand;
-  static float junctionAngle;
+  // static float junctionAngle;
   static float angleSetpoint;
+  static angleData IMUData;
 
   /* Start the loop */
   while (true) {
@@ -53,14 +54,22 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Set the speed to 0 */
         speedSetpoint = 0;
-        dirSetpoint = yaw;
+        enableAngRateControl = false;
+        enableDirectionControl = false;
+        motorDiff = 0;
+        angRateSetpoint = 0;
+
 
         /* Wait for the next command */
-        if (xQueueReceive(commandQueue, &newCommand, portMAX_DELAY) == pdTRUE) {
-          currentCommand = newCommand;
-        } else {
-          currentCommand = IDLE;
+        while (xQueueReceive(commandQueue, &newCommand, pdMS_TO_TICKS(10)) != pdTRUE) {
+          xQueuePeek(IMUDataQueue, &IMUData, 0);
+          dirSetpoint = IMUData.yaw;
         }
+
+        currentCommand = newCommand;
+        enableAngRateControl = true;
+        enableDirectionControl = true;
+
         break;
 
       /* Go forward until a junction or obstacle is reached */
@@ -71,7 +80,7 @@ void taskExecuteCommand(void *pvParameters) {
         speedSetpoint = 80;
 
         /* Wait 2 seconds to enter a passage before enabling path control */
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(4000));
         ulTaskNotifyValueClearIndexed(NULL, 0, UINT_MAX);
         enablePathControl = true;
 
@@ -129,7 +138,7 @@ void taskExecuteCommand(void *pvParameters) {
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
         /* Wait for the turn to complete */
-        vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000 + 500));
+        vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000));
 
         /* Notify the spin task that the turn is complete*/
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
@@ -140,6 +149,8 @@ void taskExecuteCommand(void *pvParameters) {
         /* Re-enable the direction controller */
         enableDirectionControl = true;
 
+        /* Delay to let the angle correct */
+        vTaskDelay(pdMS_TO_TICKS(500));
         /* Print the angles of the junctions */
         // while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
         //   if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {

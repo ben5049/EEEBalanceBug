@@ -35,7 +35,7 @@ static float frequencyIMU;
 /* Task handles */
 TaskHandle_t taskIMUHandle = nullptr;
 
-struct angleData IMUData; 
+struct angleData IMUData;
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -233,6 +233,11 @@ void taskIMU(void *pvParameters) {
   static unsigned long previousTimestamp; /* Time since last sample in microseconds */
   static float deltaTime;                 /* Time between samples in seconds */
 
+  static uint32_t samples = 0;
+  static float yawDrift = 0;
+  static float totalYawDrift = 0;
+  static float prevYaw;
+
   const TickType_t xFrequency = configTICK_RATE_HZ / IMU_SAMPLING_FREQUENCY_DMP;
   TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -289,7 +294,21 @@ void taskIMU(void *pvParameters) {
 
         IMUData.pitchRate = myICM.gyrX();
         IMUData.yawRate = myICM.gyrZ();
-        
+
+#if ENABLE_IMU_DEBUG == true
+        SERIAL_PORT.print("Pitch: ");
+        SERIAL_PORT.print(IMUData.pitch);
+        SERIAL_PORT.print(", Yaw: ");
+        SERIAL_PORT.print(IMUData.yaw);
+        samples++;
+        totalYawDrift += IMUData.yaw - prevYaw;
+        prevYaw = IMUData.yaw;
+        yawDrift = totalYawDrift / samples;
+        SERIAL_PORT.print(", Yaw drift: ");
+        SERIAL_PORT.println(yawDrift, 10);
+#endif
+
+        /* Write the object that stores the IMU data to a single item queue to distribute to other tasks */
         xQueueOverwrite(IMUDataQueue, &IMUData);
       }
     }
@@ -319,4 +338,3 @@ void taskIMU(void *pvParameters) {
 #endif
   }
 }
-

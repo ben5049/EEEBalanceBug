@@ -72,11 +72,12 @@ static float lastSpeed = 0;
 static float endTime = millis();
 
 /* Angle Rate Variables */
+volatile bool enableAngRateControl = true;
 volatile float angRateSetpoint = 0;
 static float angRateCumError = 0;
 static float angRatePrevError = 0;
 static float angRateLastTime = millis();
-static float motorDiff = 0;
+volatile float motorDiff = 0;
 
 /* Direction Variables */
 volatile bool enableDirectionControl = true;
@@ -382,7 +383,7 @@ void taskMovement(void* pvParameters) {
       // posLastTime = millis();
 
       /* Angle Rate Loop */
-      if (controlCycle % 3 == 0) {
+      if (enableAngRateControl && (controlCycle % 3 == 0)) {
         motorDiff += PID(angRateSetpoint, IMUData.yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
         angRateLastTime = millis();
         motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
@@ -396,7 +397,7 @@ void taskMovement(void* pvParameters) {
       }
 
       /* Path control only when going FORWARD */
-      if (enablePathControl && (controlCycle % 8 == 0)) {
+      if (enablePathControl && (controlCycle % 5 == 0)) {
         // dirSetpoint = PID(0.0, distanceLeftFiltered - distanceRightFiltered, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
         // pathLastTime = millis();
 
