@@ -424,44 +424,49 @@ def led_driver_red():
     global conn, cur
     global isSpinning, spinTime
     data = request.get_json()
+    energy = data["energy status"]
     print(data)
     
     if DEBUG:
         print(isSpinning, time()-spinTime)
     
     # logic to turn on led
-    if isSpinning and time()-spinTime < TIMEOUT/3:
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
+    elif energy != "enough energy":
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # swicth should be 0
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
     global isSpinning, spinTime
     data = request.get_json()
+    energy = data["energy status"]
     print(data)
     if DEBUG:
         print(isSpinning, time()-spinTime)
-    if isSpinning and time()-spinTime < TIMEOUT/3:
+    if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
     global isSpinning, spinTime
     data = request.get_json()
+    energy = data["energy status"]
     print(data)
     if DEBUG:
         print(isSpinning, time()-spinTime)
-    if isSpinning and time()-spinTime < TIMEOUT/3:
+    if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#
