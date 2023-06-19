@@ -24,7 +24,7 @@
 #define EXPOSURE_STEP 0x100
 #define GAIN_INIT 0x080
 #define GAIN_STEP 0x040
-#define DEFAULT_LEVEL 1
+#define DEFAULT_LEVEL 3
 
 #define MIPI_REG_PHYClkCtl		0x0056
 #define MIPI_REG_PHYData0Ctl	0x0058
