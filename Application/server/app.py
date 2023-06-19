@@ -94,7 +94,7 @@ def rover():
     # resp = [3]
 
     # forward test
-    # resp = [0]
+    resp = [0, 3]
 
     # spin  test
     # if len(data["beaconangles"]) == 3:
@@ -106,12 +106,7 @@ def rover():
     # print("YAW: ", data["diagnostics"]["connection"])
 
     # user input to resp
-    resp = []
-
-    a = int(input())
-    while a!=-1:
-        resp.append(a)
-        a = int(input())
+    
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
