@@ -107,10 +107,10 @@ def rover():
 
     # user input to resp
     resp = []
-    a = int(input())
+    a = int(input("Next command: "))
     while a != -1:
         resp.append(a)
-        a = int(input())
+        a = int(input("Next command: "))
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     print(resp)
     # if rover is about to spin, set flags to turn on beacons
