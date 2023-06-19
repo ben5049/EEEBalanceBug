@@ -40,19 +40,24 @@ struct angleData {
   float yawRate;
 };
 
+struct ToFDistanceData {
+  float right;
+  float left;
+};
+
 /* Variables */
 
-extern volatile float pitch;     /* Pitch in degrees between -180 and 180 */
-extern volatile float pitchRate; /* pitch rate in degrees per second around y axis (pitch axis) */
-extern volatile float yaw;       /* Yaw in degrees between -180 and 180 */
-extern volatile float yawRate;   /* Yaw rate in degrees/s */
+// extern volatile float pitch;     /* Pitch in degrees between -180 and 180 */
+// extern volatile float pitchRate; /* pitch rate in degrees per second around y axis (pitch axis) */
+// extern volatile float yaw;       /* Yaw in degrees between -180 and 180 */
+// extern volatile float yawRate;   /* Yaw rate in degrees/s */
 
 extern volatile unsigned long stepperRightSteps; /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
 extern volatile unsigned long stepperLeftSteps;  /* Total number of steps taken by the left stepper motor (forwards = +1, backwards = -1) */
 extern volatile int16_t distanceRight;           /* Distance in mm measured by the right time of flight sensor */
 extern volatile int16_t distanceLeft;            /* Distance in mm measured by the left time of flight sensor */
-extern volatile float distanceRightFiltered;     /* Filtered Distance in mm measured by the right time of flight sensor */
-extern volatile float distanceLeftFiltered;      /* Filtered distance in mm measured by the left time of flight sensor */
+// extern volatile float distanceRightFiltered;     /* Filtered Distance in mm measured by the right time of flight sensor */
+// extern volatile float distanceLeftFiltered;      /* Filtered distance in mm measured by the left time of flight sensor */
 // extern volatile float distanceRightDifferential; /* Filtered distance differentiated for the right time of flight sensor */
 // extern volatile float distanceLeftDifferential;  /* Filtered distance differentiated for the left time of flight sensor */
 extern volatile float spinStartingAngle; /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
@@ -120,7 +125,9 @@ void taskDebug(void *pvParameters);
 extern SemaphoreHandle_t mutexI2C;
 
 /* Queue handles */
+
 extern QueueHandle_t IMUDataQueue;
+extern QueueHandle_t ToFDataQueue;
 extern QueueHandle_t commandQueue;
 extern QueueHandle_t junctionAngleQueue;
 extern QueueHandle_t beaconAngleQueue;

@@ -26,6 +26,7 @@ SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C per
 
 /* Queues */
 QueueHandle_t IMUDataQueue;
+QueueHandle_t ToFDataQueue;
 QueueHandle_t commandQueue;
 QueueHandle_t junctionAngleQueue;
 QueueHandle_t beaconAngleQueue;
@@ -102,6 +103,8 @@ void setup() {
 
   /* Create queues */
   IMUDataQueue = xQueueCreate(1, sizeof(angleData));
+  ToFDataQueue = xQueueCreate(1, sizeof(ToFDistanceData));
+
   commandQueue = xQueueCreate(COMMAND_QUEUE_LENGTH, sizeof(robotCommand));
   junctionAngleQueue = xQueueCreate(MAX_NUMBER_OF_JUNCTIONS, sizeof(float));
   beaconAngleQueue = xQueueCreate(NUMBER_OF_BEACONS, sizeof(float));
@@ -217,7 +220,6 @@ void setup() {
   timerAttachInterrupt(motorTimerR, &stepR, true);
 
   /* Set the starting direction as whichever way the robot is facing when it finishes booting */
-  dirSetpoint = yaw;
 }
 
 //--------------------------------- Loop -----------------------------------------------

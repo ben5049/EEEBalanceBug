@@ -74,6 +74,9 @@ void taskSpin(void *pvParameters) {
   static float halfWayAngle;
   static float previousYaw;
 
+  static struct ToFDistanceData ToFData;
+  static struct angleData IMUData;
+
   /* Statistical analysis */
   static uint32_t sum = 0;
   static uint32_t sumSquares = 0;
@@ -126,7 +129,7 @@ void taskSpin(void *pvParameters) {
       firstHalf = true;
 
       halfWayAngle = wrapAngle(spinStartingAngle + 180.0);
-      previousYaw = yaw;
+      previousYaw = IMUData.yaw;
 
       sum = 0;
       // sumSquares = 0;
@@ -143,6 +146,9 @@ void taskSpin(void *pvParameters) {
     /* If task is incomplete, execute the task at its set frequency */
     else {
       vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+      xQueuePeek(ToFDataQueue, &ToFData, 0);
+      xQueuePeek(IMUDataQueue, &IMUData, 0);
 
 /* Poll FPGA to get x coordinate of each colour from the frame */
 #if ENABLE_FPGA_CAMERA == true
@@ -165,21 +171,21 @@ void taskSpin(void *pvParameters) {
         redBeaconDistanceToCentre = abs(fpga.averageRedX - FPGA_IMAGE_WIDTH / 2);
         if (redBeaconDistanceToCentre < redBeaconClosestDistanceToCentre) {
           redBeaconClosestDistanceToCentre = redBeaconDistanceToCentre;
-          redBeaconAngle = yaw;
+          redBeaconAngle = IMUData.yaw;
         }
 
         /* If the current position of the yellow beacon is closer to the centre of the frame than any previous position of the yellow beacon, record the distance from the centre and the yaw */
         yellowBeaconDistanceToCentre = abs(fpga.averageYellowX - FPGA_IMAGE_WIDTH / 2);
         if (yellowBeaconDistanceToCentre < yellowBeaconClosestDistanceToCentre) {
           yellowBeaconClosestDistanceToCentre = yellowBeaconDistanceToCentre;
-          yellowBeaconAngle = yaw;
+          yellowBeaconAngle = IMUData.yaw;
         }
 
         /* If the current position of the blue beacon is closer to the centre of the frame than any previous position of the blue beacon, record the distance from the centre and the yaw */
         blueBeaconDistanceToCentre = abs(fpga.averageBlueX - FPGA_IMAGE_WIDTH / 2);
         if (blueBeaconDistanceToCentre < blueBeaconClosestDistanceToCentre) {
           blueBeaconClosestDistanceToCentre = blueBeaconDistanceToCentre;
-          blueBeaconAngle = yaw;
+          blueBeaconAngle = IMUData.yaw;
         }
         // SERIAL_PORT.print("Yaw: ");
         // SERIAL_PORT.print(yaw);
@@ -190,9 +196,9 @@ void taskSpin(void *pvParameters) {
 
 /* Swap from first half to second half */
 #if SPIN_LEFT == true
-      if (firstHalf && (previousYaw < halfWayAngle) && (yaw > halfWayAngle)) {
+      if (firstHalf && (previousYaw < halfWayAngle) && (IMUData.yaw > halfWayAngle)) {
 #else
-      if (firstHalf && (previousYaw > halfWayAngle) && (yaw < halfWayAngle)) {
+      if (firstHalf && (previousYaw > halfWayAngle) && (IMUData.yaw < halfWayAngle)) {
 #endif
 
         /* Calculate the mean and standard deviation */
@@ -205,7 +211,7 @@ void taskSpin(void *pvParameters) {
         peakThreshold = THRESHOLD_DISTANCE;
 
         /* Check if right sensor starts at a junction */
-        if (distanceRightFiltered > peakThreshold) {
+        if (ToFData.right > peakThreshold) {
           rightJunctionAtStart = true;
           rightJunctionCounter++;
         } else {
@@ -213,7 +219,7 @@ void taskSpin(void *pvParameters) {
         }
 
         /* Check if left sensor starts at a junction */
-        if (distanceLeftFiltered > peakThreshold) {
+        if (ToFData.left > peakThreshold) {
           leftJunctionAtStart = true;
           leftJunctionCounter++;
         } else {
@@ -221,8 +227,8 @@ void taskSpin(void *pvParameters) {
         }
 
         /* Update variables */
-        rightPreviousDistance = distanceRightFiltered;
-        leftPreviousDistance = distanceLeftFiltered;
+        rightPreviousDistance = ToFData.right;
+        leftPreviousDistance = ToFData.left;
 
         /* Update boolean to show we are in the second half of the 360 degree turn */
         firstHalf = false;
@@ -230,10 +236,10 @@ void taskSpin(void *pvParameters) {
 
       /* In the first half, gather information about the surroundings which is then used in the second half to define what counts as a peak */
       if (firstHalf) {
-        sum += distanceRightFiltered + distanceLeftFiltered;
-        // sumSquares += sq(distanceRightFiltered) + sq(distanceLeftFiltered);
+        sum += ToFData.right + ToFData.left;
+        // sumSquares += sq(ToFData.right) + sq(ToFData.left);
         counter += 2;
-        previousYaw = yaw;
+        previousYaw = IMUData.yaw;
       }
 
       /* In the second half, check whether we are facing down a junction, and the approximate angle of that junction */
@@ -242,44 +248,44 @@ void taskSpin(void *pvParameters) {
         // TODO: change detection method to average rising and falling edge angles
 
         /* Check for right rising edge */
-        if ((rightPreviousDistance < peakThreshold) && (distanceRightFiltered >= peakThreshold)) {
-          rightRisingEdgeAngle = yaw;
+        if ((rightPreviousDistance < peakThreshold) && (ToFData.right >= peakThreshold)) {
+          rightRisingEdgeAngle = IMUData.yaw;
           rightJunctionCounter++;
         }
 
         /* Check for right falling edge */
-        else if ((rightPreviousDistance >= peakThreshold) && (distanceRightFiltered < peakThreshold)) {
+        else if ((rightPreviousDistance >= peakThreshold) && (ToFData.right < peakThreshold)) {
 
           /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
           if (rightJunctionAtStart && (rightJunctionCounter == 1)) {
-            rightJunctionAtStartAngle = yaw - 90.0;
+            rightJunctionAtStartAngle = IMUData.yaw - 90.0;
           }
 
           /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
           else {
-            angleDifference = (yaw - rightRisingEdgeAngle) / 2.0;
+            angleDifference = (IMUData.yaw - rightRisingEdgeAngle) / 2.0;
             junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90.0);
             xQueueSend(junctionAngleQueue, &junctionAngle, 0);
           }
         }
 
         /* Check for left rising edge */
-        if ((leftPreviousDistance < peakThreshold) && (distanceLeftFiltered >= peakThreshold)) {
-          leftRisingEdgeAngle = yaw;
+        if ((leftPreviousDistance < peakThreshold) && (ToFData.left >= peakThreshold)) {
+          leftRisingEdgeAngle = IMUData.yaw;
           leftJunctionCounter++;
         }
 
         /* Check for left falling edge */
-        else if ((leftPreviousDistance >= peakThreshold) && (distanceLeftFiltered < peakThreshold)) {
+        else if ((leftPreviousDistance >= peakThreshold) && (ToFData.left < peakThreshold)) {
 
           /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
           if (leftJunctionAtStart && (leftJunctionCounter == 1)) {
-            leftJunctionAtStartAngle = yaw + 90.0;
+            leftJunctionAtStartAngle = IMUData.yaw + 90.0;
           }
 
           /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
           else {
-            angleDifference = (yaw - leftRisingEdgeAngle) / 2.0;
+            angleDifference = (IMUData.yaw - leftRisingEdgeAngle) / 2.0;
             junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0);
             xQueueSend(junctionAngleQueue, &junctionAngle, 0);
           }
@@ -287,8 +293,8 @@ void taskSpin(void *pvParameters) {
 
 
         /* Keep track of previous values for next loop */
-        rightPreviousDistance = distanceRightFiltered;
-        leftPreviousDistance = distanceLeftFiltered;
+        rightPreviousDistance = ToFData.right;
+        leftPreviousDistance = ToFData.left;
       }
 
       /* If turn complete notification received */

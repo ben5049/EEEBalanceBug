@@ -37,11 +37,12 @@ void taskExecuteCommand(void *pvParameters) {
 
   (void)pvParameters;
 
+  static struct angleData IMUData;
+
   /* Variables */
   static robotCommand newCommand;
   // static float junctionAngle;
   static float angleSetpoint;
-  static angleData IMUData;
 
   /* Start the loop */
   while (true) {
@@ -129,7 +130,7 @@ void taskExecuteCommand(void *pvParameters) {
         speedSetpoint = 0;
 
         /* Disable the direction controller and set the angular rate */
-        spinStartingAngle = yaw;
+        spinStartingAngle = IMUData.yaw;
         enableDirectionControl = false;
         turns--;
         angRateSetpoint = SPIN_SPEED;

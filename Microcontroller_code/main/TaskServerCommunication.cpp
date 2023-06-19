@@ -24,6 +24,9 @@ String hostname = "ESP32 Node";
 
 TaskHandle_t taskServerCommunicationHandle = nullptr;
 
+static struct ToFDistanceData ToFData;
+static struct angleData IMUData;
+
 float ang;
 volatile whereAt currentwhereAt = PASSAGE;
 volatile bool wifiInitialised = false;
@@ -50,12 +53,14 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     return http.GET();
   } else if (requestType == 1) {
     http.addHeader("Content-Type", "application/json");
+    xQueuePeek(ToFDataQueue, &ToFData, 0);
+    xQueuePeek(IMUDataQueue, &IMUData, 0);
     String timestamp = String(millis());
     String position_x = String(xPosition);
     String position_y = String(yPosition);
-    String orientation = String(yaw);
-    String tofleft = String(distanceLeftFiltered);
-    String tofright = String(distanceRightFiltered);
+    String orientation = String(IMUData.yaw);
+    String tofleft = String(ToFData.left);
+    String tofright = String(ToFData.right);
     String mac = String(WiFi.macAddress());
     String rssi = String(WiFi.RSSI());
     String battery = String(analogRead(VBAT) * 4 * 3.3 * 1.1 / 4096);

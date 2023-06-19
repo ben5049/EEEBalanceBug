@@ -21,6 +21,8 @@
 /* Controller Speed */
 static int controlCycle = 0;
 
+static struct angleData IMUData;
+
 /* Motor variables */
 volatile static bool stepperLeftDirection = true;
 volatile static bool stepperRightDirection = true;
@@ -174,10 +176,10 @@ float PID(float setpoint, float input, float& cumError, float& prevError, float 
 void debug() {
   Serial.println("/*");
   /* Angle Control Messages */
-  debugPrint("Pitch", pitch);                       //1
-  debugPrint("MotorSetpoint", motorSetpointL);      //2
-  debugPrint("PitchError", angleSetpoint - pitch);  //3
-  debugPrint("PitchSetpoint", angleSetpoint);       //4
+  debugPrint("Pitch", IMUData.pitch);                       //1
+  debugPrint("MotorSetpoint", motorSetpointL);              //2
+  debugPrint("PitchError", angleSetpoint - IMUData.pitch);  //3
+  debugPrint("PitchSetpoint", angleSetpoint);               //4
   /* Accel Control Messages */
   debugPrint("LinearAccel", linearAccel);                 //5
   debugPrint("AccelSetpoint", accelSetpoint);             //6
@@ -307,7 +309,7 @@ void taskMovement(void* pvParameters) {
   static uint16_t timestamp = millis();
   static uint16_t timestampPrevious = 0;
 
-  static struct angleData IMUData;
+  static struct ToFDistanceData ToFData;
 
   angleCumError = 0;
 
@@ -324,110 +326,114 @@ void taskMovement(void* pvParameters) {
 
     // if (wifiInitialised) {
 
-      xQueuePeek(IMUDataQueue, &IMUData, 0);
+    xQueuePeek(IMUDataQueue, &IMUData, 0);
 
 
-      // timestamp = millis();
-      // Serial.println(timestamp-timestampPrevious);
-      // // Serial.println(IMUData.pitch);
-      // timestampPrevious = timestamp;
+    // timestamp = millis();
+    // Serial.println(timestamp-timestampPrevious);
+    // // Serial.println(IMUData.pitch);
+    // timestampPrevious = timestamp;
 
-      /* Calculate Local Yaw*/
-      if ((lastYaw < -90) && (IMUData.yaw > 90)) {
-        turns -= 1;
-      } else if ((lastYaw > 90) && (IMUData.yaw < -90)) {
-        turns += 1;
-      }
-      lastYaw = IMUData.yaw;
-      localYaw = IMUData.yaw + (turns * 360);
+    /* Calculate Local Yaw*/
+    if ((lastYaw < -90) && (IMUData.yaw > 90)) {
+      turns -= 1;
+    } else if ((lastYaw > 90) && (IMUData.yaw < -90)) {
+      turns += 1;
+    }
 
-      /* Calculate Robot Actual Speed */
-      robotLinearDPS = -((motorSpeedL + motorSpeedR) / 2) + IMUData.pitchRate;
-      robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
-      linearAccel = (robotFilteredLinearDPS - lastSpeed) * 1000 / (millis() - endTime);
-      linearAccel = FIRFilterUpdate50(&accelFilter, linearAccel);
-      lastSpeed = robotFilteredLinearDPS;
-      endTime = millis();
+    lastYaw = IMUData.yaw;
+    localYaw = IMUData.yaw + (turns * 360);
+
+    /* Calculate Robot Actual Speed */
+    robotLinearDPS = -((motorSpeedL + motorSpeedR) / 2) + IMUData.pitchRate;
+    robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
+    linearAccel = (robotFilteredLinearDPS - lastSpeed) * 1000 / (millis() - endTime);
+    linearAccel = FIRFilterUpdate50(&accelFilter, linearAccel);
+    lastSpeed = robotFilteredLinearDPS;
+    endTime = millis();
 
 
-      /* Angle Loop */
-      float PIDvalue = PID(angleSetpoint, IMUData.pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+    /* Angle Loop */
+    float PIDvalue = PID(angleSetpoint, IMUData.pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
 
-      motorSetpointL += PIDvalue;
-      motorSetpointR += PIDvalue;
-      angleLastTime = millis();
-      motorSetpointL = constrain(motorSetpointL, -300, 300);
-      motorSetpointR = constrain(motorSetpointR, -300, 300);
+    motorSetpointL += PIDvalue;
+    motorSetpointR += PIDvalue;
+    angleLastTime = millis();
+    motorSetpointL = constrain(motorSetpointL, -300, 300);
+    motorSetpointR = constrain(motorSetpointR, -300, 300);
 
-      // taskENTER_CRITICAL(&movementSpinlock);
-      motorSetDPS(constrain(motorSetpointL + motorDiff / 2, -MAX_DPS, MAX_DPS), 0);
-      motorSetDPS(constrain(motorSetpointR - motorDiff / 2, -MAX_DPS, MAX_DPS), 1);
-      // taskEXIT_CRITICAL(&movementSpinlock);
+    // taskENTER_CRITICAL(&movementSpinlock);
+    motorSetDPS(constrain(motorSetpointL + motorDiff / 2, -MAX_DPS, MAX_DPS), 0);
+    motorSetDPS(constrain(motorSetpointR - motorDiff / 2, -MAX_DPS, MAX_DPS), 1);
+    // taskEXIT_CRITICAL(&movementSpinlock);
 
-      /* Accel Loop */
-      if (controlCycle % 3 == 0) {
-        angleSetpoint += PID(accelSetpoint, linearAccel, accelCumError, accelPrevError, accelLastTime, accelKp, accelKi, accelKd);
-        accelLastTime = millis();
-        angleSetpoint = constrain(angleSetpoint, angleOffset - MAX_ANGLE, angleOffset + MAX_ANGLE);
-      }
+    /* Accel Loop */
+    if (controlCycle % 3 == 0) {
+      angleSetpoint += PID(accelSetpoint, linearAccel, accelCumError, accelPrevError, accelLastTime, accelKp, accelKi, accelKd);
+      accelLastTime = millis();
+      angleSetpoint = constrain(angleSetpoint, angleOffset - MAX_ANGLE, angleOffset + MAX_ANGLE);
+    }
 
-      /* Speed Loop */
-      if (controlCycle % 5 == 0) {
-        accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
-        speedLastTime = millis();
-        accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
-      }
+    /* Speed Loop */
+    if (controlCycle % 5 == 0) {
+      accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
+      speedLastTime = millis();
+      accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
+    }
 
-      /* Position Controller */
-      // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
-      // posLastTime = millis();
+    /* Position Controller */
+    // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
+    // posLastTime = millis();
 
-      /* Angle Rate Loop */
-      if (enableAngRateControl && (controlCycle % 3 == 0)) {
-        motorDiff += PID(angRateSetpoint, IMUData.yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
-        angRateLastTime = millis();
-        motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
-      }
+    /* Angle Rate Loop */
+    if (enableAngRateControl && (controlCycle % 3 == 0)) {
+      motorDiff += PID(angRateSetpoint, IMUData.yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
+      angRateLastTime = millis();
+      motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
+    }
 
-      /* Direction Control Loop */
-      if (enableDirectionControl && (controlCycle % 5 == 0)) {
-        angRateSetpoint = PID(dirSetpoint, localYaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
-        angRateLastTime = millis();
-        angRateSetpoint = constrain(angRateSetpoint, -MAX_ANG_RATE, MAX_ANG_RATE);
-      }
+    /* Direction Control Loop */
+    if (enableDirectionControl && (controlCycle % 5 == 0)) {
+      angRateSetpoint = PID(dirSetpoint, localYaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
+      angRateLastTime = millis();
+      angRateSetpoint = constrain(angRateSetpoint, -MAX_ANG_RATE, MAX_ANG_RATE);
+    }
 
-      /* Path control only when going FORWARD */
-      if (enablePathControl && (controlCycle % 5 == 0)) {
-        // dirSetpoint = PID(0.0, distanceLeftFiltered - distanceRightFiltered, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
-        // pathLastTime = millis();
+    /* Path control only when going FORWARD */
+    if (enablePathControl && (controlCycle % 5 == 0)) {
+
+      xQueuePeek(ToFDataQueue, &ToFData, 0);
+
+      // dirSetpoint = PID(0.0, distanceLeftFiltered - distanceRightFiltered, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
+      // pathLastTime = millis();
 
       timestamp = millis();
-        distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-        distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-        distanceRightFilteredPrevious = distanceRightFiltered;
-        distanceLeftFilteredPrevious = distanceLeftFiltered;
-        timestampPrevious = timestamp;
+      distanceRightDifferential = ((ToFData.right - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      distanceLeftDifferential = ((ToFData.left - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      distanceRightFilteredPrevious = ToFData.right;
+      distanceLeftFilteredPrevious = ToFData.left;
+      timestampPrevious = timestamp;
 
-        if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
-          dirSetpoint -= 3;
-        } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
+      if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
+        dirSetpoint -= 3;
+      } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
+        dirSetpoint += 3;
+      } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
+        if ((ToFData.left - ToFData.right) > 30.0) {
           dirSetpoint += 3;
-        } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
-          if ((distanceLeftFiltered - distanceRightFiltered) > 30.0) {
-            dirSetpoint += 3;
-          } else if ((distanceLeftFiltered - distanceRightFiltered) < -30.0) {
-            dirSetpoint -= 3;
-          }
+        } else if ((ToFData.left - ToFData.right) < -30.0) {
+          dirSetpoint -= 3;
         }
       }
+    }
 
-      /* Control Cycle */
-      controlCycle = controlCycle % 100;
-      controlCycle++;
-      if (CONTROL_DEBUG) {
-        debug();
-      }
-    // } 
+    /* Control Cycle */
+    controlCycle = controlCycle % 100;
+    controlCycle++;
+    if (CONTROL_DEBUG) {
+      debug();
+    }
+    // }
     // else {
     //   angleCumError = 0;
     //   angleLastTime = millis();

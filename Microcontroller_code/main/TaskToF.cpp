@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 30/05/23
-Date updated: 03/06/23
+Date updated: 19/06/23
 
 Code to initialise and sample the time of flight sensors
 */
@@ -39,6 +39,8 @@ volatile float distanceLeftFiltered;
 static VL53L0X_RangingMeasurementData_t measureRight;
 static VL53L0X_RangingMeasurementData_t measureLeft;
 static VL53L0X_RangingMeasurementData_t measureFront;
+
+static struct ToFDistanceData ToFData;
 
 /* I2C multiplexer */
 static TCA9548A I2CMux;
@@ -350,13 +352,10 @@ void taskToF(void *pvParameters) {
     }
 #endif
 
-    /* Apply FIR filters */
-    FIRFilterUpdate20(&rightFIR, distanceRight);
-    FIRFilterUpdate20(&leftFIR, distanceLeft);
-
-    /* Differentiate */
-    distanceRightFiltered = rightFIR.output;
-    distanceLeftFiltered = leftFIR.output;
+    /* Apply FIR filters and pass data to queue for other tasks */
+    ToFData.right = FIRFilterUpdate20(&rightFIR, distanceRight);
+    ToFData.left = FIRFilterUpdate20(&leftFIR, distanceLeft);
+    xQueueOverwrite(ToFDataQueue, &ToFData);
 
 #if TASK_TOF_DEBUG == true
     Serial.print("Right: ");
@@ -372,7 +371,6 @@ void taskToF(void *pvParameters) {
 
     /* Junction detection */
     if (currentCommand == FORWARD) {
-
       /* IF we hit a wall while going forwards alert taskExecuteCommand */
       if (IRLeftCollision || IRLeftCollision || imminentCollision) {
 
@@ -401,13 +399,12 @@ void taskToF(void *pvParameters) {
       /* If we are at a junction while going forwards alert taskExecuteCommand */
       else if ((distanceRightFiltered >= THRESHOLD_DISTANCE) || (distanceLeftFiltered >= THRESHOLD_DISTANCE)) {
         overThresholdCounter++;
-        
+
         /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
         if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 
           /* Notify taskExecuteCommand that a junction has been found */
           xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-          
         }
       } else {
         overThresholdCounter = 0;
