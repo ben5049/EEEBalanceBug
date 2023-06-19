@@ -145,6 +145,7 @@ def rover():
         print(r.actions, "ACTIONS")
         print(resp)
     conn.commit()
+    print("sent")
     return make_response(jsonify(resp), 200)
 
 # Give all rovers, active or inactive, to client
