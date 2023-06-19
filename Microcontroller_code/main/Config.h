@@ -138,7 +138,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define MAX_DPS 400
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
-#define MAX_DIFF 6
+#define MAX_DIFF 300
 #define MAX_ANG_RATE 180
 
 
