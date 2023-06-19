@@ -5,6 +5,7 @@
   (paper "A4")
 
   (lib_symbols
+<<<<<<< HEAD
     (symbol "Connector:Screw_Terminal_01x02" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J" (at 0 2.54 0)
         (effects (font (size 1.27 1.27)))
@@ -3303,4 +3304,8 @@
       )
     )
   )
+=======
+  )
+
+>>>>>>> main
 )
