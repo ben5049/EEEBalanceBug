@@ -24,7 +24,7 @@
 #define EXPOSURE_STEP 0x100
 #define GAIN_INIT 0x080
 #define GAIN_STEP 0x040
-#define DEFAULT_LEVEL 3
+#define DEFAULT_LEVEL 1
 
 #define MIPI_REG_PHYClkCtl		0x0056
 #define MIPI_REG_PHYData0Ctl	0x0058
@@ -210,8 +210,6 @@ int main()
        }
 	   // touch KEY1 to ZOOM
 	        if((IORD(KEY_BASE,0)&0x03) == 0x01){
-	      	   if(bin_level == 3 )bin_level = 1;
-	      	   else bin_level ++;
 	      	   printf("set bin level to %d\n",bin_level);
 	      	   MIPI_BIN_LEVEL(bin_level);
 	      	 	usleep(500000);
