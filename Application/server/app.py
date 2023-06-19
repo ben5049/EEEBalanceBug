@@ -87,11 +87,16 @@ def rover():
         
         rovers.append(r)
     
-    # create response, to rover, and reset timeout
+    # create response to rover and reset timeout
     r.lastSeen = time()
-    # resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
-    print(r.actions, "ACTIONS")
-    # print(data["beaconangles"], "beacon angles")
+    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
+    # idle test
+    resp = [3]
+
+    # forward test
+    # resp = [0]
+
+    # spin  test
     # if len(data["beaconangles"]) == 3:
     #     resp.append(4)
     #     newx, newy = triangulate(data["beaconangles"][0], data["beaconangles"][1], data["beaconangles"][2])
@@ -99,24 +104,16 @@ def rover():
     #     resp.append(newy)
     #     print(resp, "RESP")
     # print("YAW: ", data["diagnostics"]["connection"])
-    resp = []
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
         global isSpinning, spinTime
         isSpinning = True
         spinTime = time()
-    if(len(data["beaconangles"])!=0):
-        print(data["beaconangles"], "BEACONANGLES")
     
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        print("ANGLE_SET: ", data["diagnostics"]["connection"])
-        print("SPEED_SET: ", data["diagnostics"]["battery"])
-        print("PITCH: ", data["diagnostics"]["pitch"])
-        print("CUMERROR: ", data["diagnostics"]["cum"])
-
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
         if 5 in resp["next_actions"]:
