@@ -148,7 +148,8 @@ C_SRCS += main.c
 C_SRCS += mipi_bridge_config.c
 C_SRCS += mipi_camera_config.c
 C_SRCS += queue.c
-CXX_SRCS :=
+C_SRCS += mem_init/.metadata/.plugins/org.eclipse.cdt.make.core/specs.c
+CXX_SRCS := mem_init/.metadata/.plugins/org.eclipse.cdt.make.core/specs.cpp
 ASM_SRCS :=
 
 
