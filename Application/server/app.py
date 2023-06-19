@@ -91,10 +91,10 @@ def rover():
     r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
     # idle test
-    resp = [3]
+    # resp = [3]
 
     # forward test
-    # resp = [0]
+    resp = [0]
 
     # spin  test
     # if len(data["beaconangles"]) == 3:
@@ -432,7 +432,7 @@ def led_driver_red():
     
     # logic to turn on led
     if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) #switch should be 1
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     elif energy != "enough energy":
         return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
     # logic to turn off led
@@ -449,7 +449,9 @@ def led_driver_blue():
     if DEBUG:
         print(isSpinning, time()-spinTime)
     if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    elif energy != "enough energy":
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
     else:
         isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
@@ -463,7 +465,9 @@ def led_driver_yellow():
     if DEBUG:
         print(isSpinning, time()-spinTime)
     if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    elif energy != "enough energy":
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0'
     else:
         isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
