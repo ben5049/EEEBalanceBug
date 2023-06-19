@@ -424,6 +424,7 @@ def led_driver_red():
     global conn, cur
     global isSpinning, spinTime
     data = request.get_json()
+    print(data)
     
     if DEBUG:
         print(isSpinning, time()-spinTime)
@@ -440,6 +441,7 @@ def led_driver_red():
 def led_driver_blue():
     global isSpinning, spinTime
     data = request.get_json()
+    print(data)
     if DEBUG:
         print(isSpinning, time()-spinTime)
     if isSpinning and time()-spinTime < TIMEOUT/3:
@@ -452,6 +454,7 @@ def led_driver_blue():
 def led_driver_yellow():
     global isSpinning, spinTime
     data = request.get_json()
+    print(data)
     if DEBUG:
         print(isSpinning, time()-spinTime)
     if isSpinning and time()-spinTime < TIMEOUT/3:
