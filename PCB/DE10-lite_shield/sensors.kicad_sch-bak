@@ -5,6 +5,7 @@
   (paper "A4")
 
   (lib_symbols
+<<<<<<< HEAD
     (symbol "Connector_Generic:Conn_01x05" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J" (at 0 7.62 0)
         (effects (font (size 1.27 1.27)))
@@ -1817,4 +1818,8 @@
       )
     )
   )
+=======
+  )
+
+>>>>>>> main
 )
