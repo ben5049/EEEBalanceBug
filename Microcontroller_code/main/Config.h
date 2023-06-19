@@ -36,7 +36,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK false      /* Setting "true" enables the dead reckning task */
-#define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
+#define ENABLE_DEBUG_TASK false                /* Setting "true" enables the debug task */
 
 /* Task priorities */
 #define TASK_IMU_PRIORITY 12                 /* Task priority from 0 to 31 (larger means higher priority) */
@@ -56,7 +56,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
-#define TASK_TOF_DEBUG false             /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
+#define TASK_TOF_DEBUG true             /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
 #define ENABLE_SIDE_TOF true             /* Setting true enables the side ToF sensors. Default = true */
 #define ENABLE_FRONT_TOF false           /* Setting true enables the front ToF sensor. Default = true */
 #define ENABLE_SIDE_TOF_INTERRUPTS false /* Setting true enables data ready interrupts from the side ToF sensors. Default = false */
@@ -96,7 +96,7 @@ Pin assignments for Group 1's EEEBalanceBug
 
 /* Server communication task */
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 1 /* Frequency to run the server communication task at in Hz */
-#define ENABLE_SERVER_COMMUNICATION_DEBUG true
+#define ENABLE_SERVER_COMMUNICATION_DEBUG false
 /* Controller */
 #define CONTROL_DEBUG false        /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 #define TASK_MOVEMENT_FREQUENCY 50 /* Frequency to run the movement task at in Hz */

@@ -347,13 +347,6 @@ void taskToF(void *pvParameters) {
         /* If the range is invalid return 1000 */
         distanceLeft = 1000;
       }
-
-#if TASK_TOF_DEBUG == true
-      Serial.print("Right: ");
-      Serial.print(distanceRight);
-      Serial.print(",Left: ");
-      Serial.println(distanceLeft);
-#endif
     }
 #endif
 
@@ -364,6 +357,13 @@ void taskToF(void *pvParameters) {
     /* Differentiate */
     distanceRightFiltered = rightFIR.output;
     distanceLeftFiltered = leftFIR.output;
+
+#if TASK_TOF_DEBUG == true
+    Serial.print("Right: ");
+    Serial.print(distanceRightFiltered);
+    Serial.print(",Left: ");
+    Serial.println(distanceLeftFiltered);
+#endif
     // distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
     // distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
     // distanceRightFilteredPrevious = distanceRightFiltered;
@@ -400,19 +400,17 @@ void taskToF(void *pvParameters) {
 
       /* If we are at a junction while going forwards alert taskExecuteCommand */
       else if ((distanceRightFiltered >= THRESHOLD_DISTANCE) || (distanceLeftFiltered >= THRESHOLD_DISTANCE)) {
-        overThresholdCounter += 1;
-
+        overThresholdCounter++;
+        SERIAL_PORT.println("pog");
         /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
         if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 
           /* Notify taskExecuteCommand that a junction has been found */
           xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-
-
-
-        } else {
-          overThresholdCounter = 0;
+          SERIAL_PORT.println("pog2");
         }
+      } else {
+        overThresholdCounter = 0;
       }
     }
   }

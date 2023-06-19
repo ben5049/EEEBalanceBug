@@ -65,9 +65,6 @@ void taskDebug(void *pvParameters) {
     // motorSetDPS(-100,1);
     // vTaskDelay(100);
     // SERIAL_PORT.println(pitch);
-
-    
-    
   }
 }
 
