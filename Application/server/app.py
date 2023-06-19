@@ -108,6 +108,7 @@ def rover():
     # user input to resp
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
+    print(resp)
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
         global isSpinning, spinTime
