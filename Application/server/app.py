@@ -94,7 +94,7 @@ def rover():
     # resp = [3]
 
     # forward test
-    resp = [0, 3]
+    resp = [3, 0, 0, 0, 0]
 
     # spin  test
     # if len(data["beaconangles"]) == 3:
