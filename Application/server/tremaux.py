@@ -211,9 +211,6 @@ class Rover():
             # check if in state 7[0]
             elif currentAction[0] == 7:
                 # if the rover has not returned to its prior position, return to state 7[0]
-                print(position)
-                print(currentAction[1].position)
-                print(self.thresholding(position, currentAction[1].position))
                 if not self.thresholding(position, currentAction[1].position):
                     self.actions = [[7, currentAction[1]]] + self.actions
                 else:
