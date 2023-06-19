@@ -12,6 +12,7 @@ Pin assignments for Group 1's EEEBalanceBug
 //--------------------------------- PCB pins --------------------------------------------
 
 /* Misc */
+#define BOOT 0 
 #define LED_BUILTIN 27
 #define SERVO_PIN 13
 

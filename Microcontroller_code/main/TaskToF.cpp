@@ -401,13 +401,13 @@ void taskToF(void *pvParameters) {
       /* If we are at a junction while going forwards alert taskExecuteCommand */
       else if ((distanceRightFiltered >= THRESHOLD_DISTANCE) || (distanceLeftFiltered >= THRESHOLD_DISTANCE)) {
         overThresholdCounter++;
-        SERIAL_PORT.println("pog");
+        // SERIAL_PORT.println("pog");
         /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
         if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 
           /* Notify taskExecuteCommand that a junction has been found */
           xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-          SERIAL_PORT.println("pog2");
+          // SERIAL_PORT.println("pog2");
         }
       } else {
         overThresholdCounter = 0;

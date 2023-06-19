@@ -398,27 +398,36 @@ void taskMovement(void* pvParameters) {
 
       /* Path control only when going FORWARD */
       if (enablePathControl && (controlCycle % 5 == 0)) {
-        // dirSetpoint = PID(0.0, distanceLeftFiltered - distanceRightFiltered, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
-        // pathLastTime = millis();
+        angRateSetpoint = PID(0.0,distanceRightFiltered - distanceLeftFiltered, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
+        pathLastTime = millis();
+        // Serial.print("leftDistance");
+        // Serial.print(": ");
+        // Serial.print(distanceLeftFiltered);
+        // Serial.println(",");
+        // Serial.print("rightDistance");
+        // Serial.print(": ");
+        // Serial.print(distanceRightFiltered);
+        // Serial.println(",");
+        Serial.println();
 
-      timestamp = millis();
-        distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-        distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-        distanceRightFilteredPrevious = distanceRightFiltered;
-        distanceLeftFilteredPrevious = distanceLeftFiltered;
-        timestampPrevious = timestamp;
+      // timestamp = millis();
+      //   distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      //   distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      //   distanceRightFilteredPrevious = distanceRightFiltered;
+      //   distanceLeftFilteredPrevious = distanceLeftFiltered;
+      //   timestampPrevious = timestamp;
 
-        if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
-          dirSetpoint -= 3;
-        } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
-          dirSetpoint += 3;
-        } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
-          if ((distanceLeftFiltered - distanceRightFiltered) > 30.0) {
-            dirSetpoint += 3;
-          } else if ((distanceLeftFiltered - distanceRightFiltered) < -30.0) {
-            dirSetpoint -= 3;
-          }
-        }
+      //   if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
+      //     dirSetpoint -= 3;
+      //   } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
+      //     dirSetpoint += 3;
+      //   } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
+      //     if ((distanceLeftFiltered - distanceRightFiltered) > 30.0) {
+      //       dirSetpoint += 3;
+      //     } else if ((distanceLeftFiltered - distanceRightFiltered) < -30.0) {
+      //       dirSetpoint -= 3;
+      //     }
+      //   }
       }
 
       /* Control Cycle */

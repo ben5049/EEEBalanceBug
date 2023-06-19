@@ -12,7 +12,7 @@ TaskHandle_t taskDebugHandle = nullptr;
 
 //-------------------------------- Global Variables -------------------------------------
 
-
+static bool initialised = false;
 //-------------------------------- Task Functions ---------------------------------------
 
 /* Task to record debug information */
@@ -28,7 +28,10 @@ void taskDebug(void *pvParameters) {
   /* Start the loop */
   while (true) {
     // serialData = SERIAL_PORT.read();
-
+    while(!initialised){
+      initialised = false==digitalRead(BOOT);
+    }
+    
     // if (serialData == 'p') {
     //   angleKp = SERIAL_PORT.parseFloat();
     // } else if (serialData == 'i') {
@@ -62,9 +65,10 @@ void taskDebug(void *pvParameters) {
     // motorSetDPS(100,0);
     // motorSetDPS(100,1);
     vTaskDelay(500);
-
-    // newCommand = FORWARD;
-    // xQueueSend(commandQueue, &newCommand, 0);
+    if(initialised){
+      newCommand = FORWARD;
+      xQueueSend(commandQueue, &newCommand, 0);
+    }
 
     // newCommand = SPIN;
     // xQueueSend(commandQueue, &newCommand, 0);
