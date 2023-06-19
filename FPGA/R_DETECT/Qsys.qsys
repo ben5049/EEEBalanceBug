@@ -996,7 +996,7 @@
   <parameter name="enPRInitMode" value="false" />
   <parameter name="enableDiffWidth" value="false" />
   <parameter name="initMemContent" value="true" />
-  <parameter name="initializationFileName">C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/software/D8M_Camera_Test/mem_init/Qsys_onchip_memory2_0.hex</parameter>
+  <parameter name="initializationFileName">/home/hj220/EEEBalanceBug/FPGA/R_DETECT/software/D8M_Camera_Test/mem_init/Qsys_onchip_memory2_0.hex</parameter>
   <parameter name="instanceID" value="NONE" />
   <parameter name="memorySize" value="131072" />
   <parameter name="readDuringWriteMode" value="DONT_CARE" />
