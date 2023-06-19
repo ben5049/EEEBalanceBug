@@ -399,7 +399,6 @@ void taskToF(void *pvParameters) {
       /* If we are at a junction while going forwards alert taskExecuteCommand */
       else if ((distanceRightFiltered >= THRESHOLD_DISTANCE) || (distanceLeftFiltered >= THRESHOLD_DISTANCE)) {
         overThresholdCounter++;
-
         /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
         if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 

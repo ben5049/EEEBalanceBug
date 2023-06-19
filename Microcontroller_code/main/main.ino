@@ -80,6 +80,7 @@ void setup() {
 
 
   /* Configure pins */
+  pinMode(BOOT, INPUT);
   pinMode(IMU_INT, INPUT_PULLUP);
   pinMode(TOF_R_INT, INPUT_PULLUP);
   pinMode(TOF_L_INT, INPUT_PULLUP);

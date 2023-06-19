@@ -33,10 +33,10 @@ Pin assignments for Group 1's EEEBalanceBug
 /* Task enables */
 #define ENABLE_IMU_TASK true                  /* Setting "true" enables the IMU sampling task */
 #define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
-#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK false      /* Setting "true" enables the dead reckning task */
-#define ENABLE_DEBUG_TASK false               /* Setting "true" enables the debug task */
+#define ENABLE_DEBUG_TASK true               /* Setting "true" enables the debug task */
 
 /* Task priorities */
 #define TASK_IMU_PRIORITY 12                 /* Task priority from 0 to 31 (larger means higher priority) */
@@ -49,7 +49,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define TASK_DEAD_RECKONING_PRIORITY 7       /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* IMU */
-#define ENABLE_IMU_DEBUG true             /* Setting "true" enables debug messages over SERIAL_PORT from the IMU task */
+#define ENABLE_IMU_DEBUG false             /* Setting "true" enables debug messages over SERIAL_PORT from the IMU task */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
 #define ENABLE_DMP_MAGNETOMETER true     /* Setting "true" enables the magnetometer for the DMP */
 #define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
@@ -129,9 +129,9 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KI_DIR 0.00
 #define KD_DIR 2.0
 
-#define KP_PATH 0.0
+#define KP_PATH 0.3
 #define KI_PATH 0.0
-#define KD_PATH 0.0
+#define KD_PATH 0.5
 #define PATH_DIFF_THRESHOLD 10.0
 
 #define ANGLE_OFFSET -1.50
