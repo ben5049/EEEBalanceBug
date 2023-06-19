@@ -43,41 +43,41 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  12 .debug_frame  00002d58  00000000  00000000  0005faf0  2**2
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_str    00004371  00000000  00000000  00062848  2**0
+ 13 .debug_str    000043f6  00000000  00000000  00062848  2**0
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_loc    00018a3d  00000000  00000000  00066bb9  2**0
+ 14 .debug_loc    00018a3d  00000000  00000000  00066c3e  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_alt_sim_info 00000060  00000000  00000000  0007f5f8  2**2
+ 15 .debug_alt_sim_info 00000060  00000000  00000000  0007f67c  2**2
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_ranges 00001aa8  00000000  00000000  0007f658  2**3
+ 16 .debug_ranges 00001aa8  00000000  00000000  0007f6e0  2**3
                   CONTENTS, READONLY, DEBUGGING
- 17 .thread_model 00000003  00000000  00000000  00084ec6  2**0
+ 17 .thread_model 00000003  00000000  00000000  00084f76  2**0
                   CONTENTS, READONLY
- 18 .cpu          0000000a  00000000  00000000  00084ec9  2**0
+ 18 .cpu          0000000a  00000000  00000000  00084f79  2**0
                   CONTENTS, READONLY
- 19 .qsys         00000001  00000000  00000000  00084ed3  2**0
+ 19 .qsys         00000001  00000000  00000000  00084f83  2**0
                   CONTENTS, READONLY
- 20 .simulation_enabled 00000001  00000000  00000000  00084ed4  2**0
+ 20 .simulation_enabled 00000001  00000000  00000000  00084f84  2**0
                   CONTENTS, READONLY
- 21 .sysid_hash   00000004  00000000  00000000  00084ed5  2**0
+ 21 .sysid_hash   00000004  00000000  00000000  00084f85  2**0
                   CONTENTS, READONLY
- 22 .sysid_base   00000004  00000000  00000000  00084ed9  2**0
+ 22 .sysid_base   00000004  00000000  00000000  00084f89  2**0
                   CONTENTS, READONLY
- 23 .sysid_time   00000004  00000000  00000000  00084edd  2**0
+ 23 .sysid_time   00000004  00000000  00000000  00084f8d  2**0
                   CONTENTS, READONLY
- 24 .stderr_dev   00000009  00000000  00000000  00084ee1  2**0
+ 24 .stderr_dev   00000009  00000000  00000000  00084f91  2**0
                   CONTENTS, READONLY
- 25 .stdin_dev    00000009  00000000  00000000  00084eea  2**0
+ 25 .stdin_dev    00000009  00000000  00000000  00084f9a  2**0
                   CONTENTS, READONLY
- 26 .stdout_dev   00000009  00000000  00000000  00084ef3  2**0
+ 26 .stdout_dev   00000009  00000000  00000000  00084fa3  2**0
                   CONTENTS, READONLY
- 27 .sopc_system_name 00000004  00000000  00000000  00084efc  2**0
+ 27 .sopc_system_name 00000004  00000000  00000000  00084fac  2**0
                   CONTENTS, READONLY
- 28 .quartus_project_dir 00000050  00000000  00000000  00084f00  2**0
+ 28 .quartus_project_dir 00000050  00000000  00000000  00084fb0  2**0
                   CONTENTS, READONLY
- 29 .jdi          000048b2  00000000  00000000  00084f50  2**0
+ 29 .jdi          00004eb7  00000000  00000000  00085000  2**0
                   CONTENTS, READONLY
- 30 .sopcinfo     000a6514  00000000  00000000  00089802  2**0
+ 30 .sopcinfo     000a0bc8  00000000  00000000  00089eb7  2**0
                   CONTENTS, READONLY
 SYMBOL TABLE:
 00020000 l    d  .entry	00000000 .entry
@@ -104,11 +104,13 @@ SYMBOL TABLE:
 00000000 l    df *ABS*	00000000 I2C_core.c
 00000000 l    df *ABS*	00000000 auto_focus.c
 00000000 l    df *ABS*	00000000 main.c
+00000000 l    df *ABS*	00000000 specs.cpp
 00000000 l    df *ABS*	00000000 mipi_bridge_config.c
 00033d5c l     O .rwdata	00000034 MipiBridgeReg
 00000000 l    df *ABS*	00000000 mipi_camera_config.c
 00033d90 l     O .rwdata	00000774 MipiCameraReg
 00000000 l    df *ABS*	00000000 queue.c
+00000000 l    df *ABS*	00000000 specs.cpp
 00000000 l    df *ABS*	00000000 lib2-divmod.c
 00000000 l    df *ABS*	00000000 fopen.c
 00000000 l    df *ABS*	00000000 fseek.c
@@ -3379,6 +3381,7 @@ int main()
    218d0:	e0bff80d 	sth	r2,-32(fp)
        }
 	   // touch KEY1 to ZOOM
+	   	   bin_level == DEFAULT_LEVEL;
 	        if((IORD(KEY_BASE,0)&0x03) == 0x01){
    218d4:	00800134 	movhi	r2,4
    218d8:	10842804 	addi	r2,r2,4256

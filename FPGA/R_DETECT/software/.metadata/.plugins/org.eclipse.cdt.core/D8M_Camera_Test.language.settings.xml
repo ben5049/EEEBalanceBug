@@ -2695,6 +2695,22 @@
 						<entry kind="macro" name="__hal__" value=""/>
 					</resource>
 				</language>
+				<language id="org.eclipse.cdt.core.g++">
+					<resource project-relative-path="mem_init/.metadata/.plugins/org.eclipse.cdt.make.core/specs.cpp">
+						<entry kind="includePath" name="/D8M_Camera_Test_bsp/HAL/inc">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="/D8M_Camera_Test_bsp">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="includePath" name="/D8M_Camera_Test_bsp/drivers/inc">
+							<flag value="VALUE_WORKSPACE_PATH|RESOLVED"/>
+						</entry>
+						<entry kind="macro" name="ALT_NO_INSTRUCTION_EMULATION" value=""/>
+						<entry kind="macro" name="ALT_SINGLE_THREADED" value=""/>
+						<entry kind="macro" name="__hal__" value=""/>
+					</resource>
+				</language>
 			</provider>
 		</extension>
 	</configuration>
