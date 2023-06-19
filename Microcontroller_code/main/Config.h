@@ -31,12 +31,12 @@ Pin assignments for Group 1's EEEBalanceBug
 #define I2C_FREQ 400000 /* I2C frequency (fast mode) */
 
 /* Task enables */
-#define ENABLE_IMU_TASK true                   /* Setting "true" enables the IMU sampling task */
+#define ENABLE_IMU_TASK true                  /* Setting "true" enables the IMU sampling task */
 #define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
-#define ENABLE_SERVER_COMMUNICATION_TASK true  /* Setting "true" enables the server communication task */
-#define ENABLE_MOVEMENT_TASK true              /* Setting "true" enables the movement task */
-#define ENABLE_DEAD_RECKONING_TASK false       /* Setting "true" enables the dead reckning task */
-#define ENABLE_DEBUG_TASK false                /* Setting "true" enables the debug task */
+#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
+#define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
+#define ENABLE_DEAD_RECKONING_TASK false      /* Setting "true" enables the dead reckning task */
+#define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
 
 /* Task priorities */
 #define TASK_IMU_PRIORITY 12                 /* Task priority from 0 to 31 (larger means higher priority) */

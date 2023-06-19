@@ -58,11 +58,9 @@ void taskDebug(void *pvParameters) {
     // }
     // motorSetDPS(100,0);
     // motorSetDPS(100,1);
-    vTaskDelay(100);
+    vTaskDelay(500);
 
-    if (!wifiInitialised){
-      angleCumError = 0;
-    }
+    SERIAL_PORT.println(currentCommand);
     // motorSetDPS(-100,0);
     // motorSetDPS(-100,1);
     // vTaskDelay(100);
