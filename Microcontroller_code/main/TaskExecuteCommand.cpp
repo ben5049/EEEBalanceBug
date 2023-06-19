@@ -1,3 +1,4 @@
+#include "esp32-hal-gpio.h"
 #include "freertos/projdefs.h"
 #include "freertos/portmacro.h"
 /*
@@ -65,6 +66,7 @@ void taskExecuteCommand(void *pvParameters) {
       /* Go forward until a junction or obstacle is reached */
       case FORWARD:
 
+        digitalWrite(LED_BUILTIN, HIGH);
         /* Define what to do on the FORWARD command e.g. speed != 0 etc */
         speedSetpoint = 80;
 
@@ -75,6 +77,8 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Wait until a junction is detected by taskToF */
         ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
+
+        digitalWrite(LED_BUILTIN, LOW);
 
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &newCommand, 0) == pdTRUE) {

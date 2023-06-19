@@ -111,6 +111,8 @@ static float posLastTime = millis();
 /* Controller frequency in Hz */
 volatile float loopFreq = 50;
 
+static portMUX_TYPE movementSpinlock = portMUX_INITIALIZER_UNLOCKED;
+
 /* Task handles */
 TaskHandle_t taskMovementHandle = nullptr;
 
@@ -142,6 +144,10 @@ void debugPrint(char name[], float data) {
 /* Main PID function */
 float PID(float setpoint, float input, float& cumError, float& prevError, float lastTime, float Kp, float Ki, float Kd) {
   float error;
+  float derivativeError;
+  float pTerm;
+  float iTerm;
+  float dTerm;
   float output;
   float DT = millis() - lastTime;
   error = setpoint - input;
@@ -151,8 +157,14 @@ float PID(float setpoint, float input, float& cumError, float& prevError, float 
     cumError = 0;
   }
 
+  derivativeError = (error - prevError) / DT;
 
-  output = Kp * error + Ki * cumError + Kd * (error - prevError) / DT;
+  pTerm = Kp * error;
+  iTerm = Ki * cumError;
+  dTerm = Kd * derivativeError;
+
+  output = pTerm + iTerm + dTerm;
+
   prevError = error;
   return output;
 }
@@ -213,6 +225,7 @@ void motorSetDPS(float DPS, int motor) {
       return;
     }
   }
+
   if (motor == 0) {
     motorSpeedL = DPS;
     timerAlarmWrite(motorTimerL, microsBetweenSteps, true);
@@ -229,10 +242,13 @@ void motorSetDPS(float DPS, int motor) {
 
 /* ISR that triggers on hw timer and causes the stepper motors to step */
 void IRAM_ATTR stepL() {
+  // UBaseType_t uxSavedInterruptStatus;
 
   /* Send pulse to the stepper motors to make them step once */
+  // uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
   digitalWrite(STEPPER_L_STEP, HIGH);
   digitalWrite(STEPPER_L_STEP, LOW);
+  // taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
 
   /* Increment or decrement step counter per wheel */
   if (stepperLeftDirection) {
@@ -243,10 +259,13 @@ void IRAM_ATTR stepL() {
 }
 
 void IRAM_ATTR stepR() {
+  // UBaseType_t uxSavedInterruptStatus;
 
   /* Send pulse to the stepper motors to make them step once */
+  // uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
   digitalWrite(STEPPER_R_STEP, HIGH);
   digitalWrite(STEPPER_R_STEP, LOW);
+  // taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
 
   /* Increment or decrement step counter per wheel */
   if (stepperRightDirection) {
@@ -287,99 +306,131 @@ void taskMovement(void* pvParameters) {
   static uint16_t timestamp = millis();
   static uint16_t timestampPrevious = 0;
 
+  static struct angleData IMUData;
+
+  angleCumError = 0;
+
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / loopFreq;
   TickType_t xLastWakeTime = xTaskGetTickCount();
 
   /* Start the loop */
   while (true) {
+
     /* Pause the task until enough time has passed */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
-    /* Calculate Local Yaw*/
-    if ((lastYaw < -90) && (yaw > 90)) {
-      turns -= 1;
-    } else if ((lastYaw > 90) && (yaw < -90)) {
-      turns += 1;
-    }
-    lastYaw = yaw;
-    localYaw = yaw + (turns * 360);
-
-    /* Calculate Robot Actual Speed */
-    robotLinearDPS = -((motorSpeedL + motorSpeedR) / 2) + pitchRate;
-    robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
-    linearAccel = (robotFilteredLinearDPS - lastSpeed) * 1000 / (millis() - endTime);
-    linearAccel = FIRFilterUpdate50(&accelFilter, linearAccel);
-    lastSpeed = robotFilteredLinearDPS;
-    endTime = millis();
 
 
-    /* Angle Loop */
+    // if (wifiInitialised) {
 
-    float PIDvalue = PID(angleSetpoint, pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
-    motorSetpointL += PIDvalue;
-    motorSetpointR += PIDvalue;
-    angleLastTime = millis();
-    motorSetpointL = constrain(motorSetpointL, -300, 300);
-    motorSetpointR = constrain(motorSetpointR, -300, 300);
+      xQueuePeek(IMUDataQueue, &IMUData, 0);
 
-    motorSetDPS(constrain(motorSetpointL + motorDiff / 2, -MAX_DPS, MAX_DPS), 0);
-    motorSetDPS(constrain(motorSetpointR - motorDiff / 2, -MAX_DPS, MAX_DPS), 1);
 
-    /* Accel Loop */
-    if (controlCycle % 3 == 0) {
-      angleSetpoint += PID(accelSetpoint, linearAccel, accelCumError, accelPrevError, accelLastTime, accelKp, accelKi, accelKd);
-      accelLastTime = millis();
-      angleSetpoint = constrain(angleSetpoint, angleOffset - MAX_ANGLE, angleOffset + MAX_ANGLE);
-    }
+      // timestamp = millis();
+      // Serial.println(timestamp-timestampPrevious);
+      // // Serial.println(IMUData.pitch);
+      // timestampPrevious = timestamp;
 
-    /* Speed Loop */
-    if (controlCycle % 5 == 0) {
-      accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
-      speedLastTime = millis();
-      accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
-    }
-
-    /* Position Controller */
-    // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
-    // posLastTime = millis();
-
-    /* Angle Rate Loop */
-    if (controlCycle % 3 == 0) {
-      motorDiff += PID(angRateSetpoint, yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
-      angRateLastTime = millis();
-      motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
-    }
-
-    /* Direction Control Loop */
-    if (enableDirectionControl && (controlCycle % 5 == 0)) {
-      angRateSetpoint = PID(dirSetpoint, localYaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
-      angRateLastTime = millis();
-      angRateSetpoint = constrain(angRateSetpoint, -MAX_ANG_RATE, MAX_ANG_RATE);
-    }
-
-    /* Path control only when going FORWARD */
-    if (enablePathControl && (controlCycle % 8 == 0)) {
-      // dirSetpoint = PID(0.0, distanceLeftFiltered - distanceRightFiltered, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
-      // pathLastTime = millis();
-
-      distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-      distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-      distanceRightFilteredPrevious = distanceRightFiltered;
-      distanceLeftFilteredPrevious = distanceLeftFiltered;
-      timestampPrevious = timestamp;
-
-      if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
-        dirSetpoint -= 3;
-      } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
-        dirSetpoint += 3;
+      /* Calculate Local Yaw*/
+      if ((lastYaw < -90) && (IMUData.yaw > 90)) {
+        turns -= 1;
+      } else if ((lastYaw > 90) && (IMUData.yaw < -90)) {
+        turns += 1;
       }
-    }
+      lastYaw = IMUData.yaw;
+      localYaw = IMUData.yaw + (turns * 360);
 
-    /* Control Cycle */
-    controlCycle = controlCycle % 100;
-    controlCycle++;
-    if (CONTROL_DEBUG) {
-      debug();
-    }
+      /* Calculate Robot Actual Speed */
+      robotLinearDPS = -((motorSpeedL + motorSpeedR) / 2) + IMUData.pitchRate;
+      robotFilteredLinearDPS = 0.9 * robotFilteredLinearDPS + 0.1 * robotLinearDPS;
+      linearAccel = (robotFilteredLinearDPS - lastSpeed) * 1000 / (millis() - endTime);
+      linearAccel = FIRFilterUpdate50(&accelFilter, linearAccel);
+      lastSpeed = robotFilteredLinearDPS;
+      endTime = millis();
+
+
+      /* Angle Loop */
+      float PIDvalue = PID(angleSetpoint, IMUData.pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+
+      motorSetpointL += PIDvalue;
+      motorSetpointR += PIDvalue;
+      angleLastTime = millis();
+      motorSetpointL = constrain(motorSetpointL, -300, 300);
+      motorSetpointR = constrain(motorSetpointR, -300, 300);
+
+      // taskENTER_CRITICAL(&movementSpinlock);
+      motorSetDPS(constrain(motorSetpointL + motorDiff / 2, -MAX_DPS, MAX_DPS), 0);
+      motorSetDPS(constrain(motorSetpointR - motorDiff / 2, -MAX_DPS, MAX_DPS), 1);
+      // taskEXIT_CRITICAL(&movementSpinlock);
+
+      /* Accel Loop */
+      if (controlCycle % 3 == 0) {
+        angleSetpoint += PID(accelSetpoint, linearAccel, accelCumError, accelPrevError, accelLastTime, accelKp, accelKi, accelKd);
+        accelLastTime = millis();
+        angleSetpoint = constrain(angleSetpoint, angleOffset - MAX_ANGLE, angleOffset + MAX_ANGLE);
+      }
+
+      /* Speed Loop */
+      if (controlCycle % 5 == 0) {
+        accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
+        speedLastTime = millis();
+        accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
+      }
+
+      /* Position Controller */
+      // speedSetpoint = PID(posSetpoint, stepperRightSteps, posCumError, posPrevError, posLastTime, KP_POS, KI_POS, KD_POS);
+      // posLastTime = millis();
+
+      /* Angle Rate Loop */
+      if (controlCycle % 3 == 0) {
+        motorDiff += PID(angRateSetpoint, IMUData.yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
+        angRateLastTime = millis();
+        motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
+      }
+
+      /* Direction Control Loop */
+      if (enableDirectionControl && (controlCycle % 5 == 0)) {
+        angRateSetpoint = PID(dirSetpoint, localYaw, dirCumError, dirPrevError, dirLastTime, dirKp, dirKi, dirKd);
+        angRateLastTime = millis();
+        angRateSetpoint = constrain(angRateSetpoint, -MAX_ANG_RATE, MAX_ANG_RATE);
+      }
+
+      /* Path control only when going FORWARD */
+      if (enablePathControl && (controlCycle % 8 == 0)) {
+        // dirSetpoint = PID(0.0, distanceLeftFiltered - distanceRightFiltered, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
+        // pathLastTime = millis();
+
+      timestamp = millis();
+        distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+        distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+        distanceRightFilteredPrevious = distanceRightFiltered;
+        distanceLeftFilteredPrevious = distanceLeftFiltered;
+        timestampPrevious = timestamp;
+
+        if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
+          dirSetpoint -= 3;
+        } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
+          dirSetpoint += 3;
+        } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
+          if ((distanceLeftFiltered - distanceRightFiltered) > 30.0) {
+            dirSetpoint += 3;
+          } else if ((distanceLeftFiltered - distanceRightFiltered) < -30.0) {
+            dirSetpoint -= 3;
+          }
+        }
+      }
+
+      /* Control Cycle */
+      controlCycle = controlCycle % 100;
+      controlCycle++;
+      if (CONTROL_DEBUG) {
+        debug();
+      }
+    // } 
+    // else {
+    //   angleCumError = 0;
+    //   angleLastTime = millis();
+    //   anglePrevError = angleSetpoint - IMUData.pitch;
+    // }
   }
 }

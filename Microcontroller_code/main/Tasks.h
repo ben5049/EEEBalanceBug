@@ -19,7 +19,7 @@ Header file for tasks
 extern hw_timer_t *motorTimerR;
 extern hw_timer_t *motorTimerL;
 
-/* Types */
+/* Types and structs */
 typedef enum {
   IDLE = 0x00,
   FORWARD = 0x01,
@@ -32,6 +32,13 @@ typedef enum {
   JUNCTION = 0x01,
   DEAD_END = 0x02
 } whereAt;
+
+struct angleData{
+  float pitch;
+  float pitchRate;
+  float yaw;
+  float yawRate;
+};
 
 /* Variables */
 
@@ -64,6 +71,8 @@ extern volatile bool enablePathControl;
 extern volatile bool enableDirectionControl;
 extern volatile int16_t turns;
 
+extern volatile bool wifiInitialised;
+
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();
 void IRAM_ATTR stepL();
@@ -80,8 +89,7 @@ void configureIMU();
 void configureToF();
 void configureWiFi();
 void configureFPGACam();
-void configureEEPROM();
-void motorSetDPS(float DPS);
+void motorSetDPS(float DPS, int motor);
 
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;
@@ -106,10 +114,10 @@ void taskDebug(void *pvParameters);
 //-------------------------------- Imported ---------------------------------------
 
 /* Mutexes */
-extern SemaphoreHandle_t mutexSPI;
 extern SemaphoreHandle_t mutexI2C;
 
 /* Queue handles */
+extern QueueHandle_t IMUDataQueue;
 extern QueueHandle_t commandQueue;
 extern QueueHandle_t junctionAngleQueue;
 extern QueueHandle_t beaconAngleQueue;

@@ -24,8 +24,7 @@ void taskDebug(void *pvParameters) {
 
   /* Start the loop */
   while (true) {
-
-    serialData = SERIAL_PORT.read();
+    // serialData = SERIAL_PORT.read();
 
     // if (serialData == 'p') {
     //   angleKp = SERIAL_PORT.parseFloat();
@@ -46,25 +45,29 @@ void taskDebug(void *pvParameters) {
     // } else if (serialData == 's') {
     //   speedSetpoint = SERIAL_PORT.parseFloat();
     // }
-    if(SERIAL_PORT.available()>=1){
-      if (serialData == 'p') {
-        angRateKp = SERIAL_PORT.parseFloat();
-      } else if (serialData == 'i') {
-        angRateKi = SERIAL_PORT.parseFloat();
-      } else if (serialData == 'd') {
-        angRateKd = SERIAL_PORT.parseFloat();
-      } else if (serialData == 's') {
-        speedSetpoint = SERIAL_PORT.parseFloat();
-      }
+    // if(SERIAL_PORT.available()>=1){
+    //   if (serialData == 'p') {
+    //     angRateKp = SERIAL_PORT.parseFloat();
+    //   } else if (serialData == 'i') {
+    //     angRateKi = SERIAL_PORT.parseFloat();
+    //   } else if (serialData == 'd') {
+    //     angRateKd = SERIAL_PORT.parseFloat();
+    //   } else if (serialData == 's') {
+    //     speedSetpoint = SERIAL_PORT.parseFloat();
+    //   }
+    // }
+    // motorSetDPS(100,0);
+    // motorSetDPS(100,1);
+    vTaskDelay(100);
+
+    if (!wifiInitialised){
+      angleCumError = 0;
     }
-    speedSetpoint = 0;
-    digitalWrite(LED_BUILTIN, HIGH);
-    vTaskDelay(3000);
-    dirSetpoint = dirSetpoint - 90;
-    vTaskDelay(2000);
-    speedSetpoint = 100;
-    digitalWrite(LED_BUILTIN, LOW);
-    vTaskDelay(5000);
+    // motorSetDPS(-100,0);
+    // motorSetDPS(-100,1);
+    // vTaskDelay(100);
+    // SERIAL_PORT.println(pitch);
+
     
     
   }

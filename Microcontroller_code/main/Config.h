@@ -32,25 +32,25 @@ Pin assignments for Group 1's EEEBalanceBug
 
 /* Task enables */
 #define ENABLE_IMU_TASK true                   /* Setting "true" enables the IMU sampling task */
-#define ENABLE_TOF_TASK false                  /* Setting "true" enables the ToF sampling task */
-#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
+#define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
+#define ENABLE_SERVER_COMMUNICATION_TASK true  /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true              /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK false       /* Setting "true" enables the dead reckning task */
 #define ENABLE_DEBUG_TASK false                /* Setting "true" enables the debug task */
 
 /* Task priorities */
-#define TASK_IMU_PRIORITY 10                 /* Task priority from 0 to 31 (larger means higher priority) */
-#define TASK_TOF_PRIORITY 9                  /* Task priority from 0 to 31 (larger means higher priority) */
-#define TASK_SPIN_PRIORITY 10                /* Task priority from 0 to 31 (larger means higher priority) */
-#define TASK_EXECUTE_COMMAND_PRIORITY 10     /* Task priority from 0 to 31 (larger means higher priority) */
+#define TASK_IMU_PRIORITY 12                 /* Task priority from 0 to 31 (larger means higher priority) */
+#define TASK_TOF_PRIORITY 10                 /* Task priority from 0 to 31 (larger means higher priority) */
+#define TASK_SPIN_PRIORITY 9                 /* Task priority from 0 to 31 (larger means higher priority) */
+#define TASK_EXECUTE_COMMAND_PRIORITY 13     /* Task priority from 0 to 31 (larger means higher priority) */
 #define TASK_SERVER_COMMUNICATION_PRIORITY 4 /* Task priority from 0 to 31 (larger means higher priority) */
-#define TASK_MOVEMENT_PRIORITY 8             /* Task priority from 0 to 31 (larger means higher priority) */
+#define TASK_MOVEMENT_PRIORITY 11            /* Task priority from 0 to 31 (larger means higher priority) */
 #define TASK_DEBUG_PRIORITY 4                /* Task priority from 0 to 31 (larger means higher priority) */
 #define TASK_DEAD_RECKONING_PRIORITY 7       /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* IMU */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
-#define ENABLE_DMP_MAGNETOMETER true      /* Setting "true" enables the magnetometer for the DMP */
+#define ENABLE_DMP_MAGNETOMETER false     /* Setting "true" enables the magnetometer for the DMP */
 #define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
 #define IMU_SAMPLING_FREQUENCY_DMP 57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
@@ -95,8 +95,8 @@ Pin assignments for Group 1's EEEBalanceBug
 #define ANGLE_SETPOINT_QUEUE_LENGTH 10 /* Maximum number of angle setpoints in queue */
 
 /* Server communication task */
-#define TASK_SERVER_COMMUNICATION_FREQUENCY 10 /* Frequency to run the server communication task at in Hz */
-
+#define TASK_SERVER_COMMUNICATION_FREQUENCY 1 /* Frequency to run the server communication task at in Hz */
+#define ENABLE_SERVER_COMMUNICATION_DEBUG true
 /* Controller */
 #define CONTROL_DEBUG false        /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 #define TASK_MOVEMENT_FREQUENCY 50 /* Frequency to run the movement task at in Hz */
@@ -138,7 +138,7 @@ Pin assignments for Group 1's EEEBalanceBug
 #define MAX_DPS 400
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
-#define MAX_DIFF 300
+#define MAX_DIFF 6
 #define MAX_ANG_RATE 180
 
 

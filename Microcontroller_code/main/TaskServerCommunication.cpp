@@ -7,9 +7,6 @@
 #include "Config.h"
 #include "PinAssignments.h"
 
-TaskHandle_t taskServerCommunicationHandle = nullptr;
-#if ENABLE_SERVER_COMMUNICATION_TASK == true
-
 /* Arduino headers */
 #include "WiFi.h"
 #include "HTTPClient.h"
@@ -17,14 +14,17 @@ TaskHandle_t taskServerCommunicationHandle = nullptr;
 
 //-------------------------------- Global Variables -------------------------------------
 
-const char* ssid = "OnePlus 8";
-const char* password = "abc123def";
+const char* ssid = "osa";
+const char* password = "password";
 
 String serverName = "http://54.165.59.37:5000/";
 String hostname = "ESP32 Node";
 
+TaskHandle_t taskServerCommunicationHandle = nullptr;
+
 float ang;
 volatile whereAt currentwhereAt = PASSAGE;
+volatile bool wifiInitialised = false;
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -100,20 +100,31 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
   }
 }
 
+
 String handleResponse(uint16_t httpResponseCode, HTTPClient& http) {
+
   if (httpResponseCode >= 200 && httpResponseCode < 300) {
+#if ENABLE_SERVER_COMMUNICATION_DEBUG == true
     SERIAL_PORT.println(httpResponseCode);
+#endif
   } else if (httpResponseCode >= 400 && httpResponseCode < 500) {
+#if ENABLE_SERVER_COMMUNICATION_DEBUG == true
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
+#endif
   } else if (httpResponseCode >= 500 && httpResponseCode < 600) {
+#if ENABLE_SERVER_COMMUNICATION_DEBUG == true
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
+#endif
   } else {
+#if ENABLE_SERVER_COMMUNICATION_DEBUG == true
     SERIAL_PORT.print("Error code: ");
     SERIAL_PORT.println(httpResponseCode);
+#endif
     return "{\"error\": \"Server not up\"}";
   }
+
   return http.getString();
 }
 /* Get size of response sent */
@@ -152,6 +163,7 @@ void parsePayload(String payload, robotCommand rc[], uint16_t httpResponseCode, 
       switch (a) {
         case 0:
           commands[i] = FORWARD;
+          SERIAL_PORT.println("receiving 0");
           break;
         case 1:
           commands[i] = SPIN;
@@ -164,6 +176,7 @@ void parsePayload(String payload, robotCommand rc[], uint16_t httpResponseCode, 
           break;
         case 3:
           commands[i] = IDLE;
+          SERIAL_PORT.println("receiving 3");
           break;
         case 4:
           {
@@ -252,11 +265,12 @@ void taskServerCommunication(void* pvParameters) {
 
         for (int i = 0; i < numCommands; i++) {
           newCommand = commands[i];
+          SERIAL_PORT.print("sending ");
+          SERIAL_PORT.println(commands[i]);
           xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
         }
       }
     }
+    wifiInitialised = true;
   }
 }
-
-#endif

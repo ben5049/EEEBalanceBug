@@ -22,10 +22,10 @@ Main ESP32 program for Group 1's EEEBalanceBug
 //-------------------------------- Global Variables -------------------------------------
 
 /* Semaphores */
-SemaphoreHandle_t mutexSPI; /* SPI Mutex so only one task can access the SPI peripheral at a time */
 SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C peripheral at a time */
 
 /* Queues */
+QueueHandle_t IMUDataQueue;
 QueueHandle_t commandQueue;
 QueueHandle_t junctionAngleQueue;
 QueueHandle_t beaconAngleQueue;
@@ -57,13 +57,10 @@ void setup() {
   SERIAL_PORT.println("I2C Initialised");
 
   /* Create hw timers */
-  motorTimerL = timerBegin(0, 80, true);
-  motorTimerR = timerBegin(2, 80, true);
+  motorTimerL = timerBegin(2, 80, true);
+  motorTimerR = timerBegin(3, 80, true);
 
-  /* Configure the IMU & DMP */
-#if ENABLE_IMU_TASK == true
-  configureIMU();
-#endif
+
 
   /* Start the ToF sensors */
 #if ENABLE_TOF_TASK == true
@@ -95,14 +92,6 @@ void setup() {
   pinMode(SERVO_PIN, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  /* Create SPI mutex */
-  if (mutexSPI == NULL) {
-    mutexSPI = xSemaphoreCreateMutex();
-    if (mutexSPI != NULL) {
-      xSemaphoreGive(mutexSPI);
-    }
-  }
-
   /* Create I2C mutex */
   if (mutexI2C == NULL) {
     mutexI2C = xSemaphoreCreateMutex();
@@ -112,23 +101,13 @@ void setup() {
   }
 
   /* Create queues */
+  IMUDataQueue = xQueueCreate(1, sizeof(angleData));
   commandQueue = xQueueCreate(COMMAND_QUEUE_LENGTH, sizeof(robotCommand));
   junctionAngleQueue = xQueueCreate(MAX_NUMBER_OF_JUNCTIONS, sizeof(float));
   beaconAngleQueue = xQueueCreate(NUMBER_OF_BEACONS, sizeof(float));
   angleSetpointQueue = xQueueCreate(ANGLE_SETPOINT_QUEUE_LENGTH, sizeof(int));
 
   /* Create Tasks */
-
-#if ENABLE_IMU_TASK == true
-  xTaskCreatePinnedToCore(
-    taskIMU,           /* Function that implements the task */
-    "IMU",             /* Text name for the task */
-    10000,             /* Stack size in words, not bytes */
-    nullptr,           /* Parameter passed into the task */
-    TASK_IMU_PRIORITY, /* Task priority */
-    &taskIMUHandle,    /* Pointer to store the task handle */
-    tskNO_AFFINITY);
-#endif
 
 #if ENABLE_MOVEMENT_TASK == true
   xTaskCreatePinnedToCore(
@@ -138,8 +117,26 @@ void setup() {
     nullptr,                /* Parameter passed into the task */
     TASK_MOVEMENT_PRIORITY, /* Task priority */
     &taskMovementHandle,    /* Pointer to store the task handle */
-    tskNO_AFFINITY);
+    1);
 #endif
+
+  /* Configure the IMU & DMP */
+#if ENABLE_IMU_TASK == true
+  configureIMU();
+#endif
+
+#if ENABLE_IMU_TASK == true
+  xTaskCreatePinnedToCore(
+    taskIMU,           /* Function that implements the task */
+    "IMU",             /* Text name for the task */
+    10000,             /* Stack size in words, not bytes */
+    nullptr,           /* Parameter passed into the task */
+    TASK_IMU_PRIORITY, /* Task priority */
+    &taskIMUHandle,    /* Pointer to store the task handle */
+    1);
+#endif
+
+
 
 #if ENABLE_TOF_TASK == true
   xTaskCreatePinnedToCore(
@@ -174,11 +171,11 @@ void setup() {
   xTaskCreatePinnedToCore(
     taskServerCommunication,            /* Function that implements the task */
     "SERVER_COMMS",                     /* Text name for the task */
-    10000,                              /* Stack size in words, not bytes */
+    30000,                              /* Stack size in words, not bytes */
     nullptr,                            /* Parameter passed into the task */
     TASK_SERVER_COMMUNICATION_PRIORITY, /* Task priority */
     &taskServerCommunicationHandle,     /* Pointer to store the task handle */
-    tskNO_AFFINITY);
+    0);
 #endif
 
 #if ENABLE_DEAD_RECKONING_TASK == true
