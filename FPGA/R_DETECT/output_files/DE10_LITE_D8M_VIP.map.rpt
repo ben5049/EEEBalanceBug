@@ -1,5 +1,5 @@
 Analysis & Synthesis report for DE10_LITE_D8M_VIP
-Mon Jun 19 16:50:42 2023
+Mon Jun 19 17:14:40 2023
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
 
 
@@ -509,7 +509,7 @@ refer to the applicable agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status        ; Successful - Mon Jun 19 16:50:42 2023           ;
+; Analysis & Synthesis Status        ; Successful - Mon Jun 19 17:14:39 2023           ;
 ; Quartus Prime Version              ; 18.1.0 Build 625 09/12/2018 SJ Standard Edition ;
 ; Revision Name                      ; DE10_LITE_D8M_VIP                               ;
 ; Top-level Entity Name              ; DE10_LITE_D8M_VIP                               ;
@@ -628,12 +628,12 @@ refer to the applicable agreement for further details.
 ; Usage by Processor         ; % Time Used ;
 ;     Processor 1            ; 100.0%      ;
 ;     Processor 2            ;   0.1%      ;
-;     Processor 3            ;   0.0%      ;
-;     Processor 4            ;   0.0%      ;
-;     Processor 5            ;   0.0%      ;
-;     Processor 6            ;   0.0%      ;
-;     Processor 7            ;   0.0%      ;
-;     Processor 8            ;   0.0%      ;
+;     Processor 3            ;   0.1%      ;
+;     Processor 4            ;   0.1%      ;
+;     Processor 5            ;   0.1%      ;
+;     Processor 6            ;   0.1%      ;
+;     Processor 7            ;   0.1%      ;
+;     Processor 8            ;   0.1%      ;
 ;     Processor 9            ;   0.0%      ;
 ;     Processors 10-16       ;   0.0%      ;
 +----------------------------+-------------+
@@ -912,9 +912,9 @@ refer to the applicable agreement for further details.
 ;                                             ;                                                                               ;
 ; Total combinational functions               ; 9677                                                                          ;
 ; Logic element usage by number of LUT inputs ;                                                                               ;
-;     -- 4 input functions                    ; 4302                                                                          ;
-;     -- 3 input functions                    ; 3077                                                                          ;
-;     -- <=2 input functions                  ; 2298                                                                          ;
+;     -- 4 input functions                    ; 4301                                                                          ;
+;     -- 3 input functions                    ; 3075                                                                          ;
+;     -- <=2 input functions                  ; 2301                                                                          ;
 ;                                             ;                                                                               ;
 ; Logic elements by mode                      ;                                                                               ;
 ;     -- normal mode                          ; 7798                                                                          ;
@@ -934,7 +934,7 @@ refer to the applicable agreement for further details.
 ;                                             ;                                                                               ;
 ; Maximum fan-out node                        ; Qsys:u0|Qsys_altpll_0:altpll_0|Qsys_altpll_0_altpll_u3t2:sd1|wire_pll7_clk[0] ;
 ; Maximum fan-out                             ; 4106                                                                          ;
-; Total fan-out                               ; 67522                                                                         ;
+; Total fan-out                               ; 67518                                                                         ;
 ; Average fan-out                             ; 3.80                                                                          ;
 +---------------------------------------------+-------------------------------------------------------------------------------+
 
@@ -1408,10 +1408,11 @@ refer to the applicable agreement for further details.
 ;                   |alt_synch_pipe_cpl:ws_dgrp|                                                                                          ; 0 (0)               ; 26 (0)                    ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|alt_synch_pipe_cpl:ws_dgrp                                                                                                                                                                                                          ; alt_synch_pipe_cpl                         ; work         ;
 ;                      |dffpipe_te9:dffpipe15|                                                                                            ; 0 (0)               ; 26 (26)                   ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|alt_synch_pipe_cpl:ws_dgrp|dffpipe_te9:dffpipe15                                                                                                                                                                                    ; dffpipe_te9                                ; work         ;
 ;                   |altsyncram_r541:fifo_ram|                                                                                            ; 0 (0)               ; 0 (0)                     ; 106496      ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|altsyncram_r541:fifo_ram                                                                                                                                                                                                            ; altsyncram_r541                            ; work         ;
+;                   |cmpr_2h5:rdempty_eq_comp_msb|                                                                                        ; 1 (1)               ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|cmpr_2h5:rdempty_eq_comp_msb                                                                                                                                                                                                        ; cmpr_2h5                                   ; work         ;
 ;                   |cmpr_2h5:wrfull_eq_comp_msb|                                                                                         ; 1 (1)               ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|cmpr_2h5:wrfull_eq_comp_msb                                                                                                                                                                                                         ; cmpr_2h5                                   ; work         ;
-;                   |cmpr_3h5:rdempty_eq_comp1_lsb|                                                                                       ; 1 (1)               ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|cmpr_3h5:rdempty_eq_comp1_lsb                                                                                                                                                                                                       ; cmpr_3h5                                   ; work         ;
+;                   |cmpr_3h5:rdempty_eq_comp_lsb|                                                                                        ; 1 (1)               ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|cmpr_3h5:rdempty_eq_comp_lsb                                                                                                                                                                                                        ; cmpr_3h5                                   ; work         ;
 ;                   |mux_9d7:rdemp_eq_comp_lsb_mux|                                                                                       ; 10 (10)             ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|mux_9d7:rdemp_eq_comp_lsb_mux                                                                                                                                                                                                       ; mux_9d7                                    ; work         ;
-;                   |mux_9d7:rdemp_eq_comp_msb_mux|                                                                                       ; 9 (9)               ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|mux_9d7:rdemp_eq_comp_msb_mux                                                                                                                                                                                                       ; mux_9d7                                    ; work         ;
+;                   |mux_9d7:rdemp_eq_comp_msb_mux|                                                                                       ; 8 (8)               ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|mux_9d7:rdemp_eq_comp_msb_mux                                                                                                                                                                                                       ; mux_9d7                                    ; work         ;
 ;                   |mux_9d7:wrfull_eq_comp_lsb_mux|                                                                                      ; 10 (10)             ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|mux_9d7:wrfull_eq_comp_lsb_mux                                                                                                                                                                                                      ; mux_9d7                                    ; work         ;
 ;                   |mux_9d7:wrfull_eq_comp_msb_mux|                                                                                      ; 8 (8)               ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|TERASIC_CAMERA:terasic_camera_0|rgb_fifo:rgb_fifo_inst|dcfifo:dcfifo_component|dcfifo_6kh1:auto_generated|mux_9d7:wrfull_eq_comp_msb_mux                                                                                                                                                                                                      ; mux_9d7                                    ; work         ;
 ;       |alt_vipitc131_IS2Vid:alt_vip_itc_0|                                                                                              ; 324 (105)           ; 262 (54)                  ; 19456       ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |DE10_LITE_D8M_VIP|Qsys:u0|alt_vipitc131_IS2Vid:alt_vip_itc_0                                                                                                                                                                                                                                                                                                            ; alt_vipitc131_IS2Vid                       ; Qsys         ;
@@ -2287,7 +2288,7 @@ Note: All latches listed above may not be present at the end of synthesis due to
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:onchip_memory2_0_s1_translator|av_chipselect_pre                                                                                                                                                                      ; Stuck at GND due to stuck port data_in                                                                                                                                                                                                                                                                                                               ;
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:altpll_0_pll_slave_translator|av_readdata_pre[2..31]                                                                                                                                                                  ; Stuck at GND due to stuck port data_in                                                                                                                                                                                                                                                                                                               ;
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:terasic_auto_focus_0_mm_ctrl_translator|av_chipselect_pre                                                                                                                                                             ; Stuck at GND due to stuck port data_in                                                                                                                                                                                                                                                                                                               ;
-; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:sysid_qsys_control_slave_translator|av_readdata_pre[1,2,5,8..10,15..19,21,22,24,25,27,28,31]                                                                                                                          ; Stuck at GND due to stuck port data_in                                                                                                                                                                                                                                                                                                               ;
+; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:sysid_qsys_control_slave_translator|av_readdata_pre[2,3,5,6,8,15..19,21,22,24,25,27,28,31]                                                                                                                            ; Stuck at GND due to stuck port data_in                                                                                                                                                                                                                                                                                                               ;
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:i2c_opencores_camera_avalon_slave_0_translator|av_chipselect_pre                                                                                                                                                      ; Stuck at GND due to stuck port data_in                                                                                                                                                                                                                                                                                                               ;
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:i2c_opencores_mipi_avalon_slave_0_translator|av_chipselect_pre                                                                                                                                                        ; Stuck at GND due to stuck port data_in                                                                                                                                                                                                                                                                                                               ;
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:jtag_uart_avalon_jtag_slave_translator|av_readdata_pre[11,23..31]                                                                                                                                                     ; Stuck at GND due to stuck port data_in                                                                                                                                                                                                                                                                                                               ;
@@ -2571,7 +2572,7 @@ Note: All latches listed above may not be present at the end of synthesis due to
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_avalon_sc_fifo:jtag_uart_avalon_jtag_slave_agent_rsp_fifo|mem[1][63]                                                                                                                                                                          ; Merged with Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_avalon_sc_fifo:jtag_uart_avalon_jtag_slave_agent_rsp_fifo|mem[1][98]                                                                                                                                                                                                             ;
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_avalon_sc_fifo:jtag_uart_avalon_jtag_slave_agent_rsp_fifo|mem[1][55]                                                                                                                                                                          ; Merged with Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_avalon_sc_fifo:jtag_uart_avalon_jtag_slave_agent_rsp_fifo|mem[1][62]                                                                                                                                                                                                             ;
 ; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_avalon_sc_fifo:jtag_uart_avalon_jtag_slave_agent_rsp_fifo|mem[1][61]                                                                                                                                                                          ; Merged with Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_avalon_sc_fifo:jtag_uart_avalon_jtag_slave_agent_rsp_fifo|mem[1][62]                                                                                                                                                                                                             ;
-; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:sysid_qsys_control_slave_translator|av_readdata_pre[0,3,4,6,7,11..14,20,23,26,29]                                                                                                                                     ; Merged with Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:sysid_qsys_control_slave_translator|av_readdata_pre[30]                                                                                                                                                                                                  ;
+; Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:sysid_qsys_control_slave_translator|av_readdata_pre[0,1,4,7,9..14,20,23,26,29]                                                                                                                                        ; Merged with Qsys:u0|Qsys_mm_interconnect_0:mm_interconnect_0|altera_merlin_slave_translator:sysid_qsys_control_slave_translator|av_readdata_pre[30]                                                                                                                                                                                                  ;
 ; Qsys:u0|Qsys_uart_0:uart_0|Qsys_uart_0_rx:the_Qsys_uart_0_rx|delayed_unxsync_rxdxx2                                                                                                                                                                                                                   ; Merged with Qsys:u0|Qsys_uart_0:uart_0|Qsys_uart_0_rx:the_Qsys_uart_0_rx|delayed_unxsync_rxdxx1                                                                                                                                                                                                                                                      ;
 ; Qsys:u0|Qsys_sdram:sdram|i_addr[0..3,6..11]                                                                                                                                                                                                                                                           ; Merged with Qsys:u0|Qsys_sdram:sdram|i_addr[12]                                                                                                                                                                                                                                                                                                      ;
 ; Qsys:u0|Qsys_nios2_gen2:nios2_gen2|Qsys_nios2_gen2_cpu:cpu|W_badaddr_reg_baddr[0..17]                                                                                                                                                                                                                 ; Merged with Qsys:u0|Qsys_nios2_gen2:nios2_gen2|Qsys_nios2_gen2_cpu:cpu|W_badaddr_reg_baddr[18]                                                                                                                                                                                                                                                       ;
@@ -13169,9 +13170,9 @@ Note: In order to hide this table in the UI and the text report file, please set
 ;     normal            ; 7659                        ;
 ;         0 data inputs ; 56                          ;
 ;         1 data inputs ; 199                         ;
-;         2 data inputs ; 1106                        ;
-;         3 data inputs ; 2070                        ;
-;         4 data inputs ; 4228                        ;
+;         2 data inputs ; 1109                        ;
+;         3 data inputs ; 2068                        ;
+;         4 data inputs ; 4227                        ;
 ; cycloneiii_mac_mult   ; 3                           ;
 ; cycloneiii_mac_out    ; 3                           ;
 ; cycloneiii_pll        ; 1                           ;
@@ -13217,7 +13218,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 +------------------+--------------+
 ; Partition Name   ; Elapsed Time ;
 +------------------+--------------+
-; Top              ; 00:00:30     ;
+; Top              ; 00:00:26     ;
 ; sld_hub:auto_hub ; 00:00:00     ;
 +------------------+--------------+
 
@@ -13228,59 +13229,59 @@ Note: In order to hide this table in the UI and the text report file, please set
 Info: *******************************************************************
 Info: Running Quartus Prime Analysis & Synthesis
     Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
-    Info: Processing started: Mon Jun 19 16:48:12 2023
+    Info: Processing started: Mon Jun 19 17:12:48 2023
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off DE10_LITE_D8M_VIP -c DE10_LITE_D8M_VIP
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (20030): Parallel compilation is enabled and will use 16 of the 24 processors detected
 Info (12248): Elaborating Platform Designer system entity "Qsys.qsys"
-Info (12250): 2023.06.19.16:48:24 Progress: Loading R_DETECT/Qsys.qsys
-Info (12250): 2023.06.19.16:48:25 Progress: Reading input file
-Info (12250): 2023.06.19.16:48:25 Progress: Adding EEE_IMGPROC_0 [EEE_IMGPROC 1.0]
-Info (12250): 2023.06.19.16:48:26 Progress: Parameterizing module EEE_IMGPROC_0
-Info (12250): 2023.06.19.16:48:26 Progress: Adding TERASIC_AUTO_FOCUS_0 [TERASIC_AUTO_FOCUS 1.0]
-Info (12250): 2023.06.19.16:48:26 Progress: Parameterizing module TERASIC_AUTO_FOCUS_0
-Info (12250): 2023.06.19.16:48:26 Progress: Adding TERASIC_CAMERA_0 [TERASIC_CAMERA 1.0]
-Info (12250): 2023.06.19.16:48:28 Progress: Parameterizing module TERASIC_CAMERA_0
-Info (12250): 2023.06.19.16:48:28 Progress: Adding alt_vip_itc_0 [alt_vip_itc 14.0]
-Info (12250): 2023.06.19.16:48:28 Progress: Parameterizing module alt_vip_itc_0
-Info (12250): 2023.06.19.16:48:28 Progress: Adding alt_vip_vfb_0 [alt_vip_vfb 13.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module alt_vip_vfb_0
-Info (12250): 2023.06.19.16:48:40 Progress: Adding altpll_0 [altpll 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module altpll_0
-Info (12250): 2023.06.19.16:48:40 Progress: Adding clk_50 [clock_source 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module clk_50
-Info (12250): 2023.06.19.16:48:40 Progress: Adding i2c_opencores_camera [i2c_opencores 12.0]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module i2c_opencores_camera
-Info (12250): 2023.06.19.16:48:40 Progress: Adding i2c_opencores_mipi [i2c_opencores 12.0]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module i2c_opencores_mipi
-Info (12250): 2023.06.19.16:48:40 Progress: Adding jtag_uart [altera_avalon_jtag_uart 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module jtag_uart
-Info (12250): 2023.06.19.16:48:40 Progress: Adding key [altera_avalon_pio 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module key
-Info (12250): 2023.06.19.16:48:40 Progress: Adding led [altera_avalon_pio 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module led
-Info (12250): 2023.06.19.16:48:40 Progress: Adding mipi_pwdn_n [altera_avalon_pio 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module mipi_pwdn_n
-Info (12250): 2023.06.19.16:48:40 Progress: Adding mipi_reset_n [altera_avalon_pio 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module mipi_reset_n
-Info (12250): 2023.06.19.16:48:40 Progress: Adding nios2_gen2 [altera_nios2_gen2 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module nios2_gen2
-Info (12250): 2023.06.19.16:48:40 Progress: Adding onchip_memory2_0 [altera_avalon_onchip_memory2 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module onchip_memory2_0
-Info (12250): 2023.06.19.16:48:40 Progress: Adding sdram [altera_avalon_new_sdram_controller 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module sdram
-Info (12250): 2023.06.19.16:48:40 Progress: Adding sw [altera_avalon_pio 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module sw
-Info (12250): 2023.06.19.16:48:40 Progress: Adding sysid_qsys [altera_avalon_sysid_qsys 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module sysid_qsys
-Info (12250): 2023.06.19.16:48:40 Progress: Adding timer [altera_avalon_timer 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module timer
-Info (12250): 2023.06.19.16:48:40 Progress: Adding uart_0 [altera_avalon_uart 18.1]
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing module uart_0
-Info (12250): 2023.06.19.16:48:40 Progress: Building connections
-Info (12250): 2023.06.19.16:48:40 Progress: Parameterizing connections
-Info (12250): 2023.06.19.16:48:40 Progress: Validating
-Info (12250): 2023.06.19.16:48:41 Progress: Done reading input file
+Info (12250): 2023.06.19.17:13:00 Progress: Loading R_DETECT/Qsys.qsys
+Info (12250): 2023.06.19.17:13:00 Progress: Reading input file
+Info (12250): 2023.06.19.17:13:00 Progress: Adding EEE_IMGPROC_0 [EEE_IMGPROC 1.0]
+Info (12250): 2023.06.19.17:13:02 Progress: Parameterizing module EEE_IMGPROC_0
+Info (12250): 2023.06.19.17:13:02 Progress: Adding TERASIC_AUTO_FOCUS_0 [TERASIC_AUTO_FOCUS 1.0]
+Info (12250): 2023.06.19.17:13:02 Progress: Parameterizing module TERASIC_AUTO_FOCUS_0
+Info (12250): 2023.06.19.17:13:02 Progress: Adding TERASIC_CAMERA_0 [TERASIC_CAMERA 1.0]
+Info (12250): 2023.06.19.17:13:04 Progress: Parameterizing module TERASIC_CAMERA_0
+Info (12250): 2023.06.19.17:13:04 Progress: Adding alt_vip_itc_0 [alt_vip_itc 14.0]
+Info (12250): 2023.06.19.17:13:04 Progress: Parameterizing module alt_vip_itc_0
+Info (12250): 2023.06.19.17:13:04 Progress: Adding alt_vip_vfb_0 [alt_vip_vfb 13.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module alt_vip_vfb_0
+Info (12250): 2023.06.19.17:13:06 Progress: Adding altpll_0 [altpll 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module altpll_0
+Info (12250): 2023.06.19.17:13:06 Progress: Adding clk_50 [clock_source 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module clk_50
+Info (12250): 2023.06.19.17:13:06 Progress: Adding i2c_opencores_camera [i2c_opencores 12.0]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module i2c_opencores_camera
+Info (12250): 2023.06.19.17:13:06 Progress: Adding i2c_opencores_mipi [i2c_opencores 12.0]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module i2c_opencores_mipi
+Info (12250): 2023.06.19.17:13:06 Progress: Adding jtag_uart [altera_avalon_jtag_uart 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module jtag_uart
+Info (12250): 2023.06.19.17:13:06 Progress: Adding key [altera_avalon_pio 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module key
+Info (12250): 2023.06.19.17:13:06 Progress: Adding led [altera_avalon_pio 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module led
+Info (12250): 2023.06.19.17:13:06 Progress: Adding mipi_pwdn_n [altera_avalon_pio 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module mipi_pwdn_n
+Info (12250): 2023.06.19.17:13:06 Progress: Adding mipi_reset_n [altera_avalon_pio 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module mipi_reset_n
+Info (12250): 2023.06.19.17:13:06 Progress: Adding nios2_gen2 [altera_nios2_gen2 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module nios2_gen2
+Info (12250): 2023.06.19.17:13:06 Progress: Adding onchip_memory2_0 [altera_avalon_onchip_memory2 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module onchip_memory2_0
+Info (12250): 2023.06.19.17:13:06 Progress: Adding sdram [altera_avalon_new_sdram_controller 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module sdram
+Info (12250): 2023.06.19.17:13:06 Progress: Adding sw [altera_avalon_pio 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module sw
+Info (12250): 2023.06.19.17:13:06 Progress: Adding sysid_qsys [altera_avalon_sysid_qsys 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module sysid_qsys
+Info (12250): 2023.06.19.17:13:06 Progress: Adding timer [altera_avalon_timer 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module timer
+Info (12250): 2023.06.19.17:13:06 Progress: Adding uart_0 [altera_avalon_uart 18.1]
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing module uart_0
+Info (12250): 2023.06.19.17:13:06 Progress: Building connections
+Info (12250): 2023.06.19.17:13:06 Progress: Parameterizing connections
+Info (12250): 2023.06.19.17:13:06 Progress: Validating
+Info (12250): 2023.06.19.17:13:06 Progress: Done reading input file
 Info (12250): Qsys.alt_vip_vfb_0: The Frame Buffer will no longer be available after 16.1, please upgrade to Frame Buffer II.
 Info (12250): Qsys.jtag_uart: JTAG UART IP input clock need to be at least double (2x) the operating frequency of JTAG TCK on board
 Info (12250): Qsys.key: PIO inputs are not hardwired in test bench. Undefined values will be read from PIO inputs during simulation.
@@ -13301,41 +13302,41 @@ Info (12250): Alt_vip_vfb_0: "Qsys" instantiated alt_vip_vfb "alt_vip_vfb_0"
 Info (12250): Altpll_0: "Qsys" instantiated altpll "altpll_0"
 Info (12250): I2c_opencores_camera: "Qsys" instantiated i2c_opencores "i2c_opencores_camera"
 Info (12250): Jtag_uart: Starting RTL generation for module 'Qsys_jtag_uart'
-Info (12250): Jtag_uart:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=Qsys_jtag_uart --dir=/tmp/alt9527_2054290539038768495.dir/0011_jtag_uart_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0011_jtag_uart_gen//Qsys_jtag_uart_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Jtag_uart:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=Qsys_jtag_uart --dir=/tmp/alt9527_5713935909780861869.dir/0011_jtag_uart_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0011_jtag_uart_gen//Qsys_jtag_uart_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Jtag_uart: Done RTL generation for module 'Qsys_jtag_uart'
 Info (12250): Jtag_uart: "Qsys" instantiated altera_avalon_jtag_uart "jtag_uart"
 Info (12250): Key: Starting RTL generation for module 'Qsys_key'
-Info (12250): Key:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=Qsys_key --dir=/tmp/alt9527_2054290539038768495.dir/0012_key_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0012_key_gen//Qsys_key_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Key:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=Qsys_key --dir=/tmp/alt9527_5713935909780861869.dir/0012_key_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0012_key_gen//Qsys_key_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Key: Done RTL generation for module 'Qsys_key'
 Info (12250): Key: "Qsys" instantiated altera_avalon_pio "key"
 Info (12250): Led: Starting RTL generation for module 'Qsys_led'
-Info (12250): Led:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=Qsys_led --dir=/tmp/alt9527_2054290539038768495.dir/0013_led_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0013_led_gen//Qsys_led_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Led:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=Qsys_led --dir=/tmp/alt9527_5713935909780861869.dir/0013_led_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0013_led_gen//Qsys_led_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Led: Done RTL generation for module 'Qsys_led'
 Info (12250): Led: "Qsys" instantiated altera_avalon_pio "led"
 Info (12250): Mipi_pwdn_n: Starting RTL generation for module 'Qsys_mipi_pwdn_n'
-Info (12250): Mipi_pwdn_n:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=Qsys_mipi_pwdn_n --dir=/tmp/alt9527_2054290539038768495.dir/0014_mipi_pwdn_n_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0014_mipi_pwdn_n_gen//Qsys_mipi_pwdn_n_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Mipi_pwdn_n:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=Qsys_mipi_pwdn_n --dir=/tmp/alt9527_5713935909780861869.dir/0014_mipi_pwdn_n_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0014_mipi_pwdn_n_gen//Qsys_mipi_pwdn_n_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Mipi_pwdn_n: Done RTL generation for module 'Qsys_mipi_pwdn_n'
 Info (12250): Mipi_pwdn_n: "Qsys" instantiated altera_avalon_pio "mipi_pwdn_n"
 Info (12250): Nios2_gen2: "Qsys" instantiated altera_nios2_gen2 "nios2_gen2"
 Info (12250): Onchip_memory2_0: Starting RTL generation for module 'Qsys_onchip_memory2_0'
-Info (12250): Onchip_memory2_0:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=Qsys_onchip_memory2_0 --dir=/tmp/alt9527_2054290539038768495.dir/0015_onchip_memory2_0_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0015_onchip_memory2_0_gen//Qsys_onchip_memory2_0_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Onchip_memory2_0:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=Qsys_onchip_memory2_0 --dir=/tmp/alt9527_5713935909780861869.dir/0015_onchip_memory2_0_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0015_onchip_memory2_0_gen//Qsys_onchip_memory2_0_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Onchip_memory2_0: Done RTL generation for module 'Qsys_onchip_memory2_0'
 Info (12250): Onchip_memory2_0: "Qsys" instantiated altera_avalon_onchip_memory2 "onchip_memory2_0"
 Info (12250): Sdram: Starting RTL generation for module 'Qsys_sdram'
-Info (12250): Sdram:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_new_sdram_controller -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_new_sdram_controller/generate_rtl.pl --name=Qsys_sdram --dir=/tmp/alt9527_2054290539038768495.dir/0016_sdram_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0016_sdram_gen//Qsys_sdram_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Sdram:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_new_sdram_controller -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_new_sdram_controller/generate_rtl.pl --name=Qsys_sdram --dir=/tmp/alt9527_5713935909780861869.dir/0016_sdram_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0016_sdram_gen//Qsys_sdram_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Sdram: Done RTL generation for module 'Qsys_sdram'
 Info (12250): Sdram: "Qsys" instantiated altera_avalon_new_sdram_controller "sdram"
 Info (12250): Sw: Starting RTL generation for module 'Qsys_sw'
-Info (12250): Sw:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=Qsys_sw --dir=/tmp/alt9527_2054290539038768495.dir/0017_sw_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0017_sw_gen//Qsys_sw_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Sw:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=Qsys_sw --dir=/tmp/alt9527_5713935909780861869.dir/0017_sw_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0017_sw_gen//Qsys_sw_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Sw: Done RTL generation for module 'Qsys_sw'
 Info (12250): Sw: "Qsys" instantiated altera_avalon_pio "sw"
 Info (12250): Sysid_qsys: "Qsys" instantiated altera_avalon_sysid_qsys "sysid_qsys"
 Info (12250): Timer: Starting RTL generation for module 'Qsys_timer'
-Info (12250): Timer:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64//perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64//perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=Qsys_timer --dir=/tmp/alt9527_2054290539038768495.dir/0019_timer_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0019_timer_gen//Qsys_timer_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Timer:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64//perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64//perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=Qsys_timer --dir=/tmp/alt9527_5713935909780861869.dir/0019_timer_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0019_timer_gen//Qsys_timer_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Timer: Done RTL generation for module 'Qsys_timer'
 Info (12250): Timer: "Qsys" instantiated altera_avalon_timer "timer"
 Info (12250): Uart_0: Starting RTL generation for module 'Qsys_uart_0'
-Info (12250): Uart_0:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_uart -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_uart/generate_rtl.pl --name=Qsys_uart_0 --dir=/tmp/alt9527_2054290539038768495.dir/0020_uart_0_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_2054290539038768495.dir/0020_uart_0_gen//Qsys_uart_0_component_configuration.pl  --do_build_sim=0  ]
+Info (12250): Uart_0:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64/perl/bin/perl -I /usr/local/altera/18.1/quartus/linux64/perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_uart -- /usr/local/altera/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_uart/generate_rtl.pl --name=Qsys_uart_0 --dir=/tmp/alt9527_5713935909780861869.dir/0020_uart_0_gen/ --quartus_dir=/usr/local/altera/18.1/quartus --verilog --config=/tmp/alt9527_5713935909780861869.dir/0020_uart_0_gen//Qsys_uart_0_component_configuration.pl  --do_build_sim=0  ]
 Info (12250): Uart_0: Done RTL generation for module 'Qsys_uart_0'
 Info (12250): Uart_0: "Qsys" instantiated altera_avalon_uart "uart_0"
 Info (12250): Avalon_st_adapter: Inserting error_adapter: error_adapter_0
@@ -13381,25 +13382,25 @@ Info (12250): Reusing file /home/hj220/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/su
 Info (12250): Clocksource: "alt_vip_vfb_0" instantiated alt_cusp_testbench_clock "clocksource"
 Info (12250): Reusing file /home/hj220/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/alt_cusp181_package.vhd
 Info (12250): Cpu: Starting RTL generation for module 'Qsys_nios2_gen2_cpu'
-Info (12250): Cpu:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64//eperlcmd -I /usr/local/altera/18.1/quartus/linux64//perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=Qsys_nios2_gen2_cpu --dir=/tmp/alt9527_2054290539038768495.dir/0023_cpu_gen/ --quartus_bindir=/usr/local/altera/18.1/quartus/linux64/ --verilog --config=/tmp/alt9527_2054290539038768495.dir/0023_cpu_gen//Qsys_nios2_gen2_cpu_processor_configuration.pl  --do_build_sim=0  ]
-Info (12250): Cpu: # 2023.06.19 16:49:14 (*) Starting Nios II generation
-Info (12250): Cpu: # 2023.06.19 16:49:14 (*)   Checking for plaintext license.
-Info (12250): Cpu: # 2023.06.19 16:49:15 (*)   Plaintext license not found.
-Info (12250): Cpu: # 2023.06.19 16:49:15 (*)   Checking for encrypted license (non-evaluation).
-Info (12250): Cpu: # 2023.06.19 16:49:26 (*)   Encrypted license found.  SOF will not be time-limited.
-Info (12250): Cpu: # 2023.06.19 16:49:26 (*)   Elaborating CPU configuration settings
-Info (12250): Cpu: # 2023.06.19 16:49:26 (*)   Creating all objects for CPU
-Info (12250): Cpu: # 2023.06.19 16:49:26 (*)     Testbench
-Info (12250): Cpu: # 2023.06.19 16:49:26 (*)     Instruction decoding
-Info (12250): Cpu: # 2023.06.19 16:49:26 (*)       Instruction fields
-Info (12250): Cpu: # 2023.06.19 16:49:26 (*)       Instruction decodes
-Info (12250): Cpu: # 2023.06.19 16:49:27 (*)       Signals for RTL simulation waveforms
-Info (12250): Cpu: # 2023.06.19 16:49:27 (*)       Instruction controls
-Info (12250): Cpu: # 2023.06.19 16:49:27 (*)     Pipeline frontend
-Info (12250): Cpu: # 2023.06.19 16:49:27 (*)     Pipeline backend
-Info (12250): Cpu: # 2023.06.19 16:49:29 (*)   Generating RTL from CPU objects
-Info (12250): Cpu: # 2023.06.19 16:49:31 (*)   Creating encrypted RTL
-Info (12250): Cpu: # 2023.06.19 16:49:31 (*) Done Nios II generation
+Info (12250): Cpu:   Generation command is [exec /usr/local/altera/18.1/quartus/linux64//eperlcmd -I /usr/local/altera/18.1/quartus/linux64//perl/lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin/europa -I /usr/local/altera/18.1/quartus/sopc_builder/bin/perl_lib -I /usr/local/altera/18.1/quartus/sopc_builder/bin -I /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /usr/local/altera/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=Qsys_nios2_gen2_cpu --dir=/tmp/alt9527_5713935909780861869.dir/0023_cpu_gen/ --quartus_bindir=/usr/local/altera/18.1/quartus/linux64/ --verilog --config=/tmp/alt9527_5713935909780861869.dir/0023_cpu_gen//Qsys_nios2_gen2_cpu_processor_configuration.pl  --do_build_sim=0  ]
+Info (12250): Cpu: # 2023.06.19 17:13:30 (*) Starting Nios II generation
+Info (12250): Cpu: # 2023.06.19 17:13:30 (*)   Checking for plaintext license.
+Info (12250): Cpu: # 2023.06.19 17:13:30 (*)   Plaintext license not found.
+Info (12250): Cpu: # 2023.06.19 17:13:30 (*)   Checking for encrypted license (non-evaluation).
+Info (12250): Cpu: # 2023.06.19 17:13:31 (*)   Encrypted license found.  SOF will not be time-limited.
+Info (12250): Cpu: # 2023.06.19 17:13:31 (*)   Elaborating CPU configuration settings
+Info (12250): Cpu: # 2023.06.19 17:13:31 (*)   Creating all objects for CPU
+Info (12250): Cpu: # 2023.06.19 17:13:31 (*)     Testbench
+Info (12250): Cpu: # 2023.06.19 17:13:31 (*)     Instruction decoding
+Info (12250): Cpu: # 2023.06.19 17:13:31 (*)       Instruction fields
+Info (12250): Cpu: # 2023.06.19 17:13:31 (*)       Instruction decodes
+Info (12250): Cpu: # 2023.06.19 17:13:32 (*)       Signals for RTL simulation waveforms
+Info (12250): Cpu: # 2023.06.19 17:13:32 (*)       Instruction controls
+Info (12250): Cpu: # 2023.06.19 17:13:32 (*)     Pipeline frontend
+Info (12250): Cpu: # 2023.06.19 17:13:32 (*)     Pipeline backend
+Info (12250): Cpu: # 2023.06.19 17:13:34 (*)   Generating RTL from CPU objects
+Info (12250): Cpu: # 2023.06.19 17:13:36 (*)   Creating encrypted RTL
+Info (12250): Cpu: # 2023.06.19 17:13:36 (*) Done Nios II generation
 Info (12250): Cpu: Done RTL generation for module 'Qsys_nios2_gen2_cpu'
 Info (12250): Cpu: "nios2_gen2" instantiated altera_nios2_gen2_unit "cpu"
 Info (12250): Nios2_gen2_data_master_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "nios2_gen2_data_master_translator"
@@ -15178,7 +15179,7 @@ Info (12128): Elaborating entity "altera_reset_controller" for hierarchy "Qsys:u
 Info (12128): Elaborating entity "FpsMonitor" for hierarchy "FpsMonitor:uFps" File: /home/hj220/EEEBalanceBug/FPGA/R_DETECT/DE10_LITE_D8M_VIP.v Line: 196
 Warning (12020): Port "jdo" on the entity instantiation of "the_Qsys_nios2_gen2_cpu_nios2_oci_itrace" is connected to a signal of width 38. The formal width of the signal in the module is 16.  The extra bits will be ignored. File: /home/hj220/EEEBalanceBug/FPGA/R_DETECT/db/ip/Qsys/submodules/Qsys_nios2_gen2_cpu.v Line: 3216
 Info (11170): Starting IP generation for the debug fabric: alt_sld_fab.
-Info (11172): 2023.06.19.16:49:56 Progress: Loading sld2d1b536e/alt_sld_fab_wrapper_hw.tcl
+Info (11172): 2023.06.19.17:14:00 Progress: Loading sld2d1b536e/alt_sld_fab_wrapper_hw.tcl
 Info (11172): Alt_sld_fab.alt_sld_fab: SLD fabric agents which did not specify prefer_host were connected to JTAG
 Info (11172): Alt_sld_fab: Generating alt_sld_fab "alt_sld_fab" for QUARTUS_SYNTH
 Info (11172): Alt_sld_fab: "alt_sld_fab" instantiated alt_sld_fab "alt_sld_fab"
@@ -15492,10 +15493,10 @@ Info (21057): Implemented 13863 device resources after synthesis - the final res
     Info (21065): Implemented 1 PLLs
     Info (21062): Implemented 6 DSP elements
 Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 253 warnings
-    Info: Peak virtual memory: 1605 megabytes
-    Info: Processing ended: Mon Jun 19 16:50:42 2023
-    Info: Elapsed time: 00:02:30
-    Info: Total CPU time (on all processors): 00:03:53
+    Info: Peak virtual memory: 1607 megabytes
+    Info: Processing ended: Mon Jun 19 17:14:40 2023
+    Info: Elapsed time: 00:01:52
+    Info: Total CPU time (on all processors): 00:04:08
 
 
 +------------------------------------------+
