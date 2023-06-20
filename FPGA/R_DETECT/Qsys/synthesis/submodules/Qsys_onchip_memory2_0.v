@@ -36,7 +36,7 @@ module Qsys_onchip_memory2_0 (
                              )
 ;
 
-  parameter INIT_FILE = "C:/Users/bens1/Documents/Uni/Year_2/Design_Project_2/EEEBalanceBug/FPGA/R_DETECT/software/D8M_Camera_Test/mem_init/Qsys_onchip_memory2_0.hex";
+  parameter INIT_FILE = "/home/hj220/EEEBalanceBug/FPGA/R_DETECT/software/D8M_Camera_Test/mem_init/Qsys_onchip_memory2_0.hex";
 
 
   output  [ 31: 0] readdata;

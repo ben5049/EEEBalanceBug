@@ -2,7 +2,7 @@ set_global_assignment -entity "Qsys" -library "Qsys" -name IP_TOOL_NAME "Qsys"
 set_global_assignment -entity "Qsys" -library "Qsys" -name IP_TOOL_VERSION "18.1"
 set_global_assignment -entity "Qsys" -library "Qsys" -name IP_TOOL_ENV "Qsys"
 set_global_assignment -library "Qsys" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../Qsys.sopcinfo"]
-set_global_assignment -entity "Qsys" -library "Qsys" -name SLD_INFO "QSYS_NAME Qsys HAS_SOPCINFO 1 GENERATION_ID 1687199064"
+set_global_assignment -entity "Qsys" -library "Qsys" -name SLD_INFO "QSYS_NAME Qsys HAS_SOPCINFO 1 GENERATION_ID 1687259416"
 set_global_assignment -library "Qsys" -name MISC_FILE [file join $::quartus(qip_path) "../Qsys.cmp"]
 set_global_assignment -library "Qsys" -name SLD_FILE [file join $::quartus(qip_path) "Qsys.regmap"]
 set_global_assignment -library "Qsys" -name SLD_FILE [file join $::quartus(qip_path) "Qsys.debuginfo"]
@@ -16,7 +16,7 @@ set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_DISPLAY_
 set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_REPORT_HIERARCHY "On"
 set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_INTERNAL "Off"
 set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_VERSION "MS4w"
-set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTY4NzE5OTA2NA==::QXV0byBHRU5FUkFUSU9OX0lE"
+set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTY4NzI1OTQxNg==::QXV0byBHRU5FUkFUSU9OX0lE"
 set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfRkFNSUxZ::TUFYIDEw::QXV0byBERVZJQ0VfRkFNSUxZ"
 set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0U=::MTBNNTBEQUY0ODRDN0c=::QXV0byBERVZJQ0U="
 set_global_assignment -entity "Qsys" -library "Qsys" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfU1BFRURHUkFERQ==::Nw==::QXV0byBERVZJQ0VfU1BFRURHUkFERQ=="
@@ -1077,7 +1077,7 @@ set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_C
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "ZHVhbFBvcnQ=::ZmFsc2U=::RHVhbC1wb3J0IGFjY2Vzcw=="
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "ZGVyaXZlZF9lbmFibGVEaWZmV2lkdGg=::ZmFsc2U=::ZGVyaXZlZF9lbmFibGVEaWZmV2lkdGg="
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "aW5pdE1lbUNvbnRlbnQ=::dHJ1ZQ==::SW5pdGlhbGl6ZSBtZW1vcnkgY29udGVudA=="
-set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "aW5pdGlhbGl6YXRpb25GaWxlTmFtZQ==::QzovVXNlcnMvYmVuczEvRG9jdW1lbnRzL1VuaS9ZZWFyXzIvRGVzaWduX1Byb2plY3RfMi9FRUVCYWxhbmNlQnVnL0ZQR0EvUl9ERVRFQ1Qvc29mdHdhcmUvRDhNX0NhbWVyYV9UZXN0L21lbV9pbml0L1FzeXNfb25jaGlwX21lbW9yeTJfMC5oZXg=::VXNlciBjcmVhdGVkIGluaXRpYWxpemF0aW9uIGZpbGU="
+set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "aW5pdGlhbGl6YXRpb25GaWxlTmFtZQ==::L2hvbWUvaGoyMjAvRUVFQmFsYW5jZUJ1Zy9GUEdBL1JfREVURUNUL3NvZnR3YXJlL0Q4TV9DYW1lcmFfVGVzdC9tZW1faW5pdC9Rc3lzX29uY2hpcF9tZW1vcnkyXzAuaGV4::VXNlciBjcmVhdGVkIGluaXRpYWxpemF0aW9uIGZpbGU="
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "ZW5QUkluaXRNb2Rl::ZmFsc2U=::RW5hYmxlIFBhcnRpYWwgUmVjb25maWd1cmF0aW9uIEluaXRpYWxpemF0aW9uIE1vZGU="
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "bWVtb3J5U2l6ZQ==::MTMxMDcy::VG90YWwgbWVtb3J5IHNpemU="
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "c2ltQWxsb3dNUkFNQ29udGVudHNGaWxl::ZmFsc2U=::QWxsb3cgTVJBTSBjb250ZW50cyBmaWxlIGZvciBzaW11bGF0aW9u"
@@ -1098,7 +1098,7 @@ set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_C
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "ZGVyaXZlZF9zZXRfZGF0YV93aWR0aDI=::MzI=::U2xhdmUgMiBkYXRhIHdpZHRo"
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "ZGVyaXZlZF9ndWlfcmFtX2Jsb2NrX3R5cGU=::QXV0b21hdGlj::ZGVyaXZlZF9ndWlfcmFtX2Jsb2NrX3R5cGU="
 set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "ZGVyaXZlZF9pc19oYXJkY29weQ==::ZmFsc2U=::ZGVyaXZlZF9pc19oYXJkY29weQ=="
-set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "ZGVyaXZlZF9pbml0X2ZpbGVfbmFtZQ==::QzovVXNlcnMvYmVuczEvRG9jdW1lbnRzL1VuaS9ZZWFyXzIvRGVzaWduX1Byb2plY3RfMi9FRUVCYWxhbmNlQnVnL0ZQR0EvUl9ERVRFQ1Qvc29mdHdhcmUvRDhNX0NhbWVyYV9UZXN0L21lbV9pbml0L1FzeXNfb25jaGlwX21lbW9yeTJfMC5oZXg=::ZGVyaXZlZF9pbml0X2ZpbGVfbmFtZQ=="
+set_global_assignment -entity "Qsys_onchip_memory2_0" -library "Qsys" -name IP_COMPONENT_PARAMETER "ZGVyaXZlZF9pbml0X2ZpbGVfbmFtZQ==::L2hvbWUvaGoyMjAvRUVFQmFsYW5jZUJ1Zy9GUEdBL1JfREVURUNUL3NvZnR3YXJlL0Q4TV9DYW1lcmFfVGVzdC9tZW1faW5pdC9Rc3lzX29uY2hpcF9tZW1vcnkyXzAuaGV4::ZGVyaXZlZF9pbml0X2ZpbGVfbmFtZQ=="
 set_global_assignment -entity "Qsys_nios2_gen2" -library "Qsys" -name IP_COMPONENT_NAME "UXN5c19uaW9zMl9nZW4y"
 set_global_assignment -entity "Qsys_nios2_gen2" -library "Qsys" -name IP_COMPONENT_DISPLAY_NAME "TmlvcyBJSSBQcm9jZXNzb3I="
 set_global_assignment -entity "Qsys_nios2_gen2" -library "Qsys" -name IP_COMPONENT_REPORT_HIERARCHY "Off"
@@ -1905,20 +1905,20 @@ set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(q
 set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_sdram_test_component.v"]
 set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_onchip_memory2_0.v"]
 set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2.v"]
-set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu.ocp"]
-set_global_assignment -library "Qsys" -name SDC_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu.sdc"]
-set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu.v"]
-set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_bht_ram.mif"]
-set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_dc_tag_ram.mif"]
-set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_debug_slave_sysclk.v"]
-set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_debug_slave_tck.v"]
-set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_debug_slave_wrapper.v"]
 set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_ic_tag_ram.mif"]
-set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_mult_cell.v"]
-set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_ociram_default_contents.mif"]
+set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_bht_ram.mif"]
 set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_rf_ram_a.mif"]
 set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_rf_ram_b.mif"]
+set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_dc_tag_ram.mif"]
+set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_ociram_default_contents.mif"]
+set_global_assignment -library "Qsys" -name SDC_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu.sdc"]
 set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_test_bench.v"]
+set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_mult_cell.v"]
+set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_debug_slave_tck.v"]
+set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_debug_slave_sysclk.v"]
+set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu_debug_slave_wrapper.v"]
+set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu.v"]
+set_global_assignment -library "Qsys" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/Qsys_nios2_gen2_cpu.ocp"]
 set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_mipi_pwdn_n.v"]
 set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_led.v"]
 set_global_assignment -library "Qsys" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/Qsys_key.v"]
