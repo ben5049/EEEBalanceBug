@@ -81,5 +81,4 @@ Pin assignments for Group 1's EEEBalanceBug
 // #define TOF_L_INT 36
 // #define TOF_R_INT 0
 
-
 #endif
