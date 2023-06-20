@@ -131,10 +131,23 @@ const Connected = () => {
 	useEffect(() => {
 		Object.entries(MapData).forEach(([key, value]) => {
 			const firstTwoElements = value.slice(0, 2);
-			const CoordinateMax = Math.max(...firstTwoElements);
-			if (CoordinateMax > MapDataMax) {
+			const CoordinateMax = Math.max(...firstTwoElements.map(Math.abs));
+			if (Math.abs(CoordinateMax) > Math.abs(MapDataMax)) {
 				setMapDataMax(CoordinateMax);
-				console.log("MapDataMax = " + MapDataMax);
+				console.log("MapDataMax = " + CoordinateMax);
+			}
+		})
+	}, [MapData]);
+
+	/* Get largest magnitude negative number in MapData when changed */
+	const [MapDataNegMin, setMapDataNegMin] = useState(0);/* Number of Replay values (in MapData) */
+	useEffect(() => {
+		Object.entries(MapData).forEach(([key, value]) => {
+			const firstTwoElements = value.slice(0, 2);
+			const CoordinateNegMin = Math.min(...firstTwoElements);
+			if (CoordinateNegMin < 0 && CoordinateNegMin < MapDataNegMin) {
+				setMapDataNegMin(CoordinateNegMin);
+				console.log("MapDataNegMin = " + CoordinateNegMin);
 			}
 		})
 	}, [MapData]);
@@ -345,7 +358,12 @@ const Connected = () => {
 
 	/* Scale to canvas as coordinate system for rover different to canvas */
 	const ScaleToCanvas = (coordinate) => {
-		return ( coordinate / MapDataMax ) * 700 + 30 /* add offset so not touching border */
+		return ( coordinate / MapDataMax ) * 700 + 30 + MapDataNegMin /* add offset so not touching border */
+	}
+
+	/* Scale to canvas as coordinate system for rover different to canvas */
+	const DescaleToCanvas = (coordinate) => {
+		return (( coordinate - 30 - MapDataNegMin) / 700 ) * MapDataMax /* add offset so not touching border */
 	}
 
 	//---------------------------- Display ----------------------------------------------
