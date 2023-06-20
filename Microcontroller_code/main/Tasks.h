@@ -87,6 +87,7 @@ void configureToF();
 void configureWiFi();
 void configureFPGACam();
 void motorSetDPS(float DPS, int motor);
+void checkI2CBusMembers();
 
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;

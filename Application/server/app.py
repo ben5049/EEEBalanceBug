@@ -14,7 +14,7 @@ DEBUG = False
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 5]
+commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 5]
 
 # Server global variables
 TIMEOUT = 30
@@ -51,6 +51,7 @@ def rover():
     print("BEACON ANGLES: ", data["beaconangles"])
     print("JUNCTION ANGLES:", data["branches"])
     print("POSITION: ", data["position"])
+    print("WHEREAT:", data["whereat"])
     r = 0
     flag = True
     # check if rover is already active

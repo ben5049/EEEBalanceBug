@@ -75,7 +75,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define THRESHOLD_DISTANCE 500           /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
 
 /* FPGA */
-#define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
+#define ENABLE_FPGA_CAMERA true /* Whether or not to enable the FPGA camera */
 #define FPGA_ADDR 0x55           /* I2C address for the FPGA */
 #define FPGA_IMAGE_WIDTH 640     /* How wide the image is in pixels */
 #define FPGA_R_THRESHOLD 30      /* Threshold number of red pixels to count red beacon as having been detected */
