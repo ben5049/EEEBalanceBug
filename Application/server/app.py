@@ -47,6 +47,9 @@ def hello():
 def rover():
     global conn, cur
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
+    print("BEACON ANGLES: ", data["beaconangles"])
+    print("JUNCTION ANGLES:", data["branches"])
+    print("POSITION: ", data["position"])
     r = 0
     flag = True
     # check if rover is already active
@@ -107,10 +110,11 @@ def rover():
 
     # user input to resp
     resp = []
-    a = int(input("Next command: "))
-    while a != -1:
-        resp.append(a)
-        a = int(input("Next command: "))
+    user =int(input("Next command: "))
+    while user != -1:
+        resp.append(user)
+        user = int(input("Next command: "))
+    
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     print(resp)
     # if rover is about to spin, set flags to turn on beacons
@@ -440,14 +444,14 @@ def led_driver_red():
         print(isSpinning, time()-spinTime)
     
     # logic to turn on led
-    if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
+    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) # swicth should be 0
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # swicth should be 0
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
@@ -457,13 +461,13 @@ def led_driver_blue():
     print(data)
     if DEBUG:
         print(isSpinning, time()-spinTime)
-    if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
+    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
@@ -473,13 +477,13 @@ def led_driver_yellow():
     print(data)
     if DEBUG:
         print(isSpinning, time()-spinTime)
-    if isSpinning and time()-spinTime < TIMEOUT/3 and energy == "enough energy":
+    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0'
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0'
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#

@@ -208,8 +208,6 @@ int main()
 
     	   current_focus = Focus_Window(320,240);
        }
-	   // touch KEY1 to ZOOM
-	   	   bin_level == DEFAULT_LEVEL;
 	        if((IORD(KEY_BASE,0)&0x03) == 0x01){
 	      	   printf("set bin level to %d\n",bin_level);
 	      	   MIPI_BIN_LEVEL(bin_level);
