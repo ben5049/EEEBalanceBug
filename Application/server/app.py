@@ -49,6 +49,7 @@ def rover():
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     print("BEACON ANGLES: ", data["beaconangles"])
     print("JUNCTION ANGLES:", data["branches"])
+    print("POSITION: ", data["position"])
     r = 0
     flag = True
     # check if rover is already active
