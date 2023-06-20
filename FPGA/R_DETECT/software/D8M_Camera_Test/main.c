@@ -209,15 +209,8 @@ int main()
     	   current_focus = Focus_Window(320,240);
        }
 	   // touch KEY1 to ZOOM
-<<<<<<< Updated upstream
 	   	   bin_level == DEFAULT_LEVEL;
 	        if((IORD(KEY_BASE,0)&0x03) == 0x01){
-=======
-	         if((IORD(KEY_BASE,0)&0x03) == 0x01){
-
-//	      	   if(bin_level == 3 )bin_level = 1;
-//	      	   else bin_level ++;
->>>>>>> Stashed changes
 	      	   printf("set bin level to %d\n",bin_level);
 	      	   MIPI_BIN_LEVEL(bin_level);
 	      	 	usleep(500000);

@@ -152,6 +152,7 @@ assign bbb_active = (x == b_left) | (x == b_right) | (y == b_top) | (y == b_bott
 assign new_image = rbb_active ? {8'hff, 8'h0, 8'h0} :
 						 ybb_active ? {8'hff, 8'hff, 8'h0} :
 						 bbb_active ? {8'h0, 8'h0, 8'hff} :
+						 mid_line ? {8'h0, 8'h0, 8'h0}: // middle line across the mid point
 						 ryb_high;
 						 
 // Switch output pixels depending on mode switch
@@ -367,6 +368,19 @@ always@(*) begin	//Write words to FIFO as state machine advances
 	endcase
 end
 
+
+//RGB to HSV conversion
+rgb_to_hsv hsv_inst(
+.clk(clk),
+.rst(reset_n),
+.rgb_r(red),
+.rgb_g(green),
+.rgb_b(blue),
+.hsv_h(hsv_h),
+.hsv_s(hsv_s),
+.hsv_v(hsv_v)
+);
+
 //Output message FIFO
 MSG_FIFO	MSG_FIFO_inst (
 	.clock (clk),
@@ -377,7 +391,7 @@ MSG_FIFO	MSG_FIFO_inst (
 	.q (msg_buf_out),
 	.usedw (msg_buf_size),
 	.empty (msg_buf_empty)
-);
+	);
 
 
 //Streaming registers to buffer video signal
@@ -470,19 +484,7 @@ end
 
 //Fetch next word from message buffer after read from READ_MSG
 assign msg_buf_rd = s_chipselect & s_read & ~read_d & ~msg_buf_empty & (s_address == `READ_MSG);
-
-
-//RGB to HSV conversion
-rgb_to_hsv hsv_inst(
-	.clk(clk),
-	.rst(reset_n),
-	.rgb_r(red),
-	.rgb_g(green),
-	.rgb_b(blue),
-	.hsv_h(hsv_h),
-	.hsv_s(hsv_s),
-	.hsv_v(hsv_v)
-);						
+						
 
 wire [17:0] LEDG;
 wire [7:0] LEDR;	
@@ -501,7 +503,7 @@ i2c i2c_slave(
 	.count_red(count_red),
 	.count_yellow(count_yellow),
 	.count_blue(count_blue)
-);
+	);
 
 endmodule
 

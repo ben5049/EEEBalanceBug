@@ -5,19 +5,19 @@ rst,
 rgb_r,
 rgb_g,
 rgb_b,
-hsv_h,// 0 - 360
-hsv_s,// 0 - 255
-hsv_v // 0 - 255
+hsv_h,//  0 - 360
+hsv_s,// 0- 255
+hsv_v // 0- 255
 );
 
-input                      clk;
-input                      rst;
+input                         clk;
+input                       rst;
 input     [7:0]            rgb_r;
 input     [7:0]            rgb_g;
 input     [7:0]            rgb_b;
-output reg [8:0]  			hsv_h; // 0 - 360
-output reg [7:0] 			 	hsv_s; // 0 - 255
-output reg [7:0]  			hsv_v; // 0 - 255
+output reg [8:0]  hsv_h; //  0 - 360
+output reg [7:0]  hsv_s; // 0- 255
+output reg [7:0]  hsv_v; // 0- 255
 
 reg [7:0] top;//molecular
 reg [13:0] top_60;// *60
