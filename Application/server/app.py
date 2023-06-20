@@ -108,7 +108,12 @@ def rover():
     # print("YAW: ", data["diagnostics"]["connection"])
 
     # user input to resp
-    resp = [1]
+    resp = []
+    user =int(input("Next command: "))
+    while user != -1:
+        resp.append(user)
+        user = int(input("Next command: "))
+    
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     print(resp)
     # if rover is about to spin, set flags to turn on beacons
