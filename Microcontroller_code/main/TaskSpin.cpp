@@ -159,7 +159,7 @@ void taskSpin(void *pvParameters) {
 #endif
 
       if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-        fpga.getRYB();
+        fpga.getRYB(true);
         xSemaphoreGive(mutexI2C);
 
 /* End priority ceiling protocol */
