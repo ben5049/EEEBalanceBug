@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 02/06/23
-Date updated: 08/06/23
+Date updated: 20/06/23
 
 Header file for tasks
 */
@@ -12,14 +12,13 @@ Header file for tasks
 #include "Arduino.h"
 #include "freertos/FreeRTOS.h"
 
-
 //-------------------------------- Exported ---------------------------------------
 
 /* Hardware timers */
 extern hw_timer_t *motorTimerR;
 extern hw_timer_t *motorTimerL;
 
-/* Types and structs */
+/* Types */
 typedef enum {
   IDLE = 0x00,
   FORWARD = 0x01,
@@ -33,11 +32,12 @@ typedef enum {
   DEAD_END = 0x02
 } whereAt;
 
+/* Structs */
 struct angleData {
-  float pitch;
-  float pitchRate;
-  float yaw;
-  float yawRate;
+  float pitch;     /* Pitch in degrees between -180 and 180 */
+  float pitchRate; /* pitch rate in degrees per second */
+  float yaw;       /* Yaw in degrees between -180 and 180 */
+  float yawRate;   /* Yaw rate in degrees/s */
 };
 
 struct ToFDistanceData {
@@ -47,25 +47,16 @@ struct ToFDistanceData {
 
 /* Variables */
 
-// extern volatile float pitch;     /* Pitch in degrees between -180 and 180 */
-// extern volatile float pitchRate; /* pitch rate in degrees per second around y axis (pitch axis) */
-// extern volatile float yaw;       /* Yaw in degrees between -180 and 180 */
-// extern volatile float yawRate;   /* Yaw rate in degrees/s */
-
 extern volatile unsigned long stepperRightSteps; /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
 extern volatile unsigned long stepperLeftSteps;  /* Total number of steps taken by the left stepper motor (forwards = +1, backwards = -1) */
 extern volatile int16_t distanceRight;           /* Distance in mm measured by the right time of flight sensor */
 extern volatile int16_t distanceLeft;            /* Distance in mm measured by the left time of flight sensor */
-// extern volatile float distanceRightFiltered;     /* Filtered Distance in mm measured by the right time of flight sensor */
-// extern volatile float distanceLeftFiltered;      /* Filtered distance in mm measured by the left time of flight sensor */
-// extern volatile float distanceRightDifferential; /* Filtered distance differentiated for the right time of flight sensor */
-// extern volatile float distanceLeftDifferential;  /* Filtered distance differentiated for the left time of flight sensor */
-extern volatile float spinStartingAngle; /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
-extern volatile float xPosition;         /* The x position */
-extern volatile float yPosition;         /* The y position */
+extern volatile float spinStartingAngle;         /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
+extern volatile float xPosition;                 /* The x position */
+extern volatile float yPosition;                 /* The y position */
 
 extern volatile robotCommand currentCommand; /* The current command being implemented by the rover */
-extern volatile whereAt currentwhereAt;      /* The current general location of the rover */
+extern volatile whereAt currentwhereAt;      /* [NEED TO IMPLEMENT] The current general location of the rover */
 
 extern volatile float angleSetpoint;
 extern volatile float dirSetpoint;
@@ -78,8 +69,6 @@ extern volatile bool enableAngRateControl;
 extern volatile bool enableDirectionControl;
 extern volatile float motorDiff;
 extern volatile int16_t turns;
-
-extern volatile bool wifiInitialised;
 
 /* ISR */
 void IRAM_ATTR IMUDataReadyISR();

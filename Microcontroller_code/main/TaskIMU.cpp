@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 06/06/23
+Date updated: 19/06/23
 
 IMU sampling and sensor fusion
 */
@@ -259,6 +259,7 @@ void taskIMU(void *pvParameters) {
 #endif
 
 #if ENABLE_DMP == true
+
     /* Process the quaternion data from the DMP into Euler angles */
 
 #if ENABLE_DMP_MAGNETOMETER == true
@@ -276,6 +277,7 @@ void taskIMU(void *pvParameters) {
 #endif
         float q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
         float q2sqr = q2 * q2;
+
         /* pitch (x-axis rotation) */
         double t0 = +2.0 * (q0 * q1 + q2 * q3);
         double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
@@ -292,6 +294,7 @@ void taskIMU(void *pvParameters) {
         float t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
         IMUData.yaw = atan2(t3, t4) * 180.0 / PI;
 
+        /* Pack pitch rate and yaw rate into IMU data */
         IMUData.pitchRate = myICM.gyrX();
         IMUData.yawRate = myICM.gyrZ();
 
@@ -304,11 +307,11 @@ void taskIMU(void *pvParameters) {
         totalYawDrift += IMUData.yaw - prevYaw;
         prevYaw = IMUData.yaw;
         yawDrift = totalYawDrift / samples;
-        SERIAL_PORT.print(", Yaw drift: ");
+        SERIAL_PORT.print(", Yaw drift (per sample): ");
         SERIAL_PORT.println(yawDrift, 10);
 #endif
 
-        /* Write the object that stores the IMU data to a single item queue to distribute to other tasks */
+        /* Write the struct that stores the IMU data to a single item queue to distribute to other tasks */
         xQueueOverwrite(IMUDataQueue, &IMUData);
       }
     }
@@ -318,7 +321,9 @@ void taskIMU(void *pvParameters) {
     /* Acquire latest sensor data */
     FusionVector gyroscope = { myICM.gyrX(), myICM.gyrY(), myICM.gyrZ() };
     FusionVector accelerometer = { myICM.accX() / 1000.0, myICM.accY() / 1000.0, myICM.accZ() / 1000.0 };
-    // FusionVector magnetometer = { myICM.magX(), myICM.magY(), myICM.magZ() };
+#if ENABLE_MAGNETOMETER == true
+    FusionVector magnetometer = { myICM.magX(), myICM.magY(), myICM.magZ() };
+#endif
 
     /* Update gyroscope offset correction algorithm */
     // gyroscope = FusionOffsetUpdate(&offset, gyroscope);
@@ -327,9 +332,12 @@ void taskIMU(void *pvParameters) {
     deltaTime = (float)(timestamp - previousTimestamp) / (float)1000000.0;
     previousTimestamp = timestamp;
 
-    /* Update gyroscope AHRS algorithm */
-    // FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+/* Update gyroscope AHRS algorithm */
+#if ENABLE_MAGNETOMETER == true
+    FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+#else
     FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, deltaTime);
+#endif
 
     /* Print algorithm outputs */
     const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));

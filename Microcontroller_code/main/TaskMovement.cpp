@@ -1,3 +1,11 @@
+/*
+Authors: David Cai
+Date created: 28/05/23
+Date updated: 19/06/23
+
+Control loops for balancing, moving and turning
+*/
+
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
@@ -8,13 +16,6 @@
 #include "PinAssignments.h"
 #include "src/pidautotuner.h"
 #include "src/FIRFilter.h"
-
-//-------------------------------- Types ------------------------------------------------
-
-// union data{
-//   float floatData;
-//   unsigned uint8_t byteData[4];
-// }floatToBytes;
 
 //-------------------------------- Global Variables -------------------------------------
 
@@ -404,48 +405,39 @@ void taskMovement(void* pvParameters) {
 
       xQueuePeek(ToFDataQueue, &ToFData, 0);
 
+#if ENABLE_PATH_PID_CONTROL == true
       angRateSetpoint = PID(0.0, ToFData.right - ToFData.left, pathCumError, pathPrevError, pathLastTime, pathKp, pathKi, pathKd);
       pathLastTime = millis();
-      // Serial.print("leftDistance");
-      // Serial.print(": ");
-      // Serial.print(ToFData.left);
-      // Serial.println(",");
-      // Serial.print("rightDistance");
-      // Serial.print(": ");
-      // Serial.print(ToFData.right);
-      // Serial.println(",");
-      Serial.println();
+#else
 
-      // timestamp = millis();
-      //   distanceRightDifferential = ((ToFData.right - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-      //   distanceLeftDifferential = ((ToFData.left - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-      //   distanceRightFilteredPrevious = ToFData.right;
-      //   distanceLeftFilteredPrevious = ToFData.left;
-      //   timestampPrevious = timestamp;
+      /* Calculate ToF distance differentials */
+      timestamp = millis();
+      distanceRightDifferential = ((ToFData.right - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      distanceLeftDifferential = ((ToFData.left - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      distanceRightFilteredPrevious = ToFData.right;
+      distanceLeftFilteredPrevious = ToFData.left;
+      timestampPrevious = timestamp;
 
-      //   if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
-      //     dirSetpoint -= 3;
-      //   } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
-      //     dirSetpoint += 3;
-      //   } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
-      //     if ((ToFData.left - ToFData.right) > 30.0) {
-      //       dirSetpoint += 3;
-      //     } else if ((ToFData.left - ToFData.right) < -30.0) {
-      //       dirSetpoint -= 3;
-      //     }
+      /* Basic path control: turns until parallel to both walls, then turns towards centre of path */
+      if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
+        dirSetpoint -= 3;
+      } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
+        dirSetpoint += 3;
+      } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
+        if ((ToFData.left - ToFData.right) > 30.0) {
+          dirSetpoint += 3;
+        } else if ((ToFData.left - ToFData.right) < -30.0) {
+          dirSetpoint -= 3;
+        }
+      }
+#endif
     }
 
     /* Control Cycle */
     controlCycle = controlCycle % 100;
     controlCycle++;
-    if (CONTROL_DEBUG) {
-      debug();
-    }
-    // }
-    // else {
-    //   angleCumError = 0;
-    //   angleLastTime = millis();
-    //   anglePrevError = angleSetpoint - IMUData.pitch;
-    // }
+#if CONTROL_DEBUG == true
+    debug();
+#endif
   }
 }

@@ -1,5 +1,11 @@
-#include "freertos/projdefs.h"
-#include "esp32-hal-gpio.h"
+/*
+Authors: Aranya Gupta
+Date created: 05/05/23
+Date updated: 19/06/23
+
+Communicate with a server using JSONs
+*/
+
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
@@ -245,10 +251,8 @@ void taskServerCommunication(void* pvParameters) {
     /* Run the task at a set frequency */
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-
     String endpoint = "rover";
     requestType = 1;
-
 
     String serverPath = serverName + endpoint;
 
@@ -274,17 +278,21 @@ void taskServerCommunication(void* pvParameters) {
         parsePayload(payload, commands, httpResponseCode, numCommands);
 
         for (int i = 0; i < numCommands; i++) {
+
+          /* Flash LED when a command is received */
           digitalWrite(LED_BUILTIN, LOW);
           vTaskDelay(pdMS_TO_TICKS(10));
+
+          /* Send new command to the command queue*/
           newCommand = commands[i];
           xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
+
+          /* Flash LED when a command is received */
           digitalWrite(LED_BUILTIN, HIGH);
-          SERIAL_PORT.println("pog");
           vTaskDelay(pdMS_TO_TICKS(10));
           digitalWrite(LED_BUILTIN, LOW);
         }
       }
     }
-    wifiInitialised = true;
   }
 }
