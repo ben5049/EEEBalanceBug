@@ -51,7 +51,7 @@ def rover():
     print("BEACON ANGLES: ", data["beaconangles"])
     print("JUNCTION ANGLES:", data["branches"])
     print("POSITION: ", data["position"])
-    print("WHEREAT": data["whereat"])
+    print("WHEREAT:", data["whereat"])
     r = 0
     flag = True
     # check if rover is already active
