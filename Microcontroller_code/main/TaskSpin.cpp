@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 02/06/23
-Date updated: 07/06/23
+Date updated: 19/06/23
 
 Task to detect junctions and beacons while robot is spinning
 */

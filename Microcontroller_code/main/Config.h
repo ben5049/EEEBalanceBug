@@ -1,9 +1,9 @@
 /*
-Authors: Ben Smith
+Authors: Ben Smith, David Cai
 Date created: 28/05/23
-Date updated: 06/06/23
+Date updated: 20/06/23
 
-Pin assignments for Group 1's EEEBalanceBug
+Configuration data and macros for Group 1's EEEBalanceBug
 */
 
 #ifndef CONFIG_H
@@ -33,7 +33,7 @@ Pin assignments for Group 1's EEEBalanceBug
 /* Task enables */
 #define ENABLE_IMU_TASK true                  /* Setting "true" enables the IMU sampling task */
 #define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
-#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK false      /* Setting "true" enables the dead reckning task */
 #define ENABLE_DEBUG_TASK true               /* Setting "true" enables the debug task */
@@ -87,7 +87,6 @@ Pin assignments for Group 1's EEEBalanceBug
 #define SPIN_SPEED 360 / SPIN_TIME       /* Speed to spin at in degrees per second */
 #define TASK_SPIN_FREQUENCY 10           /* Frequency to run the spin task at in Hz (default = 10Hz) */
 #define SPIN_LEFT true                   /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
-#define TASK_DEAD_RECKONING_FREQUENCY 10 /* Frequency to run the dead reckoning task at in Hz */
 #define MAX_NUMBER_OF_JUNCTIONS 10       /* Maximum number of junctions that can be detected in one spin */
 #define NUMBER_OF_BEACONS 3              /* Number of beacons */
 
@@ -98,6 +97,10 @@ Pin assignments for Group 1's EEEBalanceBug
 /* Server communication task */
 #define TASK_SERVER_COMMUNICATION_FREQUENCY 1 /* Frequency to run the server communication task at in Hz */
 #define ENABLE_SERVER_COMMUNICATION_DEBUG false
+
+/* Dead reckoning task */
+#define TASK_DEAD_RECKONING_FREQUENCY 10 /* Frequency to run the dead reckoning task at in Hz */
+
 /* Controller */
 #define CONTROL_DEBUG false        /* Setting "true" enables debug messages over SERIAL_PORT from the controller task */
 #define TASK_MOVEMENT_FREQUENCY 50 /* Frequency to run the movement task at in Hz */
@@ -128,6 +131,8 @@ Pin assignments for Group 1's EEEBalanceBug
 #define KP_DIR 2.0
 #define KI_DIR 0.00
 #define KD_DIR 2.0
+
+#define ENABLE_PATH_PID_CONTROL false /* Setting true enables the path PID controller. If false path is controlled using if statments */
 
 #define KP_PATH 0.3
 #define KI_PATH 0.0

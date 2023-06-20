@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 28/05/23
+Date updated: 19/05/23
 
 Pin assignments for Group 1's EEEBalanceBug
 */

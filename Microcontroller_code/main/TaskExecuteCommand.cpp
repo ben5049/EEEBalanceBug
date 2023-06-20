@@ -1,10 +1,7 @@
-#include "esp32-hal-gpio.h"
-#include "freertos/projdefs.h"
-#include "freertos/portmacro.h"
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 06/06/23
+Date updated: 20/06/23
 
 Command state machine that reads new commands from a queue and implements them
 */
