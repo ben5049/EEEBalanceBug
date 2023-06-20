@@ -35,8 +35,8 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
 #define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
-#define ENABLE_DEAD_RECKONING_TASK false      /* Setting "true" enables the dead reckning task */
-#define ENABLE_DEBUG_TASK true               /* Setting "true" enables the debug task */
+#define ENABLE_DEAD_RECKONING_TASK true       /* Setting "true" enables the dead reckning task */
+#define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
 
 /* Task priorities */
 #define TASK_IMU_PRIORITY 12                 /* Task priority from 0 to 31 (larger means higher priority) */
@@ -49,11 +49,11 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define TASK_DEAD_RECKONING_PRIORITY 7       /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* IMU */
-#define ENABLE_IMU_DEBUG false             /* Setting "true" enables debug messages over SERIAL_PORT from the IMU task */
+#define ENABLE_IMU_DEBUG false            /* Setting "true" enables debug messages over SERIAL_PORT from the IMU task */
 #define ENABLE_DMP true                   /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
-#define ENABLE_DMP_MAGNETOMETER true     /* Setting "true" enables the magnetometer for the DMP */
+#define ENABLE_DMP_MAGNETOMETER true      /* Setting "true" enables the magnetometer for the DMP */
 #define ENABLE_MAGNETOMETER false         /* Setting "true" enables the magnetometer */
-#define IMU_SAMPLING_FREQUENCY_DMP 57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
+#define IMU_SAMPLING_FREQUENCY_DMP 60     //57.49  /* [NEEDS REVISING] Sampling frequency of IMU with DMP */
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500 /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
@@ -83,12 +83,12 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define FPGA_B_THRESHOLD 50      /* Threshold number of blue pixels to count blue beacon as having been detected */
 
 /* Spin task */
-#define SPIN_TIME 8                      /* Time taken for a complete spin in s */
-#define SPIN_SPEED 360 / SPIN_TIME       /* Speed to spin at in degrees per second */
-#define TASK_SPIN_FREQUENCY 10           /* Frequency to run the spin task at in Hz (default = 10Hz) */
-#define SPIN_LEFT true                   /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
-#define MAX_NUMBER_OF_JUNCTIONS 10       /* Maximum number of junctions that can be detected in one spin */
-#define NUMBER_OF_BEACONS 3              /* Number of beacons */
+#define SPIN_TIME 8                /* Time taken for a complete spin in s */
+#define SPIN_SPEED 360 / SPIN_TIME /* Speed to spin at in degrees per second */
+#define TASK_SPIN_FREQUENCY 10     /* Frequency to run the spin task at in Hz (default = 10Hz) */
+#define SPIN_LEFT true             /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
+#define MAX_NUMBER_OF_JUNCTIONS 10 /* Maximum number of junctions that can be detected in one spin */
+#define NUMBER_OF_BEACONS 3        /* Number of beacons */
 
 /* Execute command task */
 #define COMMAND_QUEUE_LENGTH 10        /* Maximum number of commands that can be in the queue */
