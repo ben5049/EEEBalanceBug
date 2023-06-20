@@ -445,11 +445,11 @@ def led_driver_red():
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) # swicth should be 0
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # swicth should be 0
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
@@ -462,10 +462,10 @@ def led_driver_blue():
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
@@ -478,10 +478,10 @@ def led_driver_yellow():
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0'
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0'
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":0}), 200)
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#
