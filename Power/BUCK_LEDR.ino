@@ -1,4 +1,4 @@
-//Based on Buck_OLCL.ino provided by power lab.
+//Refer to BUCK_LEDY
 
 #include <Wire.h>
 #include <WiFi.h>
@@ -15,7 +15,6 @@ const char* ssid = "Digo111";
 const char* password = "88888888";
 float loopLastTime = micros();
 float starttime = micros();
-bool sw_R=0;
 String serverName = "http://54.165.59.37:5000/";
 
 
@@ -26,7 +25,7 @@ void setup() {
 
   pinMode(0, OUTPUT);       //pin0 is PWM pin
   pinMode(1, OUTPUT);       //pin1 is PWM enable pin
-  digitalWrite(1, LOW);    //always enable PWM signal
+  digitalWrite(1, LOW);    //always disable PWM signal
   analogWriteFreq(100000);  //set the PWM frequency at 100kHz
   Serial.begin(115200);     //serial communication enable. Used for program debugging.
   delta = 0.01;
@@ -111,42 +110,41 @@ void loop1() {
     http.begin(serverPath.c_str());
 
     // Send HTTP request
-    int httpResponseCode = makeRequest(requestType, http);
+    int httpResponseCode = makeRequest(requestType, http,vin);
     // Manage response
     String payload = handleResponse(httpResponseCode, http);
     int flag=payload[36]-'0';
     Serial.print(payload);
     if (flag==1) {
-  digitalWrite(1, HIGH);
-      Serial.print("on!");
-      Serial.print("Inductor Current: ");
-      Serial.print(iL);
-      Serial.print("\t");
-      Serial.print("\n");
+ if(vin>6)
+      {
+      digitalWrite(1, HIGH);
+      }
+      else
+      {
+      digitalWrite(1, LOW);
+      }
+      // Serial.print("on!");
+      // Serial.print("Inductor Current: ");
+      // Serial.print(iL);
+      // Serial.print("\t");
+      // Serial.print("\n");
     } else {
   digitalWrite(1, LOW);
-      Serial.print("off!");
-      Serial.print("Inductor Current: ");
-      Serial.print(iL);
-      Serial.print("\t");
-      Serial.print("\n");
+      // Serial.print("off!");
+      // Serial.print("Inductor Current: ");
+      // Serial.print(iL);
+      // Serial.print("\t");
+      // Serial.print("\n");
     }
     // Free resources
     http.end();
     parsePayload(payload);
-    // if(sw_R==0)
-    // {
-    //   sw_R=1;
-    // }
-    // else
-    // {
-    //   sw_R=0;
-    // }
-    // delay(5000);
     delay(1000);
   }
   else
   {
+  WiFi.begin(ssid, password);
   digitalWrite(1, LOW);
   }
 }
@@ -192,19 +190,27 @@ void pwm_modulate(float pwm_input) {  // PWM function
 }
 
 
-int makeRequest(int requestType, HTTPClient& http) {
+int makeRequest(int requestType, HTTPClient& http, float vx) {
   if (requestType == 0) {
     return http.GET();
   } else {
     http.addHeader("Content-Type", "application/json");
     String VOUT = String(vout);
     String IOUT = String(iL);
-    // String SWR = String(sw_R);
     String VIN = String(vin);
-    String postData = "{\"vout\":" + VOUT + ",\"iout\":" + IOUT + ",\"vin\":"+ VIN+"}";
+    String ENERGY_STATUS ;
+    if (vx > 6) {
+    ENERGY_STATUS = "\"enough energy red\"";
+    } 
+    else {
+    ENERGY_STATUS = "\"not enough energy red\"";
+    }
+ 
+    String postData = "{\"vout\":" + VOUT + ",\"iout\":" + IOUT + ",\"vin\":" + VIN + ",\"energy status\":" +ENERGY_STATUS+ "}";
     return http.POST(postData);
   }
 }
+
 
 
 String handleResponse(int httpResponseCode, HTTPClient& http) {

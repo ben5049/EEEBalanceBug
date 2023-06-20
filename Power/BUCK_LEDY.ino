@@ -1,22 +1,22 @@
 //Based on Buck_OLCL.ino provided by power lab.
-
+//The code use a PID controller, parameters tuned by try&error
+//Two cores of Pi Pico W will be used to achieve both controlling and Wi-Fi communication.
 #include <Wire.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
-float open_loop, closed_loop, delta;  // Duty Cycles
-float vout, vin, vref = 3, vret, iL, dutyref, current_mA;                // Measurement Variables
-unsigned int sensorValue0, sensorValue1, sensorValue2, sensorValue3;     // ADC sample values declaration
-float current_limit = 300;
-float iref = 130;
-float cumError=0, prevError=0,Kp=0.035,Ki=0.02,Kd=0.01;
+float open_loop, closed_loop, delta;                                  // Duty Cycles
+float vout, vin, vref = 3, vret, iL, dutyref, current_mA;             // Measurement Variables
+unsigned int sensorValue0, sensorValue1, sensorValue2, sensorValue3;  // ADC sample values declaration
+float current_limit = 300;                                            //current limit
+float iref = 130;                                                     //current reference for yellow beacons
+float cumError = 0, prevError = 0, Kp = 0.035, Ki = 0.02, Kd = 0.01;  //PID parameters by try&errors
 const char* ssid = "Digo111";
-const char* password = "88888888";
-float loopLastTime = micros();
-float starttime = micros();
-bool sw_Y=0;
-String serverName = "http://54.165.59.37:5000/";
+const char* password = "88888888";  //hot spot parameters
+float loopLastTime = micros();      //used to calculate dt in PID
+float starttime = micros();         //software counter initiate
+String serverName = "http://54.165.59.37:5000/";  //server ip
 
 
 
@@ -27,7 +27,7 @@ void setup() {
 
   pinMode(0, OUTPUT);       //pin0 is PWM pin
   pinMode(1, OUTPUT);       //pin1 is PWM enable pin
-  digitalWrite(1, LOW);    //always enable PWM signal
+  digitalWrite(1, LOW);     //always disable PWM signal
   analogWriteFreq(100000);  //set the PWM frequency at 100kHz
   Serial.begin(115200);     //serial communication enable. Used for program debugging.
   delta = 0.01;
@@ -36,50 +36,52 @@ void setup() {
 
 void loop() {
 
-sampling();
-if((micros()-starttime)>10){
-if(iL<=current_limit){
-  //adjust dutycycle according to measured vout, vref is set to be 3V
-  
-  closed_loop=PID(iref,iL,loopLastTime,cumError,prevError,Kp,Ki,Kd);
-  loopLastTime = millis();
-  starttime= micros();
-}
-else{
-  closed_loop=closed_loop-20;
-  starttime= micros();
-}
-}
-// Serial.print("Input:");
-// Serial.println(iL);
-// Serial.print(",Setpoint:");
-// Serial.println(iref);
-// Serial.print(",DutyCycle:");
-// Serial.println(closed_loop);
-// Serial.print(",High:");
-// Serial.println(0);
-// Serial.print(",Low:");
-// Serial.println(200);
-// Serial.print("Vout: ");
-//   Serial.print(vout);
-//   Serial.print("\t");
+  sampling();
+  if ((micros() - starttime) > 10) {  //counts 10, 10 tunes slower than the entire loop
+    if (iL <= current_limit) {
+      //adjust dutycycle according to measured vout, vref is set to be 3V
 
-//   Serial.print("Vin: ");
-//   Serial.print(vin);
-//   Serial.print("\t");
-
-
-//   Serial.print("closed_loop: ");
-//   Serial.print(closed_loop);
-//   Serial.print("\t");
-
-//   Serial.print("Inductor Current: ");
-//   Serial.print(iL);
-//   Serial.print("\n");
-analogWrite(0,(int)(closed_loop));
+      closed_loop = PID(iref, iL, loopLastTime, cumError, prevError, Kp, Ki, Kd);
+      loopLastTime = millis();
+      starttime = micros();  //reset timer
+    } else {
+      closed_loop = closed_loop - 20;  //decrease duty cycle if there is too much current
+      starttime = micros();
+    }
+  }
 
   //used to debug
-  
+
+  // Serial.print("Input:");
+  // Serial.println(iL);
+  // Serial.print(",Setpoint:");
+  // Serial.println(iref);
+  // Serial.print(",DutyCycle:");
+  // Serial.println(closed_loop);
+  // Serial.print(",High:");
+  // Serial.println(0);
+  // Serial.print(",Low:");
+  // Serial.println(200);
+  // Serial.print("Vout: ");
+  //   Serial.print(vout);
+  //   Serial.print("\t");
+
+  //   Serial.print("Vin: ");
+  //   Serial.print(vin);
+  //   Serial.print("\t");
+
+
+  //   Serial.print("closed_loop: ");
+  //   Serial.print(closed_loop);
+  //   Serial.print("\t");
+
+  //   Serial.print("Inductor Current: ");
+  //   Serial.print(iL);
+  //   Serial.print("\n");
+  analogWrite(0, (int)(closed_loop));
+
+  //used to debug
+
 
   delay(1);
 }
@@ -113,46 +115,43 @@ void loop1() {
     http.begin(serverPath.c_str());
 
     // Send HTTP request
-    int httpResponseCode = makeRequest(requestType, http);
+    int httpResponseCode = makeRequest(requestType, http, vin);
 
     // Manage response
     String payload = handleResponse(httpResponseCode, http);
-    int flag=payload[36]-'0';
+    int flag = payload[36] - '0';  //take the last digit of the server response, 1 if the switch is on, 0 if the switch is off; the switch is determined by the current state of the robot.
+                                   //if the current state is spinning, switch will be on.
     Serial.print(payload);
-    if (flag==1) {
-  digitalWrite(1, HIGH);
-      Serial.print("on!");
+    if (flag == 1) {
+
+      if (vin > 6) {
+        digitalWrite(1, HIGH);  //enable the PWM signal if the robot is spinning and there is enough energy.
+      } else {
+        digitalWrite(1, LOW);  //disable the PWM signal if the robot is not spinning or there is not enough energy
+      }
+      //used to debug
+      // Serial.print("on!");
       // Serial.print("Inductor Current: ");
       // Serial.print(iL);
       // Serial.print("\t");
-      Serial.print("\n");
+      // Serial.print("\n");
     } else {
- digitalWrite(1, LOW);
-      Serial.print("off!");
+      digitalWrite(1, LOW);
+      // Serial.print("off!");
       // Serial.print("Inductor Current: ");
       // Serial.print(iL);
       // Serial.print("\t");
-      Serial.print("\n");
+      // Serial.print("\n");
     }
     // Free resources
     http.end();
     parsePayload(payload);
 
-    // if(sw_Y==0)
-    // {
-    //   sw_Y=1;
-    // }
-    // else
-    // {
-    //   sw_Y=0;
-    // }
-    // delay(5000);
+
     delay(1000);
-  }
-  else
-  {
-     digitalWrite(1, LOW);
-    iref=100;
+  } else {
+    WiFi.begin(ssid, password); // try reconnecto to wifi
+    digitalWrite(1, LOW);
   }
 }
 
@@ -197,15 +196,23 @@ void pwm_modulate(float pwm_input) {  // PWM function
 }
 
 
-int makeRequest(int requestType, HTTPClient& http) {
+int makeRequest(int requestType, HTTPClient& http, float vx) {
+  //sending the following message to the serve
   if (requestType == 0) {
     return http.GET();
   } else {
     http.addHeader("Content-Type", "application/json");
     String VOUT = String(vout);
     String IOUT = String(iL);
-    String SWY = String(sw_Y);
-    String postData = "{\"vout\":" + VOUT + ",\"iout\":" + IOUT + ",\"swY\":"+ SWY+"}";
+    String VIN = String(vin);
+    String ENERGY_STATUS;
+    if (vx > 6) {  //energy threshold
+      ENERGY_STATUS = "\"enough energy yellow\"";
+    } else {
+      ENERGY_STATUS = "\"not enough energy yellow\"";
+    }
+
+    String postData = "{\"vout\":" + VOUT + ",\"iout\":" + IOUT + ",\"vin\":" + VIN + ",\"energy status\":" + ENERGY_STATUS + "}";  //sending vout, vin, iout and energy status
     return http.POST(postData);
   }
 }
@@ -241,16 +248,16 @@ void parsePayload(String payload) {
   }
 }
 
-float PID(float setpoint, float input,float lastTime, float& cumError, float& prevError,  float Kp, float Ki,float Kd) {
+float PID(float setpoint, float input, float lastTime, float& cumError, float& prevError, float Kp, float Ki, float Kd) {
   float error;
   float output;
   float DT = millis() - lastTime;
   error = setpoint - input;
   cumError += constrain(error, -100, 100);
   cumError = constrain(cumError, -10000, 10000);
-  output = Kp * error + Ki * cumError + Kd*(error-prevError)/DT;
+  output = Kp * error + Ki * cumError + Kd * (error - prevError) / DT;
   prevError = error;
-  return constrain(output,0.1,254);
+  return constrain(output, 0.1, 254);
 }
 
 

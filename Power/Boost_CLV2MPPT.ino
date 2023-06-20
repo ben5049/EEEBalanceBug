@@ -1,8 +1,7 @@
 /*
- * Based upon code written by Yue Zhu (yue.zhu18@imperial.ac.uk) in July 2020.
- * pin6 is PWM output at 62.5kHz.
- * duty-cycle saturation is set as 2% - 98%
- * Control frequency is set as 1kHz. 
+Based on closed_loop SMPS from Power lab
+Modified by Digo Yu
+
 */
 
 #include <Wire.h>
@@ -22,7 +21,7 @@ float u0i,u1i,delta_ui,e0i,e1i,e2i; // Internal values for the current controlle
 float uv_max=4, uv_min=0; //anti-windup limitation
 float ui_max=50, ui_min=0; //anti-windup limitation
 float current_limit = 1.0;
-float vb_10,vbp=0,ibp=0;
+float vb_10,vbp=0,ibp=0; // pervious value of vin and iin
 float p,delta=0.005,delta_min=0.005,pp=0;
 boolean Boost_mode = 0;
 boolean CL_mode = 0;
@@ -84,7 +83,8 @@ void setup() {
       di=ibp;
       dp=p-pp;
 //varying dutycycle if the following condition meet
-if(va<=16)
+
+if(va<=16) //limit output voltage at 16V for safetyness
 {
        if(dp>0)
       {
@@ -115,6 +115,7 @@ else
   closed_loop=closed_loop-2*delta; //prevent output voltage too high
 }
 //store the current value as the pervious value of next cycle
+
 ibp=current_mA_ap;
 vbp=vb_10;
 pp=p;
@@ -123,7 +124,7 @@ pwm_modulate(closed_loop);
 
 }
       
-     else{ // Open Loop Boost
+     else{ // Open Loop Boost used to perform initial characterising
           current_limit = 2; // 
           oc = iL-current_limit; // Calculate the difference between current measurement and current limit
           if ( oc > 0) {
@@ -143,9 +144,10 @@ pwm_modulate(closed_loop);
     }
 
 
+
     com_count++;              //self activating, being used when dutycycle is capped at lowwer bound.
    
-    if (com_count >= 500) { //record data every second.
+    if (com_count >= 300) { //record data every second.
       if(closed_loopb==0.02&&closed_loop==0.02 && va<=16)
       {//if the dutycycle is capped, reset the dutycycle to initial value.
         closed_loop=0.7;
@@ -157,6 +159,7 @@ pwm_modulate(closed_loop);
       }
       com_count = 0;
     }
+//debug serial print
 
       Serial.print("Va: ");
       Serial.print(va);
@@ -169,14 +172,14 @@ pwm_modulate(closed_loop);
       Serial.print("p: ");
       Serial.print(p);
       Serial.print("\t\t");
-
-      Serial.print("dp: ");
-      Serial.print(dp);
-      Serial.print("\t\t");
-
-      Serial.print("dv: ");
-      Serial.print(dv);
-      Serial.print("\t\t");
+//
+//      Serial.print("dp: ");
+//      Serial.print(dp);
+//      Serial.print("\t\t");
+//
+//      Serial.print("dv: ");
+//      Serial.print(dv);
+//      Serial.print("\t\t");
       
       Serial.print("CLduty: ");
       Serial.print(closed_loop);
@@ -185,10 +188,10 @@ pwm_modulate(closed_loop);
       Serial.print("current: ");
       Serial.print(current_mA_ap);
       Serial.print("\t\t");
-
-      Serial.print("OLduty: ");
-      Serial.print(1-open_loop);
-      Serial.print("\t\t");
+//
+//      Serial.print("OLduty: ");
+//      Serial.print(1-open_loop);
+//      Serial.print("\t\t");
 
 
       Serial.print("CL Mode: ");
