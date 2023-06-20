@@ -1,21 +1,20 @@
-//Based on Buck_OLCL.ino provided by power lab.
+//Refer to BUCK_LEDY
 
 #include <Wire.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 
-float open_loop, closed_loop, delta;  // Duty Cycles
-float vout, vin, vref = 3, vret, iL, dutyref, current_mA;                // Measurement Variables
-unsigned int sensorValue0, sensorValue1, sensorValue2, sensorValue3;     // ADC sample values declaration
+float open_loop, closed_loop, delta;                                  // Duty Cycles
+float vout, vin, vref = 3, vret, iL, dutyref, current_mA;             // Measurement Variables
+unsigned int sensorValue0, sensorValue1, sensorValue2, sensorValue3;  // ADC sample values declaration
 float current_limit = 300;
 float iref = 50;
-float cumError=0, prevError=0,Kp=0.0008,Ki=0.021,Kd=0.012;
+float cumError = 0, prevError = 0, Kp = 0.0008, Ki = 0.021, Kd = 0.012;
 const char* ssid = "Digo111";
 const char* password = "88888888";
 float loopLastTime = micros();
 float starttime = micros();
-bool sw_B=0;
 String serverName = "http://54.165.59.37:5000/";
 
 
@@ -27,40 +26,39 @@ void setup() {
 
   pinMode(0, OUTPUT);       //pin0 is PWM pin
   pinMode(1, OUTPUT);       //pin1 is PWM enable pin
-  digitalWrite(1,LOW);    //always enable PWM signal
+  digitalWrite(1, LOW);     //always disable PWM signal
   analogWriteFreq(100000);  //set the PWM frequency at 100kHz
   Serial.begin(115200);     //serial communication enable. Used for program debugging.
-  delta = 0.01; 
+  delta = 0.01;
   closed_loop = 0.4;  //initial value of dutycycle0
 }
 
 void loop() {
 
-sampling();
-if((micros()-starttime)>100){
-if(iL<=current_limit){
-  //adjust dutycycle according to measured vout, vref is set to be 3V
-  
-  closed_loop=PID(iref,iL,loopLastTime,cumError,prevError,Kp,Ki,Kd);
-  loopLastTime = millis();
-  starttime= micros();
-}
-else{
-  closed_loop=closed_loop-20;
-  starttime= micros();
-}
-}
-// Serial.print("Input:");
-// Serial.println(iL);
-// Serial.print(",Setpoint:");
-// Serial.println(iref);
-// Serial.print(",DutyCycle:");
-// Serial.println(closed_loop);
-// Serial.print(",High:");
-// Serial.println(0);
-// Serial.print(",Low:");
-// Serial.println(200);
-analogWrite(0,(int)(closed_loop));
+  sampling();
+  if ((micros() - starttime) > 100) {
+    if (iL <= current_limit) {
+      //adjust dutycycle according to measured vout, vref is set to be 3V
+
+      closed_loop = PID(iref, iL, loopLastTime, cumError, prevError, Kp, Ki, Kd);
+      loopLastTime = millis();
+      starttime = micros();
+    } else {
+      closed_loop = closed_loop - 20;
+      starttime = micros();
+    }
+  }
+  // Serial.print("Input:");
+  // Serial.println(iL);
+  // Serial.print(",Setpoint:");
+  // Serial.println(iref);
+  // Serial.print(",DutyCycle:");
+  // Serial.println(closed_loop);
+  // Serial.print(",High:");
+  // Serial.println(0);
+  // Serial.print(",Low:");
+  // Serial.println(200);
+  analogWrite(0, (int)(closed_loop));
 
   //used to debug
   // Serial.print("Vout: ");
@@ -93,7 +91,6 @@ void setup1() {
     WiFi.begin(ssid, password);
     delay(1000);
     Serial.print(".");
-
   }
   Serial.println("");
   Serial.print("Connected to WiFi network with IP Address: ");
@@ -115,45 +112,41 @@ void loop1() {
     http.begin(serverPath.c_str());
 
     // Send HTTP request
-    int httpResponseCode = makeRequest(requestType, http);
+    int httpResponseCode = makeRequest(requestType, http, vin);
 
     // Manage response
     String payload = handleResponse(httpResponseCode, http);
-    int flag=payload[36]-'0';
+    int flag = payload[36] - '0';
     Serial.print(payload);
-    if (flag==1) {
-      digitalWrite(1,HIGH);
-      Serial.print("on!");
+    if (flag == 1) {
+      if (vin > 6) {
+        digitalWrite(1, HIGH);
+      } else {
+        digitalWrite(1, LOW);
+      }
+      //used to debug
+      // Serial.print("on!");
       // Serial.print("Inductor Current: ");
       // Serial.print(iL);
       // Serial.print("\t");
-      Serial.print("\n");
+      // Serial.print("\n");
     } else {
-      digitalWrite(1,LOW);
-      Serial.print("off!");
+      digitalWrite(1, LOW);
+      // Serial.print("off!");
       // Serial.print("Inductor Current: ");
       // Serial.print(iL);
       // Serial.print("\t");
-      Serial.print("\n");
+      // Serial.print("\n");
     }
     // Free resources
     http.end();
     parsePayload(payload);
-//  if(sw_B==0)
-//     {
-//       sw_B=1;
-//     }
-//     else
-//     {
-//       sw_B=0;
-//     }
-//     delay(5000);
-      delay(1000);
-  }
-  else
-  {
 
-digitalWrite(1,LOW);
+    delay(1000);
+  } else {
+
+    digitalWrite(1, LOW);
+    WiFi.begin(ssid, password);
   }
 }
 
@@ -198,20 +191,24 @@ void pwm_modulate(float pwm_input) {  // PWM function
 }
 
 
-int makeRequest(int requestType, HTTPClient& http) {
+int makeRequest(int requestType, HTTPClient& http, float vx) {
   if (requestType == 0) {
     return http.GET();
   } else {
     http.addHeader("Content-Type", "application/json");
-   String VOUT = String(vout);
+    String VOUT = String(vout);
     String IOUT = String(iL);
-    // String SWR = String(sw_R);
     String VIN = String(vin);
-    String postData = "{\"vout\":" + VOUT + ",\"iout\":" + IOUT + ",\"vin\":"+ VIN+"}";
+    String ENERGY_STATUS;
+    if (vx > 6) {
+      ENERGY_STATUS = "\"enough energy blue\"";
+    } else {
+      ENERGY_STATUS = "\"not enough energy blue\"";
+    }
+    String postData = "{\"vout\":" + VOUT + ",\"iout\":" + IOUT + ",\"vin\":" + VIN + ",\"energy status\":" + ENERGY_STATUS + "}";
     return http.POST(postData);
   }
 }
-
 
 String handleResponse(int httpResponseCode, HTTPClient& http) {
   if (httpResponseCode >= 200 && httpResponseCode < 300) {
@@ -243,16 +240,16 @@ void parsePayload(String payload) {
   }
 }
 
-float PID(float setpoint, float input,float lastTime, float& cumError, float& prevError,  float Kp, float Ki,float Kd) {
+float PID(float setpoint, float input, float lastTime, float& cumError, float& prevError, float Kp, float Ki, float Kd) {
   float error;
   float output;
   float DT = millis() - lastTime;
   error = setpoint - input;
   cumError += constrain(error, -1000, 1000);
   cumError = constrain(cumError, -10000, 10000);
-  output = Kp * error + Ki * cumError + Kd*(error-prevError)/DT;
+  output = Kp * error + Ki * cumError + Kd * (error - prevError) / DT;
   prevError = error;
-  return constrain(output,1,254);
+  return constrain(output, 1, 254);
 }
 
 

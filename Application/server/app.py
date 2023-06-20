@@ -14,6 +14,7 @@ DEBUG = False
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
+commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 5]
 
 # Server global variables
 TIMEOUT = 30
@@ -109,11 +110,15 @@ def rover():
     # print("YAW: ", data["diagnostics"]["connection"])
 
     # user input to resp
-    resp = []
-    user =int(input("Next command: "))
-    while user != -1:
-        resp.append(user)
-        user = int(input("Next command: "))
+    # resp = []
+    # user =int(input("Next command: "))
+    # while user != -1:
+    #     resp.append(user)
+    #     user = int(input("Next command: "))
+    if (len(commandQueue))!=0:
+        resp = [commandQueue.pop(0)]
+    else:
+        resp = []
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     print(resp)
