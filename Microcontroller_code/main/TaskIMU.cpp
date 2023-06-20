@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 06/06/23
+Date updated: 19/06/23
 
 IMU sampling and sensor fusion
 */
@@ -26,14 +26,16 @@ static ICM_20948_SPI myICM; /* Create an ICM_20948_SPI object */
 
 /* IMU DMP */
 volatile float pitch;
+volatile float pitchRate;
 volatile float yaw;
-volatile float roll;
-volatile float angularVelocity;
 volatile float yawRate;
+
 static float frequencyIMU;
 
 /* Task handles */
 TaskHandle_t taskIMUHandle = nullptr;
+
+struct angleData IMUData;
 
 //-------------------------------- Functions --------------------------------------------
 
@@ -71,9 +73,16 @@ void configureIMU() {
   frequencyIMU = IMU_SAMPLING_FREQUENCY_DMP;
 
   static bool success = true;
+
   success &= (myICM.initializeDMP() == ICM_20948_Stat_Ok);
+
+#if ENABLE_DMP_MAGNETOMETER == true
+  success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_ORIENTATION) == ICM_20948_Stat_Ok);
+  success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat9, 0) == ICM_20948_Stat_Ok);  // Set to the maximum
+#else
   success &= (myICM.enableDMPSensor(INV_ICM20948_SENSOR_GAME_ROTATION_VECTOR) == ICM_20948_Stat_Ok);
-  success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat6, 0) == ICM_20948_Stat_Ok);  // Set to the maximum
+  success &= (myICM.setDMPODRrate(DMP_ODR_Reg_Quat6, 0) == ICM_20948_Stat_Ok);                        // Set to the maximum
+#endif
   success &= (myICM.enableFIFO() == ICM_20948_Stat_Ok);
   success &= (myICM.enableDMP() == ICM_20948_Stat_Ok);
   success &= (myICM.resetDMP() == ICM_20948_Stat_Ok);
@@ -84,7 +93,7 @@ void configureIMU() {
   } else {
     while (true) {
       SERIAL_PORT.println(F("Enable DMP failed!"));
-      SERIAL_PORT.println(F("Please check that you have uncommented line 29 (#define ICM_20948_USE_DMP) in ICM_20948_C.h..."));
+      SERIAL_PORT.println(F("Please check that you have uncommented line 29 (#define ICM_20948_USE_DMP) in ICM_20948_C.h. (This line is re-commented out each time you update the library)"));
       delay(1000);
     }
   }
@@ -223,91 +232,117 @@ void taskIMU(void *pvParameters) {
   static unsigned long timestamp;         /* Timestamp of samples taken in microseconds */
   static unsigned long previousTimestamp; /* Time since last sample in microseconds */
   static float deltaTime;                 /* Time between samples in seconds */
-  static uint8_t counter = 0;
+
+  static uint32_t samples = 0;
+  static float yawDrift = 0;
+  static float totalYawDrift = 0;
+  static float prevYaw;
+
+  const TickType_t xFrequency = configTICK_RATE_HZ / IMU_SAMPLING_FREQUENCY_DMP;
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+
   /* Start the loop */
   while (true) {
 
     /* Wait for the data ready interrupt before sampling the IMU */
-    ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
+    // ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
+
+    /* Pause the task until enough time has passed */
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
     /* Get data from the IMU and DMP and timestamp it */
-    if (xSemaphoreTake(mutexSPI, portMAX_DELAY) == pdTRUE) {
-      timestamp = micros();
-      myICM.getAGMT();
+    timestamp = micros();
+    myICM.getAGMT();
+
 #if ENABLE_DMP == true
-      myICM.readDMPdataFromFIFO(&angle_data);
+    myICM.readDMPdataFromFIFO(&angle_data);
 #endif
-      xSemaphoreGive(mutexSPI);
 
 #if ENABLE_DMP == true
-      /* Process the quaternion data from the DMP into Euler angles */
-      if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) {  // Was valid data available?
-        if ((angle_data.header & DMP_header_bitmap_Quat6) > 0) {
-          float q1 = ((float)angle_data.Quat6.Data.Q1) / 1073741824.0;  // Convert to double. Divide by 2^30
-          float q2 = ((float)angle_data.Quat6.Data.Q2) / 1073741824.0;  // Convert to double. Divide by 2^30
-          float q3 = ((float)angle_data.Quat6.Data.Q3) / 1073741824.0;  // Convert to double. Divide by 2^30
-          float q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
-          float q2sqr = q2 * q2;
 
-          /* pitch (x-axis rotation) */
-          double t0 = +2.0 * (q0 * q1 + q2 * q3);
-          double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
-          pitch = atan2(t0, t1) * 180.0 / PI;
+    /* Process the quaternion data from the DMP into Euler angles */
 
-          /* roll (y-axis rotation) don't need to calculate since rover cannot move in this axis */
-          // float t2 = +2.0 * (q0 * q2 - q3 * q1);
-          // t2 = t2 > 1.0 ? 1.0 : t2;
-          // t2 = t2 < -1.0 ? -1.0 : t2;
-          // roll = asin(t2) * 180.0 / PI;
+#if ENABLE_DMP_MAGNETOMETER == true
+    if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) {  // Was valid data available?
+      if ((angle_data.header & DMP_header_bitmap_Quat9) > 0) {
+        float q1 = ((float)angle_data.Quat9.Data.Q1) / 1073741824.0;  // Convert to double. Divide by 2^30
+        float q2 = ((float)angle_data.Quat9.Data.Q2) / 1073741824.0;  // Convert to double. Divide by 2^30
+        float q3 = ((float)angle_data.Quat9.Data.Q3) / 1073741824.0;  // Convert to double. Divide by 2^30
+#else
+    if ((myICM.status == ICM_20948_Stat_Ok) || (myICM.status == ICM_20948_Stat_FIFOMoreDataAvail)) {  // Was valid data available?
+      if ((angle_data.header & DMP_header_bitmap_Quat6) > 0) {
+        float q1 = ((float)angle_data.Quat6.Data.Q1) / 1073741824.0;  // Convert to double. Divide by 2^30
+        float q2 = ((float)angle_data.Quat6.Data.Q2) / 1073741824.0;  // Convert to double. Divide by 2^30
+        float q3 = ((float)angle_data.Quat6.Data.Q3) / 1073741824.0;  // Convert to double. Divide by 2^30
+#endif
+        float q0 = sqrt(1.0 - ((q1 * q1) + (q2 * q2) + (q3 * q3)));
+        float q2sqr = q2 * q2;
 
-          /* yaw (z-axis rotation) */
-          float t3 = +2.0 * (q0 * q3 + q1 * q2);
-          float t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
-          yaw = atan2(t3, t4) * 180.0 / PI;
-          angularVelocity = myICM.gyrX();
-          yawRate = myICM.gyrZ();
-        }
+        /* pitch (x-axis rotation) */
+        double t0 = +2.0 * (q0 * q1 + q2 * q3);
+        double t1 = +1.0 - 2.0 * (q1 * q1 + q2sqr);
+        IMUData.pitch = atan2(t0, t1) * 180.0 / PI;
+
+        /* roll (y-axis rotation) don't need to calculate since rover cannot move in this axis */
+        // float t2 = +2.0 * (q0 * q2 - q3 * q1);
+        // t2 = t2 > 1.0 ? 1.0 : t2;
+        // t2 = t2 < -1.0 ? -1.0 : t2;
+        // roll = asin(t2) * 180.0 / PI;
+
+        /* yaw (z-axis rotation) */
+        float t3 = +2.0 * (q0 * q3 + q1 * q2);
+        float t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
+        IMUData.yaw = atan2(t3, t4) * 180.0 / PI;
+
+        /* Pack pitch rate and yaw rate into IMU data */
+        IMUData.pitchRate = myICM.gyrX();
+        IMUData.yawRate = myICM.gyrZ();
+
+#if ENABLE_IMU_DEBUG == true
+        SERIAL_PORT.print("Pitch: ");
+        SERIAL_PORT.print(IMUData.pitch);
+        SERIAL_PORT.print(", Yaw: ");
+        SERIAL_PORT.print(IMUData.yaw);
+        samples++;
+        totalYawDrift += IMUData.yaw - prevYaw;
+        prevYaw = IMUData.yaw;
+        yawDrift = totalYawDrift / samples;
+        SERIAL_PORT.print(", Yaw drift (per sample): ");
+        SERIAL_PORT.println(yawDrift, 10);
+#endif
+
+        /* Write the struct that stores the IMU data to a single item queue to distribute to other tasks */
+        xQueueOverwrite(IMUDataQueue, &IMUData);
       }
-
-      #else
-
-      /* Acquire latest sensor data */
-      FusionVector gyroscope = { myICM.gyrX(), myICM.gyrY(), myICM.gyrZ() };
-      FusionVector accelerometer = { myICM.accX() / 1000.0, myICM.accY() / 1000.0, myICM.accZ() / 1000.0 };
-      // FusionVector magnetometer = { myICM.magX(), myICM.magY(), myICM.magZ() };
-
-      /* Update gyroscope offset correction algorithm */
-      // gyroscope = FusionOffsetUpdate(&offset, gyroscope);
-
-      /* Calculate delta time (in seconds) to account for gyroscope sample clock error */
-      deltaTime = (float)(timestamp - previousTimestamp) / (float)1000000.0;
-      previousTimestamp = timestamp;
-
-      /* Update gyroscope AHRS algorithm */
-      // FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
-      FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, deltaTime);
-
-      /* Print algorithm outputs */
-      const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
-      // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
-
-      // if (counter == 10) {
-      //   counter = 0;
-      //   Serial.print("DMP yaw: ");
-      //   Serial.print(yaw);
-      //   Serial.print(", DMP pitch: ");
-      //   Serial.print(pitch);
-
-      //   Serial.print(", Madgwick yaw: ");
-      //   Serial.print(euler.angle.yaw);
-      //   Serial.print(", Madgwick pitch: ");
-      //   Serial.println(euler.angle.pitch);
-      // }
-      // counter++;
-      // yaw = euler.angle.yaw;
-      // pitch = euler.angle.pitch;
-      // angularVelocity = myICM.gyrX();
-#endif
     }
+
+#else
+
+    /* Acquire latest sensor data */
+    FusionVector gyroscope = { myICM.gyrX(), myICM.gyrY(), myICM.gyrZ() };
+    FusionVector accelerometer = { myICM.accX() / 1000.0, myICM.accY() / 1000.0, myICM.accZ() / 1000.0 };
+#if ENABLE_MAGNETOMETER == true
+    FusionVector magnetometer = { myICM.magX(), myICM.magY(), myICM.magZ() };
+#endif
+
+    /* Update gyroscope offset correction algorithm */
+    // gyroscope = FusionOffsetUpdate(&offset, gyroscope);
+
+    /* Calculate delta time (in seconds) to account for gyroscope sample clock error */
+    deltaTime = (float)(timestamp - previousTimestamp) / (float)1000000.0;
+    previousTimestamp = timestamp;
+
+/* Update gyroscope AHRS algorithm */
+#if ENABLE_MAGNETOMETER == true
+    FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, deltaTime);
+#else
+    FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, deltaTime);
+#endif
+
+    /* Print algorithm outputs */
+    const FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
+    // const FusionVector linearAcceleration = FusionAhrsGetLinearAcceleration(&ahrs);
+
+#endif
   }
 }

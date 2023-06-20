@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 28/05/23
+Date updated: 19/05/23
 
 Pin assignments for Group 1's EEEBalanceBug
 */
@@ -12,6 +12,7 @@ Pin assignments for Group 1's EEEBalanceBug
 //--------------------------------- PCB pins --------------------------------------------
 
 /* Misc */
+#define BOOT 0 
 #define LED_BUILTIN 27
 #define SERVO_PIN 13
 
@@ -79,6 +80,5 @@ Pin assignments for Group 1's EEEBalanceBug
 // #define I2C_SDA 21
 // #define TOF_L_INT 36
 // #define TOF_R_INT 0
-
 
 #endif

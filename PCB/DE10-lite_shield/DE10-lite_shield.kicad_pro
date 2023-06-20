@@ -512,6 +512,22 @@
     [
       "42dcd1c6-b27b-471e-adaa-a184b6e8160d",
       ""
+    ],
+    [
+      "64f5d376-489c-4d66-8151-16917461492d",
+      "Power"
+    ],
+    [
+      "93c598a6-836d-4390-b2c9-7307c0c28ef3",
+      "Sensors"
+    ],
+    [
+      "1ab5e218-ce3a-4931-a2dd-493389749da6",
+      "Microcontroller & USB"
+    ],
+    [
+      "9206a842-7f2b-4e44-bea3-de1c4f39f118",
+      "Other"
     ]
   ],
   "text_variables": {}

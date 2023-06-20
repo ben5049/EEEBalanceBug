@@ -16,26 +16,29 @@ def overlay_data(data1, data2, label1, data3, data4, label2):
     x = range(len(data1))  # x-axis values (assumed to be the indices of the array)
 
     plt.subplot(2,1,1)
+    plt.margins(x=0, y=0.3)
     plt.plot(x, data1, label='DMP')
     plt.plot(x, data2, label='Madgwick')
-    plt.xlabel('Index')
-    plt.ylabel('Value')
+    plt.xlabel('Sample Index')
+    plt.ylabel('Angle (degrees)')
     plt.title(label1)
     plt.legend()
 
     plt.subplot(2,1,2)
+    plt.margins(x=0, y=0.3)
     plt.plot(x, data3, label='DMP')
     plt.plot(x, data4, label='Madgwick')
-    plt.xlabel('Index')
-    plt.ylabel('Value')
+    plt.xlabel('Sample Index')
+    plt.ylabel('Angle (degrees)')
     plt.title(label2)
     plt.legend()
 
+    plt.subplots_adjust(hspace = 0.34)
     plt.show()
 
 # Inputs
 coefficients = [0.02509274331174643,0.12664894963152423,0.26587759991367516,0.33589861675220817,0.26587759991367516,0.12664894963152423,0.02509274331174643,]
-filename = "sensor_fusion_test.txt"  # Replace with the actual file name
+filename = "sensor_fusion_test_2.txt"  # Replace with the actual file name
 
 
 

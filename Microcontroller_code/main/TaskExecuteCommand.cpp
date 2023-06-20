@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 06/06/23
+Date updated: 20/06/23
 
 Command state machine that reads new commands from a queue and implements them
 */
@@ -23,11 +23,9 @@ TaskHandle_t taskExecuteCommandHandle = nullptr;
 /* Variables */
 volatile float spinStartingAngle;
 
-/* Create state */
+/* Create states */
 volatile robotCommand currentCommand = IDLE;
 volatile whereAt currentWhereAt = PASSAGE;
-
-//-------------------------------- Functions --------------------------------------------
 
 //-------------------------------- Task Functions ---------------------------------------
 
@@ -36,9 +34,11 @@ void taskExecuteCommand(void *pvParameters) {
 
   (void)pvParameters;
 
+  static struct angleData IMUData;
+
   /* Variables */
   static robotCommand newCommand;
-  static float junctionAngle;
+  // static float junctionAngle;
   static float angleSetpoint;
 
   /* Start the loop */
@@ -50,24 +50,42 @@ void taskExecuteCommand(void *pvParameters) {
       /* Do nothing and wait for commands */
       case IDLE:
 
-        /* Define what to do in the IDLE state e.g. speed = 0 etc */
+        /* Set the speed to 0 */
         speedSetpoint = 0;
-        /* Wait for the next command (timeout every second to prevent deadlock) */
-        if (xQueueReceive(commandQueue, &newCommand, pdMS_TO_TICKS(1000)) == pdTRUE) {
-          currentCommand = newCommand;
-        } else {
-          currentCommand = IDLE;
+        enableAngRateControl = false;
+        enableDirectionControl = false;
+        motorDiff = 0;
+        angRateSetpoint = 0;
+
+
+        /* Wait for the next command */
+        while (xQueueReceive(commandQueue, &newCommand, pdMS_TO_TICKS(10)) != pdTRUE) {
+          xQueuePeek(IMUDataQueue, &IMUData, 0);
+          dirSetpoint = IMUData.yaw;
         }
+
+        currentCommand = newCommand;
+        enableAngRateControl = true;
+        enableDirectionControl = true;
+
         break;
 
       /* Go forward until a junction or obstacle is reached */
       case FORWARD:
 
+        digitalWrite(LED_BUILTIN, HIGH);
         /* Define what to do on the FORWARD command e.g. speed != 0 etc */
-        speedSetpoint = -100;
-        
+        speedSetpoint = 80;
+
+        /* Wait 2 seconds to enter a passage before enabling path control */
+        vTaskDelay(pdMS_TO_TICKS(4000));
+        ulTaskNotifyValueClearIndexed(NULL, 0, UINT_MAX);
+        enablePathControl = true;
+
         /* Wait until a junction is detected by taskToF */
         ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
+
+        digitalWrite(LED_BUILTIN, LOW);
 
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &newCommand, 0) == pdTRUE) {
@@ -75,15 +93,25 @@ void taskExecuteCommand(void *pvParameters) {
         } else {
           currentCommand = IDLE;
         }
+
+        /* Disable path control when no longer going forwards */
+        enablePathControl = false;
+
         break;
 
       /* Turn to the specified angle */
       case TURN:
 
-        /* Define what to do in the TURN state */
+        /* Set the speed to 0 */
+        speedSetpoint = 0;
+
+        /* Recieve the angle to turn to and pass it to the direction controller */
         xQueueReceive(angleSetpointQueue, &angleSetpoint, portMAX_DELAY);
-        dirSetpoint = angleSetpoint;
-        // TODO: figure out how to give this to controller when finished
+        dirSetpoint = (turns * 360.0) + angleSetpoint;
+
+        /* Wait for the turn to complete */
+        vTaskDelay(pdMS_TO_TICKS(2000));
+
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &newCommand, 0) == pdTRUE) {
           currentCommand = newCommand;
@@ -95,26 +123,32 @@ void taskExecuteCommand(void *pvParameters) {
       /* Turn 360 degrees and find the angles of the beacons */
       case SPIN:
 
-        /* Define what to do in the SPIN state */
+        /* Set the speed to 0 */
+        speedSetpoint = 0;
 
-        SERIAL_PORT.print("Starting yaw: ");
-        spinStartingAngle = yaw;
-        SERIAL_PORT.println(spinStartingAngle);
+        /* Disable the direction controller and set the angular rate */
+        spinStartingAngle = IMUData.yaw;
+        enableDirectionControl = false;
+        turns--;
+        angRateSetpoint = SPIN_SPEED;
 
-        /* Unblock TaskSpin which will then count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
+        /* Unblock TaskSpin which will count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
-        /* Wait for the turn to complete (TODO: replace later with notification from yaw controller) */
-        vTaskDelay(8000);
+        /* Wait for the turn to complete */
+        vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000));
 
         /* Notify the spin task that the turn is complete*/
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
-        digitalWrite(LED_BUILTIN, LOW);
-        SERIAL_PORT.println("Finished");
 
         /* Recieve acknowledge that the queue is ready and taskSpin is done */
         ulTaskNotifyTakeIndexed(0, pdTRUE, pdMS_TO_TICKS(50));
 
+        /* Re-enable the direction controller */
+        enableDirectionControl = true;
+
+        /* Delay to let the angle correct */
+        vTaskDelay(pdMS_TO_TICKS(500));
         /* Print the angles of the junctions */
         // while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
         //   if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {

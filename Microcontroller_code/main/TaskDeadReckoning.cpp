@@ -1,9 +1,11 @@
 /*
 Authors: Aranya Gupta
 Date created: 05/06/23
+Date updated: 05/06/23
 
 Task to do dead reckoning while rover is moving
 */
+
 //-------------------------------- Includes ---------------------------------------------
 
 /* Task headers */
@@ -23,14 +25,14 @@ TaskHandle_t taskDeadReckoningHandle = nullptr;
 volatile float xPosition;
 volatile float yPosition;
 
-//-------------------------------- Functions --------------------------------------------
-
 //-------------------------------- Task Functions ---------------------------------------
 
 /* Task to get rover position */
 void taskDeadReckoning(void *pvParameters) {
 
   (void)pvParameters;
+
+  static struct angleData IMUData;
 
   /* Task variables */
   uint16_t stepDifferenceThreshold = 10;
@@ -46,6 +48,8 @@ void taskDeadReckoning(void *pvParameters) {
   while (true) {
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
+    xQueuePeek(IMUDataQueue, &IMUData, 0);
+
     /* Use dead reckoning only when moving forwards */
     if (currentCommand == FORWARD) {
 
@@ -55,8 +59,8 @@ void taskDeadReckoning(void *pvParameters) {
 
       /* Logic for if the rover has gone straight (# left wheel step == # right wheel steps)*/
       if (leftSteps == rightSteps) {
-        xPosition = xPosition + leftSteps / STEPS * cos(yaw * PI / 180) * rotationsToDistance;
-        yPosition = yPosition - leftSteps / STEPS * sin(yaw * PI / 180) * rotationsToDistance;
+        xPosition = xPosition + leftSteps / STEPS * cos(IMUData.yaw * PI / 180) * rotationsToDistance;
+        yPosition = yPosition - leftSteps / STEPS * sin(IMUData.yaw * PI / 180) * rotationsToDistance;
       }
 
       /* Logic for if the rover has turned (# left wheel step != # right wheel steps)*/
@@ -65,8 +69,8 @@ void taskDeadReckoning(void *pvParameters) {
         float r = leftSteps / STEPS * rotationsToDistance / theta;
         float triangle_sides = r - ROVER_WIDTH / 2;
         float a = sqrt(2 * triangle_sides * triangle_sides * (1 - cos(theta)));
-        xPosition = xPosition + a * sin(yaw*PI/180);
-        yPosition = yPosition - a * cos(yaw*PI/180);
+        xPosition = xPosition + a * sin(IMUData.yaw*PI/180);
+        yPosition = yPosition - a * cos(IMUData.yaw*PI/180);
       }
       priorStepperLeftSteps = stepperLeftSteps;
       priorStepperRightSteps = stepperRightSteps;
