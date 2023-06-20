@@ -2,9 +2,9 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>18.1</BspVersion>
-        <BspGeneratedTimeStamp>19-Jun-2023 19:18:45</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1687198725793</BspGeneratedUnixTimeStamp>
-        <BspGeneratedLocation>C:\Users\bens1\Documents\Uni\Year_2\Design_Project_2\EEEBalanceBug\FPGA\R_DETECT\software\D8M_Camera_Test_bsp</BspGeneratedLocation>
+        <BspGeneratedTimeStamp>2023. 6. 20 오후 12:28:53</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1687260533900</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>C:\Users\UKGC\Desktop\EEEBalanceBug\FPGA\R_DETECT\software\D8M_Camera_Test_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\Qsys.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
