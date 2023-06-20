@@ -109,11 +109,7 @@ def rover():
     # print("YAW: ", data["diagnostics"]["connection"])
 
     # user input to resp
-    resp = []
-    user =int(input("Next command: "))
-    while user != -1:
-        resp.append(user)
-        user = int(input("Next command: "))
+    resp = [0]
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     print(resp)
