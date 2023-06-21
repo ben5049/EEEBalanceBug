@@ -17,12 +17,12 @@ Bluetooth Xbox controller task
 
 //-------------------------------- Global Variables -------------------------------------
 
-TaskHandle_t taskBluetooth = nullptr;
+TaskHandle_t taskBluetoothHandle = nullptr;
 
 //-------------------------------- Task Functions ---------------------------------------
 
 /* Task to record debug information */
-void taskDebug(void *pvParameters) {
+void taskBluetooth(void *pvParameters) {
 
   (void)pvParameters;
 

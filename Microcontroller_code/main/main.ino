@@ -209,7 +209,7 @@ void setup() {
     1000,                    /* Stack size in words, not bytes */
     nullptr,                 /* Parameter passed into the task */
     TASK_BLUETOOTH_PRIORITY, /* Task priority */
-    &taskBluetooth,          /* Pointer to store the task handle */
+    &taskBluetoothHandle,    /* Pointer to store the task handle */
     tskNO_AFFINITY);
 #endif
 
