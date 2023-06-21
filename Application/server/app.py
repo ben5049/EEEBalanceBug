@@ -154,7 +154,6 @@ def allrovers():
     disallowedMacs = []
     # remove timed out rovers
     for rover in rovers:
-        print(rover)
         if time()-rover.lastSeen > TIMEOUT:
             rovers.remove(rover)
 
@@ -253,6 +252,8 @@ def diagnostics():
         flag = True
         t["isfinished"] = True
         for rover in rovers:
+            if time()-rover.lastSeen > TIMEOUT:
+                rovers.remove(rover)
             if str(rover.name)==str(mac):
                 t["isfinished"] = False
 
