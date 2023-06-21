@@ -66,16 +66,12 @@ class Rover():
     
     def thresholding(self, pos1, pos2):
         if pos1[0] == 0 and pos1[1] == 0 and pos2[0] == 0 and pos2[1]==0:
-            print("0,0 exception")
             return False
         if abs(self.priornode.position[0] - pos2[0]) < THRESHOLD and abs(self.priornode.position[1] - pos2[1]) < THRESHOLD:
-            print("Hasn't left threshold of prior node ", self.priornode)
             return False
         if abs(self.previouslyPlacedNode.position[0] - pos2[0]) < THRESHOLD and abs(self.previouslyPlacedNode.position[1] - pos2[1]) < THRESHOLD:
-            print("Hasn't left threshold of most recently placed node ", self.previouslyPlacedNode)
             return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
-            print("In threshold of previously seen node ", pos1, " current position", pos2)
             return True
         else:
             return False
