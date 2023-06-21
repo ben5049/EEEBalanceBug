@@ -90,7 +90,7 @@ def rover():
     
     # create response to rover and reset timeout
     r.lastSeen = time()
-    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
+    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
 
     # spin  test
     # if len(data["beaconangles"]) == 3:
@@ -110,6 +110,7 @@ def rover():
 
     # using command queue 
     if (len(commandQueue))!=0:
+        r.actions = []
         resp = [commandQueue.pop(0)]
     else:
         resp = []

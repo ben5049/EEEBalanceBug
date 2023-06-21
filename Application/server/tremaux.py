@@ -45,7 +45,7 @@ class Rover():
     startup = 0
     pause = False
 
-    def __init__(self, position, whereat, name, orientation):
+    def __init__(self, position, whereat, name):
         self.name = name
         n = Node(position)
         self.tree[n] = []
