@@ -64,8 +64,8 @@ class Rover():
         return str(self.name)
     
     def thresholding(self, pos1, pos2):
-        print("X COORDINATE THRESHOLD: ", abs(pos1[0] -pos2[0]) < THRESHOLD)
-        print("Y COORDINATE THRESHOLD: ", abs(pos1[1] -pos2[1]) < THRESHOLD)
+        if pos1 == (0,0) or pos2 == (0,0):
+            return False
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
             return True
         else:
