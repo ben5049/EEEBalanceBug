@@ -8,7 +8,7 @@ import mariadb
 from time import time
 from json import loads
 from triangulate import triangulate
-DEBUG = False
+DEBUG = True
 
 # Set up server
 
@@ -48,10 +48,6 @@ def hello():
 def rover():
     global conn, cur
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
-    print("BEACON ANGLES: ", data["beaconangles"])
-    print("JUNCTION ANGLES:", data["branches"])
-    print("POSITION: ", data["position"])
-    print("WHEREAT:", data["whereat"])
     r = 0
     flag = True
     # check if rover is already active
@@ -95,11 +91,6 @@ def rover():
     # create response to rover and reset timeout
     r.lastSeen = time()
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
-    # idle test
-    # resp = [3]
-
-    # forward test
-    # resp = [3]
 
     # spin  test
     # if len(data["beaconangles"]) == 3:
@@ -116,13 +107,14 @@ def rover():
     # while user != -1:
     #     resp.append(user)
     #     user = int(input("Next command: "))
+
+    # using command queue 
     if (len(commandQueue))!=0:
         resp = [commandQueue.pop(0)]
     else:
         resp = []
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
-    print(resp)
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
         global isSpinning, spinTime
@@ -144,23 +136,13 @@ def rover():
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     
     if DEBUG:
-        print(data)
-        # cur.execute("SELECT * FROM Rovers")
-        # for mac, nickname in cur:
-        #     print(mac, nickname)
-        # cur.execute("SELECT * FROM Diagnostics")
-        # for mac, timestamp, battery, connection, sessionid in cur:
-        #     print(mac, timestamp, battery, connection, sessionid, "THIS IS IN Diagnostics Table")
-        # cur.execute("SELECT * FROM ReplayInfo")
-        # for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID in cur:
-        #     print(timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, SessionID)
-        # cur.execute("SELECT * FROM Sessions")
-        # for mac, sessionId, SessionNickname in cur:
-        #     print(mac, sessionId, SessionNickname)
-        print(r.actions, "ACTIONS")
+        print("BEACON ANGLES: ", data["beaconangles"])
+        print("JUNCTION ANGLES:", data["branches"])
+        print("POSITION: ", data["position"])
+        print("WHEREAT:", data["whereat"])
+        print("ACTIONS", r.actions)
         print(resp)
     conn.commit()
-    print("sent")
     return make_response(jsonify(resp), 200)
 
 # Give all rovers, active or inactive, to client
@@ -207,11 +189,7 @@ def allrovers():
         temp["nickname"] = rover[1]
         temp["connected"] = False
         d.append(temp)
-    
-    if DEBUG:
-        print(command)
-        print(d)
-        print(disallowedMacs)
+
     return make_response(jsonify(d), 200)
 
 # get a specific session replay
@@ -239,9 +217,7 @@ def replay():
     resp = {}
     for timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, mac, sessionid in cur:
         resp[timestamp] = [xpos, ypos, whereat, orientation, tofleft, tofright]
-    if DEBUG:
-        print(data)
-        print(resp)
+
     return make_response(jsonify(resp))
 
 # Get all sessions
@@ -258,8 +234,6 @@ def sessions():
         temp["nickname"] = nickname
         d.append(temp)
     
-    if DEBUG:
-        print(d)
     return make_response(jsonify(d), 200)
 
 # Get diagnostic data from given session
@@ -278,9 +252,6 @@ def diagnostics():
         t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
         d.append(t)
     
-    if DEBUG:
-        print(data)
-        print(d, "diagnostics")
     return make_response(jsonify(d), 200)
 
 # Pause a given rover
@@ -303,9 +274,6 @@ def pause():
     if flag:
         return make_response(jsonify({"error":"Selected rover does not exist, or is not currently connected"}), 400)
     
-    if DEBUG:
-        print("PAUSED")
-        print(data)
     return make_response(jsonify({"success":"successfully paused rover"}), 200)
 
 # Play a given rover
@@ -327,9 +295,7 @@ def play():
     
     if flag:
         return make_response(jsonify({"error":"Selected rover does not exist on play, or is not currently connected"}), 400)
-    if DEBUG:
-        print("PLAYED")
-        print(data)
+
     return make_response(jsonify({"success":"successfully played rover"}), 200)
 
 # Set a nickname for a session
@@ -447,7 +413,7 @@ def led_driver_red():
     print(data)
     
     if DEBUG:
-        print(isSpinning, time()-spinTime)
+        print(isSpinning, time()-spinTime, "RED")
     
     # logic to turn on led
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
@@ -464,9 +430,9 @@ def led_driver_blue():
     global isSpinning, spinTime
     data = request.get_json()
     energy = data["energy status"]
-    print(data)
+
     if DEBUG:
-        print(isSpinning, time()-spinTime)
+        print(isSpinning, time()-spinTime, "BLUE")
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
@@ -480,9 +446,8 @@ def led_driver_yellow():
     global isSpinning, spinTime
     data = request.get_json()
     energy = data["energy status"]
-    print(data)
     if DEBUG:
-        print(isSpinning, time()-spinTime)
+        print(isSpinning, time()-spinTime, "YELLOW")
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
