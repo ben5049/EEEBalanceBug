@@ -37,7 +37,8 @@ class Rover():
 
     toreturn = []
     nickname = ""
-    priornode = 0
+    priornode = 0 # prior node for tremaux's algorithm to work 
+    previouslyPlacedNode = 0 # the node most recently placed
     priorwhereat = 0
     sessionId = -1
     lastSeen = 0
@@ -69,6 +70,9 @@ class Rover():
             return False
         if abs(self.priornode.position[0] - pos2[0]) < THRESHOLD and abs(self.priornode.position[1] - pos2[1]) < THRESHOLD:
             print("Hasn't left threshold of prior node ", self.priornode)
+            return False
+        if abs(self.previouslyPlacedNode[0] - pos2[0]) < THRESHOLD and abs(self.previouslyPlacedNode[1] - pos2[1]) < THRESHOLD:
+            print("Hasn't left threshold of most recently placed node ", self.priornode)
             return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
             print("In threshold of previously seen node ", pos1)
@@ -148,6 +152,7 @@ class Rover():
                         # create new node at position, add it to the tree and as a child of the previous node
                         # and remain in state 1
                         n = Node(position)
+                        self.previouslyPlacedNode = n
                         self.tree[n] = []
                         self.tree[self.priornode].append(n)
                         # if self.priorwhereat == 1:
@@ -186,6 +191,7 @@ class Rover():
                 # check if at exit; if true, create end node and go to state 4[0]
                 elif whereat == 3:
                     n = Node(position)
+                    self.previouslyPlacedNode = n
                     self.tree[n] = []
                     n.setend()
                     self.tree[self.priornode].append(n)
@@ -214,6 +220,7 @@ class Rover():
                         self.updatePos(newx, newy)
                         # create new node
                         n = Node((newx, newy))
+                        self.previouslyPlacedNode = n
                         self.tree[n] = []
                         self.tree[self.priornode].append(n)
                         # tell rover to eventually go to state 4[0]
