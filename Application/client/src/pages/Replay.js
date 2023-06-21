@@ -455,13 +455,13 @@ const Replay = () => {
 			const [, entry] = entries[i];
 			console.log("#####################")
 			console.log("X: " + entry[0] + " Y: " + entry[1] + " Angle: " + entry[3] + " TOF_L: " + entry[4] + " TOF_R: " + entry[5]);
-			pos_x = entry[0];
+			pos_x = -(entry[0]);
 			pos_y = entry[1];
 			console.log("PRESCALE -- x: " + pos_x + ", y: " + pos_y)
 			const orientation = entry[3];
 			const TOF_left = entry[4];
 			const TOF_right = entry[5];
-			draw(pos_x, pos_y, orientation, TOF_left, TOF_right);
+			draw(pos_x, pos_y, -orientation, TOF_left, TOF_right);
 		}
 		/* Draws rover's last known position */
 		renderRover(pos_x,pos_y);

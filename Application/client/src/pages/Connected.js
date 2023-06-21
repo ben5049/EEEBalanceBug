@@ -290,12 +290,12 @@ const Connected = () => {
 		let pos_y
 		for (let i = 0; i < entries.length; i++) {
 			const [, entry] = entries[i];
-			pos_x = entry[0];
+			pos_x = -entry[0];
 			pos_y = entry[1];
 			const orientation = entry[3];
 			const TOF_left = entry[4];
 			const TOF_right = entry[5];
-			draw(pos_x, pos_y, orientation, TOF_left, TOF_right);
+			draw(pos_x, pos_y, -orientation, TOF_left, TOF_right);
 			console.log(entry[0] + " " + entry[1] + " " + entry[3] + " " + entry[4] + " " + entry[5]);
 		}
 		/* Draws rover's last known position */
