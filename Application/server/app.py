@@ -14,7 +14,7 @@ DEBUG = True
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 5]
+commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5]
 
 # Server global variables
 TIMEOUT = 30
@@ -90,7 +90,7 @@ def rover():
     
     # create response to rover and reset timeout
     r.lastSeen = time()
-    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"], data["orientation"])
+    resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
 
     # spin  test
     # if len(data["beaconangles"]) == 3:
@@ -110,6 +110,7 @@ def rover():
 
     # using command queue 
     if (len(commandQueue))!=0:
+        r.actions = []
         resp = [commandQueue.pop(0)]
     else:
         resp = []
@@ -124,6 +125,7 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
+        # if not r.pause:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
         if 5 in resp["next_actions"]:
@@ -249,6 +251,14 @@ def diagnostics():
     d = []
     for mac, timestamp, battery, connection, sessionid in cur:
         t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+        for rover in rovers:
+            if str(rover.name) == str(mac) and len(rover.actions)==0:
+                t["isfinished"] = True
+            elif str(rover.name) == str(mac):
+                t["isfinished"] = False
+
+        if "isfinished" not in t:
+            t["isfinished"] = False
         d.append(t)
     
     return make_response(jsonify(d), 200)
