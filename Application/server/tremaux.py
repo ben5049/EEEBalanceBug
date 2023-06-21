@@ -82,19 +82,27 @@ class Rover():
         self.toreturn.append(float(angle))
     
     def go_back(self, node, position):
+        print("CURRENT POSITION:", position)
+        print("GOING TO:", node)
         try:
             if (node.position[0]-position[0]) == 0:
-                if (node.position[1]-position[1]):
+                if (node.position[1]-position[1]) == 0:
+                    print("SET TO 0")
                     angle = 0
                 else:
+                    print("SET TO 180")
                     angle = 180    
             else:
+                print("MANUALLY SET")
                 angle = degrees(atan((node.position[0]-position[0])/(node.position[1]-position[1])))
         except:
             if (node.position[0]-position[0]) > 0:
                 angle = 90
+                print("SET TO 90")
             else:
                 angle = -90
+                print("SET TO -90")
+
         self.setAngle(angle)
         self.step_forward()
         self.actions = [[7, node]] + self.actions
@@ -168,6 +176,7 @@ class Rover():
                         self.actions= [[4,self.priornode]] + self.actions
                 # check if at dead end; if true, go to state 4[0] and idle
                 elif whereat == 2:
+                    print("PRIOR: ", self.priornode)
                     self.actions = [[4, self.priornode]] + self.actions
                     self.idle()
                 # check if at exit; if true, create end node and go to state 4[0]
@@ -218,6 +227,7 @@ class Rover():
                 self.actions = [[6,currentAction[1]], 1] + self.actions
             # check if in state 4[0]; if true, visit node and tell rover to go back to the previous node
             elif currentAction[0] == 4:
+                print("GOING BACK TO: ", currentAction[1])
                 currentAction[1].visit()
                 self.go_back(currentAction[1], position)
             # check if in state 6[0]; if true, tell rover to set its angle and step forward
@@ -237,7 +247,42 @@ class Rover():
 
         return self.toreturn
 
-# r = Rover( (0,0), 0, "tits", 0)
+# line test
+# r = Rover( (0,0), 0, "tits")
+# print("STATES: ", r.actions)
+# print("ACTIONS: ", r.tremaux((0,0), 0, [], []))
+# r.pause = False
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,100), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,200), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,300), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,400), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,500), 2, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,500), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,400), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,300), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,100), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,000), 2, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,000), 2, [], []))
+
+
+
+
+# crossroads test
+
+
+# circle test
+# r = Rover( (0,0), 0, "tits",)
 # print("STATES: ", r.actions)
 # print("ACTIONS: ", r.tremaux((0,0), 0, [], [], 0))
 # r.pause = False
