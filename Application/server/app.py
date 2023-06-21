@@ -144,6 +144,7 @@ def rover():
         print("WHEREAT:", data["whereat"])
         print("ACTIONS", r.actions)
         print(resp)
+        print("\n")
     conn.commit()
     return make_response(jsonify(resp), 200)
 
