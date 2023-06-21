@@ -3,7 +3,7 @@
 from triangulate import triangulate
 from time import time
 from math import degrees, atan
-THRESHOLD = 50
+THRESHOLD = 20
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
@@ -64,7 +64,7 @@ class Rover():
         return str(self.name)
     
     def thresholding(self, pos1, pos2):
-        if pos1 == (0,0) or pos2 == (0,0):
+        if pos1[0] == 0 and pos1[1] == 0 and pos2[0] == 0 and pos2[1]==0:
             return False
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
             return True
