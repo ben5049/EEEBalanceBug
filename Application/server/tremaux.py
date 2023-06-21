@@ -38,7 +38,7 @@ class Rover():
     toreturn = []
     nickname = ""
     priornode = 0 # prior node for tremaux's algorithm to work 
-    previouslyPlacedNode = 0 # the node most recently placed
+    previouslyPlacedNode = Node((00000000,10000000000)) # the node most recently placed
     priorwhereat = 0
     sessionId = -1
     lastSeen = 0
@@ -72,7 +72,7 @@ class Rover():
         if abs(self.priornode.position[0] - pos2[0]) < THRESHOLD and abs(self.priornode.position[1] - pos2[1]) < THRESHOLD:
             print("Hasn't left threshold of prior node ", self.priornode)
             return False
-        if abs(self.previouslyPlacedNode[0] - pos2[0]) < THRESHOLD and abs(self.previouslyPlacedNode[1] - pos2[1]) < THRESHOLD:
+        if abs(self.previouslyPlacedNode.position[0] - pos2[0]) < THRESHOLD and abs(self.previouslyPlacedNode.position[1] - pos2[1]) < THRESHOLD:
             print("Hasn't left threshold of most recently placed node ", self.previouslyPlacedNode)
             return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
