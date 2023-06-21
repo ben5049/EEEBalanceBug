@@ -34,7 +34,6 @@ static struct ToFDistanceData ToFData;
 static struct angleData IMUData;
 
 float ang;
-volatile whereAt currentwhereAt = PASSAGE;
 volatile bool wifiInitialised = false;
 
 //-------------------------------- Functions --------------------------------------------
@@ -70,7 +69,7 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     String mac = String(WiFi.macAddress());
     String rssi = String(WiFi.RSSI());
     String battery = String(analogRead(VBAT) * 4 * 3.3 * 1.1 / 4096);
-    String cwa = String(currentwhereAt);
+    String cwa = String(currentWhereAt);
     String postData = "{\"diagnostics\": {\"battery\":" + battery + ",\"connection\":" + rssi + "},\"MAC\":\"" + mac + "\",\"nickname\":\"MiWhip\",\"timestamp\":" + timestamp + ",\"position\":[" + position_x + "," + position_y + "],\"whereat\":" + cwa + ",\"orientation\":" + orientation + ",\"branches\":[";
 
     float junctionAngle;

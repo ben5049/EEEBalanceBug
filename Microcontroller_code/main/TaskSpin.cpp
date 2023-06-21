@@ -48,13 +48,11 @@ float wrapAngle(float angle) {
 
 /* Configure the FPGA camera for beacon detection */
 void configureFPGACam() {
-  checkI2CBusMembers();
   if (fpga.begin(FPGA_ADDR, I2C_PORT, true)) {
     fpga.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
     SERIAL_PORT.println("FPGA camera initialised");
   } else {
     while (true) {
-      checkI2CBusMembers();
       SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
       delay(1000);
     }

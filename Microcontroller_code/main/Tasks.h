@@ -49,20 +49,20 @@ struct ToFDistanceData {
 
 extern volatile unsigned long stepperRightSteps; /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
 extern volatile unsigned long stepperLeftSteps;  /* Total number of steps taken by the left stepper motor (forwards = +1, backwards = -1) */
-extern volatile int16_t distanceRight;           /* Distance in mm measured by the right time of flight sensor */
-extern volatile int16_t distanceLeft;            /* Distance in mm measured by the left time of flight sensor */
 extern volatile float spinStartingAngle;         /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
 extern volatile float xPosition;                 /* The x position */
 extern volatile float yPosition;                 /* The y position */
 
 extern volatile robotCommand currentCommand; /* The current command being implemented by the rover */
-extern volatile whereAt currentwhereAt;      /* [NEED TO IMPLEMENT] The current general location of the rover */
+extern volatile whereAt currentWhereAt;      /* [NEED TO IMPLEMENT] The current general location of the rover */
 
 extern volatile float angleSetpoint;
 extern volatile float dirSetpoint;
 extern volatile float accelSetpoint;
 extern volatile float speedSetpoint;
 extern volatile float angRateSetpoint;
+
+extern volatile float speedKd;
 
 extern volatile bool enablePathControl;
 extern volatile bool enableAngRateControl;
@@ -98,6 +98,7 @@ extern TaskHandle_t taskToFHandle;
 extern TaskHandle_t taskDeadReckoningHandle;
 extern TaskHandle_t taskServerCommunicationHandle;
 extern TaskHandle_t taskDebugHandle;
+extern TaskHandle_t taskBluetoothHandle;
 
 /* Tasks */
 void taskIMU(void *pvParameters);
@@ -108,6 +109,7 @@ void taskToF(void *pvParameters);
 void taskDeadReckoning(void *pvParameters);
 void taskServerCommunication(void *pvParameters);
 void taskDebug(void *pvParameters);
+void taskBluetooth(void *pvParameters);
 
 //-------------------------------- Imported ---------------------------------------
 

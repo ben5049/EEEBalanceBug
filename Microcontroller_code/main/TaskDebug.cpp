@@ -38,6 +38,7 @@ void taskDebug(void *pvParameters) {
     // serialData = SERIAL_PORT.read();
     while(!initialised){
       initialised = false==digitalRead(BOOT);
+      vTaskDelay(100);
     }
     
     // if (serialData == 'p') {
@@ -74,9 +75,12 @@ void taskDebug(void *pvParameters) {
     // motorSetDPS(100,1);
     vTaskDelay(500);
     if(initialised){
-      newCommand = FORWARD;
+      // newCommand = FORWARD;
+      newCommand = SPIN;
       xQueueSend(commandQueue, &newCommand, 0);
+      initialised = false;
     }
+    
 
     // newCommand = SPIN;
     // xQueueSend(commandQueue, &newCommand, 0);

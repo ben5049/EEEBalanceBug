@@ -28,13 +28,9 @@ Code to initialise and sample the time of flight sensors
 static VL53L0X tofRight;
 static VL53L0X tofLeft;
 static VL53L0X tofFront;
-volatile int16_t distanceRight;
-volatile int16_t distanceLeft;
-volatile int16_t distanceFront;
-volatile float distanceRightFiltered;
-volatile float distanceLeftFiltered;
-// volatile float distanceRightDifferential;
-// volatile float distanceLeftDifferential;
+int16_t distanceRight;
+int16_t distanceLeft;
+int16_t distanceFront;
 
 static VL53L0X_RangingMeasurementData_t measureRight;
 static VL53L0X_RangingMeasurementData_t measureLeft;
@@ -48,6 +44,7 @@ static TCA9548A I2CMux;
 /* FIR Filters */
 static FIRFilter20 rightFIR;
 static FIRFilter20 leftFIR;
+static FIRFilter20 frontFIR;
 
 /* Variables */
 static volatile bool rightToFDataReady = false;
@@ -198,11 +195,11 @@ void configureToF() {
       delay(1000);
     }
   } else {
-
-    tofFront.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_THRESHOLD_CROSSED_LOW, VL53L0X_INTERRUPTPOLARITY_LOW);
-    FixPoint1616_t LowThreashHold = (70 * 65536.0);
-    FixPoint1616_t HighThreashHold = (1000 * 65536.0);
-    tofFront.setInterruptThresholds(LowThreashHold, HighThreashHold, false);
+    //VL53L0X_GPIOFUNCTIONALITY_THRESHOLD_CROSSED_LOWr
+    tofFront.setGpioConfig(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY, VL53L0X_INTERRUPTPOLARITY_LOW);
+    // FixPoint1616_t LowThreashHold = (70 * 65536.0);
+    // FixPoint1616_t HighThreashHold = (1000 * 65536.0);
+    // tofFront.setInterruptThresholds(LowThreashHold, HighThreashHold, false);
     tofFront.setDeviceMode(VL53L0X_DEVICEMODE_CONTINUOUS_RANGING, false);
     tofFront.startMeasurement();
     SERIAL_PORT.println("Front ToF sensor connected");
@@ -294,10 +291,6 @@ void taskToF(void *pvParameters) {
 
   /* Task local variables */
   static uint8_t overThresholdCounter = 0;
-  // static uint16_t distanceRightFilteredPrevious;
-  // static uint16_t distanceLeftFilteredPrevious;
-  // static uint16_t timestamp = millis();
-  // static uint16_t timestampPrevious = 0;
 
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
@@ -314,19 +307,27 @@ void taskToF(void *pvParameters) {
     vTaskPrioritySet(NULL, MAX_I2C_PRIORITY);
 #endif
 
-#if ENABLE_SIDE_TOF == true
-
     /* Read data from the ToF sensors */
     if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-      // timestamp = millis();
+// timestamp = millis();
+#if ENABLE_SIDE_TOF == true
       tofRight.getRangingMeasurement(&measureRight, false);
       tofLeft.getRangingMeasurement(&measureLeft, false);
+#endif
+#if ENABLE_FRONT_TOF == true
+      tofFront.getRangingMeasurement(&measureFront, false);
+#endif
 
+
+/* Reset the interrupt flags */
 #if ENABLE_SIDE_TOF_INTERRUPTS == true
-      /* Reset the interrupt flags */
       tofRight.clearInterruptMask(false);
       tofLeft.clearInterruptMask(false);
 #endif
+#if ENABLE_FRONT_TOF_INTERRUPTS == true
+      tofFront.clearInterruptMask(false);
+#endif
+
       xSemaphoreGive(mutexI2C);
 
 /* End priority ceiling protocol */
@@ -334,6 +335,7 @@ void taskToF(void *pvParameters) {
       vTaskPrioritySet(NULL, TASK_TOF_PRIORITY);
 #endif
 
+#if ENABLE_SIDE_TOF == true
       /* Check if the right data is valid (phase failures have incorrect data) */
       if ((measureRight.RangeStatus != 4) && (measureRight.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceRight = measureRight.RangeMilliMeter;
@@ -349,62 +351,70 @@ void taskToF(void *pvParameters) {
         /* If the range is invalid return 1000 */
         distanceLeft = 1000;
       }
-    }
 #endif
 
-    /* Apply FIR filters and pass data to queue for other tasks */
+#if ENABLE_FRONT_TOF == true
+      /* Check if the front data is valid (phase failures have incorrect data) */
+      if ((measureFront.RangeStatus != 4) && (measureFront.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
+        distanceFront = measureFront.RangeMilliMeter;
+      } else {
+        /* If the range is invalid return 1000 */
+        distanceFront = 600;
+      }
+#endif
+    }
+
+/* Apply FIR filters to side ToF data and pass data to queue for other tasks */
+#if ENABLE_SIDE_TOF == true
     ToFData.right = FIRFilterUpdate20(&rightFIR, distanceRight);
     ToFData.left = FIRFilterUpdate20(&leftFIR, distanceLeft);
+#endif
     xQueueOverwrite(ToFDataQueue, &ToFData);
+
+/* Apply FIR filter to front ToF data */
+#if ENABLE_FRONT_TOF == true
+    FIRFilterUpdate20(&frontFIR, distanceFront);
+#endif
 
 #if TASK_TOF_DEBUG == true
     Serial.print("Right: ");
-    Serial.print(distanceRightFiltered);
-    Serial.print(",Left: ");
-    Serial.println(distanceLeftFiltered);
+    Serial.print(ToFData.right);
+    Serial.print(", Left: ");
+    Serial.print(ToFData.left);
+    Serial.print(", Front: ");
+    Serial.println(frontFIR.output);
 #endif
-    // distanceRightDifferential = ((distanceRightFiltered - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-    // distanceLeftDifferential = ((distanceLeftFiltered - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-    // distanceRightFilteredPrevious = distanceRightFiltered;
-    // distanceLeftFilteredPrevious = distanceLeftFiltered;
-    // timestampPrevious = timestamp;
 
     /* Junction detection */
     if (currentCommand == FORWARD) {
-      /* IF we hit a wall while going forwards alert taskExecuteCommand */
-      if (IRLeftCollision || IRLeftCollision || imminentCollision) {
-
-        /* Notify taskExecuteCommand that we have hit a wall */
-        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-
-        /* Begin priority ceiling protocol */
-#if MAX_I2C_PRIORITY > TASK_TOF_PRIORITY
-        vTaskPrioritySet(NULL, MAX_I2C_PRIORITY);
-#endif
-
-        /* Clear interrupt flag */
-        if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-          tofFront.clearInterruptMask(false);
-          xSemaphoreGive(mutexI2C);
-        }
-
-        /* End priority ceiling protocol */
-#if MAX_I2C_PRIORITY > TASK_TOF_PRIORITY
-        vTaskPrioritySet(NULL, TASK_TOF_PRIORITY);
-#endif
-        /* Reset variables */
-        imminentCollision = false;
-      }
 
       /* If we are at a junction while going forwards alert taskExecuteCommand */
-      else if ((distanceRightFiltered >= THRESHOLD_DISTANCE) || (distanceLeftFiltered >= THRESHOLD_DISTANCE)) {
+      if ((ToFData.right >= THRESHOLD_DISTANCE) || (ToFData.left >= THRESHOLD_DISTANCE)) {
         overThresholdCounter++;
+
         /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
         if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 
           /* Notify taskExecuteCommand that a junction has been found */
+          currentWhereAt = JUNCTION;
           xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
         }
+      }
+      
+      /* IF we hit a wall while going forwards alert taskExecuteCommand */
+      else if (frontFIR.output < COLLISION_THRESHOLD) {
+        // digitalWrite(LED_BUILTIN, HIGH);
+
+        /* Notify taskExecuteCommand that we have hit a wall */
+        #if ENABLE_FRONT_TOF == true
+        currentWhereAt = DEAD_END;
+        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+        #endif
+
+        // vTaskDelay(10);
+
+        /* Reset variables */
+        // digitalWrite(LED_BUILTIN, LOW);
       } else {
         overThresholdCounter = 0;
       }

@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-#define FIRFilterLength20 7
+#define FIRFilterLength20 10
 #define FIRFilterLength50 10
 
 struct FIRFilter20{
