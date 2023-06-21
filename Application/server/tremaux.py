@@ -66,6 +66,8 @@ class Rover():
     def thresholding(self, pos1, pos2):
         if pos1[0] == 0 and pos1[1] == 0 and pos2[0] == 0 and pos2[1]==0:
             return False
+        if abs(self.priornode.position[0] - pos2[0]) < THRESHOLD and abs(self.priornode.position[1] - pos2[1]) < THRESHOLD:
+            return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
             return True
         else:
@@ -239,7 +241,7 @@ class Rover():
             # check if in state 7[0]
             elif currentAction[0] == 7:
                 # if the rover has not returned to its prior position, return to state 7[0]
-                if not self.thresholding(position, currentAction[1].position):
+                if not self.thresholding(currentAction[1].position, position):
                     self.actions = [[7, currentAction[1]]] + self.actions
                 else:
                     self.idle()
@@ -248,6 +250,16 @@ class Rover():
             self.toreturn.append(5)
 
         return self.toreturn
+
+# 0,0 test
+r = Rover( (0,0), 0, "tits")
+print("STATES: ", r.actions)
+print("ACTIONS: ", r.tremaux((0,0), 0, [], []))
+r.pause = False
+print("STATES: ", r.actions)
+print("ACTIONS: ",r.tremaux((0,0), 0, [], []))
+print("STATES: ", r.actions)
+print("ACTIONS: ",r.tremaux((0,100), 0, [], []))
 
 # line test
 # r = Rover( (0,0), 0, "tits")
