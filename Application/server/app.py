@@ -140,6 +140,7 @@ def rover():
     if DEBUG:
         print("BEACON ANGLES: ", data["beaconangles"])
         print("JUNCTION ANGLES:", data["branches"])
+        print("YAW: ", data["orientation"])
         print("ACTIONS", r.actions)
         print(resp)
         print("\n")
