@@ -207,7 +207,8 @@ class Rover():
                     self.actions = [[4, self.priornode]] + self.actions
                 # check if position not previously visited
                 else:
-                    if len(beaconangles)==3 and len(potentialbranches)!=0:
+                    # if len(beaconangles)==3 and len(potentialbranches)!=0:
+                    if len(potentialbranches)!=0:
                         # triangulate position
                         if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2] and beaconangles[1]==0:
                             newx, newy = position[0], position[1]
