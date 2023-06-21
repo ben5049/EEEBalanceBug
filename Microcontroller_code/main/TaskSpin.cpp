@@ -48,11 +48,13 @@ float wrapAngle(float angle) {
 
 /* Configure the FPGA camera for beacon detection */
 void configureFPGACam() {
-  if (fpga.begin(FPGA_ADDR, I2C_PORT, false)) {
+  checkI2CBusMembers();
+  if (fpga.begin(FPGA_ADDR, I2C_PORT, true)) {
     fpga.setThresholds(FPGA_R_THRESHOLD, FPGA_Y_THRESHOLD, FPGA_B_THRESHOLD);
     SERIAL_PORT.println("FPGA camera initialised");
   } else {
     while (true) {
+      checkI2CBusMembers();
       SERIAL_PORT.println("Failed to start FPGA camera I2C connection");
       delay(1000);
     }
@@ -159,7 +161,7 @@ void taskSpin(void *pvParameters) {
 #endif
 
       if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-        fpga.getRYB();
+        fpga.getRYB(true);
         xSemaphoreGive(mutexI2C);
 
 /* End priority ceiling protocol */
