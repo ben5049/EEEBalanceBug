@@ -251,17 +251,12 @@ def diagnostics():
     for mac, timestamp, battery, connection, sessionid in cur:
         t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
         flag = True
-        print("NUMBER OF ROVERS: ", len(rovers))
+        t["isfinished"] = False
         for rover in rovers:
-            if str(rover.name) == str(mac) and len(rover.actions)==0:
+            if str(rover.mac)==str(mac):
                 t["isfinished"] = True
-                flag = False
-            elif str(rover.name) == str(mac):
-                t["isfinished"] = False
-                flag = False
+            print(str(rover.mac), str(mac))
 
-        if flag:
-            t["isfinished"] = False
         print(t["isfinished"])
         d.append(t)
     
