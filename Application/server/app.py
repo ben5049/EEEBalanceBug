@@ -253,9 +253,9 @@ def diagnostics():
         flag = True
         t["isfinished"] = False
         for rover in rovers:
-            if str(rover.mac)==str(mac):
+            if str(rover.name)==str(mac):
                 t["isfinished"] = True
-            print(str(rover.mac), str(mac))
+            print(str(rover.name), str(mac))
 
         print(t["isfinished"])
         d.append(t)
