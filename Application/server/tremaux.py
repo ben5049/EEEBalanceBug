@@ -118,6 +118,7 @@ class Rover():
         self.toreturn.append(float(newy))
 
     def tremaux(self, position, whereat, potentialbranches, beaconangles):
+        print("IS PAUSED: ", self.pause)
         # if paused, remain idle
         if self.pause:
             return [3]
