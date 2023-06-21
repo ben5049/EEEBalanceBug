@@ -257,7 +257,7 @@ def diagnostics():
                 t["isfinished"] = True
             print(str(rover.name), str(mac))
 
-        print(t["isfinished"])
+        print("ISFINISHED: ", t["isfinished"])
         d.append(t)
     
     return make_response(jsonify(d), 200)
