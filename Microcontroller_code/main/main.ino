@@ -62,7 +62,10 @@ void setup() {
   motorTimerL = timerBegin(2, 80, true);
   motorTimerR = timerBegin(3, 80, true);
 
-
+  /* Configure the FPGA camera over I2C */
+#if ENABLE_FPGA_CAMERA == true
+  configureFPGACam();
+#endif
 
   /* Start the ToF sensors */
 #if ENABLE_TOF_TASK == true
@@ -73,12 +76,6 @@ void setup() {
 #if ENABLE_SERVER_COMMUNICATION_TASK == true
   configureWiFi();
 #endif
-
-  /* Configure the FPGA camera over I2C */
-#if ENABLE_FPGA_CAMERA == true
-  configureFPGACam();
-#endif
-
 
   /* Configure pins */
   pinMode(BOOT, INPUT);
@@ -122,7 +119,7 @@ void setup() {
     nullptr,                /* Parameter passed into the task */
     TASK_MOVEMENT_PRIORITY, /* Task priority */
     &taskMovementHandle,    /* Pointer to store the task handle */
-    1);
+    tskNO_AFFINITY);
 #endif
 
   /* Configure the IMU & DMP */
@@ -138,7 +135,7 @@ void setup() {
     nullptr,           /* Parameter passed into the task */
     TASK_IMU_PRIORITY, /* Task priority */
     &taskIMUHandle,    /* Pointer to store the task handle */
-    1);
+    tskNO_AFFINITY);
 #endif
 
 
@@ -180,7 +177,7 @@ void setup() {
     nullptr,                            /* Parameter passed into the task */
     TASK_SERVER_COMMUNICATION_PRIORITY, /* Task priority */
     &taskServerCommunicationHandle,     /* Pointer to store the task handle */
-    0);
+    tskNO_AFFINITY);
 #endif
 
 #if ENABLE_DEAD_RECKONING_TASK == true
@@ -205,6 +202,17 @@ void setup() {
     tskNO_AFFINITY);
 #endif
 
+#if ENABLE_BLUETOOTH_TASK == true
+  xTaskCreatePinnedToCore(
+    taskBluetooth,           /* Function that implements the task */
+    "BLUETOOTH",             /* Text name for the task */
+    1000,                    /* Stack size in words, not bytes */
+    nullptr,                 /* Parameter passed into the task */
+    TASK_BLUETOOTH_PRIORITY, /* Task priority */
+    &taskBluetoothHandle,    /* Pointer to store the task handle */
+    tskNO_AFFINITY);
+#endif
+
   /* Attach ISRs to interrupts */
   attachInterrupt(digitalPinToInterrupt(IMU_INT), IMUDataReadyISR, FALLING); /* Must be after vTaskStartScheduler() or interrupt breaks scheduler and MCU boot loops*/
 #if ENABLE_SIDE_TOF_INTERRUPTS == true
@@ -220,8 +228,6 @@ void setup() {
 #endif
   timerAttachInterrupt(motorTimerL, &stepL, true);
   timerAttachInterrupt(motorTimerR, &stepR, true);
-
-  /* Set the starting direction as whichever way the robot is facing when it finishes booting */
 }
 
 //--------------------------------- Loop -----------------------------------------------

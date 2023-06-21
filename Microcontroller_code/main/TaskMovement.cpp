@@ -419,15 +419,23 @@ void taskMovement(void* pvParameters) {
       timestampPrevious = timestamp;
 
       /* Basic path control: turns until parallel to both walls, then turns towards centre of path */
-      if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
-        dirSetpoint -= 3;
+      if (ToFData.left < 50) {
+        angRateSetpoint = -10;
+      } else if (ToFData.right < 50) {
+        angRateSetpoint = 10;
+      } else if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
+        angRateSetpoint = -constrain(distanceRightDifferential * pathKd, 0, MAX_PATH_DIFF);
+        // dirSetpoint -= constrain(distanceRightDifferential * pathKd, 0, MAX_PATH_DIFF);
       } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
-        dirSetpoint += 3;
+        angRateSetpoint = constrain(distanceLeftDifferential * pathKd, 0, MAX_PATH_DIFF);
+        // dirSetpoint += constrain(distanceLeftDifferential * pathKd, 0, MAX_PATH_DIFF);
       } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
-        if ((ToFData.left - ToFData.right) > 30.0) {
-          dirSetpoint += 3;
-        } else if ((ToFData.left - ToFData.right) < -30.0) {
-          dirSetpoint -= 3;
+        if ((ToFData.left - ToFData.right) > 20.0) {
+          // angRateSetpoint = 5;
+          // dirSetpoint += 3;
+        } else if ((ToFData.left - ToFData.right) < -20.0) {
+          // angRateSetpoint = -5;
+          // dirSetpoint -= 3;
         }
       }
 #endif

@@ -73,19 +73,19 @@ void taskExecuteCommand(void *pvParameters) {
       /* Go forward until a junction or obstacle is reached */
       case FORWARD:
 
-        digitalWrite(LED_BUILTIN, HIGH);
         /* Define what to do on the FORWARD command e.g. speed != 0 etc */
-        speedSetpoint = 80;
+        currentWhereAt = PASSAGE;
+        enableAngRateControl = true;
+        enableDirectionControl = false;
+        speedSetpoint = 70;
 
         /* Wait 2 seconds to enter a passage before enabling path control */
-        vTaskDelay(pdMS_TO_TICKS(4000));
+        vTaskDelay(pdMS_TO_TICKS(3000));
         ulTaskNotifyValueClearIndexed(NULL, 0, UINT_MAX);
         enablePathControl = true;
 
         /* Wait until a junction is detected by taskToF */
         ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
-
-        digitalWrite(LED_BUILTIN, LOW);
 
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &newCommand, 0) == pdTRUE) {
@@ -103,6 +103,8 @@ void taskExecuteCommand(void *pvParameters) {
       case TURN:
 
         /* Set the speed to 0 */
+        enableAngRateControl = true;
+        enableDirectionControl = true;
         speedSetpoint = 0;
 
         /* Recieve the angle to turn to and pass it to the direction controller */
@@ -125,6 +127,7 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Set the speed to 0 */
         speedSetpoint = 0;
+        speedKd = KD_SPEED*3;
 
         /* Disable the direction controller and set the angular rate */
         spinStartingAngle = IMUData.yaw;
@@ -139,6 +142,7 @@ void taskExecuteCommand(void *pvParameters) {
         vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000));
 
         /* Notify the spin task that the turn is complete*/
+        speedKd = KD_SPEED;
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
         /* Recieve acknowledge that the queue is ready and taskSpin is done */

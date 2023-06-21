@@ -3,7 +3,7 @@
 from triangulate import triangulate
 from time import time
 from math import degrees, atan
-THRESHOLD = 80
+THRESHOLD = 10
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
@@ -64,7 +64,14 @@ class Rover():
         return str(self.name)
     
     def thresholding(self, pos1, pos2):
+        if pos1[0] == 0 and pos1[1] == 0 and pos2[0] == 0 and pos2[1]==0:
+            print("0,0 exception")
+            return False
+        if abs(self.priornode.position[0] - pos2[0]) < THRESHOLD and abs(self.priornode.position[1] - pos2[1]) < THRESHOLD:
+            print("Hasn't left threshold of prior node ", self.priornode)
+            return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
+            print("In threshold of previously seen node ", pos1)
             return True
         else:
             return False
@@ -82,9 +89,11 @@ class Rover():
         self.toreturn.append(float(angle))
     
     def go_back(self, node, position):
+        print("CURRENT POSITION:", position)
+        print("GOING TO:", node)
         try:
             if (node.position[0]-position[0]) == 0:
-                if (node.position[1]-position[1]):
+                if (node.position[1]-position[1]) == 0:
                     angle = 0
                 else:
                     angle = 180    
@@ -95,6 +104,7 @@ class Rover():
                 angle = 90
             else:
                 angle = -90
+
         self.setAngle(angle)
         self.step_forward()
         self.actions = [[7, node]] + self.actions
@@ -108,6 +118,7 @@ class Rover():
         self.toreturn.append(float(newy))
 
     def tremaux(self, position, whereat, potentialbranches, beaconangles):
+        print("IS PAUSED: ", self.pause)
         # if paused, remain idle
         if self.pause:
             return [3]
@@ -164,10 +175,12 @@ class Rover():
                         # find node in tree, visit it and go back to prior node
                         for node in self.tree:
                             if self.thresholding(node.position, position):
+                                print("previously visited: ", position, node.position)
                                 node.visit()
                         self.actions= [[4,self.priornode]] + self.actions
                 # check if at dead end; if true, go to state 4[0] and idle
                 elif whereat == 2:
+                    print("PRIOR: ", self.priornode)
                     self.actions = [[4, self.priornode]] + self.actions
                     self.idle()
                 # check if at exit; if true, create end node and go to state 4[0]
@@ -227,7 +240,7 @@ class Rover():
             # check if in state 7[0]
             elif currentAction[0] == 7:
                 # if the rover has not returned to its prior position, return to state 7[0]
-                if not self.thresholding(position, currentAction[1].position):
+                if not self.thresholding(currentAction[1].position, position):
                     self.actions = [[7, currentAction[1]]] + self.actions
                 else:
                     self.idle()
@@ -237,7 +250,52 @@ class Rover():
 
         return self.toreturn
 
-# r = Rover( (0,0), 0, "tits", 0)
+# 0,0 test
+r = Rover( (0,0), 0, "tits")
+print("STATES: ", r.actions)
+print("ACTIONS: ", r.tremaux((0,0), 0, [], []))
+r.pause = False
+print("STATES: ", r.actions)
+print("ACTIONS: ",r.tremaux((0,0), 0, [], []))
+print("STATES: ", r.actions)
+print("ACTIONS: ",r.tremaux((0,100), 0, [], []))
+
+# line test
+# r = Rover( (0,0), 0, "tits")
+# print("STATES: ", r.actions)
+# print("ACTIONS: ", r.tremaux((0,0), 0, [], []))
+# r.pause = False
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,100), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,200), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,300), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,400), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,500), 2, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,500), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,400), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,300), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,100), 0, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,000), 2, [], []))
+# print("STATES: ", r.actions)
+# print("ACTIONS: ",r.tremaux((0,000), 2, [], []))
+
+
+
+
+# crossroads test
+
+
+# circle test
+# r = Rover( (0,0), 0, "tits",)
 # print("STATES: ", r.actions)
 # print("ACTIONS: ", r.tremaux((0,0), 0, [], [], 0))
 # r.pause = False
