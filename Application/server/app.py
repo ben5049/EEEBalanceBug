@@ -253,7 +253,9 @@ def diagnostics():
     for mac, timestamp, battery, connection, sessionid in cur:
         t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
         flag = True
+        print("NUMBER OF ROVERS: ", len(rovers))
         for rover in rovers:
+            print("ROVERS: ", str(rover.name), str(mac))
             if str(rover.name) == str(mac) and len(rover.actions)==0:
                 t["isfinished"] = True
                 flag = False
@@ -423,51 +425,82 @@ def led_driver_red():
     global isSpinning, spinTime
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_red"]
+    except:
+        pass
+    
     print(data)
     
     if DEBUG:
         print(isSpinning, time()-spinTime, "RED")
     
-    # logic to turn on led
+    try:
+        if override:
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+        red_status = 1
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
+        red_status = 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # swicth should be 0
+        red_status = 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # swicth should be 0
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
     global isSpinning, spinTime
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_blue"]
+    except:
+        pass
 
     if DEBUG:
         print(isSpinning, time()-spinTime, "BLUE")
+    try:
+        if override:
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
     global isSpinning, spinTime
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_yellow"]
+    except:
+        pass
+
     if DEBUG:
         print(isSpinning, time()-spinTime, "YELLOW")
+    try:
+        if override:
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0'
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0'
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#
