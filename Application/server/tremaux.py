@@ -65,7 +65,6 @@ class Rover():
         return str(self.name)
     
     def thresholding(self, pos1, pos2):
-        print("Previously placed node: ", self.previouslyPlacedNode)
         if pos1[0] == 0 and pos1[1] == 0 and pos2[0] == 0 and pos2[1]==0:
             print("0,0 exception")
             return False
