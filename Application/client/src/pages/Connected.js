@@ -127,12 +127,12 @@ const Connected = () => {
 	}
 
 	/* Get max magnitude in MapData when changed */
-	const [MapDataMax, setMapDataMax] = useState(1);/* Number of Replay values (in MapData) */
+	const [MapDataMax, setMapDataMax] = useState(0);/* Number of Replay values (in MapData) */
 	useEffect(() => {
 		Object.entries(MapData).forEach(([key, value]) => {
 			const firstTwoElements = value.slice(0, 2);
-			const CoordinateMax = Math.max(...firstTwoElements.map(Math.abs));
-			if (Math.abs(CoordinateMax) > Math.abs(MapDataMax)) {
+			const CoordinateMax = Math.max(...firstTwoElements);
+			if (CoordinateMax > MapDataMax) {
 				setMapDataMax(CoordinateMax);
 				console.log("MapDataMax = " + CoordinateMax);
 			}
@@ -140,14 +140,14 @@ const Connected = () => {
 	}, [MapData]);
 
 	/* Get largest magnitude negative number in MapData when changed */
-	const [MapDataNegMin, setMapDataNegMin] = useState(0);/* Number of Replay values (in MapData) */
+	const [MapDataMin, setMapDataMin] = useState(0);/* Number of Replay values (in MapData) */
 	useEffect(() => {
 		Object.entries(MapData).forEach(([key, value]) => {
 			const firstTwoElements = value.slice(0, 2);
-			const CoordinateNegMin = Math.min(...firstTwoElements);
-			if (CoordinateNegMin < 0 && CoordinateNegMin < MapDataNegMin) {
-				setMapDataNegMin(CoordinateNegMin);
-				console.log("MapDataNegMin = " + CoordinateNegMin);
+			const CoordinateMin = Math.min(...firstTwoElements);
+			if (CoordinateMin < MapDataMin) {
+				setMapDataMin(CoordinateMin);
+				console.log("MapDataMin = " + CoordinateMin);
 			}
 		})
 	}, [MapData]);
@@ -290,12 +290,12 @@ const Connected = () => {
 		let pos_y
 		for (let i = 0; i < entries.length; i++) {
 			const [, entry] = entries[i];
-			pos_x = entry[0];
+			pos_x = -entry[0];
 			pos_y = entry[1];
 			const orientation = entry[3];
 			const TOF_left = entry[4];
 			const TOF_right = entry[5];
-			draw(pos_x, pos_y, orientation, TOF_left, TOF_right);
+			draw(pos_x, pos_y, -orientation, TOF_left, TOF_right);
 			console.log(entry[0] + " " + entry[1] + " " + entry[3] + " " + entry[4] + " " + entry[5]);
 		}
 		/* Draws rover's last known position */
@@ -311,7 +311,7 @@ const Connected = () => {
 		const image = new Image();
 		image.src = RoverImg;
 		image.onload = () => {
-			context.drawImage(image, ScaleToCanvas(x), ScaleToCanvas(y), 21, 32);
+			context.drawImage(image, ScaleToCanvas(x), ScaleToCanvas(y), 21/3, 32/3);
     	};
 	}
 
@@ -344,13 +344,15 @@ const Connected = () => {
 			let l = 5; /* Change to alter length of each line */
 			let theta = orientation*Math.PI/180
 			/* Scale */
-			position_x  = ScaleToCanvas(position_x)
-			position_y  = ScaleToCanvas(position_y)
+			position_x  = parseFloat(ScaleToCanvas(position_x))
+			position_y  = parseFloat(ScaleToCanvas(position_y))
 			/* Draw and reject out of bounds */
 			if (tofleft < 800){
+				tofleft  = tofleft / (MapDataMax - MapDataMin + 1600)  * 700
 				drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
 			} 
 			if (tofright < 800){
+				tofright  = tofright / (MapDataMax - MapDataMin + 1600)  * 700
 				drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
 			}
 		}
@@ -358,12 +360,15 @@ const Connected = () => {
 
 	/* Scale to canvas as coordinate system for rover different to canvas */
 	const ScaleToCanvas = (coordinate) => {
-		return ( coordinate / MapDataMax ) * 700 + 30 + MapDataNegMin /* add offset so not touching border */
+		//console.log("Min = " + MapDataMin + "  Max = " + MapDataMax)
+		const out = ( (coordinate - MapDataMin + 800) / (MapDataMax - MapDataMin + 1600) ) * 700 + 15
+		console.log("SCALE ==> IN: " + coordinate + " OUT: " + out)
+		return out /* add offset so not touching border */
 	}
 
 	/* Scale to canvas as coordinate system for rover different to canvas */
 	const DescaleToCanvas = (coordinate) => {
-		return (( coordinate - 30 - MapDataNegMin) / 700 ) * MapDataMax /* add offset so not touching border */
+		return (( coordinate - 15) / 700 ) * (MapDataMax - MapDataMin + 1600) + MapDataMin - 800 /* add offset so not touching border */
 	}
 
 	//---------------------------- Display ----------------------------------------------
