@@ -178,7 +178,6 @@ def allrovers():
     if command == "SELECT * FROM Rovers WHERE ":
         command = "SELECT * FROM Rovers" 
     try:
-        print(command)
         cur.execute(command)
     except mariadb.Error as e:
         print(str(e))

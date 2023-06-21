@@ -2,7 +2,7 @@
 # Started 18/5/2023, major revision 31/5/2023
 from triangulate import triangulate
 from time import time
-THRESHOLD = 2
+THRESHOLD = 160
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
