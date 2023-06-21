@@ -3,7 +3,7 @@
 from triangulate import triangulate
 from time import time
 from math import degrees, atan
-THRESHOLD = 20
+THRESHOLD = 10
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
@@ -65,10 +65,13 @@ class Rover():
     
     def thresholding(self, pos1, pos2):
         if pos1[0] == 0 and pos1[1] == 0 and pos2[0] == 0 and pos2[1]==0:
+            print("0,0 exception")
             return False
         if abs(self.priornode.position[0] - pos2[0]) < THRESHOLD and abs(self.priornode.position[1] - pos2[1]) < THRESHOLD:
+            print("Hasn't left threshold of prior node ", self.priornode)
             return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
+            print("In threshold of previously seen node ", pos1)
             return True
         else:
             return False
@@ -91,21 +94,16 @@ class Rover():
         try:
             if (node.position[0]-position[0]) == 0:
                 if (node.position[1]-position[1]) == 0:
-                    print("SET TO 0")
                     angle = 0
                 else:
-                    print("SET TO 180")
                     angle = 180    
             else:
-                print("MANUALLY SET")
                 angle = degrees(atan((node.position[0]-position[0])/(node.position[1]-position[1])))
         except:
             if (node.position[0]-position[0]) > 0:
                 angle = 90
-                print("SET TO 90")
             else:
                 angle = -90
-                print("SET TO -90")
 
         self.setAngle(angle)
         self.step_forward()
@@ -176,6 +174,7 @@ class Rover():
                         # find node in tree, visit it and go back to prior node
                         for node in self.tree:
                             if self.thresholding(node.position, position):
+                                print("previously visited: ", position, node.position)
                                 node.visit()
                         self.actions= [[4,self.priornode]] + self.actions
                 # check if at dead end; if true, go to state 4[0] and idle
@@ -231,7 +230,6 @@ class Rover():
                 self.actions = [[6,currentAction[1]], 1] + self.actions
             # check if in state 4[0]; if true, visit node and tell rover to go back to the previous node
             elif currentAction[0] == 4:
-                print("GOING BACK TO: ", currentAction[1])
                 currentAction[1].visit()
                 self.go_back(currentAction[1], position)
             # check if in state 6[0]; if true, tell rover to set its angle and step forward
