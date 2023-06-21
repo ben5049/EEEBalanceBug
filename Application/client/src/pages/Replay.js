@@ -182,7 +182,7 @@ const Replay = () => {
 		   Follow till -1 or length of graph */
 		let CurrentNode = ClosestNodeObject;
 		let NextNode = ShortestPath[CurrentNode.mapsto] /* Only maps to single value as only 1 closest path */
-		while (CurrentNode.mapsto != -1) {
+		while (CurrentNode.mapsto !== -1) {
 			/* Draw */
 			console.log("While Looped")
 			renderShortestPathSegment(CurrentNode.xcoord, CurrentNode.ycoord, NextNode.xcoord, NextNode.ycoord);
@@ -514,13 +514,13 @@ const Replay = () => {
 			position_y  = parseFloat(ScaleToCanvas(position_y))
 			/* Draw and reject out of bounds */
 			console.log("DRAWING LINE FROM x: " + position_x + ", y: " + position_y)
-			if (tofleft < 800){
+			if (tofleft < 300){
 				tofleft  = tofleft / (MapDataMax - MapDataMin + 1600)  * 700
 				console.log("LEFT DASH START X   = " + (position_x + tofleft * Math.cos(theta)) + "    - position_x: " + position_x, ", tofleft: " + tofleft + ", Math.cos(theta)" + Math.cos(theta))
 				console.log("LEFT DASH START Y   = " + position_y + tofleft * Math.sin(theta))
 				drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
 			} 
-			if (tofright < 800){
+			if (tofright < 300){
 				tofright  = tofright / (MapDataMax - MapDataMin + 1600)  * 700
 				console.log("RIGHT DASH START = " + (position_x - tofright * Math.cos(theta)) + "    - position_x: " + position_x, ", tofright: " + tofright + ", Math.cos(theta)" + Math.cos(theta))
 				drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);

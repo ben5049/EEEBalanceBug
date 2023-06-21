@@ -58,9 +58,6 @@ const Connected = () => {
 	const DiagnosticPollingSuccess = (jsonResponse) => {
 		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
 		UpdateDiagnosticData(jsonResponse); /* Displays most recent value */
-		if (jsonResponse.response.isfinished) {// TODO: Change isfinished once added to response on server side
-			setConnectedState("Finish");
-		}
 		return true;
 	}
 
@@ -86,7 +83,10 @@ const Connected = () => {
 			console.log(Diagnostic_recent);
 			updateTimestamp(Diagnostic_recent.timestamp);
 			updateBattery(Diagnostic_recent.battery);
-			updateConnection(Diagnostic_recent.connected);
+			updateConnection(Diagnostic_recent.connection);
+			if (Diagnostic_recent.isfinished) {
+				setConnectedState("Finish");
+			}
 		}
 	}, [DiagnosticData]);
 
@@ -115,7 +115,7 @@ const Connected = () => {
 
 	/* On GOOD POST response */
 	const MappingPollingSuccess = (jsonResponse) => {
-		console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
+		//console.log("JSON RESPONSE: " + JSON.stringify(jsonResponse));
 		UpdateMappingData(jsonResponse);
 		return true;
 	}
@@ -347,11 +347,11 @@ const Connected = () => {
 			position_x  = parseFloat(ScaleToCanvas(position_x))
 			position_y  = parseFloat(ScaleToCanvas(position_y))
 			/* Draw and reject out of bounds */
-			if (tofleft < 800){
+			if (tofleft < 300){
 				tofleft  = tofleft / (MapDataMax - MapDataMin + 1600)  * 700
 				drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
 			} 
-			if (tofright < 800){
+			if (tofright < 300){
 				tofright  = tofright / (MapDataMax - MapDataMin + 1600)  * 700
 				drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
 			}
@@ -362,13 +362,8 @@ const Connected = () => {
 	const ScaleToCanvas = (coordinate) => {
 		//console.log("Min = " + MapDataMin + "  Max = " + MapDataMax)
 		const out = ( (coordinate - MapDataMin + 800) / (MapDataMax - MapDataMin + 1600) ) * 700 + 15
-		console.log("SCALE ==> IN: " + coordinate + " OUT: " + out)
+		//console.log("SCALE ==> IN: " + coordinate + " OUT: " + out)
 		return out /* add offset so not touching border */
-	}
-
-	/* Scale to canvas as coordinate system for rover different to canvas */
-	const DescaleToCanvas = (coordinate) => {
-		return (( coordinate - 15) / 700 ) * (MapDataMax - MapDataMin + 1600) + MapDataMin - 800 /* add offset so not touching border */
 	}
 
 	//---------------------------- Display ----------------------------------------------
@@ -465,7 +460,7 @@ const Connected = () => {
 						promise={fetchDiagnosticData} // custom api calling function that should return a promise
 						render={({ startPolling, stopPolling, isPolling }) => {
 							// TODO: select which diagnostics to display
-							return <p>MAC: {MAC}, Battery: {Battery}, Connection: {Connection}, Timestamp: {Timestamp}</p>;
+							return <p>MAC: {MAC}<br /> Battery: {Battery}<br /> Connection: {Connection}<br /> Timestamp: {Timestamp}</p>;
 						}}
 					/>
 				</div>
