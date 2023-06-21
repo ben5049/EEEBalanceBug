@@ -493,7 +493,7 @@ def led_driver_blue():
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
-    global isSpinning, spinTime
+    global isSpinning, spinTime, yellow_override
     data = request.get_json()
     energy = data["energy status"]
     try:
