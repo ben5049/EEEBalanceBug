@@ -28,6 +28,6 @@ void taskBluetooth(void *pvParameters) {
 
   /* Start the loop */
   while (true) {
-    vTaskDelay();
+    vTaskDelay(100);
   }
 }
