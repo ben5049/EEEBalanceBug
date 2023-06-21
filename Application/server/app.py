@@ -255,9 +255,7 @@ def diagnostics():
         for rover in rovers:
             if str(rover.name)==str(mac):
                 t["isfinished"] = False
-            print(str(rover.name), str(mac))
 
-        print("ISFINISHED: ", t["isfinished"])
         d.append(t)
     
     return make_response(jsonify(d), 200)

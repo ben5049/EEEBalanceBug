@@ -212,7 +212,10 @@ class Rover():
                         if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2] and beaconangles[1]==0:
                             newx, newy = position[0], position[1]
                         else:
-                            newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
+                            try:
+                                newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
+                            except:
+                                newx, newy = position[0], position[1]
                         self.updatePos(newx, newy)
                         # create new node
                         n = Node((newx, newy))
