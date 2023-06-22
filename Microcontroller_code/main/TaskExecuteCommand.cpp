@@ -40,6 +40,7 @@ void taskExecuteCommand(void *pvParameters) {
   static robotCommand newCommand;
   static float junctionAngle;
   static float angleSetpoint;
+  static float relativeAngle;
 
   /* Start the loop */
   while (true) {
@@ -97,9 +98,9 @@ void taskExecuteCommand(void *pvParameters) {
 
         if (currentWhereAt == DEAD_END) {
           speedSetpoint = 0;
-          vTaskDelay(pdMS_TO_TICKS(2000));
+          vTaskDelay(pdMS_TO_TICKS(1000));
           speedSetpoint = -60;
-          vTaskDelay(pdMS_TO_TICKS(2000));
+          vTaskDelay(pdMS_TO_TICKS(2200));
         }
 
         speedSetpoint = 0;
@@ -125,15 +126,32 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Set the speed to 0 */
         enableAngRateControl = true;
-        enableDirectionControl = true;
+        enableDirectionControl = false;
         speedSetpoint = 0;
+
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        enableSpinControl = true;
 
         /* Recieve the angle to turn to and pass it to the direction controller */
         xQueueReceive(angleSetpointQueue, &angleSetpoint, portMAX_DELAY);
-        dirSetpoint = (turns * 360.0) + angleSetpoint;
+        xQueuePeek(IMUDataQueue, &IMUData, 0);
+
+        relativeAngle = wrapAngle(angleSetpoint - IMUData.yaw);
+        dirSetpoint = IMUData.yaw+ (turns * 360.0) + angleSetpoint;
+
+        if (relativeAngle >= 0) {
+          angRateSetpoint = SPIN_SPEED;
+        } else {
+          angRateSetpoint = -SPIN_SPEED;
+        }
 
         /* Wait for the turn to complete */
-        vTaskDelay(pdMS_TO_TICKS(3000));
+        vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000 * (abs(relativeAngle) / 360.0)));
+        enableSpinControl = false;
+        angRateSetpoint = 0;
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        enableDirectionControl = true;
+        vTaskDelay(pdMS_TO_TICKS(1000));
 
         /* Recieve the next command, if none are available return to IDLE */
         if (xQueueReceive(commandQueue, &newCommand, 0) == pdTRUE) {
@@ -150,7 +168,7 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Set the speed to 0 */
         speedSetpoint = 0;
-
+        vTaskDelay(pdMS_TO_TICKS(1000));
 
         /* Disable the direction controller and set the angular rate */
         enableDirectionControl = false;

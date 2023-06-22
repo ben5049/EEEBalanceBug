@@ -90,6 +90,7 @@ void IRAM_ATTR IRLeftISR();
 
 /* Functions */
 void move(float distance);
+float wrapAngle(float angle);
 void configureIMU();
 void configureToF();
 void configureWiFi();

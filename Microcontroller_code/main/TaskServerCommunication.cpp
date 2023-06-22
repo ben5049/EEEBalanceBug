@@ -303,7 +303,7 @@ void taskServerCommunication(void* pvParameters) {
         for (int i = 0; i < numCommands; i++) {
 
           /* Flash LED when a command is received */
-          // digitalWrite(LED_BUILTIN, LOW);
+          digitalWrite(LED_BUILTIN, LOW);
           vTaskDelay(pdMS_TO_TICKS(10));
 
           /* Send new command to the command queue*/
@@ -311,9 +311,9 @@ void taskServerCommunication(void* pvParameters) {
           xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
 
           /* Flash LED when a command is received */
-          // digitalWrite(LED_BUILTIN, HIGH);
+          digitalWrite(LED_BUILTIN, HIGH);
           vTaskDelay(pdMS_TO_TICKS(10));
-          // digitalWrite(LED_BUILTIN, LOW);
+          digitalWrite(LED_BUILTIN, LOW);
         }
       }
     }

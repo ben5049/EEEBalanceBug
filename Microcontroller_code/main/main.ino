@@ -165,6 +165,7 @@ void setup() {
     tskNO_AFFINITY);
 #endif
 
+#if ENABLE_EXECUTE_COMMAND_TASK == true
   xTaskCreatePinnedToCore(
     taskExecuteCommand,            /* Function that implements the task */
     "COMMAND",                     /* Text name for the task */
@@ -173,6 +174,7 @@ void setup() {
     TASK_EXECUTE_COMMAND_PRIORITY, /* Task priority */
     &taskExecuteCommandHandle,     /* Pointer to store the task handle */
     tskNO_AFFINITY);
+#endif
 
   xTaskCreatePinnedToCore(
     taskSpin,           /* Function that implements the task */

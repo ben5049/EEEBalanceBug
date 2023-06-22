@@ -33,11 +33,12 @@ Configuration data and macros for Group 1's EEEBalanceBug
 /* Task enables */
 #define ENABLE_IMU_TASK true                  /* Setting "true" enables the IMU sampling task */
 #define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
-#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK true       /* Setting "true" enables the dead reckning task */
 #define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
 #define ENABLE_BLUETOOTH_TASK false           /* Setting "true" enables the Bluetooth task */
+#define ENABLE_EXECUTE_COMMAND_TASK false
 
 /* Task priorities */
 #define TASK_IMU_PRIORITY 12                 /* Task priority from 0 to 31 (larger means higher priority) */
@@ -75,7 +76,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define TOF_SAMPLE_FREQUENCY 20          /* Max = 33Hz, default = 10Hz */
 #define THRESHOLD_COUNTER_MAX 5          /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
 #define THRESHOLD_DISTANCE 650           /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
-#define COLLISION_THRESHOLD 160
+#define COLLISION_THRESHOLD 180
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
