@@ -4,6 +4,12 @@
 # makes sure graph is bidirectional - if B is a neighbour of A, 
 # A must be a neighbour of B 
 def assertValid(graph):
+    # makes each element a tuple not an array
+    for node in graph:
+        for i in range(len(graph[node])):
+            if type(graph[node][i])==list:
+                graph[node][i] = (graph[node][i][0], graph[node][i][1])
+                
     for node in graph:
         for neighbour in graph[node]:
             if node not in graph[neighbour]:
@@ -68,6 +74,8 @@ def formatPredecessor(P):
         prednode = -1
         for node in d:
             if pred is None:
+                pass
+            elif len(pred)==0:
                 pass
             elif d[node]["xcoord"] == pred[0] and d[node]["ycoord"] == pred[1]:
                 prednode = node

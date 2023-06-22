@@ -6,7 +6,6 @@ from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
 from time import time
-from json import loads
 from triangulate import triangulate
 DEBUG = True
 
@@ -401,7 +400,8 @@ def findShortestPath():
     # format tree so it is python-readable 
     for sid, node_x, node_y, children in cur:
         try:
-            tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
+            children = eval(children)
+            tree[(node_x, node_y)] = [eval(x) for x in children]
         except:
             tree[(node_x, node_y)] = []
     
