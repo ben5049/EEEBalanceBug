@@ -48,6 +48,7 @@ def hello():
 def rover():
     global conn, cur
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
+    print(data)
     r = 0
     flag = True
     # check if rover is already active
