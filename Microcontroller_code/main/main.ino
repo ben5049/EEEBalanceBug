@@ -72,6 +72,11 @@ void setup() {
   configureToF();
 #endif
 
+  /*Start Bluetooth */ 
+#if ENABLE_BLUETOOTH_TASK == true
+  initBluetooth();
+#endif
+
   /* Begin WiFi */
 #if ENABLE_SERVER_COMMUNICATION_TASK == true
   configureWiFi();
