@@ -260,11 +260,11 @@ class Rover():
                 print("7", currentAction[1], position)
                 print(self.thresholding(currentAction[1].position, position))
                 # if the rover has not returned to its prior position, return to state 7[0]
-                if not self.thresholding(currentAction[1].position, position):
-                    
+                # if not self.thresholding(currentAction[1].position, position):
+                if whereat == 2:
+                    self.actions = [2] + self.actions
+                elif whereat == 0:
                     self.actions = [[7, currentAction[1]]] + self.actions
-                else:
-                    self.idle()
         # if no more actions left, rover is finished
         else:
             self.toreturn.append(5)
