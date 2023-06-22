@@ -424,6 +424,12 @@ void taskToF(void *pvParameters) {
       passageEntered = false;
     }
 
+    imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
+    if (imminentCollision) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      vTaskDelay(pdMS_TO_TICKS(10));
+      digitalWrite(LED_BUILTIN, LOW);
+    }
 
     if (enableJunctionDetection && (currentCommand == FORWARD)) {
 

@@ -32,8 +32,8 @@ Configuration data and macros for Group 1's EEEBalanceBug
 
 /* Task enables */
 #define ENABLE_IMU_TASK true                  /* Setting "true" enables the IMU sampling task */
-#define ENABLE_TOF_TASK false                  /* Setting "true" enables the ToF sampling task */
-#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
+#define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
+#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK true       /* Setting "true" enables the dead reckning task */
 #define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
@@ -51,7 +51,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define TASK_BLUETOOTH_PRIORITY 6            /* Task priority from 0 to 31 (larger means higher priority) */
 
 /* IMU */
-#define ENABLE_IMU_DEBUG false              /* Setting "true" enables debug messages over SERIAL_PORT from the IMU task */
+#define ENABLE_IMU_DEBUG false             /* Setting "true" enables debug messages over SERIAL_PORT from the IMU task */
 #define YAW_DRIFT_PER_SAMPLE -0.0080618998 /**/
 #define ENABLE_DMP true                    /* Whether or not to use the Digital Motion Processing unit (DMP) on the IMU (enabling this disables Madgwick's fusion algorithm) */
 #define ENABLE_DMP_MAGNETOMETER true       /* Setting "true" enables the magnetometer for the DMP */
@@ -60,9 +60,9 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define IMU_SAMPLING_FREQUENCY_NO_DMP 500  /* [NEEDS REVISING] Sampling frequency of IMU without DMP */
 
 /* ToF */
-#define TASK_TOF_DEBUG true             /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
+#define TASK_TOF_DEBUG false             /* Setting "true" enables debug messages over SERIAL_PORT from the ToF sampling task */
 #define ENABLE_SIDE_TOF true             /* Setting true enables the side ToF sensors. Default = true */
-#define ENABLE_FRONT_TOF false           /* Setting true enables the front ToF sensor. Default = true */
+#define ENABLE_FRONT_TOF true            /* Setting true enables the front ToF sensor. Default = true */
 #define ENABLE_SIDE_TOF_INTERRUPTS false /* Setting true enables data ready interrupts from the side ToF sensors. Default = false */
 #define ENABLE_FRONT_TOF_INTERRUPT false /* Setting true enables data ready interrupts from the front ToF sensor. Default = false */
 #define ENABLE_IR_INTERRUPTS false       /* Setting true enables interrupts from the IR sensors. Default = true */
@@ -76,15 +76,15 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define THRESHOLD_GRADIENT 400           /* Gradient threshold for the ToF sensors to detect junctions */
 #define THRESHOLD_COUNTER_MAX 5          /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
 #define THRESHOLD_DISTANCE 650           /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
-#define COLLISION_THRESHOLD 90
+#define COLLISION_THRESHOLD 100
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
-#define FPGA_ADDR 0x55          /* I2C address for the FPGA */
-#define FPGA_IMAGE_WIDTH 640    /* How wide the image is in pixels */
-#define FPGA_R_THRESHOLD 30     /* Threshold number of red pixels to count red beacon as having been detected */
-#define FPGA_Y_THRESHOLD 20     /* Threshold number of yellow pixels to count yellow beacon as having been detected */
-#define FPGA_B_THRESHOLD 50     /* Threshold number of blue pixels to count blue beacon as having been detected */
+#define FPGA_ADDR 0x55           /* I2C address for the FPGA */
+#define FPGA_IMAGE_WIDTH 640     /* How wide the image is in pixels */
+#define FPGA_R_THRESHOLD 30      /* Threshold number of red pixels to count red beacon as having been detected */
+#define FPGA_Y_THRESHOLD 20      /* Threshold number of yellow pixels to count yellow beacon as having been detected */
+#define FPGA_B_THRESHOLD 50      /* Threshold number of blue pixels to count blue beacon as having been detected */
 
 /* Spin task */
 #define TASK_SPIN_DEBUG false
@@ -93,8 +93,9 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define TASK_SPIN_FREQUENCY 20     /* Frequency to run the spin task at in Hz (default = 10Hz) */
 #define SPIN_LEFT true             /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
 #define MAX_NUMBER_OF_JUNCTIONS 10 /* Maximum number of junctions that can be detected in one spin */
-#define JUNCTION_OFFSET_ANGLE 75
+#define JUNCTION_OFFSET_ANGLE 0    /* Offset angle of junctions from */
 #define NUMBER_OF_BEACONS 3        /* Number of beacons */
+#define HYSTERISIS_THRESHOLD 5     /* Number of samples to wait after a rising edge before detecting a falling edge  */
 
 /* Execute command task */
 #define COMMAND_QUEUE_LENGTH 10        /* Maximum number of commands that can be in the queue */
