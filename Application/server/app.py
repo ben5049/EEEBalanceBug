@@ -117,7 +117,7 @@ def rover():
         r.actions = []
         resp = [commandQueue.pop(0)]
     else:
-        resp = [2,250,3,3,3,3,3,3,3,3,3,3,3,3,3]
+        resp = [2,250,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3]
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
