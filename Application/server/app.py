@@ -90,6 +90,7 @@ def rover():
     
     # create response to rover and reset timeout
     r.lastSeen = time()
+    print(data)
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
 
     # spin  test
