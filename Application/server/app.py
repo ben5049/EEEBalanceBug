@@ -59,7 +59,7 @@ def rover():
     # Logic for if rover is not active
     if flag:
         # Create new rover instance
-        r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
+        # r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
         r.nickname = data["nickname"]
         # Try to add rover into database, if its mac is new (ie never seen before rover)
         try:
