@@ -50,7 +50,10 @@ def dijkstra(graph, startPos):
     while len(G)!=0:
         # finds node with current shortest distance from start, and its neighbours
         current = min(G, key=G.get)
-        neighbours = graph[current]
+        try:
+            neighbours = graph[current]
+        except:
+            return None
         # finds the minimum distance from current point to neighbours
         for neighbour in neighbours:
             dist = findDist(current, neighbour)+G[current]

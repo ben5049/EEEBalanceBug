@@ -3,7 +3,7 @@
 from triangulate import triangulate
 from time import time
 from math import degrees, atan
-THRESHOLD = 50
+THRESHOLD = 150
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
@@ -99,7 +99,7 @@ class Rover():
                 else:
                     angle = 180    
             else:
-                angle = degrees(atan((previouslyvisited.position[0]-position[0])/(previouslyvisited.position[1]-position[1])))
+                angle = degrees(atan((previouslyvisited.position[0]-position[0])/(previouslyvisited.position[1]-position[1])))+180
         except:
             if (previouslyvisited.position[0]-position[0]) > 0:
                 angle = 90
