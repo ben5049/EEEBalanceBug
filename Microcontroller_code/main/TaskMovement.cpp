@@ -95,14 +95,14 @@ static float angRateLastTime = millis();
 volatile float motorDiff = 0;
 
 /* Direction Variables */
-volatile bool enableDirectionControl = true;
+volatile bool enableDirectionControl = false;
 volatile float dirSetpoint = 0;
 static float dirCumError = 0;
 static float dirPrevError = 0;
 static float dirLastTime = millis();
 static float lastYaw = 0;
 volatile int16_t turns = 0;
-static float localYaw = 0;
+volatile float localYaw = 0;
 static float dirKp = KP_DIR;
 static float dirKi = KI_DIR;
 static float dirKd = KD_DIR;
