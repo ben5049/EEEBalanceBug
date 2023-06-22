@@ -4,7 +4,7 @@ from triangulate import triangulate
 from time import time
 from math import degrees, atan
 THRESHOLD = 150
-PREVIOUS_NODE_THRESHOLD = 40
+PREVIOUS_NODE_THRESHOLD = 200
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
@@ -79,9 +79,8 @@ class Rover():
             return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
             return True
-        else:
-            print("ELSE ISSUE")
-            return False
+        print("ELSE ISSUE")
+        return False
     
     # these all update toreturn, which gives the actual things the rover will do
     # step - 0, spin - 1, angle - 2, idle - 3, update position - 4, done - 5
