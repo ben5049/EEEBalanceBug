@@ -3,8 +3,8 @@
 from triangulate import triangulate
 from time import time
 from math import degrees, atan
-THRESHOLD = 75
-PREVIOUS_NODE_THRESHOLD = 100
+THRESHOLD = 50
+PREVIOUS_NODE_THRESHOLD = 150
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
