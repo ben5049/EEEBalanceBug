@@ -400,7 +400,10 @@ def findShortestPath():
 
     # format tree so it is python-readable 
     for sid, node_x, node_y, children in cur:
-        tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
+        try:
+            tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
+        except:
+            tree[(node_x, node_y)] = []
     
     # assert that a tree is valid and formatted bidirectionally
     tree = dijkstra.assertValid(tree)
@@ -488,8 +491,6 @@ def led_driver_blue():
     except:
         pass
 
-    if DEBUG:
-        print(isSpinning, time()-spinTime, "BLUE")
     try:
         if override:
             blue_override = 1
