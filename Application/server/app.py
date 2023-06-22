@@ -13,7 +13,7 @@ DEBUG = True
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 250]
+commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [2, 250]]
 
 # Server global variables
 TIMEOUT = 5
@@ -118,7 +118,8 @@ def rover():
     if (len(commandQueue))!=0:
         r.actions = []
         resp = []
-        resp.append(commandQueue.pop(0))
+        for i in commandQueue.pop(0):
+            resp.append(i)
     else:
         resp = []
     
