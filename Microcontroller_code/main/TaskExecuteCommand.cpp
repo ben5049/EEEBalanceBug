@@ -90,10 +90,6 @@ void taskExecuteCommand(void *pvParameters) {
 
 
 
-
-
-
-
         /* Wait until a junction is detected by taskToF */
         ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
 

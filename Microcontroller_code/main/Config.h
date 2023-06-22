@@ -88,14 +88,14 @@ Configuration data and macros for Group 1's EEEBalanceBug
 
 /* Spin task */
 #define TASK_SPIN_DEBUG false
-#define SPIN_TIME 4                /* Time taken for a complete spin in s */
-#define SPIN_SPEED 360 / SPIN_TIME /* Speed to spin at in degrees per second */
-#define TASK_SPIN_FREQUENCY 20     /* Frequency to run the spin task at in Hz (default = 10Hz) */
-#define SPIN_LEFT true             /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
-#define MAX_NUMBER_OF_JUNCTIONS 10 /* Maximum number of junctions that can be detected in one spin */
-#define JUNCTION_OFFSET_ANGLE 0    /* Offset angle of junctions from */
-#define NUMBER_OF_BEACONS 3        /* Number of beacons */
-#define HYSTERISIS_THRESHOLD 5     /* Number of samples to wait after a rising edge before detecting a falling edge  */
+#define SPIN_TIME 4                              /* Time taken for a complete spin in s */
+#define SPIN_SPEED 360 / SPIN_TIME               /* Speed to spin at in degrees per second */
+#define HYSTERISIS_THRESHOLD 5 * (SPIN_TIME / 4) /* Number of samples to wait after a rising edge before detecting a falling edge. 5 Samples at 4 seconds per turn, */
+#define TASK_SPIN_FREQUENCY 20                   /* Frequency to run the spin task at in Hz (default = 10Hz) */
+#define SPIN_LEFT true                           /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
+#define MAX_NUMBER_OF_JUNCTIONS 10               /* Maximum number of junctions that can be detected in one spin */
+#define JUNCTION_OFFSET_ANGLE 0                  /* Offset angle of junctions from */
+#define NUMBER_OF_BEACONS 3                      /* Number of beacons */
 
 /* Execute command task */
 #define COMMAND_QUEUE_LENGTH 10        /* Maximum number of commands that can be in the queue */

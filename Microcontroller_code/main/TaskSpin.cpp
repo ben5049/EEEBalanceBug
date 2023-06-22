@@ -80,9 +80,7 @@ void taskSpin(void *pvParameters) {
 
   /* Junction detection */
   static uint16_t rightHysterisis = HYSTERISIS_THRESHOLD;
-  static uint16_t  = HYSTERISIS_THRESHOLD;
-  static uint16_t leftRisingHysterisis = HYSTERISIS_THRESHOLD;
-  static uint16_t leftFallingHysterisis = HYSTERISIS_THRESHOLD;
+  static uint16_t leftHysterisis = HYSTERISIS_THRESHOLD;
 
   static float angleDifference;
   static float junctionAngle;
@@ -132,9 +130,7 @@ void taskSpin(void *pvParameters) {
       rightJunctionCounter = 0;
       leftJunctionCounter = 0;
       rightHysterisis = HYSTERISIS_THRESHOLD;
-       = HYSTERISIS_THRESHOLD;
-      leftRisingHysterisis = HYSTERISIS_THRESHOLD;
-      leftFallingHysterisis = HYSTERISIS_THRESHOLD;
+      leftHysterisis = HYSTERISIS_THRESHOLD;
 
       /* Reset junctionAngleQueue */
       xQueueReset(junctionAngleQueue);
@@ -251,24 +247,23 @@ void taskSpin(void *pvParameters) {
         }
       } else {
         rightHysterisis++;
-        ++;
       }
 
       /* Check for left rising edge */
-      if ((leftPreviousDistance < THRESHOLD_DISTANCE) && (ToFData.left >= THRESHOLD_DISTANCE) && (leftRisingHysterisis > HYSTERISIS_THRESHOLD)) {
+      if ((leftPreviousDistance < THRESHOLD_DISTANCE) && (ToFData.left >= THRESHOLD_DISTANCE) && (leftHysterisis > HYSTERISIS_THRESHOLD)) {
 
         /* Reset the hysterisis counter */
-        leftRisingHysterisis = 0;
+        leftHysterisis = 0;
 
         leftRisingEdgeAngle = IMUData.yaw;
         leftJunctionCounter++;
       }
 
       /* Check for left falling edge */
-      else if ((leftPreviousDistance >= THRESHOLD_DISTANCE) && (ToFData.left < THRESHOLD_DISTANCE) && (leftFallingHysterisis > HYSTERISIS_THRESHOLD)) {
+      else if ((leftPreviousDistance >= THRESHOLD_DISTANCE) && (ToFData.left < THRESHOLD_DISTANCE) && ( leftHysterisis> HYSTERISIS_THRESHOLD)) {
 
         /* Reset the hysterisis counter */
-        leftFallingHysterisis = 0;
+        leftHysterisis = 0;
 
         /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
         if (leftJunctionAtStart && (leftJunctionCounter == 1)) {
@@ -282,8 +277,7 @@ void taskSpin(void *pvParameters) {
           xQueueSend(junctionAngleQueue, &junctionAngle, 0);
         }
       } else {
-        leftRisingHysterisis++;
-        leftFallingHysterisis++;
+        leftHysterisis++;
       }
 
       /* Keep track of previous values for next loop */
