@@ -131,12 +131,9 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        if (not r.pause) and r.actions[0]!=2 and r.actions[0]!=3:
-            print("ADDING REPLAY INFO")
-            cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
-        else:
-            print("ADDING NON-TOF REPLAY INFO")
-            cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], 1000, 1000, data["MAC"], r.sessionId))
+        cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
+    
+        #cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], 1000, 1000, data["MAC"], r.sessionId))
         
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
 
@@ -168,6 +165,7 @@ def allrovers():
     # remove timed out rovers
     for rover in rovers:
         if time()-rover.lastSeen > TIMEOUT:
+            print("TREE: ", rover.tree)
             for node in rover.tree:
                 neighbours = []
                 for neighbour in rover.tree[node]:
@@ -275,6 +273,7 @@ def diagnostics():
         t["isfinished"] = True
         for rover in rovers:
             if time()-rover.lastSeen > TIMEOUT:
+                print(rover.tree)
                 for node in rover.tree:
                     neighbours = []
                     for neighbour in rover.tree[node]:

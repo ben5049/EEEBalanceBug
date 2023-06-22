@@ -40,7 +40,6 @@ def dijkstra(graph, startPos):
         if node not in G:
             G[node] = 1e7
             P[node] = []
-    print("GRAPHS: ", graph, G, P)
     # checks if all nodes have been visited
     while len(G)!=0:
         # finds node with current shortest distance from start, and its neighbours

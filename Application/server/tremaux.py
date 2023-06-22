@@ -53,6 +53,7 @@ class Rover():
         self.priornode = n
         self.startup = int(time())
         if whereat == 0:
+            self.actions.append(1)
             self.priorwhereat = 1
         elif whereat == 1:
             self.actions.append(2)
@@ -125,8 +126,8 @@ class Rover():
         # special state when rover has just started - tell it to move forward
         if len(self.toreturn)!=0:
             if self.toreturn[0] == -1:
-                self.toreturn.pop(0)
                 self.step_forward()
+                self.toreturn.pop(0)
                 return self.toreturn
             else:
                 self.toreturn = []
@@ -149,7 +150,7 @@ class Rover():
                         n = Node(position)
                         self.previouslyPlacedNode = n
                         self.tree[n] = []
-                        self.tree[self.priornode].append(n)
+                        self.tree[self.previouslyPlacedNode].append(n)
                         # if self.priorwhereat == 1:
                         #     self.priornode = n
                         self.priorwhereat = 0
@@ -189,7 +190,7 @@ class Rover():
                     self.previouslyPlacedNode = n
                     self.tree[n] = []
                     n.setend()
-                    self.tree[self.priornode].append(n)
+                    self.tree[self.previouslyPlacedNode].append(n)
                     self.priornode = n
                     self.actions = [[4, self.priornode]] + self.actions
             # check if in state 2; if true, go to state 3 and output to rover to spin
