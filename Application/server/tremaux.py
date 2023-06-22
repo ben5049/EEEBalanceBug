@@ -209,7 +209,7 @@ class Rover():
                 else:
                     if len(beaconangles)==3 and len(potentialbranches)!=0:
                         # triangulate position
-                        if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2] and beaconangles[1]==0:
+                        if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2]:
                             newx, newy = position[0], position[1]
                         else:
                             try:
