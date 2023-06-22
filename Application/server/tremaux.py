@@ -88,19 +88,19 @@ class Rover():
         self.toreturn.append(2)
         self.toreturn.append(float(angle))
     
-    def go_back(self, node, position):
+    def go_back(self, node, position, previouslyvisited):
         print("CURRENT POSITION:", position)
         print("GOING TO:", node)
         try:
-            if (node.position[0]-position[0]) == 0:
-                if (node.position[1]-position[1]) == 0:
+            if (previouslyvisited.position[0]-position[0]) == 0:
+                if (previouslyvisited.position[1]-position[1]) == 0:
                     angle = 0
                 else:
                     angle = 180    
             else:
-                angle = degrees(atan((node.position[0]-position[0])/(node.position[1]-position[1])))
+                angle = degrees(atan((previouslyvisited.position[0]-position[0])/(previouslyvisited.position[1]-position[1])))
         except:
-            if (node.position[0]-position[0]) > 0:
+            if (previouslyvisited.position[0]-position[0]) > 0:
                 angle = 90
             else:
                 angle = -90
@@ -150,7 +150,7 @@ class Rover():
                         n = Node(position)
                         self.previouslyPlacedNode = n
                         self.tree[n] = []
-                        self.tree[self.priornode].append(n)
+                        self.tree[self.previouslyPlacedNode].append(n)
                         # if self.priorwhereat == 1:
                         #     self.priornode = n
                         self.priorwhereat = 0
@@ -190,9 +190,12 @@ class Rover():
                     self.previouslyPlacedNode = n
                     self.tree[n] = []
                     n.setend()
-                    self.tree[self.priornode].append(n)
+                    self.tree[self.previouslyPlacedNode].append(n)
                     self.priornode = n
                     self.actions = [[4, self.priornode]] + self.actions
+                # check if exiting junction; if it is, stay in this state
+                elif whereat == 4:
+                    self.actions = [1] + self.actions  
             # check if in state 2; if true, go to state 3 and output to rover to spin
             elif currentAction == 2:
                 self.actions = [3] + self.actions
@@ -209,7 +212,7 @@ class Rover():
                 else:
                     if len(beaconangles)==3 and len(potentialbranches)!=0:
                         # triangulate position
-                        if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2] and beaconangles[1]==0:
+                        if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2]:
                             newx, newy = position[0], position[1]
                         else:
                             try:
@@ -238,7 +241,7 @@ class Rover():
             # check if in state 4[0]; if true, visit node and tell rover to go back to the previous node
             elif currentAction[0] == 4:
                 currentAction[1].visit()
-                self.go_back(currentAction[1], position)
+                self.go_back(currentAction[1], position, self.previouslyPlacedNode)
             # check if in state 6[0]; if true, tell rover to set its angle and step forward
             elif currentAction[0] == 6:
                 self.setAngle(currentAction[1])

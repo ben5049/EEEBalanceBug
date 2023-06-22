@@ -36,12 +36,12 @@ const RoverCarousel = ({ rovers }) => {
 	//---------------------------- Button Functions: onClick ----------------------------
 
 	/* Select rover button (store seelcted rover's data) */
-	const handleRoverClick = (RoverMAC, RoverNickname, SessionID) => {
+	const handleRoverClick = (RoverMAC, RoverNickname, sessionID) => {
 		console.log("SELECTED " + RoverMAC)
 		localStorage.setItem('MAC', RoverMAC);
 		localStorage.setItem('nickname', RoverNickname);
 		localStorage.setItem('ConnectedState', 'Start');
-		localStorage.setItem('SessionID', SessionID);
+		localStorage.setItem('sessionID', sessionID);
 	};
 
 	//---------------------------- Get Connected/Offline style --------------------------

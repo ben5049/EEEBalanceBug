@@ -72,7 +72,7 @@
 .Data_Connected {
   grid-column: col 14 / span 6;
   grid-row: row 2 / span 9;
-  text-align: center;
+  /*text-align: center;*/
   line-height: 40px;
   font-family: "Lucida Console", "Courier New", monospace;
   font-weight: bold;

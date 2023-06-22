@@ -32,8 +32,8 @@ Configuration data and macros for Group 1's EEEBalanceBug
 
 /* Task enables */
 #define ENABLE_IMU_TASK true                  /* Setting "true" enables the IMU sampling task */
-#define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
-#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
+#define ENABLE_TOF_TASK false                  /* Setting "true" enables the ToF sampling task */
+#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK true       /* Setting "true" enables the dead reckning task */
 #define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
@@ -79,7 +79,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define COLLISION_THRESHOLD 90
 
 /* FPGA */
-#define ENABLE_FPGA_CAMERA true /* Whether or not to enable the FPGA camera */
+#define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
 #define FPGA_ADDR 0x55          /* I2C address for the FPGA */
 #define FPGA_IMAGE_WIDTH 640    /* How wide the image is in pixels */
 #define FPGA_R_THRESHOLD 30     /* Threshold number of red pixels to count red beacon as having been detected */

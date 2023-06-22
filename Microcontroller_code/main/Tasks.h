@@ -93,6 +93,7 @@ void configureWiFi();
 void configureFPGACam();
 void motorSetDPS(float DPS, int motor);
 void checkI2CBusMembers();
+void initBluetooth();
 
 void closeSideChannels();
 void closeFrontChannel();

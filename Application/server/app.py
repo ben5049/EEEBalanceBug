@@ -17,7 +17,8 @@ cors = CORS(app, resources={r"/*":{"origins":"*"}})
 commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5]
 
 # Server global variables
-TIMEOUT = 30
+TIMEOUT = 5
+LED_TIMEOUT = 30
 rovers = []
 isSpinning = False
 spinTime = time()
@@ -90,6 +91,11 @@ def rover():
     
     # create response to rover and reset timeout
     r.lastSeen = time()
+    print(data)
+    if "beaconangles" not in data:
+        data["beaconangles"] = []
+    if "branches" not in data:
+        data["branches"] = []
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
 
     # spin  test
@@ -125,9 +131,12 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        # if not r.pause:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
+    
+        #cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], 1000, 1000, data["MAC"], r.sessionId))
+        
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
+
         if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
@@ -156,6 +165,15 @@ def allrovers():
     # remove timed out rovers
     for rover in rovers:
         if time()-rover.lastSeen > TIMEOUT:
+            print("TREE: ", rover.tree)
+            for node in rover.tree:
+                neighbours = []
+                for neighbour in rover.tree[node]:
+                    neighbours.append(str(neighbour))
+                try:
+                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                except mariadb.Error as e:
+                    pass
             rovers.remove(rover)
 
     # add all active rovers
@@ -241,6 +259,7 @@ def sessions():
 def diagnostics():
     global conn, cur
     data = request.get_json()
+    print("DIAGNOSTIC SESSION: ", data["sessionid"])
     
     try:
         cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
@@ -248,18 +267,30 @@ def diagnostics():
         return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid sessionid"}), 400)
     
     d = []
-    for mac, timestamp, battery, connection, sessionid in cur:
-        t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
-        flag = True
-        t["isfinished"] = True
-        for rover in rovers:
-            if time()-rover.lastSeen > TIMEOUT:
-                rovers.remove(rover)
-            if str(rover.name)==str(mac):
-                t["isfinished"] = False
+    try:
+        for mac, timestamp, battery, connection, sessionid in cur:
+            t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+            flag = True
+            t["isfinished"] = True
+            for rover in rovers:
+                if time()-rover.lastSeen > TIMEOUT:
+                    print(rover.tree)
+                    for node in rover.tree:
+                        neighbours = []
+                        for neighbour in rover.tree[node]:
+                            neighbours.append(str(neighbour))
+                        try:
+                            cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                        except mariadb.Error as e:
+                            pass
+                    rovers.remove(rover)
+                if str(rover.name)==str(mac):
+                    t["isfinished"] = False
 
-        d.append(t)
-    
+            d.append(t)
+    except:
+        print("excepted - not working")
+        pass
     return make_response(jsonify(d), 200)
 
 # Pause a given rover
@@ -443,7 +474,7 @@ def led_driver_red():
 
     if red_override:
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
         red_status = 1
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     elif energy != "enough energy":
@@ -478,7 +509,7 @@ def led_driver_blue():
         pass
     if blue_override:
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
         return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
@@ -509,7 +540,7 @@ def led_driver_yellow():
         pass
     if yellow_override:
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
         return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0'
