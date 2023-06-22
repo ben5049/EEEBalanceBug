@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 30/05/23
-Date updated: 19/06/23
+Date updated: 22/06/23
 
 Code to initialise and sample the time of flight sensors
 */
@@ -28,8 +28,8 @@ Code to initialise and sample the time of flight sensors
 static VL53L0X tofRight;
 static VL53L0X tofLeft;
 static VL53L0X tofFront;
-int16_t distanceRight;
-int16_t distanceLeft;
+volatile int16_t distanceRight;
+volatile int16_t distanceLeft;
 int16_t distanceFront;
 
 static VL53L0X_RangingMeasurementData_t measureRight;
@@ -57,6 +57,24 @@ static volatile bool IRLeftCollision = false;
 TaskHandle_t taskToFHandle = nullptr;
 
 //-------------------------------- Functions --------------------------------------------
+
+void closeSideChannels() {
+  I2CMux.closeChannel(TOF_RIGHT_CHANNEL);
+  I2CMux.closeChannel(TOF_LEFT_CHANNEL);
+}
+
+void closeFrontChannel() {
+  I2CMux.closeChannel(TOF_FRONT_CHANNEL);
+}
+
+void openSideChannels() {
+  I2CMux.closeChannel(TOF_RIGHT_CHANNEL);
+  I2CMux.closeChannel(TOF_LEFT_CHANNEL);
+}
+
+void openFrontChannel() {
+  I2CMux.closeChannel(TOF_FRONT_CHANNEL);
+}
 
 /* Prints a list of all I2C bus members to SERIAL_PORT. Used for debugging */
 void checkI2CBusMembers() {
@@ -292,6 +310,10 @@ void taskToF(void *pvParameters) {
   /* Task local variables */
   static uint8_t overThresholdCounter = 0;
 
+  static bool rightJunction = false;
+  static bool leftJunction = false;
+  static bool frontJunction = false;
+
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -307,14 +329,17 @@ void taskToF(void *pvParameters) {
     vTaskPrioritySet(NULL, MAX_I2C_PRIORITY);
 #endif
 
-    /* Read data from the ToF sensors */
+    /* Take the I2C mutex */
     if (xSemaphoreTake(mutexI2C, pdMS_TO_TICKS(10)) == pdTRUE) {
-// timestamp = millis();
+
+
 #if ENABLE_SIDE_TOF == true
+      /* Read data from the side ToF sensors */
       tofRight.getRangingMeasurement(&measureRight, false);
       tofLeft.getRangingMeasurement(&measureLeft, false);
 #endif
 #if ENABLE_FRONT_TOF == true
+      /* Read data from the front ToF sensors */
       tofFront.getRangingMeasurement(&measureFront, false);
 #endif
 
@@ -328,6 +353,7 @@ void taskToF(void *pvParameters) {
       tofFront.clearInterruptMask(false);
 #endif
 
+      /* Give the I2C mutex */
       xSemaphoreGive(mutexI2C);
 
 /* End priority ceiling protocol */
@@ -358,7 +384,7 @@ void taskToF(void *pvParameters) {
       if ((measureFront.RangeStatus != 4) && (measureFront.RangeMilliMeter < MAX_MAZE_DIMENSION)) {
         distanceFront = measureFront.RangeMilliMeter;
       } else {
-        /* If the range is invalid return 1000 */
+        /* If the range is invalid return 600 */
         distanceFront = 600;
       }
 #endif
@@ -374,6 +400,8 @@ void taskToF(void *pvParameters) {
 /* Apply FIR filter to front ToF data */
 #if ENABLE_FRONT_TOF == true
     FIRFilterUpdate20(&frontFIR, distanceFront);
+#else
+
 #endif
 
 #if TASK_TOF_DEBUG == true
@@ -388,36 +416,79 @@ void taskToF(void *pvParameters) {
     /* Junction detection */
     if (currentCommand == FORWARD) {
 
-      /* If we are at a junction while going forwards alert taskExecuteCommand */
-      if ((ToFData.right >= THRESHOLD_DISTANCE) || (ToFData.left >= THRESHOLD_DISTANCE)) {
-        overThresholdCounter++;
+      /* Calculate boolean variables that determine where junctions are located*/
+      leftJunction = ToFData.left >= THRESHOLD_DISTANCE;
+      rightJunction = ToFData.right >= THRESHOLD_DISTANCE;
+      frontJunction = frontFIR.output >= THRESHOLD_DISTANCE;
+      imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
+      frontJunction = false;  //DELETE
 
-        /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
-        if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
 
-          /* Notify taskExecuteCommand that a junction has been found */
-          currentWhereAt = JUNCTION;
-          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-        }
-      }
-      
-      /* IF we hit a wall while going forwards alert taskExecuteCommand */
-      else if (frontFIR.output < COLLISION_THRESHOLD) {
-        // digitalWrite(LED_BUILTIN, HIGH);
-
-        /* Notify taskExecuteCommand that we have hit a wall */
-        #if ENABLE_FRONT_TOF == true
+      /* Dead end */
+      if (!imminentCollision) {
         currentWhereAt = DEAD_END;
         xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-        #endif
-
-        // vTaskDelay(10);
-
-        /* Reset variables */
-        // digitalWrite(LED_BUILTIN, LOW);
-      } else {
-        overThresholdCounter = 0;
       }
+
+      /* Left and right corners */
+      else if ((!rightJunction && leftJunction && !frontJunction) || (rightJunction && !leftJunction && !frontJunction)) {
+        currentWhereAt = PASSAGE;
+      }
+
+      /* Right T-junction */
+      else if (rightJunction && !leftJunction && frontJunction) {
+        currentWhereAt = JUNCTION;
+        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+      }
+
+      /* Left T-junction */
+      else if (!rightJunction && leftJunction && frontJunction) {
+        currentWhereAt = JUNCTION;
+        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+      }
+
+      /* Both T-junction */
+      else if (rightJunction && leftJunction && !frontJunction) {
+        currentWhereAt = JUNCTION;
+        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+      }
+
+      /* Crossroads */
+      else if (rightJunction && leftJunction && frontJunction) {
+        currentWhereAt = JUNCTION;
+        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+      } else {
+        currentWhereAt = PASSAGE;
+      }
+
+      // /* If we are at a junction while going forwards (and there is no wall infront) alert taskExecuteCommand */
+      // if ((leftJunction || rightJunction) && !frontJunction) {
+      //   overThresholdCounter++;
+
+      //   /* Only count it as a junction if over the threshold for THRESHOLD_COUNTER_MAX consecutive samples */
+      //   if (overThresholdCounter >= THRESHOLD_COUNTER_MAX) {
+
+      //     /* Notify taskExecuteCommand that a junction has been found */
+      //     currentWhereAt = JUNCTION;
+      //     xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+      //   }
+      // }
+
+      // /* If we hit a wall while going forwards alert taskExecuteCommand */
+      // else if (frontFIR.output < COLLISION_THRESHOLD) {
+      //   // digitalWrite(LED_BUILTIN, HIGH);
+
+      //   /* Notify taskExecuteCommand that we have hit a wall */
+      //   currentWhereAt = DEAD_END;
+      //   xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+
+      //   // vTaskDelay(10);
+
+      //   /* Reset variables */
+      //   // digitalWrite(LED_BUILTIN, LOW);
+      // } else {
+      //   overThresholdCounter = 0;
+      // }
     }
   }
 }

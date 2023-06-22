@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 25/05/23
-Date updated: 19/05/23
+Date updated: 22/05/23
 
 Main ESP32 program for Group 1's EEEBalanceBug
 */
@@ -24,6 +24,7 @@ Main ESP32 program for Group 1's EEEBalanceBug
 
 /* Semaphores */
 SemaphoreHandle_t mutexI2C; /* I2C Mutex so only one task can access the I2C peripheral at a time */
+SemaphoreHandle_t mutexSpin;
 
 /* Queues */
 QueueHandle_t IMUDataQueue;
@@ -97,6 +98,14 @@ void setup() {
     mutexI2C = xSemaphoreCreateMutex();
     if (mutexI2C != NULL) {
       xSemaphoreGive(mutexI2C);
+    }
+  }
+
+    /* Create SPIN queue mutex */
+  if (mutexSpin == NULL) {
+    mutexSpin = xSemaphoreCreateMutex();
+    if (mutexSpin != NULL) {
+      xSemaphoreGive(mutexSpin);
     }
   }
 

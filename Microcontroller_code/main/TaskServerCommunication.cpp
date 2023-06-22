@@ -1,7 +1,9 @@
+#include "freertos/portmacro.h"
+#include "freertos/projdefs.h"
 /*
 Authors: Aranya Gupta
 Date created: 05/05/23
-Date updated: 19/06/23
+Date updated: 22/06/23
 
 Communicate with a server using JSONs
 */
@@ -76,32 +78,39 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     float beaconAngle;
     bool flag = false;
 
-    /* While there are junction angles waiting in the queue, send them to the server */
-    while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
-      if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {
-        postData = postData + String(junctionAngle) + ",";
-        flag = true;
-      }
-    }
 
-    if (flag) {
-      postData = postData.substring(0, postData.length() - 1);
-    }
-    postData = postData + "],\"beaconangles\":[";
-    flag = false;
-    // SERIAL_PORT.println("I'm outside");
-    // SERIAL_PORT.println(uxQueueMessagesWaiting(beaconAngleQueue));
-    // SERIAL_PORT.println(uxQueueSpacesAvailable(beaconAngleQueue));
+    /* If the SPIN task isn't running process the results */
+    if (xSemaphoreTake(mutexSpin, 0) == pdTRUE) {
 
-    /* If there are 3 beacon angles waiting in the queue, send them to the server */
-    if (uxQueueMessagesWaiting(beaconAngleQueue) == NUMBER_OF_BEACONS) {
-      while (uxQueueMessagesWaiting(beaconAngleQueue) > 0) {
-        if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE) {
-          postData = postData + String(beaconAngle) + ",";
+      /* While there are junction angles waiting in the queue, send them to the server */
+      while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
+        if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {
+          postData = postData + String(junctionAngle) + ",";
           flag = true;
-          SERIAL_PORT.println(beaconAngle);
         }
       }
+
+      if (flag) {
+        postData = postData.substring(0, postData.length() - 1);
+      }
+      postData = postData + "],\"beaconangles\":[";
+      flag = false;
+      // SERIAL_PORT.println("I'm outside");
+      // SERIAL_PORT.println(uxQueueMessagesWaiting(beaconAngleQueue));
+      // SERIAL_PORT.println(uxQueueSpacesAvailable(beaconAngleQueue));
+
+      /* If there are 3 beacon angles waiting in the queue, send them to the server */
+      if (uxQueueMessagesWaiting(beaconAngleQueue) == NUMBER_OF_BEACONS) {
+        while (uxQueueMessagesWaiting(beaconAngleQueue) > 0) {
+          if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE) {
+            postData = postData + String(beaconAngle) + ",";
+            flag = true;
+            SERIAL_PORT.println(beaconAngle);
+          }
+        }
+      }
+
+      xSemaphoreGive(mutexSpin);
     }
 
     if (flag) {

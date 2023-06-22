@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 30/05/23
-Date updated: 19/06/23
+Date updated: 21/06/23
 
 Dubug task
 */
@@ -77,6 +77,7 @@ void taskDebug(void *pvParameters) {
     if(initialised){
       // newCommand = FORWARD;
       newCommand = SPIN;
+      SERIAL_PORT.println("SPIN");
       xQueueSend(commandQueue, &newCommand, 0);
       initialised = false;
     }
