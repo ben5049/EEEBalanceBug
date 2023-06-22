@@ -38,7 +38,7 @@ class Rover():
     toreturn = []
     nickname = ""
     priornode = 0 # prior node for tremaux's algorithm to work 
-    previouslyPlacedNode = Node((00000000,10000000000)) # the node most recently placed
+    previouslyPlacedNode = 0 # the node most recently placed
     priorwhereat = 0
     sessionId = -1
     lastSeen = 0
@@ -51,6 +51,7 @@ class Rover():
         n = Node(position)
         self.tree[n] = []
         self.priornode = n
+        self.previouslyPlacedNode = n
         self.startup = int(time())
         if whereat == 0:
             self.actions.append(1)
@@ -148,9 +149,9 @@ class Rover():
                         # create new node at position, add it to the tree and as a child of the previous node
                         # and remain in state 1
                         n = Node(position)
-                        self.previouslyPlacedNode = n
                         self.tree[n] = []
                         self.tree[self.previouslyPlacedNode].append(n)
+                        self.previouslyPlacedNode = n
                         # if self.priorwhereat == 1:
                         #     self.priornode = n
                         self.priorwhereat = 0
@@ -187,10 +188,10 @@ class Rover():
                 # check if at exit; if true, create end node and go to state 4[0]
                 elif whereat == 3:
                     n = Node(position)
-                    self.previouslyPlacedNode = n
                     self.tree[n] = []
                     n.setend()
                     self.tree[self.previouslyPlacedNode].append(n)
+                    self.previouslyPlacedNode = n
                     self.priornode = n
                     self.actions = [[4, self.priornode]] + self.actions
                 # check if exiting junction; if it is, stay in this state
@@ -260,14 +261,6 @@ class Rover():
         return self.toreturn
 
 # 0,0 test
-r = Rover( (0,0), 0, "tits")
-print("STATES: ", r.actions)
-print("ACTIONS: ", r.tremaux((0,0), 0, [], []))
-r.pause = False
-print("STATES: ", r.actions)
-print("ACTIONS: ",r.tremaux((0,0), 0, [], []))
-print("STATES: ", r.actions)
-print("ACTIONS: ",r.tremaux((0,100), 0, [], []))
 
 # line test
 # r = Rover( (0,0), 0, "tits")

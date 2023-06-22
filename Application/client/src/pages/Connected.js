@@ -8,7 +8,6 @@ Date created: 03/05/23
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ReactPolling from "react-polling/lib/ReactPolling";
-import BatteryGauge from 'react-battery-gauge'
 import '../components/Connected/grid_Connected.css';
 import '../components/grid.css';
 import RoverImg from '../components/Connected/location.png';
