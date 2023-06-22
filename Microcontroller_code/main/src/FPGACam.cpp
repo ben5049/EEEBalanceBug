@@ -175,14 +175,27 @@ bool FPGACam::getRYB(bool debug) {
   uint32_t sumY = 0;
   uint32_t sumB = 0;
 
+  if (debug){
+    Serial.println("Starting FPGA contact");
+  }
+
   _i2c->beginTransmission(_addr);
   _i2c->write(FPGA_CAM_R_ADDR);
   _i2c->endTransmission();
 
   _i2c->requestFrom(FPGA_CAM_I2C_ADDR, 18);
 
+  if (debug){
+    Serial.println("Finished FPGA contact");
+  }
+  
   // TODO: ADD EXCEPTION TO WHILE LOOP
 
+  if (debug){
+    Serial.print("Bytes read from FPGA: ");
+    Serial.println(_i2c->available());
+  }
+  
   while (_i2c->available() != 18) {
     delay(1);
   }

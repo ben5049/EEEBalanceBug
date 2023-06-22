@@ -17,7 +17,8 @@ cors = CORS(app, resources={r"/*":{"origins":"*"}})
 commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5]
 
 # Server global variables
-TIMEOUT = 30
+TIMEOUT = 5
+LED_TIMEOUT = 30
 rovers = []
 isSpinning = False
 spinTime = time()
@@ -90,6 +91,11 @@ def rover():
     
     # create response to rover and reset timeout
     r.lastSeen = time()
+    print(data)
+    if "beaconangles" not in data:
+        data["beaconangles"] = []
+    if "branches" not in data:
+        data["branches"] = []
     resp = r.tremaux(data["position"], data["whereat"], data["branches"], data["beaconangles"])
 
     # spin  test
@@ -125,9 +131,12 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        # if not r.pause:
         cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
+    
+        #cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], 1000, 1000, data["MAC"], r.sessionId))
+        
         cur.execute("INSERT INTO Diagnostics (MAC, timestamp, battery, connection, SessionID) VALUES (?, ?, ?, ?, ?)", (data["MAC"], r.startup+data["timestamp"]/1000, data["diagnostics"]["battery"], data["diagnostics"]["connection"], r.sessionId))
+
         if 5 in resp["next_actions"]:
             for node in r.tree:
                 neighbours = []
@@ -140,10 +149,10 @@ def rover():
     if DEBUG:
         print("BEACON ANGLES: ", data["beaconangles"])
         print("JUNCTION ANGLES:", data["branches"])
-        print("POSITION: ", data["position"])
-        print("WHEREAT:", data["whereat"])
+        print("YAW: ", data["orientation"])
         print("ACTIONS", r.actions)
         print(resp)
+        print("\n")
     conn.commit()
     return make_response(jsonify(resp), 200)
 
@@ -155,8 +164,16 @@ def allrovers():
     disallowedMacs = []
     # remove timed out rovers
     for rover in rovers:
-        print(rover)
         if time()-rover.lastSeen > TIMEOUT:
+            print("TREE: ", rover.tree)
+            for node in rover.tree:
+                neighbours = []
+                for neighbour in rover.tree[node]:
+                    neighbours.append(str(neighbour))
+                try:
+                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                except mariadb.Error as e:
+                    pass
             rovers.remove(rover)
 
     # add all active rovers
@@ -242,6 +259,7 @@ def sessions():
 def diagnostics():
     global conn, cur
     data = request.get_json()
+    print("DIAGNOSTIC SESSION: ", data["sessionid"])
     
     try:
         cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
@@ -249,18 +267,30 @@ def diagnostics():
         return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid sessionid"}), 400)
     
     d = []
-    for mac, timestamp, battery, connection, sessionid in cur:
-        t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
-        for rover in rovers:
-            if str(rover.name) == str(mac) and len(rover.actions)==0:
-                t["isfinished"] = True
-            elif str(rover.name) == str(mac):
-                t["isfinished"] = False
+    try:
+        for mac, timestamp, battery, connection, sessionid in cur:
+            t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+            flag = True
+            t["isfinished"] = True
+            for rover in rovers:
+                if time()-rover.lastSeen > TIMEOUT:
+                    print(rover.tree)
+                    for node in rover.tree:
+                        neighbours = []
+                        for neighbour in rover.tree[node]:
+                            neighbours.append(str(neighbour))
+                        try:
+                            cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                        except mariadb.Error as e:
+                            pass
+                    rovers.remove(rover)
+                if str(rover.name)==str(mac):
+                    t["isfinished"] = False
 
-        if "isfinished" not in t:
-            t["isfinished"] = False
-        d.append(t)
-    
+            d.append(t)
+    except:
+        print("excepted - not working")
+        pass
     return make_response(jsonify(d), 200)
 
 # Pause a given rover
@@ -412,58 +442,111 @@ def estop():
         return make_response(jsonify({"error":"Invalid MAC address"}))
     return make_response(jsonify({"success":"estopped"}))
 
+red_override = 0
+blue_override = 0
+yellow_override = 0
 # turns on or off red LED
 @app.route("/led_driver/red", methods=["POST"])
 def led_driver_red():
     global conn, cur
-    global isSpinning, spinTime
+    global isSpinning, spinTime, red_override
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_red"]
+    except:
+        pass
+    
     print(data)
     
     if DEBUG:
         print(isSpinning, time()-spinTime, "RED")
     
-    # logic to turn on led
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    try:
+        if override:
+            red_override = 1
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+        else:
+            red_override = 0
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
+
+    if red_override:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
+        red_status = 1
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
+        red_status = 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # swicth should be 0
+        red_status = 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # swicth should be 0
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
-    global isSpinning, spinTime
+    global isSpinning, spinTime, blue_override
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_blue"]
+    except:
+        pass
 
     if DEBUG:
         print(isSpinning, time()-spinTime, "BLUE")
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    try:
+        if override:
+            blue_override = 1
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+        else:
+            blue_override = 0
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
+    if blue_override:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
-    global isSpinning, spinTime
+    global isSpinning, spinTime, yellow_override
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_yellow"]
+    except:
+        pass
+
     if DEBUG:
         print(isSpinning, time()-spinTime, "YELLOW")
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    try:
+        if override:
+            yellow_override = 1
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+        else:
+            yellow_override = 0
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
+    if yellow_override:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0'
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0'
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#

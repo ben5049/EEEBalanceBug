@@ -51,7 +51,7 @@ void taskDeadReckoning(void *pvParameters) {
     xQueuePeek(IMUDataQueue, &IMUData, 0);
 
     /* Use dead reckoning only when moving forwards */
-    if (currentCommand == FORWARD) {
+    if (currentCommand == FORWARD || currentCommand == SPIN) {
 
       /* Find the number of steps since the previous time dead reckoning was used - NOTE: Check if priorStepperLeft/RightSteps resets */
       int32_t leftSteps = stepperLeftSteps - priorStepperLeftSteps;

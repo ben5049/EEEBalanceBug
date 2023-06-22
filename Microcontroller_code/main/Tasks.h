@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 02/06/23
-Date updated: 20/06/23
+Date updated: 22/06/23
 
 Header file for tasks
 */
@@ -47,6 +47,9 @@ struct ToFDistanceData {
 
 /* Variables */
 
+extern volatile int16_t distanceRight;
+extern volatile int16_t distanceLeft;
+
 extern volatile unsigned long stepperRightSteps; /* Total number of steps taken by the right stepper motor (forwards = +1, backwards = -1) */
 extern volatile unsigned long stepperLeftSteps;  /* Total number of steps taken by the left stepper motor (forwards = +1, backwards = -1) */
 extern volatile float spinStartingAngle;         /* The yaw angle in degrees at the start of a spin looking for beacons/junctions */
@@ -90,6 +93,11 @@ void motorSetDPS(float DPS, int motor);
 void checkI2CBusMembers();
 void initBluetooth();
 
+void closeSideChannels();
+void closeFrontChannel();
+void openSideChannels();
+void openFrontChannel();
+
 /* Task handles */
 extern TaskHandle_t taskIMUHandle;
 extern TaskHandle_t taskMovementHandle;
@@ -116,6 +124,7 @@ void taskBluetooth(void *pvParameters);
 
 /* Mutexes */
 extern SemaphoreHandle_t mutexI2C;
+extern SemaphoreHandle_t mutexSpin;
 
 /* Queue handles */
 

@@ -21,7 +21,7 @@ import RoverImg from '../components/Connected/location.png';
 //-------------------------------- Main -------------------------------------------------
 
 /* 
-Replay Page - given a replayID, this page displays a replay while also giving the user control.
+Replay Page - given a sessionID, this page displays a replay while also giving the user control.
     		  It also allows the user to change the shortest path start and end points.
 */
 
@@ -30,8 +30,8 @@ const Replay = () => {
 	//---------------------------- Get Stored Values ------------------------------------
 
 	const ServerIP = localStorage.getItem('ServerIP');
-	const replayID = localStorage.getItem('ReplayID');
-	console.log('Replay ID = ' + replayID);
+	const sessionID = localStorage.getItem('sessionID');
+	console.log('sessionID = ' + sessionID);
 	const MAC = localStorage.getItem('MAC');
 	console.log('CONNECTED MAC = ' + MAC);
 	const nickname = localStorage.getItem('nickname');
@@ -55,7 +55,7 @@ const Replay = () => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "sessionid": replayID })
+			body: JSON.stringify({ "sessionid": sessionID })
 		})
 		.then(response => response.json()) /* Parse the response as JSON */
 		.then(data => UpdateMappingData(data)) /* Update the state with the data */
@@ -124,7 +124,7 @@ const Replay = () => {
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ "sessionid": replayID, "start_x": StartX, "start_y": StartY }) /* Gives sessionID, start coordinate to server */
+				body: JSON.stringify({ "sessionid": sessionID, "start_x": StartX, "start_y": StartY }) /* Gives sessionID, start coordinate to server */
 			});
 
 			const data = await response.json(); /* Parse response as JSON */
@@ -182,7 +182,7 @@ const Replay = () => {
 		   Follow till -1 or length of graph */
 		let CurrentNode = ClosestNodeObject;
 		let NextNode = ShortestPath[CurrentNode.mapsto] /* Only maps to single value as only 1 closest path */
-		while (CurrentNode.mapsto != -1) {
+		while (CurrentNode.mapsto !== -1) {
 			/* Draw */
 			console.log("While Looped")
 			renderShortestPathSegment(CurrentNode.xcoord, CurrentNode.ycoord, NextNode.xcoord, NextNode.ycoord);
@@ -416,6 +416,7 @@ const Replay = () => {
 
 	/* Top level function to draw on the canvas */
 	const drawOnCanvas = () => {
+		
 		const canvas = canvasRef.current;
 		const ctx = canvas.getContext('2d');
 	  
@@ -431,7 +432,7 @@ const Replay = () => {
 		renderPoints(ctx, endCoordinates_X, endCoordinates_Y, 'magenta');
 	  
 		/* Re-renders map */
-		//console.log(MapData);
+		console.log("RAW MAP DATA: ", MapData);
 		renderBoundaries();
 
 		/* display shortest path if button was pressed */
@@ -514,13 +515,13 @@ const Replay = () => {
 			position_y  = parseFloat(ScaleToCanvas(position_y))
 			/* Draw and reject out of bounds */
 			console.log("DRAWING LINE FROM x: " + position_x + ", y: " + position_y)
-			if (tofleft < 800){
+			if (tofleft < 300){
 				tofleft  = tofleft / (MapDataMax - MapDataMin + 1600)  * 700
 				console.log("LEFT DASH START X   = " + (position_x + tofleft * Math.cos(theta)) + "    - position_x: " + position_x, ", tofleft: " + tofleft + ", Math.cos(theta)" + Math.cos(theta))
 				console.log("LEFT DASH START Y   = " + position_y + tofleft * Math.sin(theta))
 				drawLine(ctx, [position_x + tofleft * Math.cos(theta), position_y + tofleft * Math.sin(theta)], [position_x + tofleft * Math.cos(theta) + l * Math.sin(theta), position_y + tofleft * Math.sin(theta) - l * Math.cos(theta)]);
 			} 
-			if (tofright < 800){
+			if (tofright < 300){
 				tofright  = tofright / (MapDataMax - MapDataMin + 1600)  * 700
 				console.log("RIGHT DASH START = " + (position_x - tofright * Math.cos(theta)) + "    - position_x: " + position_x, ", tofright: " + tofright + ", Math.cos(theta)" + Math.cos(theta))
 				drawLine(ctx, [position_x - tofright * Math.cos(theta), position_y - tofright * Math.sin(theta)], [position_x - tofright * Math.cos(theta) + l * Math.sin(theta), position_y - tofright * Math.sin(theta) - l * Math.cos(theta)]);
@@ -613,7 +614,7 @@ const Replay = () => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "sessionid": replayID })
+			body: JSON.stringify({ "sessionid": sessionID })
 		})
 		.then(response => response.json()) /* Parse the response as JSON */
 		.then(data => UpdateDiagnosticData(data)) /* Update the state with the data */

@@ -1,7 +1,7 @@
 /*
-Authors: Ben Smith
-Date created: 30/05/23
-Date updated: 19/06/23
+Authors: David Cai
+Date created: 21/05/23
+Date updated: 21/06/23
 
 Bluetooth Xbox controller task
 */

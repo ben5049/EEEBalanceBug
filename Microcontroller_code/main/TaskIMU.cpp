@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 19/06/23
+Date updated: 21/06/23
 
 IMU sampling and sensor fusion
 */
@@ -292,18 +292,19 @@ void taskIMU(void *pvParameters) {
         /* yaw (z-axis rotation) */
         float t3 = +2.0 * (q0 * q3 + q1 * q2);
         float t4 = +1.0 - 2.0 * (q2sqr + q3 * q3);
-        IMUData.yaw = atan2(t3, t4) * 180.0 / PI;
+        samples++;
+        IMUData.yaw = (atan2(t3, t4) * 180.0 / PI) - (YAW_DRIFT_PER_SAMPLE * samples);
 
         /* Pack pitch rate and yaw rate into IMU data */
         IMUData.pitchRate = myICM.gyrX();
         IMUData.yawRate = myICM.gyrZ();
+        
 
 #if ENABLE_IMU_DEBUG == true
         SERIAL_PORT.print("Pitch: ");
         SERIAL_PORT.print(IMUData.pitch);
         SERIAL_PORT.print(", Yaw: ");
         SERIAL_PORT.print(IMUData.yaw);
-        samples++;
         totalYawDrift += IMUData.yaw - prevYaw;
         prevYaw = IMUData.yaw;
         yawDrift = totalYawDrift / samples;

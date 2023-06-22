@@ -1,7 +1,7 @@
 /*
 Authors: Ben Smith
 Date created: 28/05/23
-Date updated: 20/06/23
+Date updated: 22/06/23
 
 Command state machine that reads new commands from a queue and implements them
 */
@@ -38,7 +38,7 @@ void taskExecuteCommand(void *pvParameters) {
 
   /* Variables */
   static robotCommand newCommand;
-  // static float junctionAngle;
+  static float junctionAngle;
   static float angleSetpoint;
 
   /* Start the loop */
@@ -79,8 +79,8 @@ void taskExecuteCommand(void *pvParameters) {
         enableDirectionControl = false;
         speedSetpoint = 70;
 
-        /* Wait 2 seconds to enter a passage before enabling path control */
-        vTaskDelay(pdMS_TO_TICKS(3000));
+        /* Wait x seconds to enter a passage before enabling path control */
+        vTaskDelay(pdMS_TO_TICKS(4000));
         ulTaskNotifyValueClearIndexed(NULL, 0, UINT_MAX);
         enablePathControl = true;
 
@@ -135,24 +135,27 @@ void taskExecuteCommand(void *pvParameters) {
         turns--;
         angRateSetpoint = SPIN_SPEED;
 
+        Serial.println("Starting spin");
         /* Unblock TaskSpin which will count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
         /* Wait for the turn to complete */
         vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000));
 
-        /* Notify the spin task that the turn is complete*/
+        /* Notify the spin task that the turn is complete */
         speedKd = KD_SPEED;
+        Serial.println("Finished spin");
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
         /* Recieve acknowledge that the queue is ready and taskSpin is done */
-        ulTaskNotifyTakeIndexed(0, pdTRUE, pdMS_TO_TICKS(50));
+        // ulTaskNotifyTakeIndexed(0, pdTRUE, pdMS_TO_TICKS(50));
 
         /* Re-enable the direction controller */
         enableDirectionControl = true;
 
         /* Delay to let the angle correct */
         vTaskDelay(pdMS_TO_TICKS(500));
+
         /* Print the angles of the junctions */
         // while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
         //   if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {
