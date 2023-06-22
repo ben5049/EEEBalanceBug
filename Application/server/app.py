@@ -273,15 +273,15 @@ def diagnostics():
         flag = True
         t["isfinished"] = True
         for rover in rovers:
-            for node in rover.tree:
-                neighbours = []
-                for neighbour in rover.tree[node]:
-                    neighbours.append(str(neighbour))
-                try:
-                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
-                except mariadb.Error as e:
-                    pass
             if time()-rover.lastSeen > TIMEOUT:
+                for node in rover.tree:
+                    neighbours = []
+                    for neighbour in rover.tree[node]:
+                        neighbours.append(str(neighbour))
+                    try:
+                        cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                    except mariadb.Error as e:
+                        pass
                 rovers.remove(rover)
             if str(rover.name)==str(mac):
                 t["isfinished"] = False
