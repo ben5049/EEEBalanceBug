@@ -43,6 +43,14 @@ cur = conn.cursor()
 def hello():
     return jsonify({"hello":"world"})
 
+@app.route("/set_angle", methods=["POST"])
+def set_angle():
+    data = request.get_json()
+    global commandQueue
+    commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3]]
+    commandQueue.append([2, data["angle"]])
+    return make_response(jsonify({"suc":"ces"}))
+
 # Communication with rover
 @app.route("/rover", methods=["POST"])
 def rover():
