@@ -53,7 +53,6 @@ class Rover():
         self.priornode = n
         self.startup = int(time())
         if whereat == 0:
-            self.actions.append(1)
             self.priorwhereat = 1
         elif whereat == 1:
             self.actions.append(2)

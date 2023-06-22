@@ -261,6 +261,7 @@ def sessions():
 def diagnostics():
     global conn, cur
     data = request.get_json()
+    print("DIAGNOSTIC SESSION: ", data["sessionid"])
     
     try:
         cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
