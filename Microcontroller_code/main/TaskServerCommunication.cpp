@@ -111,7 +111,7 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
           if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE) {
             postData = postData + String(beaconAngle) + ",";
             flag = true;
-            SERIAL_PORT.println(beaconAngle);
+            // SERIAL_PORT.println(beaconAngle);
           }
         }
       }

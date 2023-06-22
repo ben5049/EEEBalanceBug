@@ -73,10 +73,9 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define TOF_LEFT_CHANNEL 3               /* I2C mux channel for the left ToF sensor */
 #define TOF_FRONT_CHANNEL 0              /* I2C mux channel for the front ToF sensor */
 #define TOF_SAMPLE_FREQUENCY 20          /* Max = 33Hz, default = 10Hz */
-#define THRESHOLD_GRADIENT 400           /* Gradient threshold for the ToF sensors to detect junctions */
 #define THRESHOLD_COUNTER_MAX 5          /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
 #define THRESHOLD_DISTANCE 650           /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
-#define COLLISION_THRESHOLD 100
+#define COLLISION_THRESHOLD 160
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
@@ -98,6 +97,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define NUMBER_OF_BEACONS 3                      /* Number of beacons */
 
 /* Execute command task */
+#define TASK_EXECUTE_COMMAND_DEBUG false
 #define COMMAND_QUEUE_LENGTH 10        /* Maximum number of commands that can be in the queue */
 #define ANGLE_SETPOINT_QUEUE_LENGTH 10 /* Maximum number of angle setpoints in queue */
 
@@ -153,7 +153,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
 #define MAX_DIFF 300
-#define MAX_ANG_RATE 180
+#define MAX_ANG_RATE 90
 
 /* Other macro logic*/
 

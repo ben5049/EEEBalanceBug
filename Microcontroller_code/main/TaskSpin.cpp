@@ -297,14 +297,14 @@ void taskSpin(void *pvParameters) {
         /* Logic if there was a junction at the start and end of right */
         if (rightJunctionAtStart) {
           angleDifference = (rightJunctionAtStartAngle - rightRisingEdgeAngle) / 2.0;
-          junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference - 90.0 + JUNCTION_OFFSET_ANGLE);
+          junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0 + JUNCTION_OFFSET_ANGLE);
           // xQueueSend(junctionAngleQueue, &junctionAngle, 0);
         }
 
         /* Logic if there was a junction at the start and end of left */
         if (leftJunctionAtStart) {
           angleDifference = (leftJunctionAtStartAngle - leftRisingEdgeAngle) / 2.0;
-          junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference + 90.0 + JUNCTION_OFFSET_ANGLE);
+          junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90.0 + JUNCTION_OFFSET_ANGLE);
           xQueueSend(junctionAngleQueue, &junctionAngle, 0);
         }
       }

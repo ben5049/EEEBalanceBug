@@ -50,12 +50,12 @@ void taskDeadReckoning(void *pvParameters) {
 
     xQueuePeek(IMUDataQueue, &IMUData, 0);
 
-    /* Use dead reckoning only when moving forwards */
-    if (currentCommand == FORWARD || currentCommand == SPIN) {
+    /* Find the number of steps since the previous time dead reckoning was used - NOTE: Check if priorStepperLeft/RightSteps resets */
+    int32_t leftSteps = stepperLeftSteps - priorStepperLeftSteps;
+    int32_t rightSteps = stepperRightSteps - priorStepperRightSteps;
 
-      /* Find the number of steps since the previous time dead reckoning was used - NOTE: Check if priorStepperLeft/RightSteps resets */
-      int32_t leftSteps = stepperLeftSteps - priorStepperLeftSteps;
-      int32_t rightSteps = stepperRightSteps - priorStepperRightSteps;
+    /* Use dead reckoning only when moving forwards */
+    if (currentCommand == FORWARD) {  //|| currentCommand == SPIN || currentCommand == TURN) {
 
       /* Logic for if the rover has gone straight (# left wheel step == # right wheel steps)*/
       if (leftSteps == rightSteps) {
@@ -65,12 +65,12 @@ void taskDeadReckoning(void *pvParameters) {
 
       /* Logic for if the rover has turned (# left wheel step != # right wheel steps)*/
       else {
-        float theta = (leftSteps - rightSteps) * rotationsToDistance / (ROVER_WIDTH*STEPS);
+        float theta = (leftSteps - rightSteps) * rotationsToDistance / (ROVER_WIDTH * STEPS);
         float r = leftSteps / STEPS * rotationsToDistance / theta;
         float triangle_sides = r - ROVER_WIDTH / 2;
         float a = sqrt(2 * triangle_sides * triangle_sides * (1 - cos(theta)));
-        xPosition = xPosition + a * sin(IMUData.yaw*PI/180);
-        yPosition = yPosition - a * cos(IMUData.yaw*PI/180);
+        xPosition = xPosition + a * sin(IMUData.yaw * PI / 180);
+        yPosition = yPosition - a * cos(IMUData.yaw * PI / 180);
       }
       priorStepperLeftSteps = stepperLeftSteps;
       priorStepperRightSteps = stepperRightSteps;

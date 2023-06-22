@@ -424,12 +424,12 @@ void taskToF(void *pvParameters) {
       passageEntered = false;
     }
 
-    // imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
-    // if (imminentCollision) {
-    //   digitalWrite(LED_BUILTIN, HIGH);
-    //   vTaskDelay(pdMS_TO_TICKS(10));
-    //   digitalWrite(LED_BUILTIN, LOW);
-    // }
+    imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
+    if (imminentCollision) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      vTaskDelay(pdMS_TO_TICKS(10));
+      digitalWrite(LED_BUILTIN, LOW);
+    }
 
     if (enableJunctionDetection && (currentCommand == FORWARD)) {
 
@@ -439,8 +439,8 @@ void taskToF(void *pvParameters) {
       rightJunction = ToFData.right >= THRESHOLD_DISTANCE;
       frontJunction = frontFIR.output >= THRESHOLD_DISTANCE;
       imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
-      frontJunction = false;  //DELETE
-      imminentCollision = false;
+      // frontJunction = false;  //DELETE
+      // imminentCollision = false;
 
 
       if (passageEntered) {
