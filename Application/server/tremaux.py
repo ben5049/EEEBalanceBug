@@ -3,8 +3,8 @@
 from triangulate import triangulate
 from time import time
 from math import degrees, atan
-THRESHOLD = 150
-PREVIOUS_NODE_THRESHOLD = 200
+THRESHOLD = 75
+PREVIOUS_NODE_THRESHOLD = 100
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
@@ -78,6 +78,7 @@ class Rover():
             print("NEAR PREVIOUSLY PLACED NODE")
             return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
+            print("FINALLY TRUE")
             return True
         print("ELSE ISSUE")
         return False
@@ -256,7 +257,7 @@ class Rover():
                 if self.thresholding(position, self.watchdog) and whereat == 1:
                     print("watchdog working")
                     self.actions = [2, [7, currentAction[1]]] + self.actions
-                print("7", currentAction[1])
+                print("7", currentAction[1], position)
                 print(self.thresholding(currentAction[1].position, position))
                 # if the rover has not returned to its prior position, return to state 7[0]
                 if not self.thresholding(currentAction[1].position, position):

@@ -146,6 +146,11 @@ def rover():
     
     if DEBUG:
         print(data)
+        for i in r.actions:
+            if type(i)==list:
+                print(r.actions[0], r.actions[1])
+            else:
+                print(r.actions)
         print("ACTIONS", r.actions)
         print(resp)
         print("\n")
