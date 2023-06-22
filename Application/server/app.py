@@ -268,6 +268,7 @@ def diagnostics():
     
     d = []
     for mac, timestamp, battery, connection, sessionid in cur:
+        print(mac, timestamp, battery, connection, sessionid)
         t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
         flag = True
         t["isfinished"] = True
