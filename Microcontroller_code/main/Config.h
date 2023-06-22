@@ -38,7 +38,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define ENABLE_DEAD_RECKONING_TASK true       /* Setting "true" enables the dead reckning task */
 #define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
 #define ENABLE_BLUETOOTH_TASK false           /* Setting "true" enables the Bluetooth task */
-#define ENABLE_EXECUTE_COMMAND_TASK false
+#define ENABLE_EXECUTE_COMMAND_TASK true
 
 /* Task priorities */
 #define TASK_IMU_PRIORITY 12                 /* Task priority from 0 to 31 (larger means higher priority) */

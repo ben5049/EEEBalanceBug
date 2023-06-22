@@ -137,7 +137,7 @@ void taskExecuteCommand(void *pvParameters) {
         xQueuePeek(IMUDataQueue, &IMUData, 0);
 
         relativeAngle = wrapAngle(angleSetpoint - IMUData.yaw);
-        dirSetpoint = IMUData.yaw+ (turns * 360.0) + angleSetpoint;
+        dirSetpoint = (turns * 360.0) + angleSetpoint;  // + IMUData.yaw;
 
         if (relativeAngle >= 0) {
           angRateSetpoint = SPIN_SPEED;
