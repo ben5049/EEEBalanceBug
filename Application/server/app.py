@@ -13,7 +13,7 @@ DEBUG = True
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2, 250]
+commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 
 # Server global variables
 TIMEOUT = 5
@@ -117,7 +117,7 @@ def rover():
         r.actions = []
         resp = [commandQueue.pop(0)]
     else:
-        resp = []
+        resp = [2,250]
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
