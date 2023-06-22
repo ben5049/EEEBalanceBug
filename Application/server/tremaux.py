@@ -148,9 +148,9 @@ class Rover():
                         # create new node at position, add it to the tree and as a child of the previous node
                         # and remain in state 1
                         n = Node(position)
-                        self.previouslyPlacedNode = n
                         self.tree[n] = []
                         self.tree[self.previouslyPlacedNode].append(n)
+                        self.previouslyPlacedNode = n
                         # if self.priorwhereat == 1:
                         #     self.priornode = n
                         self.priorwhereat = 0
@@ -187,10 +187,10 @@ class Rover():
                 # check if at exit; if true, create end node and go to state 4[0]
                 elif whereat == 3:
                     n = Node(position)
-                    self.previouslyPlacedNode = n
                     self.tree[n] = []
                     n.setend()
                     self.tree[self.previouslyPlacedNode].append(n)
+                    self.previouslyPlacedNode = n
                     self.priornode = n
                     self.actions = [[4, self.priornode]] + self.actions
                 # check if exiting junction; if it is, stay in this state

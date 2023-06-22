@@ -91,7 +91,6 @@ def rover():
     
     # create response to rover and reset timeout
     r.lastSeen = time()
-    print(data)
     if "beaconangles" not in data:
         data["beaconangles"] = []
     if "branches" not in data:
@@ -147,9 +146,7 @@ def rover():
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     
     if DEBUG:
-        print("BEACON ANGLES: ", data["beaconangles"])
-        print("JUNCTION ANGLES:", data["branches"])
-        print("YAW: ", data["orientation"])
+        print(data)
         print("ACTIONS", r.actions)
         print(resp)
         print("\n")
@@ -456,11 +453,6 @@ def led_driver_red():
         override = data["override_red"]
     except:
         pass
-    
-    print(data)
-    
-    if DEBUG:
-        print(isSpinning, time()-spinTime, "RED")
     
     try:
         if override:

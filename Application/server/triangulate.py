@@ -18,6 +18,7 @@ DELTA = 0.05
 LENGTH = 1 # 2.4
 WIDTH = 1  # 3.6
 def triangulate(ang1, ang2, ang3):
+    print("TRIANGULATING")
     theta1 = 360-ang1
     x1 = LENGTH*sin(theta1*pi/180)*sin((90-ang2)*pi/180)/sin((theta1+ang2)*pi/180)
     y1 = LENGTH*cos(theta1*pi/180)*sin((90-ang2)*pi/180)/sin((theta1+ang2)*pi/180)
@@ -29,7 +30,6 @@ def triangulate(ang1, ang2, ang3):
     
     xdiff = abs(x1-x2)
     ydiff = abs(y1-y2)
-    print(xdiff, ydiff)
     # shift angle anticlockwise and calculate new x1, y1, x2, y2
     ang1-=DELTA
     ang2-=DELTA
