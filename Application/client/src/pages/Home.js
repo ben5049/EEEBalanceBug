@@ -6,13 +6,13 @@ Date created: 03/05/23
 //-------------------------------- Imports ----------------------------------------------
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+//import { Link } from 'react-router-dom';
 import ReactPolling from "react-polling/lib/ReactPolling";
 import RoverCarousel from '../components/Home/RoverCarousel';
 import ReplayCarousel from '../components/Home/ReplayCarousel';
 import '../components/Home/grid_Home.css';
 import '../components/grid.css';
-import AddIcon from '../components/Home/AddIcon.png';
+//import AddIcon from '../components/Home/AddIcon.png';
 
 //-------------------------------- Main -------------------------------------------------
 
@@ -88,9 +88,9 @@ const Home = () => {
 	//---------------------------- Button Functions: onClick ----------------------------
 
 	/* Add Rover button */
-	const handleAddRover = () => {
-		console.log("Add New Rover");
-	}
+	// const handleAddRover = () => {
+	// 	console.log("Add New Rover");
+	// }
 
 	//---------------------------- Display ----------------------------------------------
 

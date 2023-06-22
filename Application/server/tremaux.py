@@ -3,7 +3,7 @@
 from triangulate import triangulate
 from time import time
 from math import degrees, atan
-THRESHOLD = 20
+THRESHOLD = 10
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
@@ -37,7 +37,8 @@ class Rover():
 
     toreturn = []
     nickname = ""
-    priornode = 0
+    priornode = 0 # prior node for tremaux's algorithm to work 
+    previouslyPlacedNode = Node((00000000,10000000000)) # the node most recently placed
     priorwhereat = 0
     sessionId = -1
     lastSeen = 0
@@ -67,6 +68,8 @@ class Rover():
         if pos1[0] == 0 and pos1[1] == 0 and pos2[0] == 0 and pos2[1]==0:
             return False
         if abs(self.priornode.position[0] - pos2[0]) < THRESHOLD and abs(self.priornode.position[1] - pos2[1]) < THRESHOLD:
+            return False
+        if abs(self.previouslyPlacedNode.position[0] - pos2[0]) < THRESHOLD and abs(self.previouslyPlacedNode.position[1] - pos2[1]) < THRESHOLD:
             return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
             return True
@@ -91,21 +94,16 @@ class Rover():
         try:
             if (node.position[0]-position[0]) == 0:
                 if (node.position[1]-position[1]) == 0:
-                    print("SET TO 0")
                     angle = 0
                 else:
-                    print("SET TO 180")
                     angle = 180    
             else:
-                print("MANUALLY SET")
                 angle = degrees(atan((node.position[0]-position[0])/(node.position[1]-position[1])))
         except:
             if (node.position[0]-position[0]) > 0:
                 angle = 90
-                print("SET TO 90")
             else:
                 angle = -90
-                print("SET TO -90")
 
         self.setAngle(angle)
         self.step_forward()
@@ -120,6 +118,7 @@ class Rover():
         self.toreturn.append(float(newy))
 
     def tremaux(self, position, whereat, potentialbranches, beaconangles):
+        print("IS PAUSED: ", self.pause)
         # if paused, remain idle
         if self.pause:
             return [3]
@@ -149,6 +148,7 @@ class Rover():
                         # create new node at position, add it to the tree and as a child of the previous node
                         # and remain in state 1
                         n = Node(position)
+                        self.previouslyPlacedNode = n
                         self.tree[n] = []
                         self.tree[self.priornode].append(n)
                         # if self.priorwhereat == 1:
@@ -176,6 +176,7 @@ class Rover():
                         # find node in tree, visit it and go back to prior node
                         for node in self.tree:
                             if self.thresholding(node.position, position):
+                                print("previously visited: ", position, node.position)
                                 node.visit()
                         self.actions= [[4,self.priornode]] + self.actions
                 # check if at dead end; if true, go to state 4[0] and idle
@@ -186,6 +187,7 @@ class Rover():
                 # check if at exit; if true, create end node and go to state 4[0]
                 elif whereat == 3:
                     n = Node(position)
+                    self.previouslyPlacedNode = n
                     self.tree[n] = []
                     n.setend()
                     self.tree[self.priornode].append(n)
@@ -210,10 +212,14 @@ class Rover():
                         if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2] and beaconangles[1]==0:
                             newx, newy = position[0], position[1]
                         else:
-                            newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
+                            try:
+                                newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
+                            except:
+                                newx, newy = position[0], position[1]
                         self.updatePos(newx, newy)
                         # create new node
                         n = Node((newx, newy))
+                        self.previouslyPlacedNode = n
                         self.tree[n] = []
                         self.tree[self.priornode].append(n)
                         # tell rover to eventually go to state 4[0]
@@ -231,7 +237,6 @@ class Rover():
                 self.actions = [[6,currentAction[1]], 1] + self.actions
             # check if in state 4[0]; if true, visit node and tell rover to go back to the previous node
             elif currentAction[0] == 4:
-                print("GOING BACK TO: ", currentAction[1])
                 currentAction[1].visit()
                 self.go_back(currentAction[1], position)
             # check if in state 6[0]; if true, tell rover to set its angle and step forward

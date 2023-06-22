@@ -140,10 +140,10 @@ def rover():
     if DEBUG:
         print("BEACON ANGLES: ", data["beaconangles"])
         print("JUNCTION ANGLES:", data["branches"])
-        print("POSITION: ", data["position"])
-        print("WHEREAT:", data["whereat"])
+        print("YAW: ", data["orientation"])
         print("ACTIONS", r.actions)
         print(resp)
+        print("\n")
     conn.commit()
     return make_response(jsonify(resp), 200)
 
@@ -155,7 +155,6 @@ def allrovers():
     disallowedMacs = []
     # remove timed out rovers
     for rover in rovers:
-        print(rover)
         if time()-rover.lastSeen > TIMEOUT:
             rovers.remove(rover)
 
@@ -251,14 +250,14 @@ def diagnostics():
     d = []
     for mac, timestamp, battery, connection, sessionid in cur:
         t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+        flag = True
+        t["isfinished"] = True
         for rover in rovers:
-            if str(rover.name) == str(mac) and len(rover.actions)==0:
-                t["isfinished"] = True
-            elif str(rover.name) == str(mac):
+            if time()-rover.lastSeen > TIMEOUT:
+                rovers.remove(rover)
+            if str(rover.name)==str(mac):
                 t["isfinished"] = False
 
-        if "isfinished" not in t:
-            t["isfinished"] = False
         d.append(t)
     
     return make_response(jsonify(d), 200)
@@ -412,58 +411,111 @@ def estop():
         return make_response(jsonify({"error":"Invalid MAC address"}))
     return make_response(jsonify({"success":"estopped"}))
 
+red_override = 0
+blue_override = 0
+yellow_override = 0
 # turns on or off red LED
 @app.route("/led_driver/red", methods=["POST"])
 def led_driver_red():
     global conn, cur
-    global isSpinning, spinTime
+    global isSpinning, spinTime, red_override
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_red"]
+    except:
+        pass
+    
     print(data)
     
     if DEBUG:
         print(isSpinning, time()-spinTime, "RED")
     
-    # logic to turn on led
+    try:
+        if override:
+            red_override = 1
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+        else:
+            red_override = 0
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
+
+    if red_override:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200)
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+        red_status = 1
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
+        red_status = 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
     # logic to turn off led
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # swicth should be 0
+        red_status = 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # swicth should be 0
 
 @app.route("/led_driver/blue", methods=["POST"])
 def led_driver_blue():
-    global isSpinning, spinTime
+    global isSpinning, spinTime, blue_override
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_blue"]
+    except:
+        pass
 
     if DEBUG:
         print(isSpinning, time()-spinTime, "BLUE")
+    try:
+        if override:
+            blue_override = 1
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+        else:
+            blue_override = 0
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
+    if blue_override:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
 
 @app.route("/led_driver/yellow", methods=["POST"])
 def led_driver_yellow():
-    global isSpinning, spinTime
+    global isSpinning, spinTime, yellow_override
     data = request.get_json()
     energy = data["energy status"]
+    try:
+        override = data["override_yellow"]
+    except:
+        pass
+
     if DEBUG:
         print(isSpinning, time()-spinTime, "YELLOW")
+    try:
+        if override:
+            yellow_override = 1
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+        else:
+            yellow_override = 0
+            return make_response(jsonify({"success":"received data", "switch":override}), 200) #switch should be 1
+    except:
+        pass
+    if yellow_override:
+        return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
-        return make_response(jsonify({"success":"received data", "switch":1}), 200) # siwtch should be 0'
+        return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0'
     else:
         isSpinning = False
-        return make_response(jsonify({"success":"received data", "switch":1}), 200)
+        return make_response(jsonify({"success":"received data", "switch":0}), 200)
     
 
 #---------------------ERROR HANDLING------------------------#
