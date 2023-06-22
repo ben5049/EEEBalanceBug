@@ -412,7 +412,7 @@ def findShortestPath():
     P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
 
     if P is None:
-        return make_response(jsonify({"error":"Invalid starting point"}), 400)
+        return make_response(jsonify({"error":"Tree does not exist"}), 400)
     
     P = dijkstra.formatPredecessor(P)
 
