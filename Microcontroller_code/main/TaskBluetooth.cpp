@@ -10,16 +10,21 @@ Bluetooth Xbox controller task
 
 /* Task headers */
 #include "Tasks.h"
-#include "BluetoothSerial.h"
 
 /* Configuration headers */
 #include "Config.h"
 #include "PinAssignments.h"
-BluetoothSerial SerialBT;
+
+TaskHandle_t taskBluetoothHandle = nullptr;
+
+#if ENABLE_BLUETOOTH_TASK == true
+
+/* Other libraries */
+#include "BluetoothSerial.h"
 
 //-------------------------------- Global Variables -------------------------------------
 
-TaskHandle_t taskBluetoothHandle = nullptr;
+BluetoothSerial SerialBT;
 
 //-------------------------------- Task Functions ---------------------------------------
 
@@ -54,3 +59,5 @@ void taskBluetooth(void *pvParameters) {
     vTaskDelay(100);
   }
 }
+
+#endif

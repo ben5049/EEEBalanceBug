@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Input
 coefficients = [0.02509274331174643,0.12664894963152423,0.26587759991367516,0.33589861675220817,0.26587759991367516,0.12664894963152423,0.02509274331174643,]
-filename = "2daysleft_spin1.txt"  # Replace with the actual file name
+filename = "1dayleft_spin1.txt"  # Replace with the actual file name
 
 # FIR Filter
 def fir_filter(coefficients, input_array):

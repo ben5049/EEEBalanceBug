@@ -242,7 +242,7 @@ const Replay = () => {
 	/* Replay button */
 	const handleReplay = () => {
 		console.log('Replay');
-		setSliderValue(parseInt(0));
+		setSliderValue(parseInt(1));
 	};
 
 	//---------------------------- Button Functions: onMouseDown & onMouseUp ------------
@@ -261,7 +261,7 @@ const Replay = () => {
 			For example, decrease the slider value by a certain amount */
 			setSliderValue((prevValue) => {
 			  const newValue = prevValue - FastforwardStrength; /* Get new value of slider  */
-			  return newValue < 0 ? 0 : newValue; /* Ensure the new value stays above 0 */
+			  return newValue < 1 ? 1 : newValue; /* Ensure the new value stays above 0 */
 			});
 		  }, FastforwardInterval); /* Interval duration */
 		}
@@ -343,7 +343,7 @@ const Replay = () => {
 	//---------------------------- Slider -----------------------------------------------
 
 	/* Initialise variables */
-	const [SliderValue, setSliderValue] = useState(0); /* Position in replay (initial = start) */
+	const [SliderValue, setSliderValue] = useState(1); /* Position in replay (initial = start) */
 	const SliderRate = 40; /* Time Interval (ms) */
 
 	/* sliderValueMax updates when MapData is changed */
@@ -507,7 +507,7 @@ const Replay = () => {
 		const canvas = document.querySelector('#canvas');
 		if (canvas.getContext) {
 			const ctx = canvas.getContext('2d');
-			let l = 5; /* Change to alter length of each line */
+			let l = 15; /* Change to alter length of each line */
 			let theta = orientation*Math.PI/180
 			/* Scale */
 			console.log("PRESCALE DRAWING LINE FROM x: " + position_x + ", y: " + position_y)
@@ -604,7 +604,7 @@ const Replay = () => {
 	*/
 
 	/* Create updating variables */
-	const [DiagnosticData, UpdateDiagnosticData] = useState([]);
+	const [DiagnosticData, UpdateDiagnosticData] = useState([{MAC: "N/A", battery: "N/A",connection : "N/A",timestamp : "N/A"}]);
 
 	/* Send POST request to get Map Data */
 	const DiagnosticURL = "http://" + ServerIP + ":5000/client/diagnostics";
@@ -617,15 +617,17 @@ const Replay = () => {
 			body: JSON.stringify({ "sessionid": sessionID })
 		})
 		.then(response => response.json()) /* Parse the response as JSON */
-		.then(data => UpdateDiagnosticData(data)) /* Update the state with the data */
+		.then(data => { UpdateDiagnosticData(data); console.log("DIAGNOSTIC RESPONSE: ",data)}) /* Update the state with the data */
 		.catch(error => console.log(error)); /* Error Handling */
 	}, []);
 
 	/* Update diagnostic data whenever slider value changes */
-	const [DiagnosticData_Current, UpdateDiagnosticData_Current] = useState([]);
+	const [DiagnosticData_Current, UpdateDiagnosticData_Current] = useState({MAC: "N/A", battery: "N/A",connection : "N/A",timestamp : "N/A"});
 	useEffect(() => {
-		const DiagnosticData_Current = DiagnosticData[SliderValue];
-	}, [SliderValue]);
+		UpdateDiagnosticData_Current(DiagnosticData[SliderValue-1]);
+		console.log("DIAGNOSTICS CURRENT: ", DiagnosticData[SliderValue-1])
+		console.log("TAKEN FROM DiagnosticData: ", DiagnosticData,"AT: ", SliderValue-1)
+	}, [SliderValue, DiagnosticData]);
 
 	//---------------------------- Display ----------------------------------------------
 
@@ -806,7 +808,7 @@ const Replay = () => {
 				</div>
 				{/* Display Data */}
 				<div className="box Data_Replay">
-					CPU: {DiagnosticData_Current.CPU}, MAC: {DiagnosticData_Current.MAC}, Battery: {DiagnosticData_Current.battery}, Connection: {DiagnosticData_Current.connection}, Timestamp: {DiagnosticData_Current.timestamp}
+					MAC: {DiagnosticData_Current.MAC}, Battery: {DiagnosticData_Current.battery}, Connection: {DiagnosticData_Current.connection}, Timestamp: {DiagnosticData_Current.timestamp}
 				</div>
 				{/* Slider */}
 				<div className="box-nobackground Slider_Replay">

@@ -6,7 +6,6 @@ from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
 from time import time
-from json import loads
 from triangulate import triangulate
 DEBUG = True
 
@@ -91,7 +90,6 @@ def rover():
     
     # create response to rover and reset timeout
     r.lastSeen = time()
-    print(data)
     if "beaconangles" not in data:
         data["beaconangles"] = []
     if "branches" not in data:
@@ -147,9 +145,7 @@ def rover():
         return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
     
     if DEBUG:
-        print("BEACON ANGLES: ", data["beaconangles"])
-        print("JUNCTION ANGLES:", data["branches"])
-        print("YAW: ", data["orientation"])
+        print(data)
         print("ACTIONS", r.actions)
         print(resp)
         print("\n")
@@ -403,7 +399,11 @@ def findShortestPath():
 
     # format tree so it is python-readable 
     for sid, node_x, node_y, children in cur:
-        tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
+        try:
+            children = eval(children)
+            tree[(node_x, node_y)] = [eval(x) for x in children]
+        except:
+            tree[(node_x, node_y)] = []
     
     # assert that a tree is valid and formatted bidirectionally
     tree = dijkstra.assertValid(tree)
@@ -412,7 +412,7 @@ def findShortestPath():
     P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
 
     if P is None:
-        return make_response(jsonify({"error":"Invalid starting point"}), 400)
+        return make_response(jsonify({"error":"Tree does not exist"}), 400)
     
     P = dijkstra.formatPredecessor(P)
 
@@ -457,11 +457,6 @@ def led_driver_red():
     except:
         pass
     
-    print(data)
-    
-    if DEBUG:
-        print(isSpinning, time()-spinTime, "RED")
-    
     try:
         if override:
             red_override = 1
@@ -496,8 +491,6 @@ def led_driver_blue():
     except:
         pass
 
-    if DEBUG:
-        print(isSpinning, time()-spinTime, "BLUE")
     try:
         if override:
             blue_override = 1
@@ -527,8 +520,6 @@ def led_driver_yellow():
     except:
         pass
 
-    if DEBUG:
-        print(isSpinning, time()-spinTime, "YELLOW")
     try:
         if override:
             yellow_override = 1
