@@ -87,7 +87,6 @@ void taskSpin(void *pvParameters) {
   static uint16_t counter = 0;
   static uint16_t mean;
   static float standardDeviation;
-  static uint16_t peakThreshold;
 
   /* Junction detection */
   static float angleDifference;
@@ -222,13 +221,13 @@ void taskSpin(void *pvParameters) {
 #endif
 
       /* Check for right rising edge */
-      if ((rightPreviousDistance < peakThreshold) && (ToFData.right >= peakThreshold)) {
+      if ((rightPreviousDistance < THRESHOLD_DISTANCE) && (ToFData.right >= THRESHOLD_DISTANCE)) {
         rightRisingEdgeAngle = IMUData.yaw;
         rightJunctionCounter++;
       }
 
       /* Check for right falling edge */
-      else if ((rightPreviousDistance >= peakThreshold) && (ToFData.right < peakThreshold)) {
+      else if ((rightPreviousDistance >= THRESHOLD_DISTANCE) && (ToFData.right < THRESHOLD_DISTANCE)) {
 
         /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
         if (rightJunctionAtStart && (rightJunctionCounter == 1)) {
@@ -238,19 +237,19 @@ void taskSpin(void *pvParameters) {
         /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
         else {
           angleDifference = (IMUData.yaw - rightRisingEdgeAngle) / 2.0;
-          junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90.0);
+          junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90.0 + JUNCTION_OFFSET_ANGLE);
           // xQueueSend(junctionAngleQueue, &junctionAngle, 0);
         }
       }
 
       /* Check for left rising edge */
-      if ((leftPreviousDistance < peakThreshold) && (ToFData.left >= peakThreshold)) {
+      if ((leftPreviousDistance < THRESHOLD_DISTANCE) && (ToFData.left >= THRESHOLD_DISTANCE)) {
         leftRisingEdgeAngle = IMUData.yaw;
         leftJunctionCounter++;
       }
 
       /* Check for left falling edge */
-      else if ((leftPreviousDistance >= peakThreshold) && (ToFData.left < peakThreshold)) {
+      else if ((leftPreviousDistance >= THRESHOLD_DISTANCE) && (ToFData.left < THRESHOLD_DISTANCE)) {
 
         /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
         if (leftJunctionAtStart && (leftJunctionCounter == 1)) {
@@ -260,7 +259,7 @@ void taskSpin(void *pvParameters) {
         /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
         else {
           angleDifference = (IMUData.yaw - leftRisingEdgeAngle) / 2.0;
-          junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0);
+          junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0 + JUNCTION_OFFSET_ANGLE);
           xQueueSend(junctionAngleQueue, &junctionAngle, 0);
         }
       }
@@ -282,14 +281,14 @@ void taskSpin(void *pvParameters) {
         /* Logic if there was a junction at the start and end of right */
         if (rightJunctionAtStart) {
           angleDifference = (rightJunctionAtStartAngle - rightRisingEdgeAngle) / 2.0;
-          junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference);
+          junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference - 90.0 + JUNCTION_OFFSET_ANGLE);
           // xQueueSend(junctionAngleQueue, &junctionAngle, 0);
         }
 
         /* Logic if there was a junction at the start and end of left */
         if (leftJunctionAtStart) {
           angleDifference = (leftJunctionAtStartAngle - leftRisingEdgeAngle) / 2.0;
-          junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference);
+          junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference + 90.0 + JUNCTION_OFFSET_ANGLE);
           xQueueSend(junctionAngleQueue, &junctionAngle, 0);
         }
       }

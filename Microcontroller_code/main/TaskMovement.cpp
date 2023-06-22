@@ -305,6 +305,8 @@ void taskMovement(void* pvParameters) {
     initMovement();
   }
 
+  static float PIDvalue;
+
   static uint16_t distanceRightFilteredPrevious;
   static uint16_t distanceLeftFilteredPrevious;
   static uint16_t timestamp = millis();
@@ -355,7 +357,8 @@ void taskMovement(void* pvParameters) {
 
 
     /* Angle Loop */
-    float PIDvalue = PID(angleSetpoint, IMUData.pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
+
+    PIDvalue = PID(angleSetpoint, IMUData.pitch, angleCumError, anglePrevError, angleLastTime, angleKp, angleKi, angleKd);
 
     motorSetpointL += PIDvalue;
     motorSetpointR += PIDvalue;
@@ -412,8 +415,8 @@ void taskMovement(void* pvParameters) {
 
       /* Calculate ToF distance differentials */
       timestamp = millis();
-      distanceRightDifferential = ((ToFData.right - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
-      distanceLeftDifferential = ((ToFData.left - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious);
+      distanceRightDifferential = constrain((((ToFData.right - distanceRightFilteredPrevious) * 1000) / (timestamp - timestampPrevious)), -4 * PATH_DIFF_THRESHOLD, 4 * PATH_DIFF_THRESHOLD);
+      distanceLeftDifferential = constrain((((ToFData.left - distanceLeftFilteredPrevious) * 1000) / (timestamp - timestampPrevious)), -4 * PATH_DIFF_THRESHOLD, 4 * PATH_DIFF_THRESHOLD);
       distanceRightFilteredPrevious = ToFData.right;
       distanceLeftFilteredPrevious = ToFData.left;
       timestampPrevious = timestamp;
@@ -423,18 +426,22 @@ void taskMovement(void* pvParameters) {
         angRateSetpoint = -10;
       } else if (ToFData.right < 50) {
         angRateSetpoint = 10;
-      } else if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD)) {
+      }
+      /* If large increasing right differential, turn right */
+      else if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD) && (ToFData.right < 500)) {
         angRateSetpoint = -constrain(distanceRightDifferential * pathKd, 0, MAX_PATH_DIFF);
         // dirSetpoint -= constrain(distanceRightDifferential * pathKd, 0, MAX_PATH_DIFF);
-      } else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD)) {
+      }
+      /* If large increasing left differential, turn left */
+      else if ((distanceRightDifferential < -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > PATH_DIFF_THRESHOLD) && (ToFData.left < 500)) {
         angRateSetpoint = constrain(distanceLeftDifferential * pathKd, 0, MAX_PATH_DIFF);
         // dirSetpoint += constrain(distanceLeftDifferential * pathKd, 0, MAX_PATH_DIFF);
       } else if ((distanceRightDifferential < PATH_DIFF_THRESHOLD) && (distanceRightDifferential > -PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < PATH_DIFF_THRESHOLD) && (distanceLeftDifferential > -PATH_DIFF_THRESHOLD)) {
         if ((ToFData.left - ToFData.right) > 20.0) {
-          // angRateSetpoint = 5;
+          angRateSetpoint = 5;
           // dirSetpoint += 3;
         } else if ((ToFData.left - ToFData.right) < -20.0) {
-          // angRateSetpoint = -5;
+          angRateSetpoint = -5;
           // dirSetpoint -= 3;
         }
       }

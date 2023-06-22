@@ -22,6 +22,9 @@ Communicate with a server using JSONs
 #include "HTTPClient.h"
 #include <ArduinoJson.h>
 
+/* Personal libraries */
+#include "src/FIRFilter.h"
+
 //-------------------------------- Global Variables -------------------------------------
 
 const char* ssid = "osa";
@@ -31,6 +34,9 @@ String serverName = "http://54.165.59.37:5000/";
 String hostname = "ESP32 Node";
 
 TaskHandle_t taskServerCommunicationHandle = nullptr;
+
+/* Create battery FIR filter */
+static FIRFilter2 batteryFIR;
 
 static struct ToFDistanceData ToFData;
 static struct angleData IMUData;
@@ -70,7 +76,7 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     String tofright = String(ToFData.right);
     String mac = String(WiFi.macAddress());
     String rssi = String(WiFi.RSSI());
-    String battery = String(analogRead(VBAT) * 4 * 3.3 * 1.1 / 4096);
+    String battery = String(FIRFilterUpdate2(&batteryFIR, analogRead(VBAT) * 4 * 3.3 * 1.1 / 4096));
     String cwa = String(currentWhereAt);
     String postData = "{\"diagnostics\": {\"battery\":" + battery + ",\"connection\":" + rssi + "},\"MAC\":\"" + mac + "\",\"nickname\":\"MiWhip\",\"timestamp\":" + timestamp + ",\"position\":[" + position_x + "," + position_y + "],\"whereat\":" + cwa + ",\"orientation\":" + orientation + ",\"branches\":[";
 
@@ -111,6 +117,12 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
       }
 
       xSemaphoreGive(mutexSpin);
+    } 
+    /* If SPIN task running, send empty JSON keys#[] */
+    else {
+
+      postData = postData + "],\"beaconangles\":[";
+      flag = false;
     }
 
     if (flag) {
@@ -240,7 +252,7 @@ void parsePayload(String payload, robotCommand rc[], uint16_t httpResponseCode, 
 
 //-------------------------------- Task Functions ---------------------------------------
 
-/* Task to record debug information */
+/* Task to communicate with server via JSON */
 void taskServerCommunication(void* pvParameters) {
 
   (void)pvParameters;
@@ -250,6 +262,9 @@ void taskServerCommunication(void* pvParameters) {
   static uint8_t numCommands;
   static robotCommand newCommand;
 
+  /* Initialise battery filter */
+  FIRFilterInit2(&batteryFIR);
+  
   const TickType_t xFrequency = configTICK_RATE_HZ / TASK_SERVER_COMMUNICATION_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
 

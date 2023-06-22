@@ -314,6 +314,9 @@ void taskToF(void *pvParameters) {
   static bool leftJunction = false;
   static bool frontJunction = false;
 
+  static bool enableJunctionDetection = false;
+  static bool passageEntered = false;
+
   /* Make the task execute at a specified frequency */
   const TickType_t xFrequency = configTICK_RATE_HZ / TOF_SAMPLE_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -414,7 +417,16 @@ void taskToF(void *pvParameters) {
 #endif
 
     /* Junction detection */
-    if (currentCommand == FORWARD) {
+
+    /* If start notification recieved */
+    if (ulTaskNotifyTakeIndexed(0, pdTRUE, 0) != 0) {
+      enableJunctionDetection = true;
+      passageEntered = false;
+    }
+
+
+    if (enableJunctionDetection && (currentCommand == FORWARD)) {
+
 
       /* Calculate boolean variables that determine where junctions are located*/
       leftJunction = ToFData.left >= THRESHOLD_DISTANCE;
@@ -422,43 +434,91 @@ void taskToF(void *pvParameters) {
       frontJunction = frontFIR.output >= THRESHOLD_DISTANCE;
       imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
       frontJunction = false;  //DELETE
+      imminentCollision = false;
 
 
-      /* Dead end */
-      if (!imminentCollision) {
-        currentWhereAt = DEAD_END;
-        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-      }
+      if (passageEntered) {
 
-      /* Left and right corners */
-      else if ((!rightJunction && leftJunction && !frontJunction) || (rightJunction && !leftJunction && !frontJunction)) {
-        currentWhereAt = PASSAGE;
-      }
+        /* Dead end */
+        if (imminentCollision) {
+          currentWhereAt = DEAD_END;
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+          enableJunctionDetection = false;
+        }
 
-      /* Right T-junction */
-      else if (rightJunction && !leftJunction && frontJunction) {
-        currentWhereAt = JUNCTION;
-        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-      }
+        /* Left and right corners */
+        else if ((!rightJunction && leftJunction && !frontJunction) || (rightJunction && !leftJunction && !frontJunction)) {
+          currentWhereAt = JUNCTION;
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+          enableJunctionDetection = false;
+        }
 
-      /* Left T-junction */
-      else if (!rightJunction && leftJunction && frontJunction) {
-        currentWhereAt = JUNCTION;
-        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-      }
+        /* Right T-junction */
+        else if (rightJunction && !leftJunction && frontJunction) {
+          currentWhereAt = JUNCTION;
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+          enableJunctionDetection = false;
+        }
 
-      /* Both T-junction */
-      else if (rightJunction && leftJunction && !frontJunction) {
-        currentWhereAt = JUNCTION;
-        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-      }
+        /* Left T-junction */
+        else if (!rightJunction && leftJunction && frontJunction) {
+          currentWhereAt = JUNCTION;
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+          enableJunctionDetection = false;
+        }
 
-      /* Crossroads */
-      else if (rightJunction && leftJunction && frontJunction) {
-        currentWhereAt = JUNCTION;
-        xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
-      } else {
-        currentWhereAt = PASSAGE;
+        /* Both T-junction */
+        else if (rightJunction && leftJunction && !frontJunction) {
+          currentWhereAt = JUNCTION;
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+          enableJunctionDetection = false;
+        }
+
+        /* Crossroads */
+        else if (rightJunction && leftJunction && frontJunction) {
+          currentWhereAt = JUNCTION;
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+          enableJunctionDetection = false;
+        } else {
+          currentWhereAt = PASSAGE;
+          passageEntered = true;
+        }
+      } else if (currentCommand == FORWARD) {
+
+        currentWhereAt = EXITING_JUNCTION;
+
+        /* Dead end */
+        if (imminentCollision) {
+          currentWhereAt = DEAD_END;
+          xTaskNotifyGiveIndexed(taskExecuteCommandHandle, 0);
+          enableJunctionDetection = false;
+        }
+
+        /* Left and right corners */
+        else if ((!rightJunction && leftJunction && !frontJunction) || (rightJunction && !leftJunction && !frontJunction)) {
+        }
+
+        /* Right T-junction */
+        else if (rightJunction && !leftJunction && frontJunction) {
+        }
+
+        /* Left T-junction */
+        else if (!rightJunction && leftJunction && frontJunction) {
+        }
+
+        /* Both T-junction */
+        else if (rightJunction && leftJunction && !frontJunction) {
+        }
+
+        /* Crossroads */
+        else if (rightJunction && leftJunction && frontJunction) {
+        }
+
+        /* Otherwise a passage has been entered for the first time*/
+        else {
+          currentWhereAt = PASSAGE;
+          passageEntered = true;
+        }
       }
 
       // /* If we are at a junction while going forwards (and there is no wall infront) alert taskExecuteCommand */

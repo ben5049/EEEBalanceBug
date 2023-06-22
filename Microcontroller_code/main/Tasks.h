@@ -29,7 +29,9 @@ typedef enum {
 typedef enum {
   PASSAGE = 0x00,
   JUNCTION = 0x01,
-  DEAD_END = 0x02
+  DEAD_END = 0x02,
+  AT_EXIT = 0x03,
+  EXITING_JUNCTION = 0x04
 } whereAt;
 
 /* Structs */

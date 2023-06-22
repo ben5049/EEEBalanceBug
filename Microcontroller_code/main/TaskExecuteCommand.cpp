@@ -77,12 +77,22 @@ void taskExecuteCommand(void *pvParameters) {
         currentWhereAt = PASSAGE;
         enableAngRateControl = true;
         enableDirectionControl = false;
-        speedSetpoint = 70;
+        speedSetpoint = 60;
 
-        /* Wait x seconds to enter a passage before enabling path control */
-        vTaskDelay(pdMS_TO_TICKS(4000));
-        ulTaskNotifyValueClearIndexed(NULL, 0, UINT_MAX);
+        /*  */
+        xTaskNotifyGiveIndexed(taskToFHandle, 0);
+        vTaskDelay(pdMS_TO_TICKS(2000));
         enablePathControl = true;
+        // vTaskDelay(pdMS_TO_TICKS(2000));
+        // ulTaskNotifyValueClearIndexed(NULL, 0, UINT_MAX);
+
+        /* Tell the ToF task we are starting a FORWARD command*/
+
+
+
+
+
+
 
         /* Wait until a junction is detected by taskToF */
         ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
@@ -101,6 +111,8 @@ void taskExecuteCommand(void *pvParameters) {
 
       /* Turn to the specified angle */
       case TURN:
+
+        currentWhereAt = EXITING_JUNCTION;
 
         /* Set the speed to 0 */
         enableAngRateControl = true;
@@ -125,9 +137,11 @@ void taskExecuteCommand(void *pvParameters) {
       /* Turn 360 degrees and find the angles of the beacons */
       case SPIN:
 
+        currentWhereAt = EXITING_JUNCTION;
+
         /* Set the speed to 0 */
         speedSetpoint = 0;
-        speedKd = KD_SPEED*3;
+        speedKd = KD_SPEED * 3;
 
         /* Disable the direction controller and set the angular rate */
         spinStartingAngle = IMUData.yaw;
