@@ -117,6 +117,7 @@ def rover():
     # using command queue 
     if (len(commandQueue))!=0:
         r.actions = []
+        resp = []
         resp.append(commandQueue.pop(0))
     else:
         resp = []
