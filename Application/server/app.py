@@ -13,7 +13,7 @@ DEBUG = True
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5]
+commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [2, 250]]
 
 # Server global variables
 TIMEOUT = 5
@@ -58,6 +58,8 @@ def rover():
             break
     # Logic for if rover is not active
     if flag:
+        print(type(data))
+        print(data)
         # Create new rover instance
         r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
         r.nickname = data["nickname"]
@@ -113,11 +115,13 @@ def rover():
     #     user = int(input("Next command: "))
 
     # using command queue 
-    # if (len(commandQueue))!=0:
-    #     r.actions = []
-    #     resp = [commandQueue.pop(0)]
-    # else:
-    #     resp = []
+    if (len(commandQueue))!=0:
+        r.actions = []
+        resp = []
+        for i in commandQueue.pop(0):
+            resp.append(i)
+    else:
+        resp = []
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
@@ -146,6 +150,11 @@ def rover():
     
     if DEBUG:
         print(data)
+        for i in r.actions:
+            if type(i)==list:
+                print(r.actions[0], r.actions[1])
+            else:
+                print(r.actions)
         print("ACTIONS", r.actions)
         print(resp)
         print("\n")
