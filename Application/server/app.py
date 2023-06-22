@@ -121,14 +121,14 @@ def rover():
     #     resp.append(user)
     #     user = int(input("Next command: "))
 
-    # using command queue 
-    # if (len(commandQueue))!=0:
-    #     r.actions = []
-    #     resp = []
-    #     for i in commandQueue.pop(0):
-    #         resp.append(i)
-    # else:
-    #     resp = []
+    #using command queue 
+    if (len(commandQueue))!=0:
+        r.actions = []
+        resp = []
+        for i in commandQueue.pop(0):
+            resp.append(i)
+    else:
+        resp = []
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
