@@ -48,7 +48,6 @@ def hello():
 def rover():
     global conn, cur
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
-    print(data)
     r = 0
     flag = True
     # check if rover is already active
@@ -59,6 +58,8 @@ def rover():
             break
     # Logic for if rover is not active
     if flag:
+        print(type(data))
+        print(data)
         # Create new rover instance
         # r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
         r.nickname = data["nickname"]
