@@ -53,7 +53,7 @@ class Rover():
         self.priornode = n
         self.startup = int(time())
         if whereat == 0:
-            self.actions.append(1)
+            self.actions.append(2)
             self.priorwhereat = 1
         elif whereat == 1:
             self.actions.append(2)
@@ -88,19 +88,19 @@ class Rover():
         self.toreturn.append(2)
         self.toreturn.append(float(angle))
     
-    def go_back(self, node, position):
+    def go_back(self, node, position, previouslyvisited):
         print("CURRENT POSITION:", position)
         print("GOING TO:", node)
         try:
-            if (node.position[0]-position[0]) == 0:
-                if (node.position[1]-position[1]) == 0:
+            if (previouslyvisited.position[0]-position[0]) == 0:
+                if (previouslyvisited.position[1]-position[1]) == 0:
                     angle = 0
                 else:
                     angle = 180    
             else:
-                angle = degrees(atan((node.position[0]-position[0])/(node.position[1]-position[1])))
+                angle = degrees(atan((previouslyvisited.position[0]-position[0])/(previouslyvisited.position[1]-position[1])))
         except:
-            if (node.position[0]-position[0]) > 0:
+            if (previouslyvisited.position[0]-position[0]) > 0:
                 angle = 90
             else:
                 angle = -90
@@ -126,7 +126,6 @@ class Rover():
         # special state when rover has just started - tell it to move forward
         if len(self.toreturn)!=0:
             if self.toreturn[0] == -1:
-                self.step_forward()
                 self.toreturn.pop(0)
                 return self.toreturn
             else:
@@ -238,7 +237,7 @@ class Rover():
             # check if in state 4[0]; if true, visit node and tell rover to go back to the previous node
             elif currentAction[0] == 4:
                 currentAction[1].visit()
-                self.go_back(currentAction[1], position)
+                self.go_back(currentAction[1], position, self.previouslyPlacedNode)
             # check if in state 6[0]; if true, tell rover to set its angle and step forward
             elif currentAction[0] == 6:
                 self.setAngle(currentAction[1])

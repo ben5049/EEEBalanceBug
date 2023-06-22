@@ -131,7 +131,7 @@ def rover():
     # store positions and timestamp in database
     # also store tree in database if rover is done traversing
     try:
-        if not r.pause and r.actions[0]!=3:
+        if not r.pause and r.actions[0]!=1:
             print("ADDING REPLAY INFO")
             cur.execute("INSERT INTO ReplayInfo (timestamp, xpos, ypos, whereat, orientation, tofleft, tofright, MAC, SessionID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (r.startup+data["timestamp"]/1000, data["position"][0], data["position"][1], data["whereat"], data["orientation"], data["tofleft"], data["tofright"], data["MAC"], r.sessionId))
         else:
@@ -172,7 +172,10 @@ def allrovers():
                 neighbours = []
                 for neighbour in rover.tree[node]:
                     neighbours.append(str(neighbour))
-                cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                try:
+                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                except mariadb.Error as e:
+                    pass
             rovers.remove(rover)
 
     # add all active rovers
@@ -274,7 +277,10 @@ def diagnostics():
                 neighbours = []
                 for neighbour in rover.tree[node]:
                     neighbours.append(str(neighbour))
-                cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                try:
+                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                except mariadb.Error as e:
+                    pass
             if time()-rover.lastSeen > TIMEOUT:
                 rovers.remove(rover)
             if str(rover.name)==str(mac):
