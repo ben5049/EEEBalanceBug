@@ -67,6 +67,7 @@ static float accelLastTime = millis();
 
 
 /* Speed Control Variables */
+volatile bool enableSpeedControl = true;
 volatile float speedSetpoint = 0;
 static float speedCumError = 0;
 static float speedPrevError = 0;
@@ -193,6 +194,9 @@ void debug() {
   /* Position Debugging */
   /* PID Values */
   /* Yaw Rate Debugging */
+  debugPrint("YawRate", IMUData.yawRate);                 //8
+  debugPrint("yawRateSetpoint", angRateSetpoint);                        //9
+  debugPrint("yawRate error", angRateSetpoint - IMUData.yawRate);  //10
   Serial.println("*/");
 }
 
@@ -376,7 +380,7 @@ void taskMovement(void* pvParameters) {
     }
 
     /* Speed Loop */
-    if (controlCycle % 5 == 0) {
+    if ((controlCycle % 5 == 0)&&enableSpeedControl) {
       accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
       speedLastTime = millis();
       accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);

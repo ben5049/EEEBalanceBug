@@ -127,7 +127,9 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Set the speed to 0 */
         speedSetpoint = 0;
-        speedKd = KD_SPEED*3;
+        speedKd = KD_SPEED*100;
+        speedKp = KP_SPEED*5;
+
 
         /* Disable the direction controller and set the angular rate */
         spinStartingAngle = IMUData.yaw;
@@ -135,7 +137,6 @@ void taskExecuteCommand(void *pvParameters) {
         turns--;
         angRateSetpoint = SPIN_SPEED;
 
-        Serial.println("Starting spin");
         /* Unblock TaskSpin which will count the junctions and find the beacons. NOTE THIS TASK DOESN'T MAKE THE ROBOT SPIN */
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
@@ -143,15 +144,18 @@ void taskExecuteCommand(void *pvParameters) {
         vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000));
 
         /* Notify the spin task that the turn is complete */
+        angRateSetpoint = 0;
+        vTaskDelay(500);
         speedKd = KD_SPEED;
-        Serial.println("Finished spin");
+        speedKp = KP_SPEED;
         xTaskNotifyGiveIndexed(taskSpinHandle, 0);
 
         /* Recieve acknowledge that the queue is ready and taskSpin is done */
         // ulTaskNotifyTakeIndexed(0, pdTRUE, pdMS_TO_TICKS(50));
 
         /* Re-enable the direction controller */
-        enableDirectionControl = true;
+        enableDirectionControl = false;
+
 
         /* Delay to let the angle correct */
         vTaskDelay(pdMS_TO_TICKS(500));

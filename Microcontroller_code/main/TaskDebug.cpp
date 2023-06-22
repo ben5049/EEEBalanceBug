@@ -77,7 +77,6 @@ void taskDebug(void *pvParameters) {
     if(initialised){
       // newCommand = FORWARD;
       newCommand = SPIN;
-      SERIAL_PORT.println("SPIN");
       xQueueSend(commandQueue, &newCommand, 0);
       initialised = false;
     }
