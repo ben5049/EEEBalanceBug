@@ -254,11 +254,6 @@ class Rover():
                 self.step_forward()
             # check if in state 7[0]
             elif currentAction[0] == 7:
-                if self.thresholding(position, self.watchdog) and whereat == 1:
-                    print("watchdog working")
-                    self.actions = [2, [7, currentAction[1]]] + self.actions
-                print("7", currentAction[1], position)
-                print(self.thresholding(currentAction[1].position, position))
                 # if the rover has not returned to its prior position, return to state 7[0]
                 # if not self.thresholding(currentAction[1].position, position):
                 if whereat == 2:
