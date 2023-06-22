@@ -49,6 +49,7 @@ def set_angle():
     global commandQueue
     commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3]]
     commandQueue.append([2, data["angle"]])
+    print(commandQueue)
     return make_response(jsonify({"suc":"ces"}))
 
 # Communication with rover
