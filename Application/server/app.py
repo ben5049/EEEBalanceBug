@@ -67,8 +67,6 @@ def rover():
             break
     # Logic for if rover is not active
     if flag:
-        print(type(data))
-        print(data)
         # Create new rover instance
         r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
         r.nickname = data["nickname"]
@@ -124,13 +122,13 @@ def rover():
     #     user = int(input("Next command: "))
 
     # using command queue 
-    if (len(commandQueue))!=0:
-        r.actions = []
-        resp = []
-        for i in commandQueue.pop(0):
-            resp.append(i)
-    else:
-        resp = []
+    # if (len(commandQueue))!=0:
+    #     r.actions = []
+    #     resp = []
+    #     for i in commandQueue.pop(0):
+    #         resp.append(i)
+    # else:
+    #     resp = []
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
