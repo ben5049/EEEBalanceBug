@@ -150,12 +150,11 @@ void taskExecuteCommand(void *pvParameters) {
 
         /* Set the speed to 0 */
         speedSetpoint = 0;
-        speedKd = KD_SPEED*100;
-        speedKp = KP_SPEED*5;
 
 
         /* Disable the direction controller and set the angular rate */
         enableDirectionControl = false;
+        enableSpinControl = true;
         turns--;
         angRateSetpoint = SPIN_SPEED;
 
@@ -171,7 +170,6 @@ void taskExecuteCommand(void *pvParameters) {
         /* Notify the spin task that the turn is complete */
         angRateSetpoint = 0;
         vTaskDelay(500);
-        speedKd = KD_SPEED;
 
 #if TASK_EXECUTE_COMMAND_DEBUG == true
         Serial.println("Finished spin");
@@ -182,12 +180,12 @@ void taskExecuteCommand(void *pvParameters) {
         // ulTaskNotifyTakeIndexed(0, pdTRUE, pdMS_TO_TICKS(50));
 
         /* Re-enable the direction controller */
-        enableDirectionControl = false;
+        enableDirectionControl = true;
 
 
         /* Delay to let the angle correct */
         vTaskDelay(pdMS_TO_TICKS(500));
-
+        enableSpinControl = false;
         /* Print the angles of the junctions */
         // while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
         //   if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {

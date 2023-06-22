@@ -69,6 +69,7 @@ extern volatile float angRateSetpoint;
 
 extern volatile float speedKd;
 extern volatile float speedKp;
+extern volatile bool enableSpinControl;
 
 extern volatile bool enablePathControl;
 extern volatile bool enableAngRateControl;

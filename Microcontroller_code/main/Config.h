@@ -33,7 +33,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 /* Task enables */
 #define ENABLE_IMU_TASK true                  /* Setting "true" enables the IMU sampling task */
 #define ENABLE_TOF_TASK true                  /* Setting "true" enables the ToF sampling task */
-#define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
+#define ENABLE_SERVER_COMMUNICATION_TASK false /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK true       /* Setting "true" enables the dead reckning task */
 #define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
@@ -116,6 +116,10 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define KI_POS 0.00
 #define KD_POS 0.00
 
+#define KP_SPIN 100.00
+#define KI_SPIN 0.00
+#define KD_SPIN 0.00
+
 #define KP_ACCEL 0.001
 #define KD_ACCEL 0.025
 #define KI_ACCEL 0.00
@@ -147,6 +151,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define MAX_PATH_DIFF 30
 #define PATH_DIFF_THRESHOLD 10.0
 
+#define MAX_SPEED 400
 #define ANGLE_OFFSET -1.50
 #define MAX_ANGLE 7.5
 #define MAX_DPS 400

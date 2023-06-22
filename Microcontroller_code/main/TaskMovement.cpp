@@ -75,6 +75,17 @@ static float speedLastTime = millis();
 static float lastSpeed = 0;
 static float endTime = millis();
 
+/* Spin Rate Variables */
+volatile bool enableSpinControl = false;
+volatile float spinSetpoint = 0;
+static float spinCumError = 0;
+static float spinPrevError = 0;
+static float spinLastTime = millis();
+volatile float spinKp = KP_SPIN;
+volatile float spinKi = KI_SPIN;
+volatile float spinKd = KD_SPIN;
+
+
 /* Angle Rate Variables */
 volatile bool enableAngRateControl = true;
 volatile float angRateSetpoint = 0;
@@ -398,6 +409,13 @@ void taskMovement(void* pvParameters) {
       motorDiff += PID(angRateSetpoint, IMUData.yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
       angRateLastTime = millis();
       motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
+    }
+
+    /* Spin on spot */
+    if (enableSpinControl && (controlCycle % 3 == 0)) {
+      speedSetpoint = -PID(spinSetpoint, (motorSetpointL+motorSetpointR), spinCumError, spinPrevError, spinLastTime, spinKp, spinKi, spinKd);
+      spinLastTime = millis();
+      speedSetpoint = constrain(speedSetpoint, -MAX_SPEED, MAX_SPEED);
     }
 
     /* Direction Control Loop */
