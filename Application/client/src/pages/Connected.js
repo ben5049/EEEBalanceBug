@@ -8,6 +8,7 @@ Date created: 03/05/23
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ReactPolling from "react-polling/lib/ReactPolling";
+import BatteryGauge from 'react-battery-gauge'
 import '../components/Connected/grid_Connected.css';
 import '../components/grid.css';
 import RoverImg from '../components/Connected/location.png';
@@ -28,8 +29,8 @@ const Connected = () => {
 	console.log('CONNECTED MAC = ' + MAC);
 	const nickname = localStorage.getItem('nickname');
 	console.log('CONNECTED nickname = ' + nickname);
-	const SessionID = localStorage.getItem('SessionID');
-	console.log('CONNECTED SessionID = ' + SessionID);
+	const sessionID = localStorage.getItem('sessionID');
+	console.log('CONNECTED sessionID = ' + sessionID);
 	
 	//---------------------------- Polling: Diagnostics ---------------------------------
 
@@ -44,13 +45,13 @@ const Connected = () => {
 	/* Send POST request to get Diagnostics data */
 	const DiagnosticURL = "http://" + ServerIP + ":5000/client/diagnostics";
 	const fetchDiagnosticData = () => {
-		console.log("URL = " + DiagnosticURL + " used: " + SessionID);
+		console.log("URL = " + DiagnosticURL + " used: " + sessionID);
 		return fetch(DiagnosticURL, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "sessionid": SessionID })
+			body: JSON.stringify({ "sessionid": sessionID })
 		});
 	};
 
@@ -109,7 +110,7 @@ const Connected = () => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "sessionid": SessionID })
+			body: JSON.stringify({ "sessionid": sessionID })
 		});
 	};
 
@@ -226,9 +227,6 @@ const Connected = () => {
 	/* View replay button */
 	const handleViewReplay = () => {
 		console.log("View Replay")
-		// TODO: set ReplayID of Session (given by server)
-		const ReplayID = "01";
-		localStorage.setItem('ReplayID', ReplayID);
 	}
 
 	/* Menu button (debug) */
@@ -460,7 +458,7 @@ const Connected = () => {
 						promise={fetchDiagnosticData} // custom api calling function that should return a promise
 						render={({ startPolling, stopPolling, isPolling }) => {
 							// TODO: select which diagnostics to display
-							return <p>MAC: {MAC}<br /> Battery: {Battery}<br /> Connection: {Connection}<br /> Timestamp: {Timestamp}</p>;
+							return <p>MAC: {MAC}<br /> Battery:&emsp;{Battery}V<br /> Connection:&emsp; {Connection}dBm<br /> Timestamp: {Timestamp}</p>;
 						}}
 					/>
 				</div>

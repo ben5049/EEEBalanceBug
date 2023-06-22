@@ -21,7 +21,7 @@ import RoverImg from '../components/Connected/location.png';
 //-------------------------------- Main -------------------------------------------------
 
 /* 
-Replay Page - given a replayID, this page displays a replay while also giving the user control.
+Replay Page - given a sessionID, this page displays a replay while also giving the user control.
     		  It also allows the user to change the shortest path start and end points.
 */
 
@@ -30,8 +30,8 @@ const Replay = () => {
 	//---------------------------- Get Stored Values ------------------------------------
 
 	const ServerIP = localStorage.getItem('ServerIP');
-	const replayID = localStorage.getItem('ReplayID');
-	console.log('Replay ID = ' + replayID);
+	const sessionID = localStorage.getItem('sessionID');
+	console.log('sessionID = ' + sessionID);
 	const MAC = localStorage.getItem('MAC');
 	console.log('CONNECTED MAC = ' + MAC);
 	const nickname = localStorage.getItem('nickname');
@@ -55,7 +55,7 @@ const Replay = () => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "sessionid": replayID })
+			body: JSON.stringify({ "sessionid": sessionID })
 		})
 		.then(response => response.json()) /* Parse the response as JSON */
 		.then(data => UpdateMappingData(data)) /* Update the state with the data */
@@ -124,7 +124,7 @@ const Replay = () => {
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ "sessionid": replayID, "start_x": StartX, "start_y": StartY }) /* Gives sessionID, start coordinate to server */
+				body: JSON.stringify({ "sessionid": sessionID, "start_x": StartX, "start_y": StartY }) /* Gives sessionID, start coordinate to server */
 			});
 
 			const data = await response.json(); /* Parse response as JSON */
@@ -416,6 +416,7 @@ const Replay = () => {
 
 	/* Top level function to draw on the canvas */
 	const drawOnCanvas = () => {
+		
 		const canvas = canvasRef.current;
 		const ctx = canvas.getContext('2d');
 	  
@@ -431,7 +432,7 @@ const Replay = () => {
 		renderPoints(ctx, endCoordinates_X, endCoordinates_Y, 'magenta');
 	  
 		/* Re-renders map */
-		//console.log(MapData);
+		console.log("RAW MAP DATA: ", MapData);
 		renderBoundaries();
 
 		/* display shortest path if button was pressed */
@@ -613,7 +614,7 @@ const Replay = () => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ "sessionid": replayID })
+			body: JSON.stringify({ "sessionid": sessionID })
 		})
 		.then(response => response.json()) /* Parse the response as JSON */
 		.then(data => UpdateDiagnosticData(data)) /* Update the state with the data */

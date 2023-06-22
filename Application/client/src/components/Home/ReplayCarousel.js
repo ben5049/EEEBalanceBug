@@ -34,9 +34,9 @@ const ReplayCarousel = ({ replays }) => {
 	//---------------------------- Button Functions: onClick ----------------------------
 
 	/* Select replay button */
-    const handleReplayClick = (ReplayID, MAC) => {
-        console.log("SELECTED " + ReplayID)
-        localStorage.setItem('ReplayID', ReplayID);
+    const handleReplayClick = (sessionID, MAC) => {
+        console.log("SELECTED " + sessionID)
+        localStorage.setItem('sessionID', sessionID);
 		console.log("SELECTED " + MAC)
         localStorage.setItem('MAC', MAC);
     };
