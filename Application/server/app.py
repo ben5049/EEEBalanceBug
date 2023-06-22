@@ -289,6 +289,7 @@ def diagnostics():
 
             d.append(t)
     except:
+        print("excepted - not working")
         pass
     return make_response(jsonify(d), 200)
 
