@@ -76,10 +76,24 @@ void taskDebug(void *pvParameters) {
     vTaskDelay(500);
     if(initialised){
       // newCommand = FORWARD;
-      newCommand = SPIN;
-      xQueueSend(commandQueue, &newCommand, 0);
+      enableDirectionControl = false;
+      speedSetpoint = 0;
+      enableSpinControl = true;
+      dirSetpoint = localYaw +90;
+      angRateSetpoint = SPIN_SPEED;
+      digitalWrite(LED_BUILTIN, HIGH);
+      vTaskDelay(1000);
+      digitalWrite(LED_BUILTIN, LOW);
+      angRateSetpoint = 0;
+      vTaskDelay(500);
+      enableSpinControl = false;
+      speedSetpoint = 0;
+      enableDirectionControl=true;
       initialised = false;
+      
     }
+    
+
     
 
     // newCommand = SPIN;
