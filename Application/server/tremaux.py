@@ -260,14 +260,6 @@ class Rover():
         return self.toreturn
 
 # 0,0 test
-r = Rover( (0,0), 0, "tits")
-print("STATES: ", r.actions)
-print("ACTIONS: ", r.tremaux((0,0), 0, [], []))
-r.pause = False
-print("STATES: ", r.actions)
-print("ACTIONS: ",r.tremaux((0,0), 0, [], []))
-print("STATES: ", r.actions)
-print("ACTIONS: ",r.tremaux((0,100), 0, [], []))
 
 # line test
 # r = Rover( (0,0), 0, "tits")
