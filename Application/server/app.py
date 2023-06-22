@@ -13,7 +13,7 @@ DEBUG = True
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [2, 90]]
+commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [2, 0]]
 
 # Server global variables
 TIMEOUT = 5
