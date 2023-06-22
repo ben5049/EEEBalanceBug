@@ -22,7 +22,7 @@ def findDist(node1, node2):
 def dijkstra(graph, startPos):
     # finds node closest to start
     minDist = 1e9
-    startNode = 0
+    startNode = (0,0)
     for node in graph:
         dist = findDist(startPos, node)
         if  dist < minDist:
@@ -40,7 +40,7 @@ def dijkstra(graph, startPos):
         if node not in G:
             G[node] = 1e7
             P[node] = []
-    
+    print("GRAPHS: ", graph, G, P)
     # checks if all nodes have been visited
     while len(G)!=0:
         # finds node with current shortest distance from start, and its neighbours

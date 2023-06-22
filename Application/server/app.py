@@ -17,7 +17,8 @@ cors = CORS(app, resources={r"/*":{"origins":"*"}})
 commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5]
 
 # Server global variables
-TIMEOUT = 30
+TIMEOUT = 5
+LED_TIMEOUT = 30
 rovers = []
 isSpinning = False
 spinTime = time()
@@ -165,6 +166,11 @@ def allrovers():
     # remove timed out rovers
     for rover in rovers:
         if time()-rover.lastSeen > TIMEOUT:
+            for node in rover.tree:
+                neighbours = []
+                for neighbour in rover.tree[node]:
+                    neighbours.append(str(neighbour))
+                cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
             rovers.remove(rover)
 
     # add all active rovers
@@ -452,7 +458,7 @@ def led_driver_red():
 
     if red_override:
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
         red_status = 1
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
     elif energy != "enough energy":
@@ -487,7 +493,7 @@ def led_driver_blue():
         pass
     if blue_override:
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
         return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0
@@ -518,7 +524,7 @@ def led_driver_yellow():
         pass
     if yellow_override:
         return make_response(jsonify({"success":"received data", "switch":1}), 200) #switch should be 1
-    if isSpinning and time()-spinTime < 2*TIMEOUT and energy == "enough energy":
+    if isSpinning and time()-spinTime < LED_TIMEOUT and energy == "enough energy":
         return make_response(jsonify({"success":"received data", "switch":1}), 200)
     elif energy != "enough energy":
         return make_response(jsonify({"success":"received data", "switch":0}), 200) # siwtch should be 0'
