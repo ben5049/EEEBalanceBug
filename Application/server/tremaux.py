@@ -45,6 +45,7 @@ class Rover():
     estop = False 
     startup = 0
     pause = False
+    watchdog = 0
 
     def __init__(self, position, whereat, name):
         self.name = name
@@ -108,6 +109,7 @@ class Rover():
 
         self.setAngle(angle)
         self.step_forward()
+        self.watchdog = position
         self.actions = [[7, node]] + self.actions
         
     def idle(self):
@@ -177,12 +179,10 @@ class Rover():
                         # find node in tree, visit it and go back to prior node
                         for node in self.tree:
                             if self.thresholding(node.position, position):
-                                print("previously visited: ", position, node.position)
                                 node.visit()
                         self.actions= [[4,self.priornode]] + self.actions
                 # check if at dead end; if true, go to state 4[0] and idle
                 elif whereat == 2:
-                    print("PRIOR: ", self.priornode)
                     self.actions = [[4, self.priornode]] + self.actions
                     self.idle()
                 # check if at exit; if true, create end node and go to state 4[0]
@@ -249,6 +249,9 @@ class Rover():
                 self.step_forward()
             # check if in state 7[0]
             elif currentAction[0] == 7:
+                if self.thresholding(position, self.watchdog) and whereat == 1:
+                    print("watchdog working")
+                    self.actions = [2, [7, currentAction[1]]] + self.actions
                 # if the rover has not returned to its prior position, return to state 7[0]
                 if not self.thresholding(currentAction[1].position, position):
                     self.actions = [[7, currentAction[1]]] + self.actions
