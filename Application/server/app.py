@@ -519,8 +519,6 @@ def led_driver_yellow():
     except:
         pass
 
-    if DEBUG:
-        print(isSpinning, time()-spinTime, "YELLOW")
     try:
         if override:
             yellow_override = 1

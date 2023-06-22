@@ -38,7 +38,7 @@ class Rover():
     toreturn = []
     nickname = ""
     priornode = 0 # prior node for tremaux's algorithm to work 
-    previouslyPlacedNode = Node((00000000,10000000000)) # the node most recently placed
+    previouslyPlacedNode = Node((0,0)) # the node most recently placed
     priorwhereat = 0
     sessionId = -1
     lastSeen = 0
