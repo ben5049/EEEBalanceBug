@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Input
 coefficients = [0.02509274331174643,0.12664894963152423,0.26587759991367516,0.33589861675220817,0.26587759991367516,0.12664894963152423,0.02509274331174643,]
-filename = "data 14_06_23 1603\\turn_2.txt"  # Replace with the actual file name
+filename = "2daysleft_spin1.txt"  # Replace with the actual file name
 
 # FIR Filter
 def fir_filter(coefficients, input_array):
@@ -305,7 +305,7 @@ try:
                 L[section].append(-1)
             else:
                 L[section].append(L_val)
-            Yaw[section].append(float(line[2][4:]))
+            #Yaw[section].append(float(line[2][4:]))
             #print(line)
         print(R)
         print(L)
@@ -336,7 +336,8 @@ for i in range(len(R)):
 for i in range(len(R)):
     print(i)
 #    Plot_All(L[i], L_Filtered[i], "Left", R[i], R_Filtered[i],"Right", Yaw[i], "YAW")
-    Plot_All_Prefiltered(L[i],"Left", R[i],"Right", Yaw[i], "Yaw")
+#    Plot_All_Prefiltered(L[i],"Left", R[i],"Right", Yaw[i], "Yaw")
+    Plot_TOF(L[i], L[i], "Left", R[i], R[i], "Right")
     
 #Plot_Offset(L_Filtered, R_Filtered, Yaw)
 
