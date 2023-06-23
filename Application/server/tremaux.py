@@ -203,7 +203,6 @@ class Rover():
                     self.step_forward()
             # check if in state 2; if true, go to state 3 and output to rover to spin
             elif currentAction == 2:
-                self.setAngle(0)
                 self.actions = [3] + self.actions
                 self.spin()
             # check if in state 3
