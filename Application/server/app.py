@@ -98,6 +98,7 @@ def rover():
         rovers.append(r)
     
     # create response to rover and reset timeout
+    print(time(), "is", r, " last seen")
     r.lastSeen = time()
     if "beaconangles" not in data:
         data["beaconangles"] = []
@@ -169,7 +170,8 @@ def allrovers():
     global conn, cur
     d = []
     disallowedMacs = []
-    # remove timed out rovers
+    # remove timed out rovers`
+    print(time()-rover.lastSeen, rover, " TIME SINCE LAST SEEN")
     for rover in rovers:
         if time()-rover.lastSeen > TIMEOUT:
             print("allrovers last seen")
