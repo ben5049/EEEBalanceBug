@@ -172,7 +172,7 @@ def allrovers():
     # remove timed out rovers
     for rover in rovers:
         if time()-rover.lastSeen > TIMEOUT:
-            print("TREE: ", rover.tree)
+            print("allrovers last seen")
             for node in rover.tree:
                 neighbours = []
                 for neighbour in rover.tree[node]:
@@ -266,7 +266,6 @@ def sessions():
 def diagnostics():
     global conn, cur
     data = request.get_json()
-    print("DIAGNOSTIC SESSION: ", data["sessionid"])
     
     try:
         cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
@@ -281,7 +280,7 @@ def diagnostics():
             t["isfinished"] = True
             for rover in rovers:
                 if time()-rover.lastSeen > TIMEOUT:
-                    print(rover.tree)
+                    print("diagnostics last seen")
                     for node in rover.tree:
                         neighbours = []
                         for neighbour in rover.tree[node]:
