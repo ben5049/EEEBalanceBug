@@ -200,6 +200,7 @@ class Rover():
                 # check if exiting junction; if it is, stay in this state
                 elif whereat == 4:
                     self.actions = [1] + self.actions  
+                    self.step_forward()
             # check if in state 2; if true, go to state 3 and output to rover to spin
             elif currentAction == 2:
                 self.setAngle(0)
