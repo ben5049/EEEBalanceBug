@@ -55,7 +55,7 @@ def set_angle():
 # Communication with rover
 @app.route("/rover", methods=["POST"])
 def rover():
-    global conn, cur
+    global conn, cur, demo, demo_beacons
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     r = 0
     flag = True
@@ -131,6 +131,14 @@ def rover():
     # else:
     #     resp = []
     
+    if demo:
+        resp = [1]
+        if len(data["beaconangles"])==3 and len(data["branches"])!=0:
+            print(data["beaconangles"])==3 and len(data["branches"])
+        demo_beacons = data["beaconangles"]
+
+        
+
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
@@ -531,6 +539,13 @@ def led_driver_yellow():
         isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
     
+demo = False
+demo_beacons = []
+@app.route("/demo_spin", methods=["POST"])
+def demo_spin():
+    global demo, demo_beacons
+    demo = not demo
+    return make_response(jsonify(demo_beacons), 200)
 
 #---------------------ERROR HANDLING------------------------#
 @app.errorhandler(400)

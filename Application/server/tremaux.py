@@ -145,134 +145,104 @@ class Rover():
             if len(self.actions)!=0:
                 if currentAction == self.actions[0]:
                     currentAction = self.actions.pop(0)
-            # check if in state 1
+            # if in state 1
             if currentAction == 1:
-                # check if at a passage
                 if whereat == 0:
-                    # check if position has never been visited before
                     if True not in [self.thresholding(nodes.position, position) for nodes in self.tree]:
-                        # create new node at position, add it to the tree and as a child of the previous node
-                        # and remain in state 1
+                        # if at passage, go forward until we reach a junction
                         n = Node(position)
-                        self.tree[n] = []
+                        self.tree[self.priornode].append(n)
                         self.tree[self.previouslyPlacedNode].append(n)
-                        self.previouslyPlacedNode = n
-                        # if self.priorwhereat == 1:
-                        #     self.priornode = n
+                        
                         self.priorwhereat = 0
+                        self.previouslyPlacedNode = n
                         self.actions = [1] + self.actions
-                        # if previously at a junction, output to rover to go forward
-                    # check if we have previously visited this node
                     else:
-                        # find the node in the tree and visit it, then go to state 4[0]
-                        for node in self.tree:
-                            if self.thresholding(node.position, position):
-                                node.visit()
                         self.actions = [[4, self.priornode]] + self.actions
                         self.idle()
-                # check if at junction
                 elif whereat == 1:
-                    # check if not previously visited
+                    # if at junction, go to spinning state, and idle
                     if True not in [self.thresholding(nodes.position, position) for nodes in self.tree]:
-                        # go to state 2 and tell rover to idle
                         self.actions = [2] + self.actions
                         self.idle()
-                    # check if previously visited
                     else:
-                        # find node in tree, visit it and go back to prior node
-                        for node in self.tree:
-                            if self.thresholding(node.position, position):
-                                node.visit()
                         self.actions= [[4,self.priornode]] + self.actions
-                # check if at dead end; if true, go to state 4[0] and idle
                 elif whereat == 2:
+                    # if at dead end, go back
                     self.actions = [[4, self.priornode]] + self.actions
                     self.idle()
-                # check if at exit; if true, create end node and go to state 4[0]
                 elif whereat == 3:
-                    n = Node(position)
-                    self.tree[n] = []
-                    n.setend()
-                    self.tree[self.previouslyPlacedNode].append(n)
-                    self.previouslyPlacedNode = n
-                    self.priornode = n
-                    self.actions = [[4, self.priornode]] + self.actions
-                # check if exiting junction; if it is, stay in this state
+                    pass
                 elif whereat == 4:
-                    n = Node(position)
-                    self.tree[n] = []
-                    self.tree[self.previouslyPlacedNode].append(n)
-                    self.previouslyPlacedNode = n
-                    self.actions = [1] + self.actions  
+                    # if about to exit a passage, keep going
+                    self.actions = [1] + self.actions
                     self.step_forward()
-            # check if in state 2; if true, go to state 3 and output to rover to spin
             elif currentAction == 2:
-                self.setAngle(0)
-                self.actions = [3] + self.actions
-                self.spin()
-            # check if in state 3
-            elif currentAction == 3:
-                # if position was previously visited, find node in tree, visit it and go to state 4[0]
-                if True in [self.thresholding(nodes.position, position) for nodes in self.tree]:
-                    for node in self.tree:
-                        if self.thresholding(node.position, position):
-                            node.visit()
-                    self.actions = [[4, self.priornode]] + self.actions
-                # check if position not previously visited
+                if whereat == 4:
+                    # if about to exit a passage, keep going
+                    self.actions = [1] + self.actions
+                    self.step_forward()
                 else:
-                    if len(beaconangles)==3 and len(potentialbranches)!=0:
-                        # triangulate position
-                        if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2]:
-                            newx, newy = position[0], position[1]
-                        else:
-                            try:
-                                newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
-                            except:
+                    self.actions = [3] + self.actions
+                    self.spin()
+
+            elif currentAction == 3:
+                if True in [self.thresholding(nodes.position, position) for nodes in self.tree]:
+                    self.actions = [[4, self.priornode]] + self.actions
+                else:
+                    if whereat == 0 or whereat == 1 or whereat == 2 or whereat == 3:
+                        if len(beaconangles)==3 and len(potentialbranches)!=0:
+                            # triangulate position
+                            if beaconangles[0] == beaconangles[1] and beaconangles[1]==beaconangles[2] and beaconangles[1]==0:
                                 newx, newy = position[0], position[1]
-                        self.updatePos(newx, newy)
-                        # create new node
-                        n = Node((newx, newy))
-                        self.previouslyPlacedNode = n
-                        self.tree[n] = []
-                        self.tree[self.priornode].append(n)
-                        # tell rover to eventually go to state 4[0]
-                        self.actions = [[4, self.priornode]] + self.actions
-                        self.priornode = n
-                        self.priorwhereat = 1
-                        # tell rover to visit each branch and then return to the junction. done by adding state 3[0] and 4[0] to state machine 
-                        for i in potentialbranches:
-                            self.actions = [[3, i], [4, self.priornode]] + self.actions 
-                    else:
-                        self.actions = [3] + self.actions
-                        self.watchdog += 1
-                        if self.watchdog == 20:
-                            if whereat == 4:
-                                self.actions = [1] + self.actions
-                                self.step_forward()
                             else:
-                                self.actions = [2] + self.actions
-                                self.toreturn = [2, 0] + self.toreturn
-                            self.watchdog = 0
-            # check if in state 3[0]; if true, go to state 6[0], then state 1
+                                try:
+                                    newx, newy = triangulate(beaconangles[0], beaconangles[1], beaconangles[2])
+                                except:
+                                    newx, newy = position[0], position[1]
+                            self.updatePos(newx, newy)
+                            # create new node
+
+                            n = Node((newx, newy))
+                            self.tree[n] = []
+                            self.tree[self.priornode].append(n)
+
+                            # tell rover to eventually go to state 4[0]
+                            self.actions = [[4, self.priornode]] + self.actions
+                            self.priornode = n
+                            self.previouslyPlacedNode = n
+                            self.priorwhereat = 1
+                            # tell rover to visit each branch and then return to the junction. done by adding state 3[0] and 4[0] to state machine 
+                            for i in potentialbranches:
+                                self.actions = [[3, i], [4, self.priornode]] + self.actions 
+                        else:
+                            self.actions = [3] + self.actions
+                    elif whereat == 4:
+                        self.step_forward()
+                        self.actions = [1] + self.actions
             elif currentAction[0] == 3:
-                self.idle()
-                self.actions = [[6,currentAction[1]], 1] + self.actions
-            # check if in state 4[0]; if true, visit node and tell rover to go back to the previous node
+                if whereat == 0 or whereat == 1 or whereat == 2 or whereat == 3:
+                    self.setAngle(currentAction[1])
+                    self.step_forward()
+                    self.toreturn = [1] + self.toreturn
+                elif whereat == 4:
+                    self.step_forward()
+                    self.actions = [1] + self.actions 
+
             elif currentAction[0] == 4:
-                currentAction[1].visit()
-                self.go_back(currentAction[1], position, self.previouslyPlacedNode)
-            # check if in state 6[0]; if true, tell rover to set its angle and step forward
-            elif currentAction[0] == 6:
-                self.setAngle(currentAction[1])
-                self.step_forward()
-            # check if in state 7[0]
+                if whereat == 1 or whereat == 2 or whereat == 3:
+                    self.go_back(self.priornode, position, self.previouslyPlacedNode)
+                elif whereat == 0 or whereat == 4:
+                    self.step_forward()
+                    self.actions = [1] + self.actions 
+            
             elif currentAction[0] == 7:
                 # if the rover has not returned to its prior position, return to state 7[0]
-                # if not self.thresholding(currentAction[1].position, position):
-                if whereat == 2:
-                    self.actions = [2] + self.actions
-                elif whereat == 0:
+                if not self.thresholding(currentAction[1].position, position):
                     self.actions = [[7, currentAction[1]]] + self.actions
+                
+                    
+            
         # if no more actions left, rover is finished
         else:
             self.toreturn.append(5)
