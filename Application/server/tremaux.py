@@ -241,8 +241,12 @@ class Rover():
                         self.actions = [3] + self.actions
                         self.watchdog += 1
                         if self.watchdog == 20:
-                            self.actions = [2] + self.actions
-                            self.toreturn = [2, 0] + self.toreturn
+                            if whereat == 4:
+                                self.actions = [1] + self.actions
+                                self.step_forward()
+                            else:
+                                self.actions = [2] + self.actions
+                                self.toreturn = [2, 0] + self.toreturn
                             self.watchdog = 0
             # check if in state 3[0]; if true, go to state 6[0], then state 1
             elif currentAction[0] == 3:
