@@ -544,7 +544,7 @@ demo_beacons = []
 @app.route("/demo_spin", methods=["POST"])
 def demo_spin():
     global demo, demo_beacons
-    demo = not demo
+    demo = True
     return make_response(jsonify(demo_beacons), 200)
 
 #---------------------ERROR HANDLING------------------------#
