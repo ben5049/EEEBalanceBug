@@ -13,7 +13,7 @@ DEBUG = True
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [2, 250]]
+commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [2, 0]]
 
 # Server global variables
 TIMEOUT = 5
@@ -43,6 +43,15 @@ cur = conn.cursor()
 def hello():
     return jsonify({"hello":"world"})
 
+@app.route("/set_angle", methods=["POST"])
+def set_angle():
+    data = request.get_json()
+    global commandQueue
+    commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3]]
+    commandQueue.append([2, data["angle"]])
+    print(commandQueue)
+    return make_response(jsonify({"suc":"ces"}))
+
 # Communication with rover
 @app.route("/rover", methods=["POST"])
 def rover():
@@ -58,8 +67,6 @@ def rover():
             break
     # Logic for if rover is not active
     if flag:
-        print(type(data))
-        print(data)
         # Create new rover instance
         r = tremaux.Rover(data["position"], data["whereat"], data["MAC"])
         r.nickname = data["nickname"]
@@ -114,14 +121,14 @@ def rover():
     #     resp.append(user)
     #     user = int(input("Next command: "))
 
-    # using command queue 
-    if (len(commandQueue))!=0:
-        r.actions = []
-        resp = []
-        for i in commandQueue.pop(0):
-            resp.append(i)
-    else:
-        resp = []
+    #using command queue 
+    # if (len(commandQueue))!=0:
+    #     r.actions = []
+    #     resp = []
+    #     for i in commandQueue.pop(0):
+    #         resp.append(i)
+    # else:
+    #     resp = []
     
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
@@ -150,11 +157,6 @@ def rover():
     
     if DEBUG:
         print(data)
-        for i in r.actions:
-            if type(i)==list:
-                print(r.actions[0], r.actions[1])
-            else:
-                print(r.actions)
         print("ACTIONS", r.actions)
         print(resp)
         print("\n")
@@ -170,7 +172,7 @@ def allrovers():
     # remove timed out rovers
     for rover in rovers:
         if time()-rover.lastSeen > TIMEOUT:
-            print("TREE: ", rover.tree)
+            print("allrovers last seen")
             for node in rover.tree:
                 neighbours = []
                 for neighbour in rover.tree[node]:
@@ -264,7 +266,6 @@ def sessions():
 def diagnostics():
     global conn, cur
     data = request.get_json()
-    print("DIAGNOSTIC SESSION: ", data["sessionid"])
     
     try:
         cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
@@ -279,7 +280,7 @@ def diagnostics():
             t["isfinished"] = True
             for rover in rovers:
                 if time()-rover.lastSeen > TIMEOUT:
-                    print(rover.tree)
+                    print("diagnostics last seen")
                     for node in rover.tree:
                         neighbours = []
                         for neighbour in rover.tree[node]:
@@ -419,7 +420,7 @@ def findShortestPath():
 
     # get tree predecessor graph
     P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
-
+    print(P, "shortestPath predecessor non formatted")
     if P is None:
         return make_response(jsonify({"error":"Tree does not exist"}), 400)
     
