@@ -6,7 +6,6 @@ from flask_cors import CORS
 import tremaux, dijkstra
 import mariadb
 from time import time
-from json import loads
 from triangulate import triangulate
 DEBUG = True
 
@@ -14,7 +13,7 @@ DEBUG = True
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*":{"origins":"*"}})
-commandQueue = [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5]
+commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [2, 0]]
 
 # Server global variables
 TIMEOUT = 5
@@ -44,10 +43,19 @@ cur = conn.cursor()
 def hello():
     return jsonify({"hello":"world"})
 
+@app.route("/set_angle", methods=["POST"])
+def set_angle():
+    data = request.get_json()
+    global commandQueue
+    commandQueue = [[3], [3], [3], [3], [3], [3], [3], [3], [3], [3], [3]]
+    commandQueue.append([2, data["angle"]])
+    print(commandQueue)
+    return make_response(jsonify({"suc":"ces"}))
+
 # Communication with rover
 @app.route("/rover", methods=["POST"])
 def rover():
-    global conn, cur
+    global conn, cur, demo, demo_beacons
     data = request.get_json() # data has keys "diagnostics", "MAC", "nickname", "timestamp", "position", "whereat", "orientation", "branches", "beaconangles", "tofleft", "tofright"
     r = 0
     flag = True
@@ -90,6 +98,7 @@ def rover():
         rovers.append(r)
     
     # create response to rover and reset timeout
+    print(time()-r.lastSeen, "is", r, " last seen")
     r.lastSeen = time()
     if "beaconangles" not in data:
         data["beaconangles"] = []
@@ -113,13 +122,23 @@ def rover():
     #     resp.append(user)
     #     user = int(input("Next command: "))
 
-    # using command queue 
+    #using command queue 
     # if (len(commandQueue))!=0:
     #     r.actions = []
-    #     resp = [commandQueue.pop(0)]
+    #     resp = []
+    #     for i in commandQueue.pop(0):
+    #         resp.append(i)
     # else:
     #     resp = []
     
+    if demo:
+        resp = [1]
+        if len(data["beaconangles"])==3 and len(data["branches"])!=0:
+            print(data["beaconangles"])==3 and len(data["branches"])
+        demo_beacons = data["beaconangles"]
+
+        
+
     resp = {"next_actions" : resp, "clear_queue":r.estop}
     # if rover is about to spin, set flags to turn on beacons
     if 1 in resp["next_actions"]:
@@ -162,7 +181,7 @@ def allrovers():
     # remove timed out rovers
     for rover in rovers:
         if time()-rover.lastSeen > TIMEOUT:
-            print("TREE: ", rover.tree)
+            print("allrovers last seen")
             for node in rover.tree:
                 neighbours = []
                 for neighbour in rover.tree[node]:
@@ -172,40 +191,6 @@ def allrovers():
                 except mariadb.Error as e:
                     pass
             rovers.remove(rover)
-
-    # add all active rovers
-    for rover in rovers:
-        temp = {}
-        temp["MAC"] = rover.name
-        disallowedMacs.append(rover.name)
-        temp["nickname"] = rover.nickname
-        temp["connected"] = True
-        temp["sessionid"] = rover.sessionId
-        d.append(temp)
-        print(temp)
-    
-    # add all inactive rovers from database
-    t = ""
-    for i in disallowedMacs:
-        t+="MAC != \""+str(i)+"\" AND "
-    t = t[:-5]
-    
-    command = "SELECT * FROM Rovers WHERE "+t
-    if command == "SELECT * FROM Rovers WHERE ":
-        command = "SELECT * FROM Rovers" 
-    try:
-        cur.execute(command)
-    except mariadb.Error as e:
-        print(str(e))
-        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
-    for rover in cur:
-        temp = {}
-        temp["MAC"] = rover[0]
-        temp["nickname"] = rover[1]
-        temp["connected"] = False
-        d.append(temp)
-
-    return make_response(jsonify(d), 200)
 
 # get a specific session replay
 @app.route("/client/replay", methods=["POST"])
@@ -256,7 +241,6 @@ def sessions():
 def diagnostics():
     global conn, cur
     data = request.get_json()
-    print("DIAGNOSTIC SESSION: ", data["sessionid"])
     
     try:
         cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
@@ -264,31 +248,26 @@ def diagnostics():
         return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid sessionid"}), 400)
     
     d = []
-    try:
-        for mac, timestamp, battery, connection, sessionid in cur:
-            t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
-            flag = True
-            t["isfinished"] = True
-            for rover in rovers:
-                if time()-rover.lastSeen > TIMEOUT:
-                    print(rover.tree)
-                    for node in rover.tree:
-                        neighbours = []
-                        for neighbour in rover.tree[node]:
-                            neighbours.append(str(neighbour))
-                        try:
-                            cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
-                        except mariadb.Error as e:
-                            pass
-                    rovers.remove(rover)
-                if str(rover.name)==str(mac):
-                    t["isfinished"] = False
-
-            d.append(t)
-    except:
-        print("excepted - not working")
-        pass
+    for mac, timestamp, battery, connection, sessionid in cur:
+        t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+        d.append(t)
     return make_response(jsonify(d), 200)
+
+# check if rover is timed out - if it is, remove it
+@app.route("/timeout", methods=["GET"])
+def timeout():
+    for rover in rovers:
+        if time()-rover.lastSeen > TIMEOUT:
+            print(time()-rover.lastSeen, rover, " TIME SINCE LAST SEEN")
+            for node in rover.tree:
+                neighbours = []
+                for neighbour in rover.tree[node]:
+                    neighbours.append(str(neighbour))
+                try:
+                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                except mariadb.Error as e:
+                    pass
+            rovers.remove(rover)
 
 # Pause a given rover
 @app.route("/client/pause", methods=["POST"])
@@ -401,7 +380,8 @@ def findShortestPath():
     # format tree so it is python-readable 
     for sid, node_x, node_y, children in cur:
         try:
-            tree[(node_x, node_y)] = [eval(x) for x in loads(children)]
+            children = eval(children)
+            tree[(node_x, node_y)] = [eval(x) for x in children]
         except:
             tree[(node_x, node_y)] = []
     
@@ -410,9 +390,9 @@ def findShortestPath():
 
     # get tree predecessor graph
     P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
-
+    print(P, "shortestPath predecessor non formatted")
     if P is None:
-        return make_response(jsonify({"error":"Invalid starting point"}), 400)
+        return make_response(jsonify({"error":"Tree does not exist"}), 400)
     
     P = dijkstra.formatPredecessor(P)
 
@@ -539,6 +519,13 @@ def led_driver_yellow():
         isSpinning = False
         return make_response(jsonify({"success":"received data", "switch":0}), 200)
     
+demo = False
+demo_beacons = []
+@app.route("/demo_spin", methods=["POST"])
+def demo_spin():
+    global demo, demo_beacons
+    demo = True
+    return make_response(jsonify(demo_beacons), 200)
 
 #---------------------ERROR HANDLING------------------------#
 @app.errorhandler(400)

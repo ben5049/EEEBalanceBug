@@ -80,9 +80,7 @@ void taskSpin(void *pvParameters) {
 
   /* Junction detection */
   static uint16_t rightHysterisis = HYSTERISIS_THRESHOLD;
-  static uint16_t  = HYSTERISIS_THRESHOLD;
-  static uint16_t leftRisingHysterisis = HYSTERISIS_THRESHOLD;
-  static uint16_t leftFallingHysterisis = HYSTERISIS_THRESHOLD;
+  static uint16_t leftHysterisis = HYSTERISIS_THRESHOLD;
 
   static float angleDifference;
   static float junctionAngle;
@@ -122,6 +120,7 @@ void taskSpin(void *pvParameters) {
     if (completed) {
       xSemaphoreGive(mutexSpin);
       ulTaskNotifyTakeIndexed(0, pdTRUE, portMAX_DELAY);
+      xQueuePeek(IMUDataQueue, &IMUData, 0);
 
       /* Reset variables */
       completed = false;
@@ -132,31 +131,50 @@ void taskSpin(void *pvParameters) {
       rightJunctionCounter = 0;
       leftJunctionCounter = 0;
       rightHysterisis = HYSTERISIS_THRESHOLD;
-       = HYSTERISIS_THRESHOLD;
-      leftRisingHysterisis = HYSTERISIS_THRESHOLD;
-      leftFallingHysterisis = HYSTERISIS_THRESHOLD;
+      leftHysterisis = HYSTERISIS_THRESHOLD;
 
       /* Reset junctionAngleQueue */
       xQueueReset(junctionAngleQueue);
 
-      /* Get starting ToF data */
+      /* Get starting data */
       xQueuePeek(ToFDataQueue, &ToFData, 0);
 
-      /* Check if right sensor starts at a junction */
+      // junctionAngle = wrapAngle(IMUData.yaw -180);
+      // xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+
+      /* */
       if (ToFData.right > THRESHOLD_DISTANCE) {
-        rightJunctionAtStart = true;
-        rightJunctionCounter++;
-      } else {
-        rightJunctionAtStart = false;
+        junctionAngle = wrapAngle(IMUData.yaw - 90.0);
+        xQueueSend(junctionAngleQueue, &junctionAngle, 0);
       }
 
-      /* Check if left sensor starts at a junction */
+      /* */
       if (ToFData.left > THRESHOLD_DISTANCE) {
-        leftJunctionAtStart = true;
-        leftJunctionCounter++;
-      } else {
-        leftJunctionAtStart = false;
+        junctionAngle = wrapAngle(IMUData.yaw + 90.0);
+        xQueueSend(junctionAngleQueue, &junctionAngle, 0);
       }
+
+      /* */
+      if (ToFData.front > THRESHOLD_DISTANCE) {
+        junctionAngle = IMUData.yaw;
+        xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+      }
+
+      // /* Check if right sensor starts at a junction */
+      // if (ToFData.right > THRESHOLD_DISTANCE) {
+      //   rightJunctionAtStart = true;
+      //   rightJunctionCounter++;
+      // } else {
+      //   rightJunctionAtStart = false;
+      // }
+
+      // /* Check if left sensor starts at a junction */
+      // if (ToFData.left > THRESHOLD_DISTANCE) {
+      //   leftJunctionAtStart = true;
+      //   leftJunctionCounter++;
+      // } else {
+      //   leftJunctionAtStart = false;
+      // }
 
       /* Take the mutex and begin the data processing */
       xSemaphoreTake(mutexSpin, portMAX_DELAY);
@@ -222,73 +240,71 @@ void taskSpin(void *pvParameters) {
       }
 #endif
 
-      /* Check for right rising edge */
-      if ((rightPreviousDistance < THRESHOLD_DISTANCE) && (ToFData.right >= THRESHOLD_DISTANCE) && (rightHysterisis > HYSTERISIS_THRESHOLD)) {
+      // /* Check for right rising edge */
+      // if ((rightPreviousDistance < THRESHOLD_DISTANCE) && (ToFData.right >= THRESHOLD_DISTANCE) && (rightHysterisis > HYSTERISIS_THRESHOLD)) {
 
-        /* Reset the hysterisis counter */
-        rightHysterisis = 0;
+      //   /* Reset the hysterisis counter */
+      //   rightHysterisis = 0;
 
-        rightRisingEdgeAngle = IMUData.yaw;
-        rightJunctionCounter++;
-      }
+      //   rightRisingEdgeAngle = IMUData.yaw;
+      //   rightJunctionCounter++;
+      // }
 
-      /* Check for right falling edge */
-      else if ((rightPreviousDistance >= THRESHOLD_DISTANCE) && (ToFData.right < THRESHOLD_DISTANCE) && ( rightHysterisis> HYSTERISIS_THRESHOLD)) {
+      // /* Check for right falling edge */
+      // else if ((rightPreviousDistance >= THRESHOLD_DISTANCE) && (ToFData.right < THRESHOLD_DISTANCE) && (rightHysterisis > HYSTERISIS_THRESHOLD)) {
 
-        /* Reset the hysterisis counter */
-        rightHysterisis = 0;
+      //   /* Reset the hysterisis counter */
+      //   rightHysterisis = 0;
 
-        /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
-        if (rightJunctionAtStart && (rightJunctionCounter == 1)) {
-          rightJunctionAtStartAngle = IMUData.yaw - 90.0;
-        }
+      //   /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
+      //   if (rightJunctionAtStart && (rightJunctionCounter == 1)) {
+      //     rightJunctionAtStartAngle = IMUData.yaw - 90.0;
+      //   }
 
-        /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
-        else {
-          angleDifference = (IMUData.yaw - rightRisingEdgeAngle) / 2.0;
-          junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90.0 + JUNCTION_OFFSET_ANGLE);
-          // xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-        }
-      } else {
-        rightHysterisis++;
-        ++;
-      }
+      //   /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
+      //   else {
+      //     angleDifference = (IMUData.yaw - rightRisingEdgeAngle) / 2.0;
+      //     junctionAngle = wrapAngle(rightRisingEdgeAngle + angleDifference - 90.0 + JUNCTION_OFFSET_ANGLE);
+      //     // xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+      //   }
+      // } else {
+      //   rightHysterisis++;
+      // }
 
-      /* Check for left rising edge */
-      if ((leftPreviousDistance < THRESHOLD_DISTANCE) && (ToFData.left >= THRESHOLD_DISTANCE) && (leftRisingHysterisis > HYSTERISIS_THRESHOLD)) {
+      // /* Check for left rising edge */
+      // if ((leftPreviousDistance < THRESHOLD_DISTANCE) && (ToFData.left >= THRESHOLD_DISTANCE) && (leftHysterisis > HYSTERISIS_THRESHOLD)) {
 
-        /* Reset the hysterisis counter */
-        leftRisingHysterisis = 0;
+      //   /* Reset the hysterisis counter */
+      //   leftHysterisis = 0;
 
-        leftRisingEdgeAngle = IMUData.yaw;
-        leftJunctionCounter++;
-      }
+      //   leftRisingEdgeAngle = IMUData.yaw;
+      //   leftJunctionCounter++;
+      // }
 
-      /* Check for left falling edge */
-      else if ((leftPreviousDistance >= THRESHOLD_DISTANCE) && (ToFData.left < THRESHOLD_DISTANCE) && (leftFallingHysterisis > HYSTERISIS_THRESHOLD)) {
+      // /* Check for left falling edge */
+      // else if ((leftPreviousDistance >= THRESHOLD_DISTANCE) && (ToFData.left < THRESHOLD_DISTANCE) && (leftHysterisis > HYSTERISIS_THRESHOLD)) {
 
-        /* Reset the hysterisis counter */
-        leftFallingHysterisis = 0;
+      //   /* Reset the hysterisis counter */
+      //   leftHysterisis = 0;
 
-        /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
-        if (leftJunctionAtStart && (leftJunctionCounter == 1)) {
-          leftJunctionAtStartAngle = IMUData.yaw + 90.0;
-        }
+      //   /* Save the angle of the falling edge if we started above the threshold so we can calculate the average at the end */
+      //   if (leftJunctionAtStart && (leftJunctionCounter == 1)) {
+      //     leftJunctionAtStartAngle = IMUData.yaw + 90.0;
+      //   }
 
-        /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
-        else {
-          angleDifference = (IMUData.yaw - leftRisingEdgeAngle) / 2.0;
-          junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0 + JUNCTION_OFFSET_ANGLE);
-          xQueueSend(junctionAngleQueue, &junctionAngle, 0);
-        }
-      } else {
-        leftRisingHysterisis++;
-        leftFallingHysterisis++;
-      }
+      //   /* Calculate the average angle of the rising and falling edges to get the centre angle of the junction and send the junction angle to the queue */
+      //   else {
+      //     angleDifference = (IMUData.yaw - leftRisingEdgeAngle) / 2.0;
+      //     junctionAngle = wrapAngle(leftRisingEdgeAngle + angleDifference + 90.0 + JUNCTION_OFFSET_ANGLE);
+      //     xQueueSend(junctionAngleQueue, &junctionAngle, 0);
+      //   }
+      // } else {
+      //   leftHysterisis++;
+      // }
 
-      /* Keep track of previous values for next loop */
-      rightPreviousDistance = ToFData.right;
-      leftPreviousDistance = ToFData.left;
+      // /* Keep track of previous values for next loop */
+      // rightPreviousDistance = ToFData.right;
+      // leftPreviousDistance = ToFData.left;
 
       /* If turn complete notification received */
       if (ulTaskNotifyTakeIndexed(0, pdTRUE, 0) != 0) {

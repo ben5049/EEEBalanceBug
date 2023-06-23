@@ -36,11 +36,11 @@ void taskDebug(void *pvParameters) {
   /* Start the loop */
   while (true) {
     // serialData = SERIAL_PORT.read();
-    while(!initialised){
-      initialised = false==digitalRead(BOOT);
+    while (!initialised) {
+      initialised = false == digitalRead(BOOT);
       vTaskDelay(100);
     }
-    
+
     // if (serialData == 'p') {
     //   angleKp = SERIAL_PORT.parseFloat();
     // } else if (serialData == 'i') {
@@ -74,21 +74,33 @@ void taskDebug(void *pvParameters) {
     // motorSetDPS(100,0);
     // motorSetDPS(100,1);
     vTaskDelay(500);
-    if(initialised){
+    if (initialised) {
       // newCommand = FORWARD;
-      newCommand = SPIN;
-      SERIAL_PORT.println("SPIN");
-      xQueueSend(commandQueue, &newCommand, 0);
+      enableDirectionControl = false;
+      speedSetpoint = 0;
+      enableSpinControl = true;
+      dirSetpoint = localYaw + 90;
+      angRateSetpoint = SPIN_SPEED;
+      digitalWrite(LED_BUILTIN, HIGH);
+      vTaskDelay(1000);
+      digitalWrite(LED_BUILTIN, LOW);
+      angRateSetpoint = 0;
+      vTaskDelay(500);
+      enableSpinControl = false;
+      speedSetpoint = 0;
+      enableDirectionControl = true;
       initialised = false;
     }
-    
+
+
+
 
     // newCommand = SPIN;
     // xQueueSend(commandQueue, &newCommand, 0);
 
     // newCommand = TURN;
     // newAngleSetpoint = 90.0;
-    
+
     // xQueueSend(angleSetpointQueue, &newCommand, 0);
     // xQueueSend(commandQueue, &newCommand, 0);
 

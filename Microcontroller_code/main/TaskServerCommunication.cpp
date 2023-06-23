@@ -80,6 +80,11 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
     String cwa = String(currentWhereAt);
     String postData = "{\"diagnostics\": {\"battery\":" + battery + ",\"connection\":" + rssi + "},\"MAC\":\"" + mac + "\",\"nickname\":\"MiWhip\",\"timestamp\":" + timestamp + ",\"position\":[" + position_x + "," + position_y + "],\"whereat\":" + cwa + ",\"orientation\":" + orientation + ",\"branches\":[";
 
+    // Serial.print("Left: ");
+    // Serial.print(tofleft);
+    // Serial.print(", Right: ");
+    // Serial.println(tofleft);
+
     float junctionAngle;
     float beaconAngle;
     bool flag = false;
@@ -111,13 +116,13 @@ uint16_t makeRequest(uint16_t requestType, HTTPClient& http) {
           if (xQueueReceive(beaconAngleQueue, &beaconAngle, 0) == pdTRUE) {
             postData = postData + String(beaconAngle) + ",";
             flag = true;
-            SERIAL_PORT.println(beaconAngle);
+            // SERIAL_PORT.println(beaconAngle);
           }
         }
       }
 
       xSemaphoreGive(mutexSpin);
-    } 
+    }
     /* If SPIN task running, send empty JSON keys#[] */
     else {
 
@@ -264,7 +269,7 @@ void taskServerCommunication(void* pvParameters) {
 
   /* Initialise battery filter */
   FIRFilterInit2(&batteryFIR);
-  
+
   const TickType_t xFrequency = configTICK_RATE_HZ / TASK_SERVER_COMMUNICATION_FREQUENCY;
   TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -303,7 +308,7 @@ void taskServerCommunication(void* pvParameters) {
         for (int i = 0; i < numCommands; i++) {
 
           /* Flash LED when a command is received */
-          // digitalWrite(LED_BUILTIN, LOW);
+          digitalWrite(LED_BUILTIN, LOW);
           vTaskDelay(pdMS_TO_TICKS(10));
 
           /* Send new command to the command queue*/
@@ -311,9 +316,9 @@ void taskServerCommunication(void* pvParameters) {
           xQueueSend(commandQueue, &newCommand, portMAX_DELAY);
 
           /* Flash LED when a command is received */
-          // digitalWrite(LED_BUILTIN, HIGH);
+          digitalWrite(LED_BUILTIN, HIGH);
           vTaskDelay(pdMS_TO_TICKS(10));
-          // digitalWrite(LED_BUILTIN, LOW);
+          digitalWrite(LED_BUILTIN, LOW);
         }
       }
     }

@@ -67,12 +67,24 @@ static float accelLastTime = millis();
 
 
 /* Speed Control Variables */
+volatile bool enableSpeedControl = true;
 volatile float speedSetpoint = 0;
 static float speedCumError = 0;
 static float speedPrevError = 0;
 static float speedLastTime = millis();
 static float lastSpeed = 0;
 static float endTime = millis();
+
+/* Spin Rate Variables */
+volatile bool enableSpinControl = false;
+volatile float spinSetpoint = 0;
+static float spinCumError = 0;
+static float spinPrevError = 0;
+static float spinLastTime = millis();
+volatile float spinKp = KP_SPIN;
+volatile float spinKi = KI_SPIN;
+volatile float spinKd = KD_SPIN;
+
 
 /* Angle Rate Variables */
 volatile bool enableAngRateControl = true;
@@ -83,14 +95,14 @@ static float angRateLastTime = millis();
 volatile float motorDiff = 0;
 
 /* Direction Variables */
-volatile bool enableDirectionControl = true;
+volatile bool enableDirectionControl = false;
 volatile float dirSetpoint = 0;
 static float dirCumError = 0;
 static float dirPrevError = 0;
 static float dirLastTime = millis();
 static float lastYaw = 0;
 volatile int16_t turns = 0;
-static float localYaw = 0;
+volatile float localYaw = 0;
 static float dirKp = KP_DIR;
 static float dirKi = KI_DIR;
 static float dirKd = KD_DIR;
@@ -193,6 +205,9 @@ void debug() {
   /* Position Debugging */
   /* PID Values */
   /* Yaw Rate Debugging */
+  debugPrint("YawRate", IMUData.yawRate);                          //8
+  debugPrint("yawRateSetpoint", angRateSetpoint);                  //9
+  debugPrint("yawRate error", angRateSetpoint - IMUData.yawRate);  //10
   Serial.println("*/");
 }
 
@@ -379,7 +394,7 @@ void taskMovement(void* pvParameters) {
     }
 
     /* Speed Loop */
-    if (controlCycle % 5 == 0) {
+    if ((controlCycle % 5 == 0) && enableSpeedControl) {
       accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
       speedLastTime = millis();
       accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
@@ -394,6 +409,13 @@ void taskMovement(void* pvParameters) {
       motorDiff += PID(angRateSetpoint, IMUData.yawRate, angRateCumError, angRatePrevError, angRateLastTime, angRateKp, angRateKi, angRateKd);
       angRateLastTime = millis();
       motorDiff = constrain(motorDiff, -MAX_DIFF, MAX_DIFF);
+    }
+
+    /* Spin on spot */
+    if (enableSpinControl && (controlCycle % 3 == 0)) {
+      speedSetpoint = -PID(spinSetpoint, (motorSetpointL + motorSetpointR), spinCumError, spinPrevError, spinLastTime, spinKp, spinKi, spinKd);
+      spinLastTime = millis();
+      speedSetpoint = constrain(speedSetpoint, -MAX_SPEED, MAX_SPEED);
     }
 
     /* Direction Control Loop */
@@ -422,11 +444,19 @@ void taskMovement(void* pvParameters) {
       timestampPrevious = timestamp;
 
       /* Basic path control: turns until parallel to both walls, then turns towards centre of path */
-      if (ToFData.left < 50) {
-        angRateSetpoint = -10;
+      if ((ToFData.left < 50) && (ToFData.right < 50)) {
+          if (ToFData.left < ToFData.right) {
+            angRateSetpoint = -10;
+          } else {
+            angRateSetpoint = 10;
+          }
+        }
+      else if (ToFData.left < 50) {
+        angRateSetpoint = -15;
       } else if (ToFData.right < 50) {
-        angRateSetpoint = 10;
+        angRateSetpoint = 15;
       }
+
       /* If large increasing right differential, turn right */
       else if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD) && (ToFData.right < 500)) {
         angRateSetpoint = -constrain(distanceRightDifferential * pathKd, 0, MAX_PATH_DIFF);

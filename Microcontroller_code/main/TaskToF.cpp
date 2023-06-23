@@ -398,14 +398,15 @@ void taskToF(void *pvParameters) {
     ToFData.right = FIRFilterUpdate20(&rightFIR, distanceRight);
     ToFData.left = FIRFilterUpdate20(&leftFIR, distanceLeft);
 #endif
+
+#if ENABLE_FRONT_TOF == true
+    ToFData.front = FIRFilterUpdate20(&frontFIR, distanceFront);
+#endif
+
     xQueueOverwrite(ToFDataQueue, &ToFData);
 
 /* Apply FIR filter to front ToF data */
-#if ENABLE_FRONT_TOF == true
-    FIRFilterUpdate20(&frontFIR, distanceFront);
-#else
 
-#endif
 
 #if TASK_TOF_DEBUG == true
     Serial.print("Right: ");
@@ -413,7 +414,7 @@ void taskToF(void *pvParameters) {
     Serial.print(", Left: ");
     Serial.print(ToFData.left);
     Serial.print(", Front: ");
-    Serial.println(frontFIR.output);
+    Serial.println(ToFData.front);
 #endif
 
     /* Junction detection */
@@ -424,12 +425,12 @@ void taskToF(void *pvParameters) {
       passageEntered = false;
     }
 
-    imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
-    if (imminentCollision) {
-      digitalWrite(LED_BUILTIN, HIGH);
-      vTaskDelay(pdMS_TO_TICKS(10));
-      digitalWrite(LED_BUILTIN, LOW);
-    }
+    // imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
+    // if (imminentCollision) {
+    //   digitalWrite(LED_BUILTIN, HIGH);
+    //   vTaskDelay(pdMS_TO_TICKS(10));
+    //   digitalWrite(LED_BUILTIN, LOW);
+    // }
 
     if (enableJunctionDetection && (currentCommand == FORWARD)) {
 
@@ -437,10 +438,10 @@ void taskToF(void *pvParameters) {
       /* Calculate boolean variables that determine where junctions are located*/
       leftJunction = ToFData.left >= THRESHOLD_DISTANCE;
       rightJunction = ToFData.right >= THRESHOLD_DISTANCE;
-      frontJunction = frontFIR.output >= THRESHOLD_DISTANCE;
-      imminentCollision = frontFIR.output <= COLLISION_THRESHOLD;
-      frontJunction = false;  //DELETE
-      imminentCollision = false;
+      frontJunction = ToFData.front >= THRESHOLD_DISTANCE;
+      imminentCollision = ToFData.front <= COLLISION_THRESHOLD;
+      // frontJunction = false;  //DELETE
+      // imminentCollision = false;
 
 
       if (passageEntered) {

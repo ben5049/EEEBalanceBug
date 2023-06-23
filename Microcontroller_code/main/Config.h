@@ -36,8 +36,9 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK true       /* Setting "true" enables the dead reckning task */
-#define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
+#define ENABLE_DEBUG_TASK false                /* Setting "true" enables the debug task */
 #define ENABLE_BLUETOOTH_TASK false           /* Setting "true" enables the Bluetooth task */
+#define ENABLE_EXECUTE_COMMAND_TASK true
 
 /* Task priorities */
 #define TASK_IMU_PRIORITY 12                 /* Task priority from 0 to 31 (larger means higher priority) */
@@ -73,10 +74,9 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define TOF_LEFT_CHANNEL 3               /* I2C mux channel for the left ToF sensor */
 #define TOF_FRONT_CHANNEL 0              /* I2C mux channel for the front ToF sensor */
 #define TOF_SAMPLE_FREQUENCY 20          /* Max = 33Hz, default = 10Hz */
-#define THRESHOLD_GRADIENT 400           /* Gradient threshold for the ToF sensors to detect junctions */
 #define THRESHOLD_COUNTER_MAX 5          /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
-#define THRESHOLD_DISTANCE 650           /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
-#define COLLISION_THRESHOLD 100
+#define THRESHOLD_DISTANCE 200           /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
+#define COLLISION_THRESHOLD 130
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
@@ -88,16 +88,17 @@ Configuration data and macros for Group 1's EEEBalanceBug
 
 /* Spin task */
 #define TASK_SPIN_DEBUG false
-#define SPIN_TIME 4                /* Time taken for a complete spin in s */
-#define SPIN_SPEED 360 / SPIN_TIME /* Speed to spin at in degrees per second */
-#define TASK_SPIN_FREQUENCY 20     /* Frequency to run the spin task at in Hz (default = 10Hz) */
-#define SPIN_LEFT true             /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
-#define MAX_NUMBER_OF_JUNCTIONS 10 /* Maximum number of junctions that can be detected in one spin */
-#define JUNCTION_OFFSET_ANGLE 0    /* Offset angle of junctions from */
-#define NUMBER_OF_BEACONS 3        /* Number of beacons */
-#define HYSTERISIS_THRESHOLD 5     /* Number of samples to wait after a rising edge before detecting a falling edge  */
+#define SPIN_TIME 4                              /* Time taken for a complete spin in s */
+#define SPIN_SPEED 360 / SPIN_TIME               /* Speed to spin at in degrees per second */
+#define HYSTERISIS_THRESHOLD 5 * (SPIN_TIME / 4) /* Number of samples to wait after a rising edge before detecting a falling edge. 5 Samples at 4 seconds per turn, */
+#define TASK_SPIN_FREQUENCY 20                   /* Frequency to run the spin task at in Hz (default = 10Hz) */
+#define SPIN_LEFT true                           /* When looking for beacons and juntions, spin left or right (spinning left increases yaw) */
+#define MAX_NUMBER_OF_JUNCTIONS 10               /* Maximum number of junctions that can be detected in one spin */
+#define JUNCTION_OFFSET_ANGLE 0                  /* Offset angle of junctions from */
+#define NUMBER_OF_BEACONS 3                      /* Number of beacons */
 
 /* Execute command task */
+#define TASK_EXECUTE_COMMAND_DEBUG false
 #define COMMAND_QUEUE_LENGTH 10        /* Maximum number of commands that can be in the queue */
 #define ANGLE_SETPOINT_QUEUE_LENGTH 10 /* Maximum number of angle setpoints in queue */
 
@@ -115,6 +116,10 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define KP_POS 0.00
 #define KI_POS 0.00
 #define KD_POS 0.00
+
+#define KP_SPIN 50.00
+#define KI_SPIN 0.00
+#define KD_SPIN 0.00
 
 #define KP_ACCEL 0.001
 #define KD_ACCEL 0.025
@@ -147,13 +152,14 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define MAX_PATH_DIFF 30
 #define PATH_DIFF_THRESHOLD 10.0
 
+#define MAX_SPEED 400
 #define ANGLE_OFFSET -1.50
 #define MAX_ANGLE 7.5
 #define MAX_DPS 400
 #define MAX_ERROR_CHANGE 30  // I term windup constants for PI control
 #define MAX_CUM_ERROR 10000
 #define MAX_DIFF 300
-#define MAX_ANG_RATE 180
+#define MAX_ANG_RATE 90
 
 /* Other macro logic*/
 
