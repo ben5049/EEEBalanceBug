@@ -98,7 +98,7 @@ def rover():
         rovers.append(r)
     
     # create response to rover and reset timeout
-    print(time(), "is", r, " last seen")
+    print(time()-r.lastSeen, "is", r, " last seen")
     r.lastSeen = time()
     if "beaconangles" not in data:
         data["beaconangles"] = []
@@ -182,7 +182,7 @@ def allrovers():
                     cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
                 except mariadb.Error as e:
                     pass
-            rovers.remove(rover)
+            # rovers.remove(rover)
 
     # add all active rovers
     for rover in rovers:
