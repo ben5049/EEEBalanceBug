@@ -420,7 +420,7 @@ def findShortestPath():
 
     # get tree predecessor graph
     P = dijkstra.dijkstra(tree, [float(start_x), float(start_y)])
-
+    print(P, "shortestPath predecessor non formatted")
     if P is None:
         return make_response(jsonify({"error":"Tree does not exist"}), 400)
     
