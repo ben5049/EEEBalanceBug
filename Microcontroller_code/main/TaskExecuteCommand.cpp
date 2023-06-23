@@ -78,11 +78,11 @@ void taskExecuteCommand(void *pvParameters) {
         currentWhereAt = PASSAGE;
         enableAngRateControl = true;
         enableDirectionControl = false;
-        speedSetpoint = 60;
+        speedSetpoint = 50;
 
         /*  */
         xTaskNotifyGiveIndexed(taskToFHandle, 0);
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(1000));
         enablePathControl = true;
         // vTaskDelay(pdMS_TO_TICKS(2000));
         // ulTaskNotifyValueClearIndexed(NULL, 0, UINT_MAX);
@@ -128,16 +128,15 @@ void taskExecuteCommand(void *pvParameters) {
         enableAngRateControl = true;
         enableDirectionControl = false;
         speedSetpoint = 0;
-
-        vTaskDelay(pdMS_TO_TICKS(1000));
         enableSpinControl = true;
+        angRateSetpoint = 0;
 
         /* Recieve the angle to turn to and pass it to the direction controller */
         xQueueReceive(angleSetpointQueue, &angleSetpoint, portMAX_DELAY);
         xQueuePeek(IMUDataQueue, &IMUData, 0);
 
         relativeAngle = wrapAngle(angleSetpoint - IMUData.yaw);
-        dirSetpoint = (turns * 360.0) + angleSetpoint;  // + IMUData.yaw;
+        dirSetpoint = localYaw + relativeAngle;
 
         if (relativeAngle >= 0) {
           angRateSetpoint = SPIN_SPEED;
@@ -146,10 +145,16 @@ void taskExecuteCommand(void *pvParameters) {
         }
 
         /* Wait for the turn to complete */
-        vTaskDelay(pdMS_TO_TICKS(SPIN_TIME * 1000 * (abs(relativeAngle) / 360.0)));
-        enableSpinControl = false;
+        // const TickType_t xDelay = SPIN_TIME * 1000 * (abs(relativeAngle) / 360.0);
+        // vTaskDelay(xDelay);
+
+        // uint16_t xDelay = SPIN_TIME * 1000 * (abs(relativeAngle) / 360.0);
+
+        delay(SPIN_TIME * 1000 * (abs(relativeAngle) / 360.0));
         angRateSetpoint = 0;
         vTaskDelay(pdMS_TO_TICKS(1000));
+        enableSpinControl = false;
+        speedSetpoint = 0;
         enableDirectionControl = true;
         vTaskDelay(pdMS_TO_TICKS(1000));
 
@@ -163,17 +168,18 @@ void taskExecuteCommand(void *pvParameters) {
 
       /* Turn 360 degrees and find the angles of the beacons */
       case SPIN:
+        digitalWrite(LED_BUILTIN, HIGH);
 
         currentWhereAt = EXITING_JUNCTION;
 
         /* Set the speed to 0 */
         speedSetpoint = 0;
+        enableSpinControl = true;
         vTaskDelay(pdMS_TO_TICKS(1000));
 
         /* Disable the direction controller and set the angular rate */
         enableDirectionControl = false;
-        enableSpinControl = true;
-        turns--;
+        dirSetpoint = localYaw + 360;
         angRateSetpoint = SPIN_SPEED;
 
 #if TASK_EXECUTE_COMMAND_DEBUG == true
@@ -192,7 +198,7 @@ void taskExecuteCommand(void *pvParameters) {
 #if TASK_EXECUTE_COMMAND_DEBUG == true
         Serial.println("Finished spin");
 #endif
-        xTaskNotifyGiveIndexed(taskSpinHandle, 0);
+        xTaskNotifyGiveIndexed(taskSpinHandle, 0); //Not sure what this actually does - David
 
         /* Recieve acknowledge that the queue is ready and taskSpin is done */
         // ulTaskNotifyTakeIndexed(0, pdTRUE, pdMS_TO_TICKS(50));
@@ -204,6 +210,12 @@ void taskExecuteCommand(void *pvParameters) {
         /* Delay to let the angle correct */
         vTaskDelay(pdMS_TO_TICKS(500));
         enableSpinControl = false;
+
+        speedSetpoint = -100;
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        speedSetpoint = 0;
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        digitalWrite(LED_BUILTIN, LOW);
         /* Print the angles of the junctions */
         // while (uxQueueMessagesWaiting(junctionAngleQueue) > 0) {
         //   if (xQueueReceive(junctionAngleQueue, &junctionAngle, 0) == pdTRUE) {

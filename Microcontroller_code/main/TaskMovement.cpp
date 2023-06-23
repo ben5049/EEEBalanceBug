@@ -205,8 +205,8 @@ void debug() {
   /* Position Debugging */
   /* PID Values */
   /* Yaw Rate Debugging */
-  debugPrint("YawRate", IMUData.yawRate);                 //8
-  debugPrint("yawRateSetpoint", angRateSetpoint);                        //9
+  debugPrint("YawRate", IMUData.yawRate);                          //8
+  debugPrint("yawRateSetpoint", angRateSetpoint);                  //9
   debugPrint("yawRate error", angRateSetpoint - IMUData.yawRate);  //10
   Serial.println("*/");
 }
@@ -394,7 +394,7 @@ void taskMovement(void* pvParameters) {
     }
 
     /* Speed Loop */
-    if ((controlCycle % 5 == 0)&&enableSpeedControl) {
+    if ((controlCycle % 5 == 0) && enableSpeedControl) {
       accelSetpoint = PID(speedSetpoint, robotFilteredLinearDPS, speedCumError, speedPrevError, speedLastTime, speedKp, speedKi, speedKd);
       speedLastTime = millis();
       accelSetpoint = constrain(accelSetpoint, -MAX_ACCEL, MAX_ACCEL);
@@ -413,7 +413,7 @@ void taskMovement(void* pvParameters) {
 
     /* Spin on spot */
     if (enableSpinControl && (controlCycle % 3 == 0)) {
-      speedSetpoint = -PID(spinSetpoint, (motorSetpointL+motorSetpointR), spinCumError, spinPrevError, spinLastTime, spinKp, spinKi, spinKd);
+      speedSetpoint = -PID(spinSetpoint, (motorSetpointL + motorSetpointR), spinCumError, spinPrevError, spinLastTime, spinKp, spinKi, spinKd);
       spinLastTime = millis();
       speedSetpoint = constrain(speedSetpoint, -MAX_SPEED, MAX_SPEED);
     }
@@ -444,11 +444,19 @@ void taskMovement(void* pvParameters) {
       timestampPrevious = timestamp;
 
       /* Basic path control: turns until parallel to both walls, then turns towards centre of path */
-      if (ToFData.left < 50) {
-        angRateSetpoint = -10;
+      if ((ToFData.left < 50) && (ToFData.right < 50)) {
+          if (ToFData.left < ToFData.right) {
+            angRateSetpoint = -10;
+          } else {
+            angRateSetpoint = 10;
+          }
+        }
+      else if (ToFData.left < 50) {
+        angRateSetpoint = -15;
       } else if (ToFData.right < 50) {
-        angRateSetpoint = 10;
+        angRateSetpoint = 15;
       }
+
       /* If large increasing right differential, turn right */
       else if ((distanceRightDifferential > PATH_DIFF_THRESHOLD) && (distanceLeftDifferential < -PATH_DIFF_THRESHOLD) && (ToFData.right < 500)) {
         angRateSetpoint = -constrain(distanceRightDifferential * pathKd, 0, MAX_PATH_DIFF);

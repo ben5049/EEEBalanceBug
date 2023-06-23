@@ -45,6 +45,7 @@ struct angleData {
 struct ToFDistanceData {
   float right;
   float left;
+  float front;
 };
 
 /* Variables */

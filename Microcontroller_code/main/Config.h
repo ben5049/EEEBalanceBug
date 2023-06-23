@@ -36,7 +36,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define ENABLE_SERVER_COMMUNICATION_TASK true /* Setting "true" enables the server communication task */
 #define ENABLE_MOVEMENT_TASK true             /* Setting "true" enables the movement task */
 #define ENABLE_DEAD_RECKONING_TASK true       /* Setting "true" enables the dead reckning task */
-#define ENABLE_DEBUG_TASK true                /* Setting "true" enables the debug task */
+#define ENABLE_DEBUG_TASK false                /* Setting "true" enables the debug task */
 #define ENABLE_BLUETOOTH_TASK false           /* Setting "true" enables the Bluetooth task */
 #define ENABLE_EXECUTE_COMMAND_TASK true
 
@@ -75,8 +75,8 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define TOF_FRONT_CHANNEL 0              /* I2C mux channel for the front ToF sensor */
 #define TOF_SAMPLE_FREQUENCY 20          /* Max = 33Hz, default = 10Hz */
 #define THRESHOLD_COUNTER_MAX 5          /* Number of times the ToF distance can be over THRESHOLD_DISTANCE before flagging a junction */
-#define THRESHOLD_DISTANCE 650           /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
-#define COLLISION_THRESHOLD 180
+#define THRESHOLD_DISTANCE 200           /* Threshold distance for ToF sensors for what counts as a junction (in mm) */
+#define COLLISION_THRESHOLD 130
 
 /* FPGA */
 #define ENABLE_FPGA_CAMERA false /* Whether or not to enable the FPGA camera */
@@ -117,7 +117,7 @@ Configuration data and macros for Group 1's EEEBalanceBug
 #define KI_POS 0.00
 #define KD_POS 0.00
 
-#define KP_SPIN 100.00
+#define KP_SPIN 50.00
 #define KI_SPIN 0.00
 #define KD_SPIN 0.00
 
