@@ -178,39 +178,19 @@ def allrovers():
     global conn, cur
     d = []
     disallowedMacs = []
-    # add all active rovers
+    # remove timed out rovers
     for rover in rovers:
-        temp = {}
-        temp["MAC"] = rover.name
-        disallowedMacs.append(rover.name)
-        temp["nickname"] = rover.nickname
-        temp["connected"] = True
-        temp["sessionid"] = rover.sessionId
-        d.append(temp)
-        print(temp)
-    
-    # add all inactive rovers from database
-    t = ""
-    for i in disallowedMacs:
-        t+="MAC != \""+str(i)+"\" AND "
-    t = t[:-5]
-    
-    command = "SELECT * FROM Rovers WHERE "+t
-    if command == "SELECT * FROM Rovers WHERE ":
-        command = "SELECT * FROM Rovers" 
-    try:
-        cur.execute(command)
-    except mariadb.Error as e:
-        print(str(e))
-        return make_response(jsonify({"error":f"Incorrectly formatted request: {e}"}), 400)
-    for rover in cur:
-        temp = {}
-        temp["MAC"] = rover[0]
-        temp["nickname"] = rover[1]
-        temp["connected"] = False
-        d.append(temp)
-
-    return make_response(jsonify(d), 200)
+        if time()-rover.lastSeen > TIMEOUT:
+            print("allrovers last seen")
+            for node in rover.tree:
+                neighbours = []
+                for neighbour in rover.tree[node]:
+                    neighbours.append(str(neighbour))
+                try:
+                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                except mariadb.Error as e:
+                    pass
+            rovers.remove(rover)
 
 # get a specific session replay
 @app.route("/client/replay", methods=["POST"])
