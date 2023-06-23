@@ -170,20 +170,6 @@ def allrovers():
     global conn, cur
     d = []
     disallowedMacs = []
-    # remove timed out rovers`
-    for rover in rovers:
-        if time()-rover.lastSeen > TIMEOUT:
-            print(time()-rover.lastSeen, rover, " TIME SINCE LAST SEEN")
-            for node in rover.tree:
-                neighbours = []
-                for neighbour in rover.tree[node]:
-                    neighbours.append(str(neighbour))
-                try:
-                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
-                except mariadb.Error as e:
-                    pass
-            # rovers.remove(rover)
-
     # add all active rovers
     for rover in rovers:
         temp = {}
@@ -262,43 +248,38 @@ def sessions():
     
     return make_response(jsonify(d), 200)
 
-# # Get diagnostic data from given session
-# @app.route("/client/diagnostics", methods=["POST"])
-# def diagnostics():
-#     global conn, cur
-#     data = request.get_json()
+# Get diagnostic data from given session
+@app.route("/client/diagnostics", methods=["POST"])
+def diagnostics():
+    global conn, cur
+    data = request.get_json()
     
-#     try:
-#         cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
-#     except:
-#         return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid sessionid"}), 400)
+    try:
+        cur.execute("SELECT * FROM Diagnostics WHERE SessionID=? ORDER BY timestamp DESC;", (data["sessionid"],))
+    except:
+        return make_response(jsonify({"error":"Incorrectly formatted request: missing/invalid sessionid"}), 400)
     
-#     d = []
-#     try:
-#         for mac, timestamp, battery, connection, sessionid in cur:
-#             t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
-#             flag = True
-#             t["isfinished"] = True
-#             for rover in rovers:
-#                 if time()-rover.lastSeen > TIMEOUT:
-#                     print("diagnostics last seen")
-#                     for node in rover.tree:
-#                         neighbours = []
-#                         for neighbour in rover.tree[node]:
-#                             neighbours.append(str(neighbour))
-#                         try:
-#                             cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
-#                         except mariadb.Error as e:
-#                             pass
-#                     rovers.remove(rover)
-#                 if str(rover.name)==str(mac):
-#                     t["isfinished"] = False
+    d = []
+    for mac, timestamp, battery, connection, sessionid in cur:
+        t = {"MAC":mac, "timestamp":timestamp, "battery":battery, "connection":connection}
+        d.append(t)
+    return make_response(jsonify(d), 200)
 
-#             d.append(t)
-#     except:
-#         print("excepted - not working")
-#         pass
-#     return make_response(jsonify(d), 200)
+# check if rover is timed out - if it is, remove it
+@app.route("/timeout", methods=["GET"])
+def timeout():
+    for rover in rovers:
+        if time()-rover.lastSeen > TIMEOUT:
+            print(time()-rover.lastSeen, rover, " TIME SINCE LAST SEEN")
+            for node in rover.tree:
+                neighbours = []
+                for neighbour in rover.tree[node]:
+                    neighbours.append(str(neighbour))
+                try:
+                    cur.execute("INSERT INTO Trees (SessionID, node_x, node_y, children) VALUES (?, ?, ?, ?)", (rover.sessionId, node.position[0], node.position[1], str(neighbours)))
+                except mariadb.Error as e:
+                    pass
+            rovers.remove(rover)
 
 # Pause a given rover
 @app.route("/client/pause", methods=["POST"])
