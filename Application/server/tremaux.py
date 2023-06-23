@@ -3,8 +3,8 @@
 from triangulate import triangulate
 from time import time
 from math import degrees, atan
-THRESHOLD = 150
-PREVIOUS_NODE_THRESHOLD = 200
+THRESHOLD = 50
+PREVIOUS_NODE_THRESHOLD = 150
 # Node class storing position data and whether or not a node has been visited
 class Node:
     state = 0 
@@ -78,6 +78,7 @@ class Rover():
             print("NEAR PREVIOUSLY PLACED NODE")
             return False   
         if abs(pos1[0] -pos2[0]) < THRESHOLD and abs(pos1[1] -pos2[1]) < THRESHOLD:
+            print("FINALLY TRUE")
             return True
         print("ELSE ISSUE")
         return False
@@ -113,7 +114,6 @@ class Rover():
 
         self.setAngle(angle)
         self.step_forward()
-        self.watchdog = position
         self.actions = [[7, node]] + self.actions
         
     def idle(self):
@@ -125,7 +125,6 @@ class Rover():
         self.toreturn.append(float(newy))
 
     def tremaux(self, position, whereat, potentialbranches, beaconangles):
-        print("IS PAUSED: ", self.pause)
         # if paused, remain idle
         if self.pause:
             return [3]
@@ -201,8 +200,10 @@ class Rover():
                 # check if exiting junction; if it is, stay in this state
                 elif whereat == 4:
                     self.actions = [1] + self.actions  
+                    self.step_forward()
             # check if in state 2; if true, go to state 3 and output to rover to spin
             elif currentAction == 2:
+                self.setAngle(0)
                 self.actions = [3] + self.actions
                 self.spin()
             # check if in state 3
@@ -239,6 +240,15 @@ class Rover():
                             self.actions = [[3, i], [4, self.priornode]] + self.actions 
                     else:
                         self.actions = [3] + self.actions
+                        self.watchdog += 1
+                        if self.watchdog == 20:
+                            if whereat == 4:
+                                self.actions = [1] + self.actions
+                                self.step_forward()
+                            else:
+                                self.actions = [2] + self.actions
+                                self.toreturn = [2, 0] + self.toreturn
+                            self.watchdog = 0
             # check if in state 3[0]; if true, go to state 6[0], then state 1
             elif currentAction[0] == 3:
                 self.idle()
@@ -253,17 +263,12 @@ class Rover():
                 self.step_forward()
             # check if in state 7[0]
             elif currentAction[0] == 7:
-                if self.thresholding(position, self.watchdog) and whereat == 1:
-                    print("watchdog working")
-                    self.actions = [2, [7, currentAction[1]]] + self.actions
-                print("7", currentAction[1])
-                print(self.thresholding(currentAction[1].position, position))
                 # if the rover has not returned to its prior position, return to state 7[0]
-                if not self.thresholding(currentAction[1].position, position):
-                    
+                # if not self.thresholding(currentAction[1].position, position):
+                if whereat == 2:
+                    self.actions = [2] + self.actions
+                elif whereat == 0:
                     self.actions = [[7, currentAction[1]]] + self.actions
-                else:
-                    self.idle()
         # if no more actions left, rover is finished
         else:
             self.toreturn.append(5)
