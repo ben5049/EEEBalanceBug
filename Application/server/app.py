@@ -175,21 +175,26 @@ def rover():
 # Give all rovers, active or inactive, to client
 @app.route("/client/allrovers", methods=["GET"])
 def allrovers():
-    temp = {}
-    temp["MAC"] = rover.name
-    disallowedMacs.append(rover.name)
-    temp["nickname"] = rover.nickname
-    temp["connected"] = True
-    temp["sessionid"] = rover.sessionId
-    d.append(temp)
-    print(temp)
-
+    global conn, cur
+    d = []
+    disallowedMacs = []
+    # add all active rovers
+    for rover in rovers:
+        temp = {}
+        temp["MAC"] = rover.name
+        disallowedMacs.append(rover.name)
+        temp["nickname"] = rover.nickname
+        temp["connected"] = True
+        temp["sessionid"] = rover.sessionId
+        d.append(temp)
+        print(temp)
+    
     # add all inactive rovers from database
     t = ""
     for i in disallowedMacs:
         t+="MAC != \""+str(i)+"\" AND "
     t = t[:-5]
-
+    
     command = "SELECT * FROM Rovers WHERE "+t
     if command == "SELECT * FROM Rovers WHERE ":
         command = "SELECT * FROM Rovers" 
@@ -205,6 +210,7 @@ def allrovers():
         temp["connected"] = False
         d.append(temp)
 
+    return make_response(jsonify(d), 200)
 
 # get a specific session replay
 @app.route("/client/replay", methods=["POST"])
