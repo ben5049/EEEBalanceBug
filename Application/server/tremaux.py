@@ -114,7 +114,6 @@ class Rover():
 
         self.setAngle(angle)
         self.step_forward()
-        self.watchdog = position
         self.actions = [[7, node]] + self.actions
         
     def idle(self):
@@ -240,6 +239,10 @@ class Rover():
                             self.actions = [[3, i], [4, self.priornode]] + self.actions 
                     else:
                         self.actions = [3] + self.actions
+                        self.watchdog += 1
+                        if self.watchdog == 20:
+                            self.actions = [2] + self.actions
+                            self.watchdog = 0
             # check if in state 3[0]; if true, go to state 6[0], then state 1
             elif currentAction[0] == 3:
                 self.idle()
