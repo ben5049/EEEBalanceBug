@@ -199,6 +199,10 @@ class Rover():
                     self.actions = [[4, self.priornode]] + self.actions
                 # check if exiting junction; if it is, stay in this state
                 elif whereat == 4:
+                    n = Node(position)
+                    self.tree[n] = []
+                    self.tree[self.previouslyPlacedNode].append(n)
+                    self.previouslyPlacedNode = n
                     self.actions = [1] + self.actions  
                     self.step_forward()
             # check if in state 2; if true, go to state 3 and output to rover to spin
