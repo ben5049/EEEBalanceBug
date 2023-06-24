@@ -1,7 +1,7 @@
 # EEEBalanceBug
 
 ### Abstract
-A two-wheeled balancing robotwas created to map a maze autonomously and calculate the shortest path.The maze wasbounded by LED strips, and up to 3 differently coloured beacons couldbe placed around the maze beforehand. The beacons must be powered througha carefully optimisedDC grid by solar power.There wasa budget of £60 for the robot. AnFPGA-based camera systemmust be used. Other optical sensors werepermitted, but no other cameras.The  methods  employed  includedesigning  an  advanced  embedded  system, hardware-basedimage processing, scalable cloud infrastructureand optimal energy distribution systems.
+A two-wheeled balancing robot was created to map a maze autonomously and calculate the shortest path. The maze was bounded by LED strips, and up to 3 differently coloured beacons could be placed around the maze beforehand. The beacons must be powered through a carefully optimised DC grid by solar power. There was a budget of £60 for the robot. An FPGA-based camera system must be used. Other optical sensors were permitted, but no other cameras. The methods employed include designing an advanced embedded system, hardware-based image processing, scalable cloud infrastructure and optimal energy distribution systems.
 
 ### Gantt Chart
 <img src="GanttChart.png"
